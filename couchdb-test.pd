@@ -1,0 +1,5 @@
+#N canvas 0 0 450 300 10;
+#X obj 151 145 couchdb;
+#X msg 129 46 url http://127.0.0.1:5984/;
+#X obj 251 226 couchdb http://127.0.0.1:5984/;
+#X connect 1 0 0 0;

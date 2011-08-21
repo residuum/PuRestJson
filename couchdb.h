@@ -26,6 +26,7 @@ void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec)
 
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
 void test_connection(char *couch_url);
+void execute_couchdb(char *couch_url, char *request_type, char *data, char **additional_parameters);
 
 t_class *couchdb_class;
 void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec);

@@ -1,4 +1,5 @@
 #include "couchdb.h"
+#include "json.c"
 
 void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char request_type[7];
@@ -26,7 +27,7 @@ void couchdb_oauth(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argve
 }
 
 void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char url[128] = "http://127.0.0.1:5984/";
+	char url[128];
 	switch (argcount) {
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
@@ -47,7 +48,7 @@ void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec)
 
 void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_couchdb *x = (t_couchdb *)pd_new(couchdb_class);
-	char url[128] = "http://127.0.0.1:5984/";
+	char url[128];
 	switch (argcount) {
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
@@ -73,6 +74,12 @@ void couchdb_setup(void) {
 	class_addmethod(couchdb_class, (t_method)couchdb_oauth, gensym("oauth"), A_GIMME, 0);
 	class_addmethod(couchdb_class, (t_method)couchdb_url, gensym("url"), A_GIMME, 0);
 	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("couchdb"), A_GIMME, 0);
+
+	json_encode_class = class_new(gensym("json-encode"), (t_newmethod)json_encode_new,
+		0, sizeof(t_json_encode), 0, A_GIMME, 0);
+	class_addbang(json_encode_class, (t_method)json_encode_bang);
+	class_addmethod(json_encode_class, (t_method)json_encode_add, gensym("add"), A_GIMME, 0);
+	class_addmethod(json_encode_class, (t_method)json_encode_clear, gensym("clear"), A_GIMME, 0);
 }
 
 void test_connection(char *couch_url) {
@@ -89,7 +96,7 @@ void test_connection(char *couch_url) {
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
 		result = curl_easy_perform(curl_handle);
 		if (result == CURLE_OK) {
-			post("Connection to %s established.", couch_url);
+			post("Connection to %s possible.", couch_url);
 			post("Received information: %s", chunk.memory);
 			if (chunk.memory) {
 				free(chunk.memory);

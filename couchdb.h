@@ -14,11 +14,20 @@ typedef struct couchdb {
 	t_atom out[MAX_ARRAY_SIZE];
 } t_couchdb;
 
+typedef struct json_encode{
+	t_object x_ob;
+	char ***data;
+	int data_count;
+} t_json_encode;
  
 typedef struct memory_struct {
   char *memory;
   size_t size;
 } t_memory_struct;
+
+/* couchdb */
+t_class *couchdb_class;
+void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec); 
 void couchdb_oauth(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec);
@@ -28,6 +37,13 @@ static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *
 void test_connection(char *couch_url);
 void execute_couchdb(char *couch_url, char *request_type, char *data, char **additional_parameters);
 
-t_class *couchdb_class;
-void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec);
-void couchdb_setup(void); 
+/* json-encode */
+t_class *json_encode_class;
+void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
+
+void json_encode_bang(t_json_encode *x);
+void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
+void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
+
+/* general */ 
+void couchdb_setup(void);

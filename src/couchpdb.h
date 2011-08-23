@@ -28,6 +28,7 @@ typedef struct memory_struct {
 
 /* couchdb */
 t_class *couchdb_class;
+void setup_couchdb(void);
 void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec); 
@@ -40,6 +41,7 @@ void execute_couchdb(char *couch_url, char *request_type, char *data, char **add
 
 /* json-encode */
 t_class *json_encode_class;
+void setup_json_encode(void);
 void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void json_encode_bang(t_json_encode *x);

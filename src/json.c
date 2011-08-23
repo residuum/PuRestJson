@@ -1,3 +1,11 @@
+void setup_json_encoder(void) {
+	json_encode_class = class_new(gensym("json-encode"), (t_newmethod)json_encode_new,
+		0, sizeof(t_json_encode), 0, A_GIMME, 0);
+	class_addbang(json_encode_class, (t_method)json_encode_bang);
+	class_addmethod(json_encode_class, (t_method)json_encode_add, gensym("add"), A_GIMME, 0);
+	class_addmethod(json_encode_class, (t_method)json_encode_clear, gensym("clear"), A_GIMME, 0);
+}
+
 void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_json_encode *x = (t_json_encode*)pd_new(json_encode_class);
 	x->data_count = 0;

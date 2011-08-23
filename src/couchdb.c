@@ -1,3 +1,11 @@
+void setup_couchdb(void) {
+	couchdb_class = class_new(gensym("couchdb"), (t_newmethod)couchdb_new,
+			0, sizeof(t_couchdb), 0, A_GIMME, 0);
+	class_addmethod(couchdb_class, (t_method)couchdb_oauth, gensym("oauth"), A_GIMME, 0);
+	class_addmethod(couchdb_class, (t_method)couchdb_url, gensym("url"), A_GIMME, 0);
+	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("couchdb"), A_GIMME, 0);
+}
+
 void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char request_type[7];
 	char data[MAX_STRING_SIZE];

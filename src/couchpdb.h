@@ -46,4 +46,4 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* general */ 
-void couchdb_setup(void);
+void couchpdb_setup(void);

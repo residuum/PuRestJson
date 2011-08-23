@@ -1,7 +1,7 @@
-default: couchdb
+default: couchpdb
 
-couchdb-test: couchdb
-	pdextended -stderr couchdb-test.pd
+couchpdb-test: couchpdb
+	pdextended -stderr -lib couchpdb couchpdb-test.pd
 
-couchdb:
-	gcc -Wall -shared -ansi -O2 -fPIC -lcurl -I/home/thomas/dev/diverse/Pd-0.42.5-extended/pd/src couchdb.c -o couchdb.pd_linux
+couchpdb:
+	gcc -Wall -shared -ansi -O2 -fPIC -lcurl -I/home/thomas/dev/diverse/Pd-0.42.5-extended/pd/src src/couchpdb.c -o couchpdb.pd_linux

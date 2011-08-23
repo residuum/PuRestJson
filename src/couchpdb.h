@@ -5,7 +5,8 @@
 #include <curl/curl.h>
 #include <json/json.h>
 
-#define MAX_ARRAY_SIZE 512
+#define MAX_ARRAY_SIZE 128
+#define MAX_STRING_SIZE 512
 
 typedef struct couchdb {
 	t_object x_ob;
@@ -16,7 +17,7 @@ typedef struct couchdb {
 
 typedef struct json_encode{
 	t_object x_ob;
-	char ***data;
+	char data[MAX_ARRAY_SIZE][MAX_STRING_SIZE];
 	int data_count;
 } t_json_encode;
  

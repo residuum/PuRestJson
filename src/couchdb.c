@@ -1,6 +1,6 @@
 void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char request_type[7];
-	char data[512];
+	char data[MAX_STRING_SIZE];
 	char *additional_parameters[16];
 	int i;
 	switch (argcount) {
@@ -9,9 +9,9 @@ void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *arg
 		default:
 			atom_string(argvec, request_type, 7);
 			if (argcount > 1) {
-				atom_string(argvec + 1, data, 512);
+				atom_string(argvec + 1, data, MAX_STRING_SIZE);
 				for (i = 2; i < argcount; i++) {
-					atom_string(argvec + i, additional_parameters[i - 1], 512);
+					atom_string(argvec + i, additional_parameters[i - 1], MAX_STRING_SIZE);
 				} 
 			}
 			execute_couchdb(x->couch_url, request_type, data, additional_parameters);
@@ -24,13 +24,13 @@ void couchdb_oauth(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argve
 }
 
 void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char url[128];
+	char url[MAX_STRING_SIZE];
 	switch (argcount) {
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("URL to CouchDB cannot be set.");
 			} else {
-				atom_string(argvec, url, 128);
+				atom_string(argvec, url, MAX_STRING_SIZE);
 				x->couch_url = (char *)url;
 				test_connection(x->couch_url);
 			}
@@ -45,13 +45,13 @@ void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec)
 
 void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_couchdb *x = (t_couchdb *)pd_new(couchdb_class);
-	char url[128];
+	char url[MAX_STRING_SIZE];
 	switch (argcount) {
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("URL to CouchDB cannot be set.");
 			} else {
-				atom_string(argvec, url, 128);
+				atom_string(argvec, url, MAX_STRING_SIZE);
 				x->couch_url = (char *)url;
 				test_connection(x->couch_url);
 			}

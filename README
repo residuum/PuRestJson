@@ -1,0 +1,32 @@
+CouchPdb
+
+CouchPdb is a CouchDB (http://http://couchdb.apache.org/) library for Puredata (http://puredata.info).
+
+
+About CouchDB (From the official website)
+
+Apache CouchDB is a document-oriented database that can be queried and indexed in a MapReduce fashion using JavaScript. CouchDB also offers incremental replication with bi-directional conflict detection and resolution.
+
+CouchDB provides a RESTful JSON API than can be accessed from any environment that allows HTTP requests. There are myriad third-party client libraries that make this even easier from your programming language of choice. CouchDB’s built in Web administration console speaks directly to the database using HTTP requests issued from your browser.
+
+
+About Puredata
+
+Pd (aka Pure Data) is a real-time graphical programming environment for audio, video, and graphical processing. It is the third major branch of the family of patcher programming languages known as Max (Max/FTS, ISPW Max, Max/MSP, jMax, etc.) originally developed by Miller Puckette and company at IRCAM. The core of Pd is written and maintained by Miller Puckette and includes the work of many developers, making the whole package very much a community effort.
+
+
+Externals in the library
+
+[couchdb]
+
+[json-encoder]
+
+
+How to build CouchPdb
+
+(Edit Makefile)
+make
+
+or
+
+make couchdb-test

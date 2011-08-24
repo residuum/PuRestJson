@@ -7,7 +7,7 @@ void setup_couchdb(void) {
 }
 
 void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char request_type[7];
+	char request_type[8];
 	char data[MAX_STRING_SIZE];
 	char *additional_parameters[16];
 	int i;
@@ -15,7 +15,7 @@ void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *arg
 		case 0:
 			break;
 		default:
-			atom_string(argvec, request_type, 7);
+			atom_string(argvec, request_type, 8);
 			if (argcount > 1) {
 				atom_string(argvec + 1, data, MAX_STRING_SIZE);
 				for (i = 2; i < argcount; i++) {

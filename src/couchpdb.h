@@ -11,7 +11,7 @@
 typedef struct couchdb {
 	t_object x_ob;
 	int out_count;
-	char *couch_url;
+	char couch_url[MAX_STRING_SIZE];
 	t_atom out[MAX_ARRAY_SIZE];
 } t_couchdb;
 
@@ -36,8 +36,9 @@ void couchdb_oauth(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argve
 void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
+static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
 void test_connection(char *couch_url);
-void execute_couchdb(char *couch_url, char *request_type, char *data, char **additional_parameters);
+void execute_couchdb(char *couch_url, char *request_type, char *database, char *parameters);
 
 /* json-encode */
 t_class *json_encode_class;

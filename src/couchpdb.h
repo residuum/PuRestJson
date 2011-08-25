@@ -37,8 +37,8 @@ void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec)
 
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
 static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
-void test_connection(char *couch_url);
-void execute_couchdb(char *couch_url, char *request_type, char *database, char *parameters);
+void test_connection(char *couch_url, t_couchdb *x);
+void execute_couchdb(char *couch_url, char *request_type, char *database, char *parameters, t_couchdb *x);
 
 /* json-encode */
 t_class *json_encode_class;
@@ -48,6 +48,9 @@ void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
 void json_encode_bang(t_json_encode *x);
 void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
+
+/* json-decode */
+void output_json(json_object *jobj, t_outlet *outlet);
 
 /* general */ 
 void couchpdb_setup(void);

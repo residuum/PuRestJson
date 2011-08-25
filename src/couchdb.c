@@ -21,7 +21,7 @@ void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *arg
 			if (argcount > 2) {
 				atom_string(argvec + 2, parameter, MAX_STRING_SIZE);
 			}
-			execute_couchdb(x->couch_url, request_type, database, parameter);
+			execute_couchdb(x->couch_url, request_type, database, parameter, x);
 			break;
 	}
 }
@@ -31,14 +31,13 @@ void couchdb_oauth(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argve
 }
 
 void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char url[MAX_STRING_SIZE];
 	switch (argcount) {
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("URL to CouchDB cannot be set.");
 			} else {
 				atom_string(argvec, x->couch_url, MAX_STRING_SIZE);
-				test_connection(x->couch_url);
+				test_connection(x->couch_url, x);
 			}
 			break;
 		case 0:
@@ -51,14 +50,13 @@ void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec)
 
 void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_couchdb *x = (t_couchdb *)pd_new(couchdb_class);
-	char url[MAX_STRING_SIZE];
 	switch (argcount) {
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("URL to CouchDB cannot be set.");
 			} else {
 				atom_string(argvec, x->couch_url, MAX_STRING_SIZE);
-				test_connection(x->couch_url);
+				test_connection(x->couch_url, x);
 			}
 			break;
 		case 0:
@@ -67,10 +65,11 @@ void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec) {
 			error("Too many parameters.");
 			break;
 	}
+	outlet_new(&x->x_ob, NULL);
 	return (void *)x;
 }
 
-void test_connection(char *couch_url) {
+void test_connection(char *couch_url, t_couchdb *x) {
 	CURL *curl_handle;
 	CURLcode result;
 	t_memory_struct chunk;
@@ -86,6 +85,10 @@ void test_connection(char *couch_url) {
 		if (result == CURLE_OK) {
 			post("Connection to %s possible.", couch_url);
 			post("Received information: %s", chunk.memory);
+			/* Parse JSON */
+			json_object *jobj = json_tokener_parse(chunk.memory);
+			output_json(jobj, x->x_ob.ob_outlet);
+			/* Free memory */
 			if (chunk.memory) {
 				free(chunk.memory);
 			}
@@ -98,7 +101,7 @@ void test_connection(char *couch_url) {
 	}
 }
 
-void execute_couchdb(char *couch_url, char *request_type, char *database, char *parameters){
+void execute_couchdb(char *couch_url, char *request_type, char *database, char *parameters, t_couchdb *x){
 	char real_url[strlen(couch_url) + strlen(database)];
 	CURL *curl_handle;
 	CURLcode result;
@@ -131,8 +134,12 @@ void execute_couchdb(char *couch_url, char *request_type, char *database, char *
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
 		result = curl_easy_perform(curl_handle);
 		if (result == CURLE_OK) {
-			post("Action successful");
+			post("CURL successful");
 			post("Received information: %s", out_memory.memory);
+			/* Parse JSON */
+			json_object *jobj = json_tokener_parse(out_memory.memory);
+			output_json(jobj, x->x_ob.ob_outlet);
+			/* Free memory */
 			if (out_memory.memory) {
 				free(out_memory.memory);
 			}
@@ -170,3 +177,4 @@ static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *d
 	mem->memory += to_copy;
 	return to_copy;
 }
+

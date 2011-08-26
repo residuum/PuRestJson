@@ -1,32 +1,140 @@
 CouchPdb
 
-CouchPdb is a CouchDB (http://http://couchdb.apache.org/) library for Puredata (http://puredata.info).
+CouchPdb is a CouchDB (http://couchdb.apache.org/) library for Puredata
+(http://puredata.info/). As CouchDB uses JSON (http://json.org/)data
+for communication, there are two accompaning objects that are more or
+less a lemma of the main object in the library for encoding and decoding
+json strings.
 
 
 About CouchDB (From the official website)
 
-Apache CouchDB is a document-oriented database that can be queried and indexed in a MapReduce fashion using JavaScript. CouchDB also offers incremental replication with bi-directional conflict detection and resolution.
+Apache CouchDB is a document-oriented database that can be queried and
+indexed in a MapReduce fashion using JavaScript. CouchDB also offers
+incremental replication with bi-directional conflict detection and
+resolution.
 
-CouchDB provides a RESTful JSON API than can be accessed from any environment that allows HTTP requests. There are myriad third-party client libraries that make this even easier from your programming language of choice. CouchDB’s built in Web administration console speaks directly to the database using HTTP requests issued from your browser.
+CouchDB provides a RESTful JSON API than can be accessed from any
+environment that allows HTTP requests. There are myriad third-party client
+libraries that make this even easier from your programming language of
+choice. CouchDB’s built in Web administration console speaks directly
+to the database using HTTP requests issued from your browser.
 
 
 About Puredata
 
-Pd (aka Pure Data) is a real-time graphical programming environment for audio, video, and graphical processing. It is the third major branch of the family of patcher programming languages known as Max (Max/FTS, ISPW Max, Max/MSP, jMax, etc.) originally developed by Miller Puckette and company at IRCAM. The core of Pd is written and maintained by Miller Puckette and includes the work of many developers, making the whole package very much a community effort.
+Pd (aka Pure Data) is a real-time graphical programming environment for
+audio, video, and graphical processing. It is the third major branch
+of the family of patcher programming languages known as Max (Max/FTS,
+ISPW Max, Max/MSP, jMax, etc.) originally developed by Miller Puckette
+and company at IRCAM. The core of Pd is written and maintained by Miller
+Puckette and includes the work of many developers, making the whole
+package very much a community effort.
 
 
 Externals in the library
 
-[couchdb]
+[couchdb] 
+Creation argument (symbol): 
+	Base URL for requests, e.g. http://localhost:5984/ 	Basically just 
+	a helper method for making couchpd messages smaller.
 
-[json-encoder]
+Methods:
+url:
+	parameters:
+		(symbol) new base url.
+	description:
+		Sets the base URL to the new base url, same as creation argument.
+	example input:
+		[url http://localhost:5984 (
+	output:
+		Returned data from connection with CouchDB on that url.
+	example output:
+		couchdb welcome version 0.11.0
+		
+couchpd:
+	parameters:
+		(symbol) HTTP request method
+		(symbol) path to CouchDB object
+		(anything) parameters for CouchDB method
+	description:
+		Performs HTTP request to CouchDB with method on CouchDB object.
+		Additional parameters can be put in after the object, e. g. JSON
+		data for storage. If you have specified a base url for the object,
+		either at creation or with the url method, then the path to the
+		CouchDB object will be prepended with the base url.
+	output:
+		Returned data from CouchDB.
+	example input 1:
+		[couchdb GET test(
+	example output 1:
+		db_name test doc_count 0 doc_del_count 0 update_seq 0 purge_seq 0 compact_running 0 disk_size 79 instance_start_time 1314392958296952 disk_format_version 5 
+	example input 2:
+		[couchdb PUT test/1 {"name":"residuum"}
+	example output 2:
+		error conflict reason Document update conflict.
+
+[json-encode]
+Methods:
+add:
+	parameters: 
+		(symbol) key
+		(anything) value
+	description:
+		Adds a key / value pair to the internally stored JSON object.
+	output: 
+		Does not output anything.
+	example input:
+		[add name residuum(
+
+clear:
+	parameters:
+		no additional parameters allowed.
+	description:
+		Clears all internally stored data.
+	output:
+		No Output:
+	example input:
+		[clear(
+
+bang:
+	description:
+		Issuing a bang on the inlet will output the stored object as a json string.
+	output:
+		The stored object as json string.
+	sample input:
+		[add name residuum, bang(
+	sample output:
+		{"name":"residuum"}
+
+[json-decode]
+description:
+	Decodes a JSON string and outputs its values in a more Pd friendly way.
+sample input:
+	[{"name":"residuum"}(
+sample output:
+	name residuum
 
 
 How to build CouchPdb
 
-(Edit Makefile)
+Edit the makefile to fit your platform, it is currently made for Debian Wheezy.
+Make sure to have the header files for libcurl and json-c installed, on Debian the
+libraries are called libcurl-dev (with several packages providing this virtual package)
+and libjson0-dev respectively. 
+
 make
 
 or
 
 make couchdb-test
+
+The latter one also launches Pd with a sample patch.
+
+
+TODO (Almost everything)
+- I have no clear strategy for outputting nested JSON objects and arrays.
+- How to output data with space in it?
+- Outputting lists instead of symbols
+- Implementing OAUTH for connecting with Ubuntu One
+- Move [json-encode] to json-c instead of just doing string concat.

@@ -1,7 +1,7 @@
 CouchPdb
 
 CouchPdb is a CouchDB (http://couchdb.apache.org/) library for Puredata
-(http://puredata.info/). As CouchDB uses JSON (http://json.org/)data
+(http://puredata.info/). As CouchDB uses JSON (http://json.org/) data
 for communication, there are two accompaning objects that are more or
 less a lemma of the main object in the library for encoding and decoding
 json strings.

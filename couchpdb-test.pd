@@ -21,8 +21,10 @@
 #X msg 717 25 add year 2011;
 #X msg 794 49 bang;
 #X msg 516 93 add album \$1;
-#X obj 122 397 print;
-#X connect 0 0 22 0;
+#X obj 513 265 json-decode;
+#X obj 122 397 print data from couchdb;
+#X obj 520 317 print decode json data;
+#X connect 0 0 23 0;
 #X connect 1 0 0 0;
 #X connect 3 0 0 0;
 #X connect 4 0 0 0;
@@ -34,6 +36,7 @@
 #X connect 10 0 0 0;
 #X connect 11 0 6 0;
 #X connect 13 0 10 0;
+#X connect 13 0 22 0;
 #X connect 13 1 12 0;
 #X connect 14 0 0 0;
 #X connect 15 0 0 0;
@@ -43,3 +46,4 @@
 #X connect 19 0 17 0;
 #X connect 20 0 17 0;
 #X connect 21 0 6 0;
+#X connect 22 0 24 0;

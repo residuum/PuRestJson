@@ -15,11 +15,15 @@ typedef struct couchdb {
 	t_atom out[MAX_ARRAY_SIZE];
 } t_couchdb;
 
-typedef struct json_encode{
+typedef struct json_encode {
 	t_object x_ob;
 	char data[MAX_ARRAY_SIZE][MAX_STRING_SIZE];
 	int data_count;
 } t_json_encode;
+
+typedef struct json_decode {
+	t_object x_ob;
+} t_json_decode;
  
 typedef struct memory_struct {
   char *memory;
@@ -50,6 +54,11 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* json-decode */
+t_class *json_decode_class;
+void setup_json_decode(void);
+void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec);
+
+void json_decode_string(t_json_decode *x, t_symbol *data);
 void output_json(json_object *jobj, t_outlet *outlet);
 
 /* general */ 

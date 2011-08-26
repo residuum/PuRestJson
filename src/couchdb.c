@@ -56,7 +56,7 @@ void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec) {
 				error("URL to CouchDB cannot be set.");
 			} else {
 				atom_string(argvec, x->couch_url, MAX_STRING_SIZE);
-				test_connection(x->couch_url, x);
+				/*test_connection(x->couch_url, &x);*/
 			}
 			break;
 		case 0:

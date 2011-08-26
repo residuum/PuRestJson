@@ -5,4 +5,5 @@
 void couchpdb_setup(void) {
 	setup_couchdb();
 	setup_json_encoder();
+	setup_json_decoder();
 }

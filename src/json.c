@@ -26,26 +26,22 @@ void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec) {
  */
 void json_encode_bang(t_json_encode *x) {
 	int i = 0; 
-	char json_data[2 + MAX_ARRAY_SIZE * (2 * MAX_STRING_SIZE + 6)] = "{";
+	json_object *jobj = json_object_new_object();
+	json_object *value;
 	if (x->data_count > 0) {
 		for (i = 0; i < x->data_count; i++) {
-			strcat(json_data, "\"");
-			strcat(json_data, x->data[i * 2]);
-			strcat(json_data, "\":");
-			if(x->data[i * 2 +1][0] != '{' && x->data[i * 2 +1][0] != '[') {
-				strcat(json_data, "\"");
+			/* if stored value is string is starting with { and ending with }, 
+			   then create a json object from it. */
+			if (x->data[i * 2 + 1][0] == '{' && x->data[i * 2 + 1][strlen(x->data[i * 2 + 1]) -1] == '}') {
+				post("%s", x->data[i * 2 + 1]);
+				value = json_tokener_parse(remove_backslashes(x->data[i * 2 + 1]));
+			} else {
+				value = json_object_new_string(x->data[i * 2 + 1]);
 			}
-			strcat(json_data, x->data[i * 2 + 1]);
-			if(x->data[i * 2 + 1][strlen(x->data[i * 2 + 1]) - 1] != '}' 
-					&& x->data[i * 2 + 1][strlen(x->data[i * 2 + 1]) - 1] != ']') {
-				strcat(json_data, "\"");
-			}
-			if (i < x->data_count - 1) {
-				strcat(json_data, ",");
-			}
+			json_object_object_add(jobj, x->data[i * 2], value); 
 		}
-		strcat(json_data, "}");
-		outlet_symbol(x->x_ob.ob_outlet, gensym(json_data));
+
+		outlet_symbol(x->x_ob.ob_outlet, gensym(json_object_to_json_string(jobj)));
 	}
 }
 

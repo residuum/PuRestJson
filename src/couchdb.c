@@ -56,7 +56,7 @@ void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec) {
 				error("URL to CouchDB cannot be set.");
 			} else {
 				atom_string(argvec, x->couch_url, MAX_STRING_SIZE);
-				/*test_connection(x->couch_url, &x);*/
+				test_connection(x->couch_url, x);
 			}
 			break;
 		case 0:
@@ -85,9 +85,6 @@ void test_connection(char *couch_url, t_couchdb *x) {
 		if (result == CURLE_OK) {
 			post("Connection to %s possible.", couch_url);
 			post("Received information: %s", chunk.memory);
-			/* Parse JSON */
-			json_object *jobj = json_tokener_parse(chunk.memory);
-			output_json(jobj, x->x_ob.ob_outlet);
 			/* Free memory */
 			if (chunk.memory) {
 				free(chunk.memory);
@@ -103,25 +100,25 @@ void test_connection(char *couch_url, t_couchdb *x) {
 
 void execute_couchdb(char *couch_url, char *request_type, char *database, char *parameters, t_couchdb *x){
 	char real_url[strlen(couch_url) + strlen(database)];
+	char *cleaned_parameters = remove_backslashes(parameters);
 	CURL *curl_handle;
 	CURLcode result;
 	strcpy(real_url, couch_url);
 	strcat(real_url, database);
 	t_memory_struct in_memory;
 	t_memory_struct out_memory;
-	size_t parameter_len = strlen(parameters);
+	size_t parameter_len = strlen(cleaned_parameters);
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
 	if (curl_handle) {
 		curl_easy_setopt(curl_handle, CURLOPT_URL, real_url);
-		post("Request URL: %s", real_url);
 		if (strcmp(request_type, "PUT") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
 			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, read_memory_callback);
 			/* Prepare data for reading */
 			in_memory.memory = malloc(parameter_len + 1);
 			in_memory.size = parameter_len;
-			memcpy(in_memory.memory, parameters, parameter_len);
+			memcpy(in_memory.memory, cleaned_parameters, parameter_len);
 			curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
 		} else if (strcmp(request_type, "POST") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
@@ -134,8 +131,6 @@ void execute_couchdb(char *couch_url, char *request_type, char *database, char *
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
 		result = curl_easy_perform(curl_handle);
 		if (result == CURLE_OK) {
-			post("CURL successful");
-			post("Received information: %s", out_memory.memory);
 			/* Parse JSON */
 			json_object *jobj = json_tokener_parse(out_memory.memory);
 			output_json(jobj, x->x_ob.ob_outlet);

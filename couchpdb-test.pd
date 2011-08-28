@@ -1,4 +1,4 @@
-#N canvas 725 103 985 468 10;
+#N canvas 381 103 985 468 10;
 #X obj 119 352 couchdb;
 #X msg 129 46 url http://127.0.0.1:5984/;
 #X obj 314 373 couchdb http://127.0.0.1:5984/;
@@ -20,7 +20,7 @@
 #X msg 664 -12 add name Der Discokeller des Grauens;
 #X msg 717 25 add year 2011;
 #X msg 794 49 bang;
-#X msg 516 93 add album \$1;
+#X msg 557 95 add album \$1;
 #X obj 513 265 json-decode;
 #X obj 122 397 print data from couchdb;
 #X obj 520 317 print decode json data;

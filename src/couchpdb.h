@@ -63,3 +63,4 @@ void output_json(json_object *jobj, t_outlet *outlet);
 
 /* general */ 
 void couchpdb_setup(void);
+char *remove_backslashes(char *source_string);

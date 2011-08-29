@@ -82,37 +82,32 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
  * @param outlet outlet where data should be sent to.
  */
 void output_json(json_object *jobj, t_outlet *outlet) {
-	char output_string[MAX_STRING_SIZE * MAX_ARRAY_SIZE] = "";
+	t_atom output_data[MAX_ARRAY_SIZE];
+	size_t element_count = 0;
 	enum json_type type;
-	char val_string[MAX_STRING_SIZE];
+	
 	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
 		type = json_object_get_type(val);
 		switch (type) {
 			case json_type_boolean:
-				strcat(output_string, key);
-				strcat(output_string, " ");
-				strcat(output_string, json_object_get_boolean(val) ? "1" : "0");
-				strcat(output_string, " ");
+				SETSYMBOL(&output_data[element_count * 2], gensym(key));
+				SETFLOAT(&output_data[element_count * 2 + 1], json_object_get_boolean(val) ? 1 : 0);
+				element_count++;
 				break;
 			case json_type_double:
-				strcat(output_string, key);
-				strcat(output_string, " ");
-				sprintf(val_string, "%f", json_object_get_double(val));
-				strcat(output_string, val_string);
-				strcat(output_string, " ");
+				SETSYMBOL(&output_data[element_count * 2], gensym(key));
+				SETFLOAT(&output_data[element_count * 2 + 1], json_object_get_double(val));
+				element_count++;
 				break;
 			case json_type_int:
-				strcat(output_string, key);
-				strcat(output_string, " ");
-				sprintf(val_string, "%d", json_object_get_int(val));
-				strcat(output_string, val_string);
-				strcat(output_string, " ");
+				SETSYMBOL(&output_data[element_count * 2], gensym(key));
+				SETFLOAT(&output_data[element_count * 2 + 1], json_object_get_int(val));
+				element_count++;
 				break;
 			case json_type_string: 
-				strcat(output_string, key);
-				strcat(output_string, " ");
-				strcat(output_string, json_object_get_string(val));
-				strcat(output_string, " ");
+				SETSYMBOL(&output_data[element_count * 2], gensym(key));
+				SETSYMBOL(&output_data[element_count * 2 + 1], gensym(json_object_get_string(val)));
+				element_count++;
 				break;
 			case json_type_object:
 				error("TODO: What shall we do with a nested object?");
@@ -125,11 +120,10 @@ void output_json(json_object *jobj, t_outlet *outlet) {
 				break;
 		}
 	}
-	if (strlen(output_string) > 0) {
-		outlet_symbol(outlet, gensym(output_string));
+	if (element_count > 1) {
+		outlet_list(outlet, gensym(""), element_count * 2, output_data);
 	}
 }
-
 /**
  * Setup json_decoder
  * 

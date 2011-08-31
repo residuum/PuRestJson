@@ -84,6 +84,8 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	enum json_type type;
 	t_atom out_data[2];
+	/*char string_value[MAX_STRING_SIZE];*/
+	float float_value;
 	
 	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
 		type = json_object_get_type(val);
@@ -105,7 +107,14 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 				break;
 			case json_type_string: 
 				SETSYMBOL(&out_data[0], gensym(key));
-				SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
+				/* Float values might come as string */
+				const char *string_value = json_object_get_string(val);
+				float_value = atof(string_value);
+				if (float_value == 0 && strcmp(string_value, "0") != 0) {
+					SETSYMBOL(&out_data[1], gensym(string_value));
+				} else {
+					SETFLOAT(&out_data[1], float_value);
+				}
 				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				break;
 			case json_type_object:

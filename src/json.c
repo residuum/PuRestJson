@@ -81,33 +81,32 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
  * @param jobj json object to output.
  * @param outlet outlet where data should be sent to.
  */
-void output_json(json_object *jobj, t_outlet *outlet) {
-	t_atom output_data[MAX_ARRAY_SIZE];
-	size_t element_count = 0;
+void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	enum json_type type;
+	t_atom out_data[2];
 	
 	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
 		type = json_object_get_type(val);
 		switch (type) {
 			case json_type_boolean:
-				SETSYMBOL(&output_data[element_count * 2], gensym(key));
-				SETFLOAT(&output_data[element_count * 2 + 1], json_object_get_boolean(val) ? 1 : 0);
-				element_count++;
+				SETSYMBOL(&out_data[0], gensym(key));
+				SETFLOAT(&out_data[1], json_object_get_boolean(val) ? 1: 0);
+				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				break;
 			case json_type_double:
-				SETSYMBOL(&output_data[element_count * 2], gensym(key));
-				SETFLOAT(&output_data[element_count * 2 + 1], json_object_get_double(val));
-				element_count++;
+				SETSYMBOL(&out_data[0], gensym(key));
+				SETFLOAT(&out_data[1], json_object_get_double(val));
+				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				break;
 			case json_type_int:
-				SETSYMBOL(&output_data[element_count * 2], gensym(key));
-				SETFLOAT(&output_data[element_count * 2 + 1], json_object_get_int(val));
-				element_count++;
+				SETSYMBOL(&out_data[0], gensym(key));
+				SETFLOAT(&out_data[1], json_object_get_int(val));
+				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				break;
 			case json_type_string: 
-				SETSYMBOL(&output_data[element_count * 2], gensym(key));
-				SETSYMBOL(&output_data[element_count * 2 + 1], gensym(json_object_get_string(val)));
-				element_count++;
+				SETSYMBOL(&out_data[0], gensym(key));
+				SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
+				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				break;
 			case json_type_object:
 				error("TODO: What shall we do with a nested object?");
@@ -120,9 +119,7 @@ void output_json(json_object *jobj, t_outlet *outlet) {
 				break;
 		}
 	}
-	if (element_count > 1) {
-		outlet_list(outlet, gensym(""), element_count * 2, output_data);
-	}
+	outlet_bang(done_outlet);
 }
 /**
  * Setup json_decoder
@@ -141,6 +138,7 @@ void setup_json_decoder(void) {
 void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_json_decode *x = (t_json_decode*)pd_new(json_decode_class);
 	outlet_new(&x->x_ob, NULL);
+	x->done_outlet = outlet_new(&x->x_ob, &s_bang);
 	return (void *)x;
 }
 
@@ -151,5 +149,5 @@ void json_decode_string(t_json_decode *x, t_symbol *data) {
 	char *json_string = data->s_name;
 	json_object *jobj;
 	jobj = json_tokener_parse(json_string);
-	output_json(jobj, x->x_ob.ob_outlet);
+	output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
 }

@@ -10,6 +10,7 @@
 
 typedef struct couchdb {
 	t_object x_ob;
+	t_outlet *done_outlet;
 	int out_count;
 	char couch_url[MAX_STRING_SIZE];
 	t_atom out[MAX_ARRAY_SIZE];
@@ -23,6 +24,7 @@ typedef struct json_encode {
 
 typedef struct json_decode {
 	t_object x_ob;
+	t_outlet *done_outlet;
 } t_json_decode;
  
 typedef struct memory_struct {
@@ -59,7 +61,7 @@ void setup_json_decode(void);
 void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void json_decode_string(t_json_decode *x, t_symbol *data);
-void output_json(json_object *jobj, t_outlet *outlet);
+void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 
 /* general */ 
 void couchpdb_setup(void);

@@ -1,3 +1,8 @@
+/**
+ * Setup couchdb 
+ * 
+ * Performs setup of couchdb object, initializes methods for inlet
+ */
 void setup_couchdb(void) {
 	couchdb_class = class_new(gensym("couchdb"), (t_newmethod)couchdb_new,
 			0, sizeof(t_couchdb), 0, A_GIMME, 0);
@@ -6,6 +11,11 @@ void setup_couchdb(void) {
 	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("couchdb"), A_GIMME, 0);
 }
 
+/**
+ * Performs couchdb method 
+ * 
+ * Executes a couchdb command 
+ */
 void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char request_type[8];
 	char database[MAX_STRING_SIZE];
@@ -66,6 +76,7 @@ void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec) {
 			break;
 	}
 	outlet_new(&x->x_ob, NULL);
+	x->done_outlet = outlet_new(&x->x_ob, &s_bang);
 	return (void *)x;
 }
 
@@ -133,7 +144,7 @@ void execute_couchdb(char *couch_url, char *request_type, char *database, char *
 		if (result == CURLE_OK) {
 			/* Parse JSON */
 			json_object *jobj = json_tokener_parse(out_memory.memory);
-			output_json(jobj, x->x_ob.ob_outlet);
+			output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
 			/* Free memory */
 			if (out_memory.memory) {
 				free(out_memory.memory);

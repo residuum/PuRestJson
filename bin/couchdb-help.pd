@@ -1,0 +1,4 @@
+#N canvas 0 0 1069 709 10;
+#X obj 19 23 couchdb;
+#X obj 584 392 couchdb;
+#X text 75 24 - object for communicating with a CouchDB;

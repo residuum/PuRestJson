@@ -9,6 +9,7 @@ void setup_json_encoder(void) {
 	class_addbang(json_encode_class, (t_method)json_encode_bang);
 	class_addmethod(json_encode_class, (t_method)json_encode_add, gensym("add"), A_GIMME, 0);
 	class_addmethod(json_encode_class, (t_method)json_encode_clear, gensym("clear"), A_GIMME, 0);
+	class_sethelpsymbol(json_encode_class, gensym("json-help"));
 }
 
 /**
@@ -139,6 +140,7 @@ void setup_json_decoder(void) {
 	json_decode_class = class_new(gensym("json-decode"), (t_newmethod)json_decode_new,
 		0, sizeof(t_json_decode), 0, A_GIMME, 0);
 	class_addsymbol(json_decode_class, (t_method)json_decode_string);
+	class_sethelpsymbol(json_decode_class, gensym("json-help"));
 }
 
 /**

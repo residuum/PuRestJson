@@ -3,10 +3,9 @@
 #include "json.c"
 
 void couchpdb_setup(void) {
-	post("CouchPdb: A library for connecting to CouchDB and encoding and decoding JSON data from Puredata.");
+	post("CouchPdb version 0.1: A library for connecting to CouchDB and encoding and decoding JSON data from Puredata.");
 	post("(c) Thomas Mayer (Residuum) 2011");
 	post("Get the latest source from https://github.com/residuum/CouchPdb");
-	post("Found bugs? Report them on the Github page as well.");
 	setup_couchdb();
 	setup_json_encoder();
 	setup_json_decoder();

@@ -9,6 +9,7 @@ void setup_couchdb(void) {
 	class_addmethod(couchdb_class, (t_method)couchdb_oauth, gensym("oauth"), A_GIMME, 0);
 	class_addmethod(couchdb_class, (t_method)couchdb_url, gensym("url"), A_GIMME, 0);
 	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("couchdb"), A_GIMME, 0);
+	class_sethelpsymbol(couchdb_class, gensym("couchdb-help"));
 }
 
 /**

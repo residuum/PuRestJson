@@ -21,7 +21,7 @@ choice. CouchDB’s built in Web administration console speaks directly
 to the database using HTTP requests issued from your browser.
 
 
-About Puredata
+About Puredata (From the official website)
 
 Pd (aka Pure Data) is a real-time graphical programming environment for
 audio, video, and graphical processing. It is the third major branch
@@ -34,101 +34,16 @@ package very much a community effort.
 
 Externals in the library
 
-[couchdb] 
-Creation argument (symbol): 
-	Base URL for requests, e.g. http://localhost:5984/ 	Basically just 
-	a helper method for making couchpd messages smaller.
-
-Methods:
-url:
-	parameters:
-		(symbol) new base url.
-	description:
-		Sets the base URL to the new base url, same as creation argument.
-	example input:
-		[url http://localhost:5984 (
-	output:
-		Does output data to console.
-	example output:
-		{"couchdb":"welcome", "version":"0.11.0"}
-		
-couchpd:
-	parameters:
-		(symbol) HTTP request method
-		(symbol) path to CouchDB object
-		(anything) parameters for CouchDB method
-	description:
-		Performs HTTP request to CouchDB with method on CouchDB object.
-		Additional parameters can be put in after the object, e. g. JSON
-		data for storage. If you have specified a base url for the object,
-		either at creation or with the url method, then the path to the
-		CouchDB object will be prepended with the base url.
-	output:
-		Returned data from CouchDB, decoded in the same way as [json-decode].
-	example input 1:
-		[couchdb GET test(
-	example output 1:
-		left outlet: list db_name test
-		left outlet: list doc_count 0
-		left outlet: list doc_del_count 0 
-		left outlet: list update_seq 0 
-		left outlet: list purge_seq 0 
-		left outlet: list compact_running 0 
-		left outlet: list disk_size 79 
-		left outlet: list instance_start_time 1314392958296952 
-		left outlet: list disk_format_version 5
-		right outlet: bang
-	example input 2:
-		[couchdb PUT test/1 {"name":"residuum"}
-	example output 2:
-		left outlet: left error conflict
-		left outlet: left reason Document update conflict.
-		right outlet: bang
+[couchdb]
+Object for communication with a CouchDB instance.
 
 [json-encode]
-Methods:
-add:
-	parameters: 
-		(symbol) key
-		(anything) value
-	description:
-		Adds a key / value pair to the internally stored JSON object.
-	output: 
-		Does not output anything.
-	example input:
-		[add name residuum(
-
-clear:
-	parameters:
-		no additional parameters allowed.
-	description:
-		Clears all internally stored data.
-	output:
-		No Output:
-	example input:
-		[clear(
-
-bang:
-	description:
-		Issuing a bang on the inlet will output the stored object as a JSON string.
-	output:
-		The stored object as JSON string.
-	sample input:
-		[add name residuum, bang(
-	sample output:
-		{"name":"residuum"}
+Object for encoding data to JSON.
 
 [json-decode]
-description:
-	Decodes a JSON string and outputs its values in a more Pd friendly way.
-	After a decoded JSON string, the right outlet outputs a bang, so that you
-	can distinguish between two objects in fast succession.
-sample input:
-	[{"name":"Residuum", "album":"Der Diskokeller des Grauens"}]
-sample output:
-	left outlet: list name Residuum
-	left outlet: list album Der Diskokeller des Grauens 
-	right outlet: bang
+Object for decoding JSON data.
+
+For the usage of the externals see the help patches for the objects.
 
 
 How to build CouchPdb

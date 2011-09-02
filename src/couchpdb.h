@@ -1,6 +1,7 @@
 #include "m_pd.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <curl/curl.h>
 #include <json/json.h>
@@ -66,3 +67,4 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 /* general */ 
 void couchpdb_setup(void);
 char *remove_backslashes(char *source_string);
+int str_ccmp(const char *s1, const char *s2);

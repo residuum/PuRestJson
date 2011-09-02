@@ -109,11 +109,18 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 			case json_type_string: 
 				SETSYMBOL(&out_data[0], gensym(key));
 				/* Float values might come as string */
+				char *remainder;
 				const char *string_value = json_object_get_string(val);
-				float_value = atof(string_value);
-				if (float_value == 0 && strcmp(string_value, "0") != 0) {
+				float_value = strtod(string_value, &remainder);
+				/* Boolean values might come as string */
+				if (str_ccmp(string_value, "true") == 0) {
+					SETFLOAT(&out_data[1], 1);
+				} else if (str_ccmp(string_value, "false") == 0) {
+					SETFLOAT(&out_data[1], 0);
+				/* String to float has remainder => send the string  */
+				} else if (strlen(remainder) != 0) {
 					SETSYMBOL(&out_data[1], gensym(string_value));
-				} else {
+				} else{
 					SETFLOAT(&out_data[1], float_value);
 				}
 				outlet_list(data_outlet, &s_list, 2, &out_data[0]);

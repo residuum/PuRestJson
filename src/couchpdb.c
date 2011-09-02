@@ -42,3 +42,17 @@ char *remove_backslashes(char *source_string) {
 	}
 	return (dest);
 }
+
+int str_ccmp(const char *s1, const char *s2) {
+	const unsigned char *p1 = (const unsigned char *)s1;
+	const unsigned char *p2 = (const unsigned char *)s2;
+
+	while (toupper(*p1) == toupper(*p2)) {
+		if (*p1 == '\0') {
+			return 0;
+		}
+		++p1;
+		++p2;
+	}
+	return toupper(*p2) > toupper(*p1) ? -1 : 1;
+}

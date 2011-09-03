@@ -85,7 +85,6 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	enum json_type type;
 	t_atom out_data[2];
-	/*char string_value[MAX_STRING_SIZE];*/
 	float float_value;
 	
 	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
@@ -111,17 +110,18 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 				/* Float values might come as string */
 				char *remainder;
 				const char *string_value = json_object_get_string(val);
-				float_value = strtod(string_value, &remainder);
+				float_value = (float)strtod(string_value, &remainder);
+				/* String to float has no remainder => float */
+				if (strlen(remainder) == 0) {
+					SETFLOAT(&out_data[1], float_value);
 				/* Boolean values might come as string */
-				if (str_ccmp(string_value, "true") == 0) {
+				} else if (str_ccmp(string_value, "true") == 0) {
 					SETFLOAT(&out_data[1], 1);
 				} else if (str_ccmp(string_value, "false") == 0) {
 					SETFLOAT(&out_data[1], 0);
-				/* String to float has remainder => send the string  */
-				} else if (strlen(remainder) != 0) {
+				/* String */
+				} else {
 					SETSYMBOL(&out_data[1], gensym(string_value));
-				} else{
-					SETFLOAT(&out_data[1], float_value);
 				}
 				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				break;

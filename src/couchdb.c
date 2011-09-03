@@ -8,7 +8,10 @@ void setup_couchdb(void) {
 			0, sizeof(t_couchdb), 0, A_GIMME, 0);
 	class_addmethod(couchdb_class, (t_method)couchdb_oauth, gensym("oauth"), A_GIMME, 0);
 	class_addmethod(couchdb_class, (t_method)couchdb_url, gensym("url"), A_GIMME, 0);
-	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("couchdb"), A_GIMME, 0);
+	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("PUT"), A_GIMME, 0);
+	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("GET"), A_GIMME, 0);
+	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("DELETE"), A_GIMME, 0);
+	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("POST"), A_GIMME, 0);
 	class_sethelpsymbol(couchdb_class, gensym("couchdb-help"));
 }
 
@@ -18,19 +21,19 @@ void setup_couchdb(void) {
  * Executes a couchdb command 
  */
 void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char request_type[8];
+	char *request_type;
 	char database[MAX_STRING_SIZE];
 	char parameter[MAX_STRING_SIZE];
 	switch (argcount) {
 		case 0:
 			break;
 		default:
-			atom_string(argvec, request_type, 8);
-			if (argcount > 1) {
-				atom_string(argvec + 1, database, MAX_STRING_SIZE);
+			request_type = selector->s_name;
+			if (argcount > 0) {
+				atom_string(argvec, database, MAX_STRING_SIZE);
 			} 
-			if (argcount > 2) {
-				atom_string(argvec + 2, parameter, MAX_STRING_SIZE);
+			if (argcount > 1) {
+				atom_string(argvec + 1, parameter, MAX_STRING_SIZE);
 			}
 			execute_couchdb(x->couch_url, request_type, database, parameter, x);
 			break;

@@ -62,8 +62,8 @@ make couchdb-test
 The latter one also launches Pd with a sample patch.
 
 
-TODO (Almost everything)
+TODO
 - I have no clear strategy for outputting nested JSON objects and arrays.
+  For the time being, these are ignored.
 - Makefile for Mac OS X and Windows (MinGW)
-- Help patches
 - Implementing OAUTH for connecting with Ubuntu One

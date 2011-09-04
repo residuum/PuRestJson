@@ -1,4 +1,181 @@
-#N canvas 0 0 1069 709 10;
-#X obj 19 23 couchdb;
-#X obj 584 392 couchdb;
-#X text 75 24 - object for communicating with a CouchDB;
+#N canvas 0 0 1163 709 10;
+#X obj 20 -60 couchdb;
+#X obj 630 310 couchdb;
+#X text 76 -59 - object for communicating with a CouchDB;
+#N canvas 260 56 853 566 CouchDB-basics 0;
+#X text 17 76 CRUD tables:;
+#X text 15 93 PUT http://localhost:5984/pd-test This will create a
+table "pd-test" on the server localhost. If the operation is successful
+\, CouchDB will return a JSON object starting with a key of "ok" and
+a message as value for that key. If creating the table is not possible
+\, you will get a key "error" and the reason for the failure as its
+value.;
+#X text 13 164 GET http://localhost:5984/pd-test This will get some
+info on the table \, including the count of stored documents as "doc_count".
+If getting the table is not possible you will receive a key "error"
+and the reason for the failure as its value.;
+#X text 12 228 DELETE http://localhost:5984/pd-test This will delete
+the table if possible. BEWARE: You won't get prompted for confirmation
+\, CouchDB will delete the table without any warning including all
+stored documents. This will return "ok" or "error" as a key.;
+#X text 416 69 CRUD documents:;
+#X text 416 91 PUT http://localhost:5984/pd-test/object-name This will
+create or update a document with the ID "object-name" in the table
+"pd-test". The table must be created first. If an object with the ID
+"object-name" already exists \, you must include the revision \, that
+you can get with the GET method (see below). On error CouchDB will
+return a key of "error" and the reason for the error as its value.
+Data for the object must be provided as JSON data in the request header.
+;
+#X text 417 186 GET http://localhost:5984/pd-test/object-name This
+will retrieve the document "object-name" from the table "pd-test".
+This will return the document as a JSON object \, including the ID
+with the key "_id" and the revision code with the key "_rev". The latter
+value is needed for updating or deleting the object from the table
+to prevent concurrent updates.;
+#X text 419 265 DELETE http://localhost:5984/pd-test/object-name This
+will delete the document if possible. You will need to provide the
+revision for the document. You will receive data with a key of "ok"
+or "error" and information as value.;
+#X text 15 10 Basic CRUD methods for tables and individual objects
+are done with three HTTP methods: PUT \, GET and DELETE. PUT is used
+for creating and updating data \, GET is used for retrieving data \,
+while DELETE is used for deleting data. This is best explained with
+some examples:;
+#X text 16 334 All these request \, PUT \, GET and DELETE can be done
+with [couchdb] \, you can even issue POST requests to a CouchDB server.
+If you want to do complex data operations on a CouchDB \, please refer
+to the manual: http://guide.couchdb.org/;
+#X restore 18 147 pd CouchDB-basics;
+#N canvas 506 84 450 300 OAUTH 0;
+#X text 68 54 OAUTH is not yet implemented. Sorry about that.;
+#X restore 20 316 pd OAUTH;
+#X text 19 -25 [couchdb] is an object for communication with a CouchDB
+database. This help patch assumes an installation on the local machine
+with the default configuration \, i.e. an instance accessible with
+http://localhost:5984/.;
+#X text 19 23 CouchDB is a document database with a RESTful interface:
+;
+#X text 19 39 Document database means \, that stored objects do not
+have a pre-defined layout \, but each document can have a different
+layout \, even when stored in the same table.;
+#X text 19 74 RESTful interface means \, that all operations are done
+with HTTP requests \, depending on the request methods \, different
+actions are performed on databases and documents.;
+#X text 19 114 For more infos on how to create \, retrieve \, update
+and delete (CRUD) data \, see this subpatch:;
+#X msg 666 88 bang;
+#X obj 17 202 couchdb http://localhost:5984/;
+#X msg 422 -9 url http://localhost:5984/;
+#X obj 630 345 list trim;
+#X obj 629 376 route error ok;
+#X msg 638 443 0;
+#X obj 720 332 t b b;
+#X msg 720 359 1;
+#X text 558 425 Close signal flow on error;
+#X obj 514 493 print error message;
+#X text 779 367 Reopen signal flow after each object.;
+#X obj 669 401 print OK message;
+#X text 16 184 Set the base url at creation or use [url( message;
+#N canvas 576 82 450 511 create-sequencer-data 0;
+#X obj 32 12 inlet;
+#X obj 103 349 outlet;
+#X obj 82 266 + 1;
+#X obj 99 311 pack f s;
+#X obj 36 132 json-encode;
+#X msg 29 47 add pitch 440 \, add duration 2000 \, bang \, clear \,
+add pitch 880 \, add duration 1000 \, bang \, clear \, add pitch 440
+\, add duration 1000 \, bang \, clear \, add pitch 1320 \, add duration
+500 \, bang \, clear \, add pitch 880 \, add duration 2000 \, bang
+\, clear;
+#X obj 35 167 t b a;
+#X obj 31 266 0;
+#X connect 0 0 5 0;
+#X connect 2 0 7 1;
+#X connect 3 0 1 0;
+#X connect 4 0 6 0;
+#X connect 5 0 4 0;
+#X connect 6 0 7 0;
+#X connect 6 1 3 1;
+#X connect 7 0 2 0;
+#X connect 7 0 3 0;
+#X restore 666 115 pd create-sequencer-data;
+#X text 421 -30 1 Sets the base URL.;
+#X text 604 -34 2 Creates database pd-test on server with base URL.
+If you do not set the base URL \, then you can also issue this command
+with [PUT http://localhost:5984/pd-test/(;
+#X text 663 60 3 Creates some sequencer data and stores the data in
+pd-test. Objects contain "pitch" and "duration".;
+#X text 709 191 4 Start sequencer and get first object;
+#X obj 710 238 f;
+#X obj 738 240 + 1;
+#X obj 775 452 route pitch duration;
+#X obj 747 484 pack f f f;
+#X obj 675 560 unpack f f f;
+#X obj 744 593 del;
+#X floatatom 709 595 5 0 0 0 - - -;
+#X text 802 512 first inlet of pack is not used. The reason for that
+is explained in the help patch for;
+#X obj 998 528 json-decode;
+#X obj 17 256 json-decode;
+#X text 16 238 [couchdb] gets data as JSON objects \, output is the
+same as;
+#X obj 485 360 print data;
+#X text 424 174 5 Get database pd-test;
+#X text 382 251 6 Delete database pd-test;
+#X msg 425 197 GET pdtest;
+#X msg 609 30 PUT pdtest;
+#X msg 666 139 PUT pdtest/\$1 \$2;
+#X msg 384 269 DELETE pdtest;
+#X msg 710 267 GET pdtest/\$1;
+#X text 19 295 When OAUTH is implemented \, you will find infos about
+it here;
+#X text 421 -65 This example will create a database and store values
+to be used by a simple sequencer.;
+#X msg 710 210 0;
+#X obj 675 529 spigot 1;
+#X obj 969 203 spigot;
+#X obj 1002 169 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1
+0 1;
+#X obj 666 164 print Put command;
+#X obj 598 398 t b a b;
+#X text 949 153 toggle only when using sequencer;
+#X msg 491 432 0;
+#X text 463 409 restart GET sequence;
+#X connect 1 0 13 0;
+#X connect 1 0 39 0;
+#X connect 1 1 16 0;
+#X connect 10 0 23 0;
+#X connect 12 0 1 0;
+#X connect 13 0 14 0;
+#X connect 14 0 54 0;
+#X connect 14 1 21 0;
+#X connect 14 2 30 0;
+#X connect 15 0 50 1;
+#X connect 16 0 17 0;
+#X connect 16 1 31 0;
+#X connect 17 0 50 1;
+#X connect 23 0 44 0;
+#X connect 28 0 29 0;
+#X connect 28 0 46 0;
+#X connect 29 0 28 1;
+#X connect 30 0 31 1;
+#X connect 30 1 31 2;
+#X connect 31 0 50 0;
+#X connect 32 1 34 0;
+#X connect 32 2 33 0;
+#X connect 33 0 51 0;
+#X connect 42 0 1 0;
+#X connect 43 0 1 0;
+#X connect 44 0 1 0;
+#X connect 44 0 53 0;
+#X connect 45 0 1 0;
+#X connect 46 0 1 0;
+#X connect 49 0 28 0;
+#X connect 50 0 32 0;
+#X connect 51 0 28 0;
+#X connect 52 0 51 1;
+#X connect 54 0 56 0;
+#X connect 54 1 19 0;
+#X connect 54 2 15 0;
+#X connect 56 0 51 0;

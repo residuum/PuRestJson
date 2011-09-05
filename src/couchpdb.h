@@ -9,6 +9,16 @@
 #define MAX_ARRAY_SIZE 128
 #define MAX_STRING_SIZE 512
 
+typedef struct memory_struct {
+  char *memory;
+  size_t size;
+} t_memory_struct;
+
+typedef struct key_value_pair{
+  char key[MAX_STRING_SIZE];
+  char value[MAX_STRING_SIZE];
+} t_key_value_pair;
+
 typedef struct couchdb {
 	t_object x_ob;
 	t_outlet *done_outlet;
@@ -19,7 +29,7 @@ typedef struct couchdb {
 
 typedef struct json_encode {
 	t_object x_ob;
-	char data[MAX_ARRAY_SIZE][MAX_STRING_SIZE];
+	t_key_value_pair data[MAX_ARRAY_SIZE];
 	int data_count;
 } t_json_encode;
 
@@ -28,11 +38,6 @@ typedef struct json_decode {
 	t_outlet *done_outlet;
 } t_json_decode;
  
-typedef struct memory_struct {
-  char *memory;
-  size_t size;
-} t_memory_struct;
-
 /* couchdb */
 t_class *couchdb_class;
 void setup_couchdb(void);

@@ -33,15 +33,13 @@ void json_encode_bang(t_json_encode *x) {
 		for (i = 0; i < x->data_count; i++) {
 			/* if stored value is string is starting with { and ending with }, 
 			   then create a json object from it. */
-			if (x->data[i * 2 + 1][0] == '{' && x->data[i * 2 + 1][strlen(x->data[i * 2 + 1]) -1] == '}') {
-				post("%s", x->data[i * 2 + 1]);
-				value = json_tokener_parse(remove_backslashes(x->data[i * 2 + 1]));
+			if (x->data[i].value[0] == '{' && x->data[i].value[strlen(x->data[i].value) -1] == '}') {
+				value = json_tokener_parse(remove_backslashes(x->data[i].value));
 			} else {
-				value = json_object_new_string(x->data[i * 2 + 1]);
+				value = json_object_new_string(x->data[i].value);
 			}
-			json_object_object_add(jobj, x->data[i * 2], value); 
+			json_object_object_add(jobj, x->data[i].key, value); 
 		}
-
 		outlet_symbol(x->x_ob.ob_outlet, gensym(json_object_to_json_string(jobj)));
 	}
 }
@@ -57,13 +55,13 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 		error("For method 'add' You need to specify a value.");
 	} else {
 		atom_string(argvec, key, MAX_STRING_SIZE);
-		strcpy(x->data[x->data_count * 2], key);
+		strcpy(x->data[x->data_count].key, key);
 		atom_string(argvec + 1, value, MAX_STRING_SIZE);
-		strcpy(x->data[x->data_count * 2 + 1], value);
+		strcpy(x->data[x->data_count].value, value);
 		for(i = 2; i < argcount; i++) {
 			atom_string(argvec + i, value, MAX_STRING_SIZE);
-			strcat(x->data[x->data_count * 2 + 1], " ");
-			strcat(x->data[x->data_count * 2 + 1], value);
+			strcat(x->data[x->data_count].value, " ");
+			strcat(x->data[x->data_count].value, value);
 		}
 		x->data_count += 1;
 	}

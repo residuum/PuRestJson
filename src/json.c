@@ -83,31 +83,26 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	enum json_type type;
 	t_atom out_data[2];
+	char *remainder;
 	float float_value;
-	
+	const char *string_value;
+
 	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
 		type = json_object_get_type(val);
+		SETSYMBOL(&out_data[0], gensym(key));
 		switch (type) {
 			case json_type_boolean:
-				SETSYMBOL(&out_data[0], gensym(key));
 				SETFLOAT(&out_data[1], json_object_get_boolean(val) ? 1: 0);
-				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				break;
 			case json_type_double:
-				SETSYMBOL(&out_data[0], gensym(key));
 				SETFLOAT(&out_data[1], json_object_get_double(val));
-				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				break;
 			case json_type_int:
-				SETSYMBOL(&out_data[0], gensym(key));
 				SETFLOAT(&out_data[1], json_object_get_int(val));
-				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				break;
 			case json_type_string: 
-				SETSYMBOL(&out_data[0], gensym(key));
 				/* Float values might come as string */
-				char *remainder;
-				const char *string_value = json_object_get_string(val);
+				string_value = json_object_get_string(val);
 				float_value = (float)strtod(string_value, &remainder);
 				/* String to float has no remainder => float */
 				if (strlen(remainder) == 0) {
@@ -121,18 +116,18 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 				} else {
 					SETSYMBOL(&out_data[1], gensym(string_value));
 				}
-				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				break;
 			case json_type_object:
-				error("TODO: What shall we do with a nested object?");
+				SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
 				break;
 			case json_type_array:
-				error("TODO: What shall we do with an array?");
+				SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
 				break;
 			case json_type_null:
-				error("TODO: What shall we do with a null object?");
+				SETSYMBOL(&out_data[1], gensym(""));
 				break;
 		}
+		outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 	}
 	outlet_bang(done_outlet);
 }

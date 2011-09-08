@@ -81,55 +81,101 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
  * @param outlet outlet where data should be sent to.
  */
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
-	enum json_type type;
+	enum json_type outer_type = json_object_get_type(jobj);
+	enum json_type inner_type;
 	t_atom out_data[2];
+	t_float out_float;
 	char *remainder;
 	float float_value;
 	const char *string_value;
+	int array_len;
+	int i;
 
-	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
-		type = json_object_get_type(val);
-		SETSYMBOL(&out_data[0], gensym(key));
-		switch (type) {
-			case json_type_boolean:
-				SETFLOAT(&out_data[1], json_object_get_boolean(val) ? 1: 0);
-				break;
-			case json_type_double:
-				SETFLOAT(&out_data[1], json_object_get_double(val));
-				break;
-			case json_type_int:
-				SETFLOAT(&out_data[1], json_object_get_int(val));
-				break;
-			case json_type_string: 
-				/* Float values might come as string */
-				string_value = json_object_get_string(val);
-				float_value = (float)strtod(string_value, &remainder);
-				/* String to float has no remainder => float */
-				if (strlen(remainder) == 0) {
-					SETFLOAT(&out_data[1], float_value);
-				/* Boolean values might come as string */
-				} else if (str_ccmp(string_value, "true") == 0) {
-					SETFLOAT(&out_data[1], 1);
-				} else if (str_ccmp(string_value, "false") == 0) {
-					SETFLOAT(&out_data[1], 0);
-				/* String */
-				} else {
-					SETSYMBOL(&out_data[1], gensym(string_value));
+	switch (outer_type) {
+		/* We really have a JSON object */
+		case json_type_boolean:
+			SETFLOAT(&out_data[1], json_object_get_boolean(jobj) ? 1: 0);
+			out_float = atom_getfloat(&out_data[1]);
+			outlet_float(data_outlet, out_float);
+			outlet_bang(done_outlet);
+			break;
+		case json_type_double:
+			SETFLOAT(&out_data[1], json_object_get_double(jobj));
+			out_float = atom_getfloat(&out_data[1]);
+			outlet_float(data_outlet, out_float);
+			outlet_bang(done_outlet);
+			break;
+		case json_type_int:
+			SETFLOAT(&out_data[1], json_object_get_int(jobj));
+			out_float = atom_getfloat(&out_data[1]);
+			outlet_float(data_outlet, out_float);
+			outlet_bang(done_outlet);
+			break;
+		case json_type_string:
+			outlet_symbol(data_outlet, gensym(json_object_get_string(jobj)));
+			outlet_bang(done_outlet);
+			break;
+		case json_type_null:
+			outlet_symbol(data_outlet, gensym(""));
+			outlet_bang(done_outlet);
+			break;
+		case json_type_object: 
+			{
+				json_object_object_foreach(jobj, key, val) { /*Passing through every json object*/
+					inner_type = json_object_get_type(val);
+					SETSYMBOL(&out_data[0], gensym(key));
+					switch (inner_type) {
+						case json_type_boolean:
+							SETFLOAT(&out_data[1], json_object_get_boolean(val) ? 1: 0);
+							break;
+						case json_type_double:
+							SETFLOAT(&out_data[1], json_object_get_double(val));
+							break;
+						case json_type_int:
+							SETFLOAT(&out_data[1], json_object_get_int(val));
+							break;
+						case json_type_string: 
+							/* Float values might come as string */
+							string_value = json_object_get_string(val);
+							float_value = (float)strtod(string_value, &remainder);
+							/* String to float has no remainder => float */
+							if (strlen(remainder) == 0) {
+								SETFLOAT(&out_data[1], float_value);
+								/* Boolean values might come as string */
+							} else if (str_ccmp(string_value, "true") == 0) {
+								SETFLOAT(&out_data[1], 1);
+							} else if (str_ccmp(string_value, "false") == 0) {
+								SETFLOAT(&out_data[1], 0);
+								/* String */
+							} else {
+								SETSYMBOL(&out_data[1], gensym(string_value));
+							}
+							break;
+						case json_type_object:
+							SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
+							break;
+						case json_type_array:
+							SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
+							break;
+						case json_type_null:
+							SETSYMBOL(&out_data[1], gensym(""));
+							break;
+					}
+					outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				}
-				break;
-			case json_type_object:
-				SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
-				break;
-			case json_type_array:
-				SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
-				break;
-			case json_type_null:
-				SETSYMBOL(&out_data[1], gensym(""));
-				break;
+				outlet_bang(done_outlet);
+			}
+			break;
+		case json_type_array: 
+		{
+			array_len = json_object_array_length(jobj);
+			for (i = 0; i < array_len; i++) {
+				output_json(json_object_array_get_idx(jobj, i), data_outlet, done_outlet);
+			}
 		}
-		outlet_list(data_outlet, &s_list, 2, &out_data[0]);
+		break;
+		
 	}
-	outlet_bang(done_outlet);
 }
 /**
  * Setup json_decoder
@@ -138,7 +184,7 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
  */
 void setup_json_decoder(void) {
 	json_decode_class = class_new(gensym("json-decode"), (t_newmethod)json_decode_new,
-		0, sizeof(t_json_decode), 0, A_GIMME, 0);
+			0, sizeof(t_json_decode), 0, A_GIMME, 0);
 	class_addsymbol(json_decode_class, (t_method)json_decode_string);
 	class_sethelpsymbol(json_decode_class, gensym("json-help"));
 }

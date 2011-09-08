@@ -1,7 +1,7 @@
 #N canvas 43 32 985 691 10;
 #X obj 154 306 couchdb;
 #X msg 129 46 url http://127.0.0.1:5984/;
-#X obj 664 116 couchdb http://127.0.0.1:5984/;
+#X obj 658 499 couchdb http://127.0.0.1:5984/;
 #X obj 368 88 json-encode;
 #X msg 586 87 bang;
 #X msg 701 77 clear;
@@ -37,10 +37,18 @@
 #X obj 309 314 print couchdb return;
 #X msg 222 199 GET test/1;
 #X msg 213 172 PUT test/1 \$1;
+#X msg 658 450 GET _uuids?count=4;
+#X obj 658 567 route uuids;
+#X obj 658 537 list trim;
+#X obj 658 620 json-decode;
+#X obj 777 653 print array-done;
+#X obj 658 653 print array-decode;
+#X obj 658 592 l2s;
 #X connect 0 0 19 0;
 #X connect 0 0 35 0;
 #X connect 0 1 20 0;
 #X connect 1 0 0 0;
+#X connect 2 0 40 0;
 #X connect 3 0 7 0;
 #X connect 4 0 3 0;
 #X connect 5 0 3 0;
@@ -78,3 +86,9 @@
 #X connect 34 0 0 0;
 #X connect 36 0 0 0;
 #X connect 37 0 0 0;
+#X connect 38 0 2 0;
+#X connect 39 0 44 0;
+#X connect 40 0 39 0;
+#X connect 41 0 43 0;
+#X connect 41 1 42 0;
+#X connect 44 0 41 0;

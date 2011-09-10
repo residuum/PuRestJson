@@ -44,6 +44,9 @@
 #X obj 777 653 print array-done;
 #X obj 658 653 print array-decode;
 #X obj 658 592 l2s;
+#X msg 780 91 array var yabba;
+#X msg 782 112 array var dabba;
+#X msg 788 140 array var doo;
 #X connect 0 0 19 0;
 #X connect 0 0 35 0;
 #X connect 0 1 20 0;
@@ -92,3 +95,6 @@
 #X connect 41 0 43 0;
 #X connect 41 1 42 0;
 #X connect 44 0 41 0;
+#X connect 45 0 3 0;
+#X connect 46 0 3 0;
+#X connect 47 0 3 0;

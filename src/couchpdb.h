@@ -17,6 +17,7 @@ typedef struct memory_struct {
 typedef struct key_value_pair{
   char key[MAX_STRING_SIZE];
   char value[MAX_STRING_SIZE];
+  short is_array;
 } t_key_value_pair;
 
 typedef struct couchdb {
@@ -59,7 +60,10 @@ void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void json_encode_bang(t_json_encode *x);
 void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
+void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
+
+json_object *create_object(char *value);
 
 /* json-decode */
 t_class *json_decode_class;

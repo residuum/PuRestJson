@@ -27,7 +27,7 @@ couchpdb-linux:
 	$(CC_LINUX) $(FLAGS_LINUX) $(LIB_LINUX) $(PDINCLUDE) $(COUCHPDB_SRC) -o $(COUCHPDB_LINUX) 
 
 couchpdb-mingw:
-	PATH=/usr/local/mingw/bin:$PATH
+	PATH=/usr/local/mingw/bin:$(PATH)
 	CPATH=/usr/local/mingw/include
 	LD_LIBRARY_PATH=/usr/local/mingw/lib
 	PKG_CONFIG_DIR=/usr/local/mingw/lib/pkgconfig

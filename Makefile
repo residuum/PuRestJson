@@ -2,7 +2,7 @@ CC_LINUX = gcc
 CC_MINGW = i686-w64-mingw32-gcc 
 
 FLAGS_LINUX = -Wall -fPIC -shared -ansi -O2 
-FLAGS_MINGW = -Wall -shared -ansi -O2 
+FLAGS_MINGW = -Wall -static -ansi -O2 
 
 LIB_LINUX = -lcurl -ljson
 LIB_MINGW = -lcurl -ljson
@@ -27,6 +27,10 @@ couchpdb-linux:
 	$(CC_LINUX) $(FLAGS_LINUX) $(LIB_LINUX) $(PDINCLUDE) $(COUCHPDB_SRC) -o $(COUCHPDB_LINUX) 
 
 couchpdb-mingw:
+	PATH=/usr/local/mingw/bin:$PATH
+	CPATH=/usr/local/mingw/include
+	LD_LIBRARY_PATH=/usr/local/mingw/lib
+	PKG_CONFIG_DIR=/usr/local/mingw/lib/pkgconfig
 	$(CC_MINGW) $(FLAGS_MINGW) $(LIB_MINGW) $(PDINCLUDE) $(COUCHPDB_SRC) -o $(COUCHPDB_MINGW) 
 
 doc:

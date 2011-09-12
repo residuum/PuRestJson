@@ -1,26 +1,26 @@
 /**
- * Setup couchdb 
+ * Setup rest 
  * 
- * Performs setup of couchdb object, initializes methods for inlet
+ * Performs setup of rest object, initializes methods for inlet
  */
-void setup_couchdb(void) {
-	couchdb_class = class_new(gensym("couchdb"), (t_newmethod)couchdb_new,
-			0, sizeof(t_couchdb), 0, A_GIMME, 0);
-	class_addmethod(couchdb_class, (t_method)couchdb_oauth, gensym("oauth"), A_GIMME, 0);
-	class_addmethod(couchdb_class, (t_method)couchdb_url, gensym("url"), A_GIMME, 0);
-	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("PUT"), A_GIMME, 0);
-	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("GET"), A_GIMME, 0);
-	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("DELETE"), A_GIMME, 0);
-	class_addmethod(couchdb_class, (t_method)couchdb_command, gensym("POST"), A_GIMME, 0);
-	class_sethelpsymbol(couchdb_class, gensym("couchdb-help"));
+void setup_rest(void) {
+	rest_class = class_new(gensym("rest-json"), (t_newmethod)rest_new,
+			0, sizeof(t_rest), 0, A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_oauth, gensym("oauth"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_url, gensym("url"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_command, gensym("PUT"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_command, gensym("GET"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_command, gensym("DELETE"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_command, gensym("POST"), A_GIMME, 0);
+	class_sethelpsymbol(rest_class, gensym("rest-json"));
 }
 
 /**
- * Performs couchdb method 
+ * Performs rest method 
  * 
- * Executes a couchdb command 
+ * Executes a rest command 
  */
-void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char *request_type;
 	char database[MAX_STRING_SIZE];
 	char parameter[MAX_STRING_SIZE];
@@ -33,16 +33,16 @@ void couchdb_command(t_couchdb *x, t_symbol *selector, int argcount, t_atom *arg
 			if (argcount > 1) {
 				atom_string(argvec + 1, parameter, MAX_STRING_SIZE);
 			}
-			execute_couchdb(x->couch_url, request_type, database, parameter, x);
+			execute_rest(x->couch_url, request_type, database, parameter, x);
 			break;
 	}
 }
 
-void couchdb_oauth(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void rest_oauth(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	error("OAUTH not implemented yet.");
 }
 
-void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	switch (argcount) {
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
@@ -60,8 +60,8 @@ void couchdb_url(t_couchdb *x, t_symbol *selector, int argcount, t_atom *argvec)
 	}
 }
 
-void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec) {
-	t_couchdb *x = (t_couchdb *)pd_new(couchdb_class);
+void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
+	t_rest *x = (t_rest *)pd_new(rest_class);
 	switch (argcount) {
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
@@ -82,7 +82,7 @@ void *couchdb_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	return (void *)x;
 }
 
-void test_connection(char *couch_url, t_couchdb *x) {
+void test_connection(char *couch_url, t_rest *x) {
 	CURL *curl_handle;
 	CURLcode result;
 	t_memory_struct chunk;
@@ -111,7 +111,7 @@ void test_connection(char *couch_url, t_couchdb *x) {
 	}
 }
 
-void execute_couchdb(char *couch_url, char *request_type, char *database, char *parameters, t_couchdb *x){
+void execute_rest(char *couch_url, char *request_type, char *database, char *parameters, t_rest *x){
 	char real_url[strlen(couch_url) + strlen(database)];
 	char *cleaned_parameters = remove_backslashes(parameters);
 	CURL *curl_handle;
@@ -145,8 +145,12 @@ void execute_couchdb(char *couch_url, char *request_type, char *database, char *
 		result = curl_easy_perform(curl_handle);
 		if (result == CURLE_OK) {
 			/* Parse JSON */
+			post("Before parsing");
+			post("%s", out_memory.memory);
 			json_object *jobj = json_tokener_parse(out_memory.memory);
+			post("After parsing");
 			output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
+			post("After output");
 			/* Free memory */
 			if (out_memory.memory) {
 				free(out_memory.memory);

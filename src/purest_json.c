@@ -1,12 +1,12 @@
-#include "couchpdb.h"
-#include "couchdb.c"
+#include "purest_json.h"
+#include "rest.c"
 #include "json.c"
 
-void couchpdb_setup(void) {
-	post("CouchPdb version 0.1: A library for connecting to CouchDB and encoding and decoding JSON data from Puredata.");
+void purest_json_setup(void) {
+	post("PuREST JSON version 0.2: A library for executing HTTP queries and encoding and decoding JSON data from Puredata.");
 	post("(c) Thomas Mayer (Residuum) 2011");
-	post("Get the latest source from https://github.com/residuum/CouchPdb");
-	setup_couchdb();
+	post("Get the latest source from https://github.com/residuum/PuRestJson");
+	setup_rest();
 	setup_json_encoder();
 	setup_json_decoder();
 }

@@ -7,31 +7,31 @@ FLAGS_MINGW = -Wall -static -ansi -O2
 LIB_LINUX = -lcurl -ljson
 LIB_MINGW = -lcurl -ljson
 
-COUCHPDB_LINUX = bin/couchpdb.pd_linux
-COUCHPDB_MINGW = bin/couchpdb.dll
+PUREST_JSON_LINUX = bin/purest_json.pd_linux
+PUREST_JSON_MINGW = bin/purest_json.dll
 
 PD_EXE = pdextended
 
 PDINCLUDE = -I../../../diverse/Pd-0.42.5-extended/pd/src
 
-COUCHPDB_SRC = src/couchpdb.c
+PUREST_JSON_SRC = src/purest_json.c
 
-default: couchpdb-linux 
+default: purest-json-linux 
 
-all: couchpdb-linux couchpdb-mingw doc
+all: purest-json-linux purest-json-mingw doc
 
-couchpdb-test: couchpdb
-	$(PD_EXE) -stderr -lib bin/couchpdb couchpdb-test.pd
+purest-json-test: purest-json-linux
+	$(PD_EXE) -stderr -lib bin/purest_json purest-json-test.pd
 
-couchpdb-linux:
-	$(CC_LINUX) $(FLAGS_LINUX) $(LIB_LINUX) $(PDINCLUDE) $(COUCHPDB_SRC) -o $(COUCHPDB_LINUX) 
+purest-json-linux:
+	$(CC_LINUX) $(FLAGS_LINUX) $(LIB_LINUX) $(PDINCLUDE) $(PUREST_JSON_SRC) -o $(PUREST_JSON_LINUX) 
 
-couchpdb-mingw:
+purest-json-mingw:
 	PATH=/usr/local/mingw/bin:$(PATH)
 	CPATH=/usr/local/mingw/include
 	LD_LIBRARY_PATH=/usr/local/mingw/lib
 	PKG_CONFIG_DIR=/usr/local/mingw/lib/pkgconfig
-	$(CC_MINGW) $(FLAGS_MINGW) $(LIB_MINGW) $(PDINCLUDE) $(COUCHPDB_SRC) -o $(COUCHPDB_MINGW) 
+	$(CC_MINGW) $(FLAGS_MINGW) $(LIB_MINGW) $(PDINCLUDE) $(PUREST_JSON_SRC) -o $(PUREST_JSON_MINGW) 
 
 doc:
 	doxygen Doxyfile

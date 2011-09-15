@@ -1,24 +1,13 @@
-CouchPdb
+PuREST JSON
 
-CouchPdb is a CouchDB (http://couchdb.apache.org/) library for Puredata
-(http://puredata.info/). As CouchDB uses JSON (http://json.org/) data
-for communication, there are two accompaning objects that are more or
-less a lemma of the main object in the library for encoding and decoding
-JSON strings.
+PuREST JSON is a library for connecting Puredata (PD) to HTTP services 
+and encoding and decoding JSON data.
 
+The library can issue GET, POST, PUT and DELETE statements, so consumation
+of RESTful services is possible, e.g. CouchDB. 
 
-About CouchDB (From the official website)
-
-Apache CouchDB is a document-oriented database that can be queried and
-indexed in a MapReduce fashion using JavaScript. CouchDB also offers
-incremental replication with bi-directional conflict detection and
-resolution.
-
-CouchDB provides a RESTful JSON API than can be accessed from any
-environment that allows HTTP requests. There are myriad third-party client
-libraries that make this even easier from your programming language of
-choice. CouchDB’s built in Web administration console speaks directly
-to the database using HTTP requests issued from your browser.
+The library used to be called CouchPdb, but handles all HTTP requests,
+so the name was not fitting any more.
 
 
 About Puredata (From the official website)
@@ -34,8 +23,8 @@ package very much a community effort.
 
 Externals in the library
 
-[couchdb]
-Object for communication with a CouchDB instance.
+[rest-json]
+Object for issuing HTTP request. Received data is parsed as JSON data. 
 
 [json-encode]
 Object for encoding data to JSON.
@@ -46,23 +35,33 @@ Object for decoding JSON data.
 For the usage of the externals see the help patches for the objects.
 
 
-How to build CouchPdb
+How to build PuREST JSON 
 
-Edit the makefile to fit your platform, it is currently made for Debian Wheezy.
-Make sure to have the header files for libcurl and json-c installed, on Debian the
-libraries are called libcurl-dev (with several packages providing this virtual package)
-and libjson0-dev respectively. 
+Edit the makefile to fit your platform, it is currently made for Debian
+Wheezy.
+
+Make sure to have the header files for libcurl and json-c installed, on
+Debian the libraries are called libcurl-dev (with several packages 
+providing this virtual package) and libjson0-dev respectively. 
 
 make
 
 or
 
-make couchdb-test
+make test
 
-The latter one also launches Pd with a sample patch.
+or 
+
+make debug.
+
+The latter two also launches Pd with a sample patch and an instance of gdb.
 
 
 TODO:
-- Creating arrays in [json-encode]
 - Makefile for Mac OS X and Windows (MinGW)
-- Implementing OAUTH for connecting with Ubuntu One
+- Implementing OAUTH
+- Using library template for Pd-extended.
+- Threading
+- Segfaults when querying google, JSON error when querying Twitter, 
+  maybe swtching to another JSON library that does parse UTF-8 strings.
+- Help file for [rest-json]

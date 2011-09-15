@@ -35,6 +35,3 @@ purest-json-mingw:
 	LD_LIBRARY_PATH=/usr/local/mingw/lib
 	PKG_CONFIG_DIR=/usr/local/mingw/lib/pkgconfig
 	$(CC_MINGW) $(FLAGS_MINGW) $(LIB_MINGW) $(PDINCLUDE) $(PUREST_JSON_SRC) -o $(PUREST_JSON_MINGW) 
-
-doc:
-	doxygen Doxyfile

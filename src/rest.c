@@ -145,12 +145,10 @@ void execute_rest(char *couch_url, char *request_type, char *database, char *par
 		result = curl_easy_perform(curl_handle);
 		if (result == CURLE_OK) {
 			/* Parse JSON */
-			post("Before parsing");
-			post("%s", out_memory.memory);
+			post("stored length: %d", out_memory.size);
+			post("computed length: %d", strlen(out_memory.memory));
 			json_object *jobj = json_tokener_parse(out_memory.memory);
-			post("After parsing");
 			output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
-			post("After output");
 			/* Free memory */
 			if (out_memory.memory) {
 				free(out_memory.memory);
@@ -167,15 +165,19 @@ void execute_rest(char *couch_url, char *request_type, char *database, char *par
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
 	t_memory_struct *mem = (t_memory_struct *)data;
-	mem->memory = realloc(mem->memory, mem->size + realsize + 1);
+	mem->memory = (char *) realloc(mem->memory, mem->size + realsize + 1);
 	if (mem->memory == NULL) {
 		/* out of memory! */ 
 		error("not enough memory (realloc returned NULL)\n");
 		exit(EXIT_FAILURE);
 	}
-	memcpy(&(mem->memory[mem->size]), ptr, realsize);
+	memcpy(&mem->memory[mem->size], ptr, realsize);
+	if (mem->size + realsize - mem->size != realsize) {
+		error("Integer overflow or similar. Bad Things can happen.");
+	}
 	mem->size += realsize;
-	mem->memory[mem->size] = 0;
+	post("current size: %d", mem->size);
+	mem->memory[mem->size] = '\0';
 
 	return realsize;
 }

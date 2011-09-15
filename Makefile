@@ -20,8 +20,11 @@ default: purest-json-linux
 
 all: purest-json-linux purest-json-mingw doc
 
-purest-json-test: purest-json-linux
+test: purest-json-linux
 	$(PD_EXE) -stderr -lib bin/purest_json purest-json-test.pd
+
+debug: purest-json-linux
+	gdb --args $(PD_EXE) -stderr -lib bin/purest_json purest-json-test.pd
 
 purest-json-linux:
 	$(CC_LINUX) $(FLAGS_LINUX) $(LIB_LINUX) $(PDINCLUDE) $(PUREST_JSON_SRC) -o $(PUREST_JSON_LINUX) 

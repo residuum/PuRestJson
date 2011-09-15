@@ -35,7 +35,7 @@
 #X obj 309 314 print couchdb return;
 #X msg 222 199 GET test/1;
 #X msg 213 172 PUT test/1 \$1;
-#X msg 513 444 GET _uuids?count=4;
+#X msg 545 461 GET _uuids?count=4;
 #X obj 513 561 route uuids;
 #X obj 513 531 list trim;
 #X obj 513 614 json-decode;
@@ -48,11 +48,13 @@
 #X obj 154 306 rest-json;
 #X obj 513 493 rest-json http://127.0.0.1:5984/;
 #X obj 870 451 rest-json;
-#X obj 869 535 print data;
+#X obj 881 528 print data;
 #X msg 749 324 GET http://search.twitter.com/search.json?q=%23puredata
 ;
 #X msg 758 364 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
+#X msg 527 437 GET _uuids?count=20;
+#X msg 513 414 GET _uuids?count=1000;
 #X connect 0 0 46 0;
 #X connect 1 0 5 0;
 #X connect 2 0 1 0;
@@ -94,8 +96,6 @@
 #X connect 36 0 47 0;
 #X connect 37 0 42 0;
 #X connect 38 0 37 0;
-#X connect 39 0 41 0;
-#X connect 39 1 40 0;
 #X connect 42 0 39 0;
 #X connect 43 0 1 0;
 #X connect 44 0 1 0;
@@ -107,3 +107,5 @@
 #X connect 48 0 49 0;
 #X connect 50 0 48 0;
 #X connect 51 0 48 0;
+#X connect 52 0 47 0;
+#X connect 53 0 47 0;

@@ -1,4 +1,10 @@
-PuREST JSON
+  _____        _____  ______  _____ _______        _  _____  ____  _   _ 
+ |  __ \      |  __ \|  ____|/ ____|__   __|      | |/ ____|/ __ \| \ | |
+ | |__) |_   _| |__) | |__  | (___    | |         | | (___ | |  | |  \| |
+ |  ___/| | | |  _  /|  __|  \___ \   | |     _   | |\___ \| |  | | . ` |
+ | |    | |_| | | \ \| |____ ____) |  | |    | |__| |____) | |__| | |\  |
+ |_|     \__,_|_|  \_\______|_____/   |_|     \____/|_____/ \____/|_| \_|
+                                                                         
 
 PuREST JSON is a library for connecting Puredata (PD) to HTTP services 
 and encoding and decoding JSON data.
@@ -61,7 +67,6 @@ TODO:
 - Makefile for Mac OS X and Windows (MinGW)
 - Implementing OAUTH
 - Using library template for Pd-extended.
-- Threading
 - Segfaults when querying google, JSON error when querying Twitter, 
   maybe swtching to another JSON library that does parse UTF-8 strings.
 - Help file for [rest-json]

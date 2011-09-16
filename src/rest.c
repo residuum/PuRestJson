@@ -49,7 +49,6 @@ void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 				error("URL to CouchDB cannot be set.");
 			} else {
 				atom_string(argvec, x->couch_url, MAX_STRING_SIZE);
-				test_connection(x->couch_url, x);
 			}
 			break;
 		case 0:
@@ -68,7 +67,6 @@ void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 				error("URL to CouchDB cannot be set.");
 			} else {
 				atom_string(argvec, x->couch_url, MAX_STRING_SIZE);
-				test_connection(x->couch_url, x);
 			}
 			break;
 		case 0:
@@ -80,35 +78,6 @@ void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	outlet_new(&x->x_ob, NULL);
 	x->done_outlet = outlet_new(&x->x_ob, &s_bang);
 	return (void *)x;
-}
-
-void test_connection(char *couch_url, t_rest *x) {
-	CURL *curl_handle;
-	CURLcode result;
-	t_memory_struct chunk;
-	curl_global_init(CURL_GLOBAL_ALL);
-	curl_handle = curl_easy_init();
-	if (curl_handle) {
-		curl_easy_setopt(curl_handle, CURLOPT_URL, couch_url);
-		chunk.memory = malloc(1);
-		chunk.size = 0;
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
-		result = curl_easy_perform(curl_handle);
-		if (result == CURLE_OK) {
-			post("Connection to %s possible.", couch_url);
-			post("Received information: %s", chunk.memory);
-			/* Free memory */
-			if (chunk.memory) {
-				free(chunk.memory);
-			}
-		} else {
-			error("Could not establish connection to %s with error %s.", couch_url, curl_easy_strerror(result));
-		}
-		curl_easy_cleanup(curl_handle);
-	} else {
-		error("Cannot init curl.");
-	}
 }
 
 void *execute_rest_thread(void *thread_args) {
@@ -146,8 +115,6 @@ void *execute_rest_thread(void *thread_args) {
 		result = curl_easy_perform(curl_handle);
 		if (result == CURLE_OK) {
 			/* Parse JSON */
-			post("stored length: %d", out_memory.size);
-			post("computed length: %d", strlen(out_memory.memory));
 			json_object *jobj = json_tokener_parse(out_memory.memory);
 			output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
 			/* Free memory */
@@ -164,13 +131,13 @@ void *execute_rest_thread(void *thread_args) {
 	pthread_exit(NULL);
 }
 
-void execute_rest(char *couch_url, char *request_type, char *database, char *parameters, t_rest *x) {
-	char real_url[strlen(couch_url) + strlen(database)];
+void execute_rest(char *request_url, char *request_type, char *database, char *parameters, t_rest *x) {
+	char real_url[strlen(request_url) + strlen(database)];
 	char *cleaned_parameters = remove_backslashes(parameters);
 	t_thread_data data;
 	int rc;
 	pthread_t thread;
-	strcpy(real_url, couch_url);
+	strcpy(real_url, request_url);
 	strcat(real_url, database);
 	data.pd_object = x;
 	data.request_url = real_url;
@@ -196,7 +163,6 @@ static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *
 		error("Integer overflow or similar. Bad Things can happen.");
 	}
 	mem->size += realsize;
-	post("current size: %d", mem->size);
 	mem->memory[mem->size] = '\0';
 
 	return realsize;

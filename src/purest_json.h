@@ -58,9 +58,10 @@ void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
 static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
-void test_connection(char *couch_url, t_rest *x);
+void execute_rest(char *request_url, char *request_type, char *database, char *parameters, t_rest *x);
+
+/* pthread functions */
 void *execute_rest_thread(void *thread_args);
-void execute_rest(char *couch_url, char *request_type, char *database, char *parameters, t_rest *x);
 
 /* json-encode */
 t_class *json_encode_class;

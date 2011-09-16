@@ -53,10 +53,6 @@
 ;
 #X msg 732 393 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
-#X msg 822 206 GET https://github.com/api/v2/json/commits/list/residuum/CouchPdb/master
-;
-#X msg 851 265 GET https://github.com/api/v2/json/commits/list/residuum/CouchPdb/master/Makefile
-;
 #X obj 784 514 list trim;
 #X obj 784 597 json-decode;
 #X obj 903 630 print array-done;
@@ -68,6 +64,10 @@ and not with UTF-8;
 #X obj 1011 62 osc~ 300;
 #X obj 1004 146 dac~;
 #X text 1055 102 for testing threading;
+#X msg 822 206 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master
+;
+#X msg 851 265 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master/Makefile
+;
 #X connect 0 0 46 0;
 #X connect 1 0 5 0;
 #X connect 2 0 1 0;
@@ -120,15 +120,15 @@ and not with UTF-8;
 #X connect 46 1 18 0;
 #X connect 47 0 38 0;
 #X connect 48 0 49 0;
-#X connect 48 0 54 0;
+#X connect 48 0 52 0;
 #X connect 50 0 48 0;
 #X connect 51 0 48 0;
-#X connect 52 0 48 0;
-#X connect 53 0 48 0;
-#X connect 54 0 59 0;
-#X connect 55 0 57 0;
-#X connect 55 1 56 0;
-#X connect 58 0 55 0;
-#X connect 59 0 58 0;
-#X connect 61 0 62 0;
-#X connect 61 0 62 1;
+#X connect 52 0 57 0;
+#X connect 53 0 55 0;
+#X connect 53 1 54 0;
+#X connect 56 0 53 0;
+#X connect 57 0 56 0;
+#X connect 59 0 60 0;
+#X connect 59 0 60 1;
+#X connect 62 0 48 0;
+#X connect 63 0 48 0;

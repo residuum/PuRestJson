@@ -5,6 +5,7 @@
 #include <string.h>
 #include <curl/curl.h>
 #include <json/json.h>
+#include <pthread.h>
 
 #define MAX_ARRAY_SIZE 256
 #define MAX_STRING_SIZE 2048 
@@ -14,7 +15,7 @@ typedef struct memory_struct {
   size_t size;
 } t_memory_struct;
 
-typedef struct key_value_pair{
+typedef struct key_value_pair {
   char key[MAX_STRING_SIZE];
   char value[MAX_STRING_SIZE];
   short is_array;
@@ -39,6 +40,13 @@ typedef struct json_decode {
 	t_outlet *done_outlet;
 } t_json_decode;
  
+typedef struct thread_data {
+	t_rest *pd_object;
+	char *request_type;
+	char *request_url;
+	char *parameters;
+} t_thread_data;
+
 /* rest */
 t_class *rest_class;
 void setup_rest(void);
@@ -51,6 +59,7 @@ void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
 static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
 void test_connection(char *couch_url, t_rest *x);
+void *execute_rest_thread(void *thread_args);
 void execute_rest(char *couch_url, char *request_type, char *database, char *parameters, t_rest *x);
 
 /* json-encode */

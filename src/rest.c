@@ -111,13 +111,14 @@ void test_connection(char *couch_url, t_rest *x) {
 	}
 }
 
-void execute_rest(char *couch_url, char *request_type, char *database, char *parameters, t_rest *x){
-	char real_url[strlen(couch_url) + strlen(database)];
-	char *cleaned_parameters = remove_backslashes(parameters);
+void *execute_rest_thread(void *thread_args) {
+	t_thread_data *data = (t_thread_data *)thread_args;
+	t_rest *x = data->pd_object; 
+	char *real_url = data->request_url;
+	char *request_type = data->request_type;
+	char *cleaned_parameters = data->parameters;
 	CURL *curl_handle;
 	CURLcode result;
-	strcpy(real_url, couch_url);
-	strcat(real_url, database);
 	t_memory_struct in_memory;
 	t_memory_struct out_memory;
 	size_t parameter_len = strlen(cleaned_parameters);
@@ -159,6 +160,25 @@ void execute_rest(char *couch_url, char *request_type, char *database, char *par
 		curl_easy_cleanup(curl_handle);
 	} else {
 		error("Cannot init curl.");
+	}
+	pthread_exit(NULL);
+}
+
+void execute_rest(char *couch_url, char *request_type, char *database, char *parameters, t_rest *x) {
+	char real_url[strlen(couch_url) + strlen(database)];
+	char *cleaned_parameters = remove_backslashes(parameters);
+	t_thread_data data;
+	int rc;
+	pthread_t thread;
+	strcpy(real_url, couch_url);
+	strcat(real_url, database);
+	data.pd_object = x;
+	data.request_url = real_url;
+	data.request_type = request_type;
+	data.parameters = cleaned_parameters;
+	rc = pthread_create(&thread, NULL, execute_rest_thread, (void *)&data);
+	if (rc) {
+		error("Could not create thread with code %d", rc);
 	}
 }
 

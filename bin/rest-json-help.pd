@@ -1,11 +1,6 @@
-#N canvas 600 218 704 421 10;
-#X text 76 -59 - object for communicating with a CouchDB;
+#N canvas 424 94 871 495 10;
 #N canvas 260 56 853 470 CouchDB-basics 0;
 #X text 416 71 CRUD documents:;
-#X text 15 362 All these request \, PUT \, GET and DELETE can be done
-with [couchdb] \, you can even issue POST requests to a CouchDB server.
-If you want to do complex data operations on a CouchDB \, please refer
-to the manual: http://guide.couchdb.org/;
 #X text 15 10 Basic CRUD methods for databases and individual documents
 are done with three HTTP methods: PUT \, GET and DELETE. PUT is used
 for creating and updating data \, GET is used for retrieving data \,
@@ -28,76 +23,67 @@ failure as its value.;
 won't get prompted for confirmation \, CouchDB will delete the database
 without any warning including all stored documents. This will return
 "ok" or "error" as a key.;
-#X text 416 91 PUT http://localhost:5984/pd-test/object-name;
-#X text 416 105 This will create or update a document with the ID "object-name"
+#X text 416 116 This will create or update a document with the ID "object-name"
 in the database "pd-test". The database must be created first. If a
 document with the ID "object-name" already exists \, you must include
 the revision \, that you can get with the GET method (see below). On
 error CouchDB will return a key of "error" and the reason for the error
 as its value. Data for the object must be provided as JSON data in
 the request header.;
-#X text 416 197 GET http://localhost:5984/pd-test/object-name;
-#X text 417 211 This will retrieve the document "object-name" from
+#X text 416 208 GET http://localhost:5984/pd-test/object-name;
+#X text 417 222 This will retrieve the document "object-name" from
 the database "pd-test". This will return the document as a JSON object
 \, including the ID with the key "_id" and the revision code with the
 key "_rev". The latter value is needed for updating or deleting the
 object from the table to prevent concurrent updates.;
-#X text 417 281 DELETE http://localhost:5984/pd-test/object-name;
-#X text 418 300 This will delete the document if possible. You will
+#X text 417 292 DELETE http://localhost:5984/pd-test/object-name;
+#X text 418 311 This will delete the document if possible. You will
 need to provide the revision for the document. You will receive data
 with a key of "ok" or "error" and information as value.;
-#X restore 18 134 pd CouchDB-basics;
+#X text 416 91 PUT http://localhost:5984/pd-test/object-name data-as-json-string
+;
+#X text 15 362 All these request \, PUT \, GET and DELETE can be done
+with [rest-json] \, you can even issue POST requests to a CouchDB server.
+If you want to do complex data operations on a CouchDB \, please refer
+to the manual: http://guide.couchdb.org/;
+#X restore 22 210 pd CouchDB-basics;
 #N canvas 506 84 450 300 OAUTH 0;
 #X text 68 54 OAUTH is not yet implemented. Sorry about that.;
-#X restore 20 303 pd OAUTH;
-#X text 17 -33 [couchdb] is an object for communication with a CouchDB
-database. This help patch assumes an installation on the local machine
-with the default configuration \, i.e. an instance accessible with
-http://localhost:5984/.;
-#X text 18 12 CouchDB is a document database with a RESTful interface:
-;
-#X text 18 26 Document database means \, that stored objects do not
-have a pre-defined layout \, but each document can have a different
-layout \, even when stored in the same table.;
-#X text 17 61 RESTful interface means \, that all operations are done
-with HTTP requests \, depending on the request methods \, different
-actions are performed on databases and documents.;
-#X text 16 171 Set the base url at creation or use [url( message;
-#X obj 17 243 json-decode;
-#X text 18 286 When OAUTH is implemented \, you will find infos about
+#X restore 21 347 pd OAUTH;
+#X text 18 99 Set the base url at creation or use [url( message;
+#X obj 21 164 json-decode;
+#X text 19 330 When OAUTH is implemented \, you will find infos about
 it here;
-#X text 15 226 [couchdb] gets data as JSON objects \, output is the
-same as;
-#X text 17 109 For more infos on how to create \, retrieve \, update
-and delete (CRUD) data \, see:;
-#X obj 17 188 rest-json http://localhost:5984/;
+#X obj 20 116 rest-json http://localhost:5984/;
 #X obj 19 -60 rest-json;
-#N canvas 0 0 811 709 couchdb 0;
-#X msg 303 116 bang;
+#N canvas 196 0 932 709 couchdb 0;
+#X msg 603 26 bang;
 #X msg 59 19 url http://localhost:5984/;
-#X obj 267 373 list trim;
-#X obj 266 404 route error ok;
-#X msg 275 471 0;
-#X obj 357 360 t b b;
-#X msg 357 387 1;
-#X text 195 453 Close signal flow on error;
-#X obj 151 521 print error message;
-#X text 416 395 Reopen signal flow after each object.;
-#X obj 306 429 print OK message;
-#N canvas 576 82 450 511 create-sequencer-data 0;
+#X obj 171 279 list trim;
+#X obj 170 310 route error ok;
+#X msg 179 377 0;
+#X obj 261 266 t b b;
+#X msg 261 293 1;
+#X text 99 359 Close signal flow on error;
+#X obj 55 427 print error message;
+#X text 320 301 Reopen signal flow after each object.;
+#X obj 210 335 print OK message;
+#N canvas 576 82 450 345 create-sequencer-data 0;
 #X obj 32 12 inlet;
-#X obj 103 349 outlet;
-#X obj 82 266 + 1;
-#X obj 99 311 pack f s;
-#X obj 36 132 json-encode;
-#X msg 29 47 add pitch 440 \, add duration 2000 \, bang \, clear \,
+#X obj 32 291 outlet;
+#X obj 62 222 + 1;
+#X obj 32 253 pack f s;
+#X obj 32 166 json-encode;
+#X msg 32 84 add pitch 440 \, add duration 2000 \, bang \, clear \,
 add pitch 880 \, add duration 1000 \, bang \, clear \, add pitch 440
 \, add duration 1000 \, bang \, clear \, add pitch 1320 \, add duration
 500 \, bang \, clear \, add pitch 880 \, add duration 2000 \, bang
 \, clear;
-#X obj 35 167 t b a;
-#X obj 31 266 0;
-#X connect 0 0 5 0;
+#X obj 32 193 t b a;
+#X obj 32 222 0;
+#X obj 32 49 t b b;
+#X msg 110 166 0;
+#X connect 0 0 8 0;
 #X connect 2 0 7 1;
 #X connect 3 0 1 0;
 #X connect 4 0 6 0;
@@ -106,92 +92,122 @@ add pitch 880 \, add duration 1000 \, bang \, clear \, add pitch 440
 #X connect 6 1 3 1;
 #X connect 7 0 2 0;
 #X connect 7 0 3 0;
-#X restore 303 143 pd create-sequencer-data;
+#X connect 8 0 5 0;
+#X connect 8 1 9 0;
+#X connect 9 0 7 1;
+#X restore 603 53 pd create-sequencer-data;
 #X text 58 -2 1 Sets the base URL.;
-#X text 241 -6 2 Creates database pd-test on server with base URL.
+#X text 243 -6 2 Creates database pd-test on server with base URL.
 If you do not set the base URL \, then you can also issue this command
 with [PUT http://localhost:5984/pd-test/(;
-#X text 300 88 3 Creates some sequencer data and stores the data in
+#X text 600 -2 3 Creates some sequencer data and stores the data in
 pd-test. Objects contain "pitch" and "duration".;
-#X text 346 219 4 Start sequencer and get first object;
-#X obj 347 266 f;
-#X obj 375 268 + 1;
-#X obj 412 480 route pitch duration;
-#X obj 384 512 pack f f f;
-#X obj 312 588 unpack f f f;
-#X obj 381 621 del;
-#X floatatom 346 623 5 0 0 0 - - -;
-#X text 439 540 first inlet of pack is not used. The reason for that
+#X text 45 93 4 Start sequencer and get first object;
+#X obj 46 140 f;
+#X obj 74 142 + 1;
+#X obj 316 386 route pitch duration;
+#X obj 288 418 pack f f f;
+#X obj 216 494 unpack f f f;
+#X obj 285 520 del;
+#X text 343 446 first inlet of pack is not used. The reason for that
 is explained in the help patch for;
-#X obj 635 556 json-decode;
-#X obj 122 388 print data;
-#X text 61 202 5 Get database pd-test;
-#X text 19 279 6 Delete database pd-test;
-#X msg 62 225 GET pdtest;
-#X msg 246 58 PUT pdtest;
-#X msg 303 167 PUT pdtest/\$1 \$2;
-#X msg 21 297 DELETE pdtest;
-#X msg 347 295 GET pdtest/\$1;
+#X obj 539 462 json-decode;
+#X obj 26 294 print data;
+#X text 602 131 5 Get database pd-test;
+#X text 606 175 6 Delete database pd-test;
+#X msg 603 154 GET pdtest;
+#X msg 248 35 PUT pdtest;
+#X msg 603 77 PUT pdtest/\$1 \$2;
+#X msg 608 193 DELETE pdtest;
+#X msg 46 169 GET pdtest/\$1;
 #X text 58 -37 This example will create a database and store values
 to be used by a simple sequencer.;
-#X msg 347 238 0;
-#X obj 312 557 spigot 1;
-#X obj 606 231 spigot;
-#X obj 639 197 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X msg 46 112 0;
+#X obj 216 463 spigot 1;
+#X obj 295 107 spigot;
+#X obj 328 73 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 303 192 print Put command;
-#X obj 235 426 t b a b;
-#X text 586 181 toggle only when using sequencer;
-#X msg 128 460 0;
-#X text 100 437 restart GET sequence;
-#X obj 267 338 rest-json;
+#X obj 603 102 print Put command;
+#X obj 139 332 t b a b;
+#X text 275 57 toggle only when using sequencer;
+#X msg 32 366 0;
+#X text 4 343 restart GET sequence;
+#X obj 171 244 rest-json;
+#X obj 250 540 osc~;
+#X obj 311 587 *~ 0;
+#X obj 311 613 dac~;
 #X connect 0 0 11 0;
-#X connect 1 0 43 0;
+#X connect 1 0 42 0;
 #X connect 2 0 3 0;
-#X connect 3 0 39 0;
+#X connect 3 0 38 0;
 #X connect 3 1 10 0;
 #X connect 3 2 18 0;
-#X connect 4 0 35 1;
+#X connect 4 0 34 1;
 #X connect 5 0 6 0;
 #X connect 5 1 19 0;
-#X connect 6 0 35 1;
-#X connect 11 0 30 0;
+#X connect 6 0 34 1;
+#X connect 11 0 29 0;
 #X connect 16 0 17 0;
-#X connect 16 0 32 0;
+#X connect 16 0 31 0;
 #X connect 17 0 16 1;
 #X connect 18 0 19 1;
 #X connect 18 1 19 2;
-#X connect 19 0 35 0;
-#X connect 20 1 22 0;
+#X connect 19 0 34 0;
+#X connect 20 1 43 0;
 #X connect 20 2 21 0;
-#X connect 21 0 36 0;
-#X connect 28 0 43 0;
-#X connect 29 0 43 0;
-#X connect 30 0 38 0;
-#X connect 30 0 43 0;
-#X connect 31 0 43 0;
-#X connect 32 0 43 0;
-#X connect 34 0 16 0;
-#X connect 35 0 20 0;
-#X connect 36 0 16 0;
-#X connect 37 0 36 1;
-#X connect 39 0 41 0;
-#X connect 39 1 8 0;
-#X connect 39 2 4 0;
-#X connect 41 0 36 0;
-#X connect 43 0 2 0;
-#X connect 43 0 25 0;
-#X connect 43 1 5 0;
-#X restore 25 379 pd couchdb;
+#X connect 21 0 35 0;
+#X connect 27 0 42 0;
+#X connect 28 0 42 0;
+#X connect 29 0 37 0;
+#X connect 29 0 42 0;
+#X connect 30 0 42 0;
+#X connect 31 0 42 0;
+#X connect 33 0 16 0;
+#X connect 34 0 20 0;
+#X connect 35 0 16 0;
+#X connect 36 0 35 1;
+#X connect 36 0 44 1;
+#X connect 38 0 40 0;
+#X connect 38 1 8 0;
+#X connect 38 2 4 0;
+#X connect 40 0 35 0;
+#X connect 42 0 2 0;
+#X connect 42 0 24 0;
+#X connect 42 1 5 0;
+#X connect 43 0 44 0;
+#X connect 44 0 45 0;
+#X connect 44 0 45 1;
+#X restore 21 282 pd couchdb;
 #X obj 458 216 rest-json;
-#X obj 457 300 print data;
-#X text 24 343 Here is a complex example for using [rest-json] to communicate
-with CouchDB. It uses GET \, POST and DELETE request methods. [rest-json]
-also supports POST requests.;
-#X msg 337 89 GET http://search.twitter.com/search.json?q=%23puredata
+#X obj 458 248 print data;
+#X msg 479 86 GET http://search.twitter.com/search.json?q=%23puredata
 ;
-#X msg 346 129 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
+#X msg 490 148 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
-#X connect 15 0 16 0;
-#X connect 18 0 15 0;
-#X connect 19 0 15 0;
+#X msg 456 8 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master
+;
+#X text 480 68 Getting error while parsing the return value;
+#X text 489 126 Segfault here!;
+#X text 76 -59 - object for HTTP communication with REST webservices
+;
+#X text 21 191 An example for a RESTful interface is CouchDB:;
+#X text 17 -33 [rest-json] is an object for communication with REST
+services that return JSON data. Request methods GET \, POST \, PUT
+and DELETE are available.;
+#X text 18 142 [rest-json] gets data as JSON objects \, output is the
+same as;
+#X text 17 4 All requests are issued with [REQUEST_METHOD URL DATA(
+where REQUEST_METHOD is the uppercase verb of the method \, URL is
+the request URL \, or the relative server path \, if [url( or initialization
+is used \, and DATA is the upload data for PUT or post data for POST.
+;
+#X text 19 235 Here is a complex example for using [rest-json] to communicate
+with CouchDB. It uses GET \, POST and DELETE request methods. You will
+need to have a local installation of CouchDB.;
+#X text 18 61 HTTP requests are asynchronous. Do not expect two subsequent
+requests to arrive in the same order as sending them. [rest-json] does
+all its work in separate threads.;
+#X connect 8 0 9 0;
+#X connect 10 0 8 0;
+#X connect 11 0 8 0;
+#X connect 12 0 8 0;

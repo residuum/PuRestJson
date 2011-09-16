@@ -128,7 +128,5 @@ and not with UTF-8;
 #X connect 53 1 54 0;
 #X connect 56 0 53 0;
 #X connect 57 0 56 0;
-#X connect 59 0 60 0;
-#X connect 59 0 60 1;
 #X connect 62 0 48 0;
 #X connect 63 0 48 0;

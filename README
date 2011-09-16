@@ -69,4 +69,3 @@ TODO:
 - Using library template for Pd-extended.
 - Segfaults when querying google, JSON error when querying Twitter, 
   maybe swtching to another JSON library that does parse UTF-8 strings.
-- Help file for [rest-json]

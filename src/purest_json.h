@@ -42,9 +42,9 @@ typedef struct json_decode {
  
 typedef struct thread_data {
 	t_rest *pd_object;
-	char *request_type;
-	char *request_url;
-	char *parameters;
+	char request_type[MAX_STRING_SIZE];
+	char request_url[MAX_STRING_SIZE];
+	char parameters[MAX_STRING_SIZE];
 } t_thread_data;
 
 /* rest */

@@ -67,5 +67,4 @@ TODO:
 - Makefile for Mac OS X and Windows (MinGW)
 - Implementing OAUTH
 - Using library template for Pd-extended.
-- Segfaults when querying google, JSON error when querying Twitter, 
-  maybe swtching to another JSON library that does parse UTF-8 strings.
+- JSON error when querying Twitter

@@ -180,14 +180,13 @@ to be used by a simple sequencer.;
 #X restore 21 282 pd couchdb;
 #X obj 458 216 rest-json;
 #X obj 458 248 print data;
-#X msg 479 86 GET http://search.twitter.com/search.json?q=%23puredata
+#X msg 497 149 GET http://search.twitter.com/search.json?q=%23puredata
 ;
-#X msg 490 148 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
+#X msg 474 64 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
-#X msg 456 8 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master
+#X msg 458 10 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master
 ;
-#X text 480 68 Getting error while parsing the return value;
-#X text 489 126 Segfault here!;
+#X text 498 131 Getting error while parsing the return value;
 #X text 76 -59 - object for HTTP communication with REST webservices
 ;
 #X text 21 191 An example for a RESTful interface is CouchDB:;

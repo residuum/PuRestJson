@@ -183,58 +183,63 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 			outlet_bang(done_outlet);
 			break;
 		case json_type_object: {
-			json_object_object_foreach(jobj, key, val) { /*Passing through every json object*/
-				inner_type = json_object_get_type(val);
+			json_object_object_foreach(jobj, key, val) { /* Passing through every json object */
 				SETSYMBOL(&out_data[0], gensym(key));
-				switch (inner_type) {
-					case json_type_boolean:
-						SETFLOAT(&out_data[1], json_object_get_boolean(val) ? 1: 0);
-						break;
-					case json_type_double:
-						SETFLOAT(&out_data[1], json_object_get_double(val));
-						break;
-					case json_type_int:
-						SETFLOAT(&out_data[1], json_object_get_int(val));
-						break;
-					case json_type_string: 
-						/* Float values might come as string */
-						string_value = json_object_get_string(val);
-						float_value = (float)strtod(string_value, &remainder);
-						/* String to float has no remainder => float */
-						if (strlen(remainder) == 0) {
-							SETFLOAT(&out_data[1], float_value);
-						/* Boolean values might come as string */
-						} else if (str_ccmp(string_value, "true") == 0) {
-							SETFLOAT(&out_data[1], 1);
-						} else if (str_ccmp(string_value, "false") == 0) {
-							SETFLOAT(&out_data[1], 0);
-						/* String */
-						} else {
-							SETSYMBOL(&out_data[1], gensym(string_value));
-						}
-						break;
-					case json_type_object:
-						SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
-						break;
-					case json_type_array:
-						SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
-						break;
-					case json_type_null:
-						SETSYMBOL(&out_data[1], gensym(""));
-						break;
+				/* Problem with null as value */
+				if (val == NULL) {
+					SETSYMBOL(&out_data[1], gensym(""));
+				} else {
+					inner_type = json_object_get_type(val);
+					switch (inner_type) {
+						case json_type_boolean:
+							SETFLOAT(&out_data[1], json_object_get_boolean(val) ? 1: 0);
+							break;
+						case json_type_double:
+							SETFLOAT(&out_data[1], json_object_get_double(val));
+							break;
+						case json_type_int:
+							SETFLOAT(&out_data[1], json_object_get_int(val));
+							break;
+						case json_type_string: 
+							/* Float values might come as string */
+							string_value = json_object_get_string(val);
+							float_value = (float)strtod(string_value, &remainder);
+							/* String to float has no remainder => float */
+							if (strlen(remainder) == 0) {
+								SETFLOAT(&out_data[1], float_value);
+								/* Boolean values might come as string */
+							} else if (str_ccmp(string_value, "true") == 0) {
+								SETFLOAT(&out_data[1], 1);
+							} else if (str_ccmp(string_value, "false") == 0) {
+								SETFLOAT(&out_data[1], 0);
+								/* String */
+							} else {
+								SETSYMBOL(&out_data[1], gensym(string_value));
+							}
+							break;
+						case json_type_object:
+							SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
+							break;
+						case json_type_array:
+							SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
+							break;
+						case json_type_null:
+							SETSYMBOL(&out_data[1], gensym(""));
+							break;
+					}
 				}
 				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 			}
 			outlet_bang(done_outlet);
-		   }
-		   break;
+							   }
+							   break;
 		case json_type_array: 
-			{
-				array_len = json_object_array_length(jobj);
-				for (i = 0; i < array_len; i++) {
-					output_json(json_object_array_get_idx(jobj, i), data_outlet, done_outlet);
-				}
-			}
+							   {
+								   array_len = json_object_array_length(jobj);
+								   for (i = 0; i < array_len; i++) {
+									   output_json(json_object_array_get_idx(jobj, i), data_outlet, done_outlet);
+								   }
+							   }
 		break;
 		
 	}

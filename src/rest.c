@@ -93,7 +93,6 @@ void *execute_rest_thread(void *thread_args) {
 	size_t parameter_len = strlen(cleaned_parameters);
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
-	post(real_url);
 	if (curl_handle) {
 		curl_easy_setopt(curl_handle, CURLOPT_URL, real_url);
 		if (strcmp(request_type, "PUT") == 0) {
@@ -144,13 +143,10 @@ void execute_rest(char *request_url, char *request_type, char *database, char *p
 	pthread_t thread;
 	strcpy(real_url, request_url);
 	strcat(real_url, database);
-	post("setting object");
 	data->pd_object = x;
-	post("setting strings");
 	strcpy(data->request_url, real_url);
 	strcpy(data->request_type, request_type);
 	strcpy(data->parameters, cleaned_parameters);
-	post("set strings");
 	rc = pthread_create(&thread, NULL, execute_rest_thread, (void *)data);
 	if (rc) {
 		error("Could not create thread with code %d", rc);

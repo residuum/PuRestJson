@@ -47,27 +47,47 @@
 #X msg 788 140 array var doo;
 #X obj 154 306 rest-json;
 #X obj 513 493 rest-json http://127.0.0.1:5984/;
-#X obj 870 451 rest-json;
-#X obj 881 528 print data;
-#X msg 709 364 GET http://search.twitter.com/search.json?q=%23puredata
-;
-#X msg 732 393 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
-;
-#X obj 784 514 list trim;
-#X obj 784 597 json-decode;
-#X obj 903 630 print array-done;
-#X obj 784 630 print array-decode;
-#X obj 784 569 l2s;
-#X obj 784 544 route commits;
-#X text 708 330 These will not work! json-c only works expects char*
-and not with UTF-8;
 #X obj 1011 62 osc~ 300;
 #X obj 1004 146 dac~;
 #X text 1055 102 for testing threading;
-#X msg 822 206 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master
+#N canvas 120 66 1112 677 webservices 0;
+#X obj 222 278 rest-json;
+#X obj 233 355 print data;
+#X msg 61 191 GET http://search.twitter.com/search.json?q=%23puredata
 ;
-#X msg 851 265 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master/Makefile
+#X msg 84 220 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
+#X obj 136 341 list trim;
+#X obj 136 424 json-decode;
+#X obj 255 457 print array-done;
+#X obj 136 457 print array-decode;
+#X obj 136 396 l2s;
+#X obj 136 371 route commits;
+#X msg 174 33 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master
+;
+#X msg 203 92 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master/Makefile
+;
+#X msg 582 37 GET http://www.reddit.com/r/all/search.json?q=puredata
+;
+#X msg 596 68 GET http://en.wikipedia.org/w/api.php?action=query&titles=Puredata&prop=info|links&format=json
+;
+#X msg 610 159 GET http://gdata.youtube.com/feeds/api/videos?q?puredata&v=2&alt=jsonc
+;
+#X connect 0 0 1 0;
+#X connect 0 0 4 0;
+#X connect 2 0 0 0;
+#X connect 3 0 0 0;
+#X connect 4 0 9 0;
+#X connect 5 0 7 0;
+#X connect 5 1 6 0;
+#X connect 8 0 5 0;
+#X connect 9 0 8 0;
+#X connect 10 0 0 0;
+#X connect 11 0 0 0;
+#X connect 12 0 0 0;
+#X connect 13 0 0 0;
+#X connect 14 0 0 0;
+#X restore 1005 519 pd webservices;
 #X connect 0 0 46 0;
 #X connect 1 0 5 0;
 #X connect 2 0 1 0;
@@ -120,15 +140,4 @@ and not with UTF-8;
 #X connect 46 1 18 0;
 #X connect 47 0 38 0;
 #X connect 48 0 49 0;
-#X connect 48 0 52 0;
-#X connect 50 0 48 0;
-#X connect 51 0 48 0;
-#X connect 52 0 57 0;
-#X connect 53 0 55 0;
-#X connect 53 1 54 0;
-#X connect 56 0 53 0;
-#X connect 57 0 56 0;
-#X connect 59 0 60 0;
-#X connect 59 0 60 1;
-#X connect 62 0 48 0;
-#X connect 63 0 48 0;
+#X connect 48 0 49 1;

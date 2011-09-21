@@ -1,0 +1,15 @@
+Changelog
+
+0.2.1:
+- Added this Changelog
+
+0.2:
+- Renamed library to purest_json
+- Outputting nested JSON objects and arrays as strings
+- Outputting JSON arrays as a series of objects
+- Using threading for HTTP requests
+- Using Pd-extended library template
+
+0.1:
+- Basic operations for connection to CouchDB
+- Basic JSON encoding and decoding

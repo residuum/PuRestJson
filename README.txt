@@ -43,24 +43,13 @@ For the usage of the externals see the help patches for the objects.
 
 How to build PuREST JSON 
 
-Edit the makefile to fit your platform, it is currently made for Debian
-Wheezy.
+The library uses the template for Pd-extended. Drop the library in a
+new folder "purest_json" in the "external" path of the Pd-extended
+source code and run make in the folder.
 
 Make sure to have the header files for libcurl and json-c installed, on
 Debian the libraries are called libcurl-dev (with several packages 
 providing this virtual package) and libjson0-dev respectively. 
-
-make
-
-or
-
-make test
-
-or 
-
-make debug.
-
-The latter two also launches Pd with a sample patch and an instance of gdb.
 
 
 TODO:

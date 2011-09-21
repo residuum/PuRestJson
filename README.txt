@@ -64,7 +64,5 @@ The latter two also launches Pd with a sample patch and an instance of gdb.
 
 
 TODO:
-- Makefile for Mac OS X and Windows (MinGW)
 - Implementing OAUTH
-- Using library template for Pd-extended.
 - JSON error when querying Twitter

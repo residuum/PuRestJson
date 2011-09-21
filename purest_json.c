@@ -16,7 +16,7 @@ char *remove_backslashes(char *source_string) {
 	char remove[2] = "\\,";
 	size_t len_src = strlen(source_string);
 	int found;
-	int i = 0;
+	unsigned int i = 0;
 	int j = 0;
 
 	dest = (char *) malloc(sizeof(char) * len_src + 1);

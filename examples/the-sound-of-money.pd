@@ -1,4 +1,4 @@
-#N canvas 151 114 756 544 10;
+#N canvas 514 12 756 544 10;
 #X obj 156 50 rest-json;
 #X msg 156 10 GET http://bitcoincharts.com/t/weighted_prices.json;
 #X obj 156 86 list split 1;
@@ -24,6 +24,7 @@
 #X obj 331 335 -~ 0.5;
 #X obj 331 279 line \$1 20;
 #X obj 404 280 line \$1 20;
+#X floatatom 186 462 5 0 0 0 - - -;
 #X connect 0 0 2 0;
 #X connect 0 0 11 0;
 #X connect 0 1 18 0;
@@ -46,6 +47,7 @@
 #X connect 15 0 8 0;
 #X connect 16 0 23 0;
 #X connect 17 0 16 0;
+#X connect 17 0 25 0;
 #X connect 17 1 14 0;
 #X connect 18 0 6 0;
 #X connect 19 0 8 1;

@@ -81,7 +81,7 @@ void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 }
 
 void *execute_rest_thread(void *thread_args) {
-	t_thread_data *data = (t_thread_data *)thread_args;
+	t_thread_data_rest *data = (t_thread_data_rest *)thread_args;
 	t_rest *x = data->pd_object; 
 	char *real_url = data->request_url;
 	char *request_type = data->request_type;
@@ -115,8 +115,8 @@ void *execute_rest_thread(void *thread_args) {
 		result = curl_easy_perform(curl_handle);
 		if (result == CURLE_OK) {
 			/* Parse JSON */
-			json_object *jobj = json_tokener_parse(out_memory.memory);
-			output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
+			/* No extra thread is needed, since we are already in a separate one */
+			output_json(json_tokener_parse(out_memory.memory), x->x_ob.ob_outlet, x->done_outlet);
 			/* Free memory */
 			if (out_memory.memory) {
 				free(out_memory.memory);
@@ -138,7 +138,7 @@ void *execute_rest_thread(void *thread_args) {
 void execute_rest(char *request_url, char *request_type, char *database, char *parameters, t_rest *x) {
 	char real_url[strlen(request_url) + strlen(database)];
 	char *cleaned_parameters = remove_backslashes(parameters);
-	t_thread_data *data = (t_thread_data *)malloc(sizeof(t_thread_data));
+	t_thread_data_rest *data = (t_thread_data_rest *)malloc(sizeof(t_thread_data_rest));
 	int rc;
 	pthread_t thread;
 	strcpy(real_url, request_url);

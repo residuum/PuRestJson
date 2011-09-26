@@ -55,3 +55,4 @@ providing this virtual package) and libjson0-dev respectively.
 TODO:
 - Implementing OAUTH
 - JSON error when querying Twitter
+- Problems with big data and multithreading

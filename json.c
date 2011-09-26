@@ -131,12 +131,18 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 	x->data_count = 0;
 }
 
-/**
- * Outputs json data as string.
- *
- * @param jobj json object to output.
- * @param outlet outlet where data should be sent to.
- */
+void *output_json_thread(void *thread_args) {
+	t_thread_data_json *data = (t_thread_data_json *)thread_args;
+	char json_string[data->size];
+	strcpy(json_string, data->json_string);
+	json_object *jobj = json_tokener_parse(json_string);
+	output_json(jobj, data->data_outlet, data->done_outlet);
+	if (data) {
+		free(data);
+	}
+	pthread_exit(NULL);
+}
+
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	/* NULL only in json-c after 2010-12-08, see 
 	https://github.com/json-c/json-c/commit/a503ee8217a9912f3c58acae33cf3d1d840dab6c */
@@ -241,9 +247,9 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 								   }
 							   }
 		break;
-		
 	}
 }
+
 /**
  * Setup json_decoder
  * 
@@ -270,8 +276,19 @@ void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec) {
  * Decodes string from inlet of json_decoder and outputs the json string as deserialized list.
  */
 void json_decode_string(t_json_decode *x, t_symbol *data) {
+	/* Use new thread */
 	char *json_string = data->s_name;
-	json_object *jobj;
-	jobj = json_tokener_parse(json_string);
-	output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
+	t_thread_data_json *thread_data = (t_thread_data_json *)malloc(sizeof(t_thread_data_json));
+	size_t string_len = strlen(json_string);
+	thread_data->json_string = (char *)malloc((string_len + 1) * sizeof(char));
+	int rc;
+	pthread_t thread;
+	strcpy(thread_data->json_string, json_string);
+	thread_data->data_outlet = x->x_ob.ob_outlet;
+	thread_data->done_outlet = x->done_outlet;
+	thread_data->size = string_len;
+	rc = pthread_create(&thread, NULL, output_json_thread, (void *)thread_data);
+	if (rc) {
+		error("Could not create thread with code %d", rc);
+	}
 }

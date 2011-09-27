@@ -45,13 +45,28 @@ How to build PuREST JSON
 
 The library uses the template for Pd-extended. Drop the library in a
 new folder "purest_json" in the "external" path of the Pd-extended
-source code and run make in the folder.
+source code and run make in the folder. libcurl and json-c is needed.
 
-Make sure to have the header files for libcurl and json-c installed, on
-Debian the libraries are called libcurl-dev (with several packages 
-providing this virtual package) and libjson0-dev respectively. 
+Here are the steps in detail:
+1. Download the sources of Pd-extended from 
+   http://puredata.info/community/projects/software/pd-extended
+
+2. Create a subfolder in the extracted source Pd-0.42.5-extended/externals 
+   with the name purest_json and gut the sources of purest_json in there.
+
+3. Make sure to have the header files for libcurl and json-c installed, 
+   on Debian the libraries are called libcurl-dev (with several packages 
+   providing this virtual package) and libjson0-dev respectively. 
+
+4. Now run "make" inside the folder Pd-0.42.5-extended/externals/purest_json/
+   and you should get a file purest_json.EXT, where EXT is the library file
+   extension for your platform (dll, pd_darwin, pd_linux). The help patches
+   are the *.pd files in the root folder.
+
+5. Some example patches are in the examples folder.
 
 
 TODO:
 - Implementing OAUTH
-- JSON error when querying Twitter
+- JSON error when querying Twitter (json-c: "nesting too deep")
+- Audio stutter when processing large amount of data

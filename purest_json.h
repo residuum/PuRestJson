@@ -40,19 +40,12 @@ typedef struct json_decode {
 	t_outlet *done_outlet;
 } t_json_decode;
  
-typedef struct thread_data_rest {
+typedef struct thread_data {
 	t_rest *pd_object;
 	char request_type[MAX_STRING_SIZE];
 	char request_url[MAX_STRING_SIZE];
 	char parameters[MAX_STRING_SIZE];
-} t_thread_data_rest;
-
-typedef struct thread_data_json {
-	t_outlet *data_outlet;
-	t_outlet *done_outlet;
-	char *json_string;
-	size_t size;
-} t_thread_data_json;
+} t_thread_data;
 
 /* rest */
 t_class *rest_class;
@@ -69,7 +62,6 @@ void execute_rest(char *request_url, char *request_type, char *database, char *p
 
 /* pthread functions */
 void *execute_rest_thread(void *thread_args);
-void *output_json_thread(void *thread_args);
 
 /* json-encode */
 t_class *json_encode_class;

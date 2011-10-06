@@ -1,4 +1,4 @@
-#N canvas 75 35 1002 589 10;
+#N canvas 73 51 1002 589 10;
 #X msg 9 38 url http://127.0.0.1:5984/;
 #X obj 363 136 json-encode;
 #X msg 824 36 bang;
@@ -43,7 +43,7 @@
 #X obj 552 483 print array-decode;
 #X obj 552 422 l2s;
 #X obj 552 329 rest-json http://127.0.0.1:5984/;
-#N canvas 120 66 1112 677 webservices 0;
+#N canvas 118 64 1112 677 webservices 0;
 #X obj 129 351 rest-json;
 #X obj 204 399 print data;
 #X msg 381 310 GET http://search.twitter.com/search.json?q=%23puredata
@@ -66,8 +66,10 @@
 ;
 #X msg 264 210 GET http://gdata.youtube.com/feeds/api/videos?q?puredata&v=2&alt=jsonc
 ;
-#X text 274 400 Only connect when running Pd with -stderr.;
+#X text 274 392 Disconnect the left outlet of rest-json when running
+Pd version < 0.43 and without -stderr.;
 #X connect 0 0 4 0;
+#X connect 0 0 1 0;
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;
 #X connect 4 0 9 0;

@@ -1,22 +1,92 @@
-<h1>PuREST JSON</h1>
-<p>PuREST JSON is a library for connecting Puredata (PD) to HTTP services and encoding and decoding JSON data.</p>
-<h2>Usage</h2>
-(TODO: Explain the diverse objects)
-<h2>Examples</h2>
-<p>Included with the library are examples. Using these examples, you can see the basic usage of PuREST JSON.</p>
-<h3>Querying Webservices</h3>
-<p>You can use [rest-json] to query webservices. I will explain this querying the history of the 
-Makefile in the repository. You will see the handling of arrays in this example.</p>
-<img src="webservice-example.png" />
-<p>As you can see, the webservice from Github returns an object with only one array.
-This array is then parsed by an instance of [json-decode].</p>
-<pre>
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PuREST JSON - Manual</title>
+	</head>
+	<body>
+		<h1>PuREST JSON</h1>
+		<p>PuREST JSON is a library for connecting Puredata (PD) to HTTP services and encoding and decoding JSON 
+		data.</p>
+		<p>The source code is available from 
+		<a href="https://github.com/residuum/PuRestJson">https://github.com/residuum/PuRestJson</a>.</p>
+		<h2>Usage</h2>
+		<p>The library is loaded as purest_json, so start it with <kbd>pd -lib purest_json</kbd> or the equivalent
+		in your current environment including the path.</p>
+		<h3>Objects in The Library</h3>
+		<p>This is only a brief introduction to the objects, for a full explanation, see the help patches for them.</p>
+		<dl>
+			<dt>[rest-json]</dt>
+			<dd>
+			This is the object for making RESTful queries to webservices that return JSON data.
+			<br/><em>Methods:</em>
+			<dl>
+				<dt>url</dt>
+				<dd>Sets the base URL for requests.</dd>
+				<dt>GET</dt>
+				<dd>Makes a GET http request.</dd>
+				<dt>PUT</dt>
+				<dd>Makes a PUT http request.</dd>
+				<dt>DELETE</dt>
+				<dd>Makes a DELETE http request.</dd>
+				<dt>POST</dt>
+				<dd>Makes a POST http request.</dd>
+				<dt>oauth</dt>
+				<dd>Sets OAUTH parameters (<strong>Not implemented yet</strong>).</dd>
+			</dl>
+			</dd>
+			<dt>[json-encode]</dt>
+			<dd>
+			With this object you can create JSON objects, e.g. for sending JSON data to a webservice with 
+			[rest-json].
+			<br/><em>Methods:</em>
+			<dl>
+				<dt>add</dt>
+				<dd>Adds a key/value pair to the stored JSON object. If the value is a JSON string, then this will
+				will nest the object.</dd>
+				<dt>array</dt>
+				<dd>Adds a value to an array nested in the stored JSON object. If the array does not exist, the 
+				array will be created.</dd>
+				<dt>bang</dt>
+				<dd>Outputs the stored JSON object as string.</dd>
+				<dt>clear</dt>
+				<dd>Clears the stored object.</dd>
+			</dl>
+			</dd>
+			<dt>[json-decode]</dt>
+			<dd>Decodes JSON objects. For the output, see below.</dd>
+		</dl>
+		<h2>Building PuREST JSON</h2>
+		<p>The library uses the Pd-extended library template. Therefore, the easiest way to build PuREST JSON is
+		using the compilation methods provided by Pd-extended.</p>
+		<ol>
+			<li>Download the source code of Pd-extended from 
+			<a href="http://puredata.info/community/projects/software/pd-extended">http://puredata.info/community/projects/software/pd-extended</a>
+			and extract it.</li>
+			<li>Get the source code of PuREST JSON from the repository 
+			<a href="https://github.com/residuum/PuRestJson">https://github.com/residuum/PuRestJson</a> and put or 
+			extract it in a subfolder <tt>path/to/pd-extended-source/externals/purest_json/</tt>.</li>
+			<li>Make sure to have <a href="http://oss.metaparadigm.com/json-c/">json-c</a> and 
+			<a href="http://curl.haxx.se/download.html">libcurl</a> installed, including the development headers.
+			On Debian the libraries are called libjson0-dev and libcurl-dev (with several packages
+			providing this virtual package) respectively. </li>
+			<li>Change to the <tt>path/to/pd-extended-source/externals/purest_json/</tt> folder and run
+			<kbd>make</kbd>. To install run <kbd>make install</kbd>.</li>
+		</ol>
+		<h2>Examples</h2>
+		<p>Included with the library are examples. Using these examples, you can see the basic usage of PuREST 
+		JSON.</p>
+		<h3>Querying Webservices</h3>
+		<p>You can use [rest-json] to query webservices. I will explain this querying the history of the Makefile 
+		in the repository. You will see the handling of arrays in this example.</p>
+		<img src="webservice-example.png">
+		<p>As you can see, the webservice from Github returns an object with only one array.
+		This array is then parsed by an instance of [json-decode].</p>
+		<pre>
 data: list commits [ { "parents": [ { "id": "32656d8170c9660909510100999ae09f749bc9e0" } ]\, "author": { "name": "Thomas Mayer"\, "login": "residuum"\, "email": "thomas@residuum.org" }\, "url": "\\/residuum\\/PuRestJson\\/commit\\/121eee893155d0270d1ce3ad78e5162d0f4cf376"\, "id": "121eee893155d0270d1ce3ad78e5162d0f4cf376"\, "committed_date": "2011-09-21T12:13:36-07:00"\, "authored_date": "2011-09-21T12:13:36-07:00"\, "message": "Used Pd-extended library template"\, "tree": "71022e1263b04d1d5636c5d7c16b6245ce209417"\, "committer": { "name": "Thomas Mayer"\, "login": "residuum"\, "email": "thomas@residuum.org" } }\, { "parents": [ { "id": "ea2b4a170392549c286a784a0a137ad6402758d2" } ]\, "author": { "name": "Thomas Mayer"\, "login": "residuum"\, "email": "thomas@residuum.org" }\, "url": "\\/residuum\\/PuRestJson\\/commit\\/be8d04384403afd836ce5cd8d008ac8075d32b18"\, "id": "be8d04384403afd836ce5cd8d008ac8075d32b18"\, "committed_date": "2011-09-15T15:11:44-07:00"\, "authored_date": "2011-09-15T15:11:44-07:0*
-</pre>
-<p>Each array member is then parsed individually by [json-decode], i.e. each member of
-the object is then output as list on the left outlet, followed by a bang on the right
-outlet.</p>
-<pre>
+		</pre>
+		<p>Each array member is then parsed individually by [json-decode], i.e. each member of the object is then 
+		output as list on the left outlet, followed by a bang on the right outlet.</p>
+		<pre>
 array-decode: list parents [ { "id": "32656d8170c9660909510100999ae09f749bc9e0" } ]
 array-decode: list author { "name": "Thomas Mayer"\, "login": "residuum"\, "email": "thomas@residuum.org" }
 array-decode: list url /residuum/PuRestJson/commit/121eee893155d0270d1ce3ad78e5162d0f4cf376
@@ -38,17 +108,16 @@ array-decode: list tree f4b2f6ea08b6dc656c016413d9ca6425da98b974
 array-decode: list committer { "name": "Thomas Mayer"\, "login": "residuum"\, "email": "thomas@residuum.org" }
 array-done: bang
 
- ...
-</pre>
-<h3>Using CouchDB</h3>
-<p>This example will show the usage of diverse HTTP request methods, GET, PUT, and DELETE. You will also see,
-how you can add data to PUT requests.</p>
-<img src="couchdb-example.png" />
-<p>Here is the output from the main example in examples/purest-json-test.pd with explanations.
-<br />
-A CouchDB running on the same computer is implied.</p>
-<p>First, we create the database and get info about the database:</p>
-<pre>
+...
+		</pre>
+		<h3>Using CouchDB</h3>
+		<p>This example will show the usage of diverse HTTP request methods, <tt>GET</tt>, <tt>PUT</tt>, and 
+		<tt>DELETE</tt>. You will also see, how you can add data to <tt>PUT</tt> requests.</p>
+		<p>A CouchDB running on the same computer is implied.</p>
+		<img src="couchdb-example.png">
+		<p>Here is the output from the main example in examples/purest-json-test.pd with explanations.</p>
+		<p>First, we create the database and get info about the database:</p>
+		<pre>
 couchdb return: list ok 1
 couchdb return: list db_name test
 couchdb return: list doc_count 0
@@ -60,9 +129,9 @@ couchdb return: list disk_size 79
 couchdb return: list instance_start_time 1.31733e+15
 couchdb return: list disk_format_version 5
 couchdb return: list committed_update_seq 0
-</pre>
-<p>After that, we build a JSON document and store it in the database:</p>
-<pre>
+		</pre>
+		<p>After that, we build a JSON document and store it in the database:</p>
+		<pre>
 json-encoded data: symbol \{ "value": "440"\\, "duration": "1000"\\, "start": "10"\\, "name": "first note"\\, "var": [ "yabba"\\, "dabba"\\, "doo" ]\\, "on": "TRUE" \}
 decode json data: list value 440
 decode json data: list duration 1000
@@ -73,9 +142,9 @@ decode json data: list on 1
 couchdb return: list ok 1
 couchdb return: list id 1
 couchdb return: list rev 1-b7a3cb13c20812a4c7845e9a86f92099
-</pre>
-<p>Then we query the database for the stored document and use it to drive a simple ramp:</p>
-<pre>
+		</pre>
+		<p>Then we query the database for the stored document and use it to drive a simple ramp:</p>
+		<pre>
 id: 1
 couchdb return: list _id 1
 couchdb return: list _rev 1-b7a3cb13c20812a4c7845e9a86f92099
@@ -86,8 +155,28 @@ name: first note
 couchdb return: list name first note
 couchdb return: list var [ "yabba"\\, "dabba"\\, "doo" ]
 couchdb return: list on 1
-</pre>
-<p>In the end we delete the database:</p>
-<pre>
+		</pre>
+		<p>In the end we delete the database:</p>
+		<pre>
 couchdb return: list ok 1
-</pre>
+		</pre>
+		<h2>Author and License</h2>
+		<p>Author: Thomas Mayer <thomas@residuum.org></p>
+		<p>Copyright (c) 2011 Thomas Mayer</p>
+		<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+		of this software and associated documentation files (the "Software"), to deal
+		in the Software without restriction, including without limitation the rights
+		to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+		copies of the Software, and to permit persons to whom the Software is
+		furnished to do so, subject to the following conditions:</p>
+		<p>The above copyright notice and this permission notice shall be included in
+		all copies or substantial portions of the Software.</p>
+		<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+		IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+		FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+		AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+		LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+		THE SOFTWARE.</p>
+	</body>
+</html>

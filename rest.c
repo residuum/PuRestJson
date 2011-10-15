@@ -108,6 +108,7 @@ void *execute_rest_thread(void *thread_args) {
 			/* Parse JSON */
 			json_object *jobj = json_tokener_parse(out_memory.memory);
 			output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
+			json_object_put(jobj);
 			/* Free memory */
 			if (out_memory.memory) {
 				free(out_memory.memory);
@@ -119,8 +120,10 @@ void *execute_rest_thread(void *thread_args) {
 	} else {
 		error("Cannot init curl.");
 	}
-	free(thread_args);
-	
+	if (thread_args) {
+		free(thread_args);
+	}
+
 	pthread_exit(NULL);
 }
 
@@ -136,6 +139,7 @@ void execute_rest(char *request_url, char *request_type, char *database, char *p
 	strcpy(data->request_url, real_url);
 	strcpy(data->request_type, request_type);
 	strcpy(data->parameters, cleaned_parameters);
+	free(cleaned_parameters);
 	rc = pthread_create(&thread, NULL, execute_rest_thread, (void *)data);
 	if (rc) {
 		error("Could not create thread with code %d", rc);
@@ -143,7 +147,6 @@ void execute_rest(char *request_url, char *request_type, char *database, char *p
 	} else {
 		pthread_detach(thread);
 	}
-	free(cleaned_parameters);
 }
 
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {

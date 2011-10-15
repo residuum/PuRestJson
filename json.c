@@ -116,7 +116,7 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	/* NULL only in json-c after 2010-12-08, see 
-	   https://github.com/json-c/json-c/commit/a503ee8217a9912f3c58acae33cf3d1d840dab6c */
+https://github.com/json-c/json-c/commit/a503ee8217a9912f3c58acae33cf3d1d840dab6c */
 	if (jobj == NULL || ((int)jobj < 0 && (int)jobj > -15)) {
 		error("Not a JSON object: %d", jobj);
 		return;
@@ -159,7 +159,8 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 			outlet_symbol(data_outlet, gensym(""));
 			outlet_bang(done_outlet);
 			break;
-		case json_type_object: {
+		case json_type_object: 
+			;
 			json_object_object_foreach(jobj, key, val) { /* Passing through every json object */
 				SETSYMBOL(&out_data[0], gensym(key));
 				/* Problem with null as value */
@@ -208,17 +209,15 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 			}
 			outlet_bang(done_outlet);
-							   }
-							   break;
+			break;
 		case json_type_array: 
-							   {
-								   array_len = json_object_array_length(jobj);
-								   for (i = 0; i < array_len; i++) {
-									   output_json(json_object_array_get_idx(jobj, i), data_outlet, done_outlet);
-								   }
-							   }
-		break;
-		
+			;
+			array_len = json_object_array_length(jobj);
+			for (i = 0; i < array_len; i++) {
+				json_object *array_member = json_object_array_get_idx(jobj, i);
+				output_json(array_member, data_outlet, done_outlet);
+			}
+			break;
 	}
 }
 
@@ -241,4 +240,5 @@ void json_decode_string(t_json_decode *x, t_symbol *data) {
 	json_object *jobj;
 	jobj = json_tokener_parse(json_string);
 	output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
+	json_object_put(jobj);
 }

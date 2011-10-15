@@ -1,8 +1,3 @@
-/**
- * Setup json_encoder
- * 
- * Performs setup of json_encoder object, initializes methods for inlet
- */
 void setup_json_encoder(void) {
 	json_encode_class = class_new(gensym("json-encode"), (t_newmethod)json_encode_new,
 		0, sizeof(t_json_encode), 0, A_GIMME, 0);
@@ -13,9 +8,6 @@ void setup_json_encoder(void) {
 	class_sethelpsymbol(json_encode_class, gensym("json"));
 }
 
-/**
- * Creates new instance of json_encoder
- */
 void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_json_encode *x = (t_json_encode*)pd_new(json_encode_class);
 	x->data_count = 0;
@@ -23,9 +15,6 @@ void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	return (void *)x;
 }
 
-/**
- * Bang on json_encode outputs stored json data.
- */
 void json_encode_bang(t_json_encode *x) {
 	int i, j, k; 
 	int array_member_numbers[x->data_count];
@@ -66,19 +55,19 @@ void json_encode_bang(t_json_encode *x) {
 
 json_object *create_object(char *value) {
 	json_object *object;
+	char *parsed_string;
 	/* if stored value is string is starting with { and ending with }, 
 	   then create a json object from it. */
 	if (value[0] == '{' && value[strlen(value) - 1] == '}') {
-		object = json_tokener_parse(remove_backslashes(value));
+		parsed_string = remove_backslashes(value);
+		object = json_tokener_parse(parsed_string);
+		free(parsed_string);
 	} else {
 		object = json_object_new_string(value);
 	}
 	return object;
 }
 
-/**
- * Add message on json_encode adds key/value pair to stored json data.
- */
 void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char key[MAX_STRING_SIZE];
 	char value[MAX_STRING_SIZE];
@@ -100,9 +89,6 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 	}
 }
 
-/**
- * Add message on json_encode adds key/value pair to stored json data.
- */
 void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char key[MAX_STRING_SIZE];
 	char value[MAX_STRING_SIZE];
@@ -124,19 +110,10 @@ void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t
 	}
 }
 
-/**
- * Clear message on json_encode clears stored json data.
- */
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	x->data_count = 0;
 }
 
-/**
- * Outputs json data as string.
- *
- * @param jobj json object to output.
- * @param outlet outlet where data should be sent to.
- */
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	/* NULL only in json-c after 2010-12-08, see 
 	   https://github.com/json-c/json-c/commit/a503ee8217a9912f3c58acae33cf3d1d840dab6c */
@@ -244,11 +221,7 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 		
 	}
 }
-/**
- * Setup json_decoder
- * 
- * Performs setup of json_decoder object, initializes methods for inlet.
- */
+
 void setup_json_decoder(void) {
 	json_decode_class = class_new(gensym("json-decode"), (t_newmethod)json_decode_new,
 			0, sizeof(t_json_decode), 0, A_GIMME, 0);
@@ -256,9 +229,6 @@ void setup_json_decoder(void) {
 	class_sethelpsymbol(json_decode_class, gensym("json"));
 }
 
-/**
- * Creates new instance of json_decoder.
- */
 void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_json_decode *x = (t_json_decode*)pd_new(json_decode_class);
 	outlet_new(&x->x_ob, NULL);
@@ -266,9 +236,6 @@ void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	return (void *)x;
 }
 
-/**
- * Decodes string from inlet of json_decoder and outputs the json string as deserialized list.
- */
 void json_decode_string(t_json_decode *x, t_symbol *data) {
 	char *json_string = data->s_name;
 	json_object *jobj;

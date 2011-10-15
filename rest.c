@@ -1,8 +1,3 @@
-/**
- * Setup rest 
- * 
- * Performs setup of rest object, initializes methods for inlet
- */
 void setup_rest(void) {
 	rest_class = class_new(gensym("rest-json"), (t_newmethod)rest_new,
 			0, sizeof(t_rest), 0, A_GIMME, 0);
@@ -15,11 +10,6 @@ void setup_rest(void) {
 	class_sethelpsymbol(rest_class, gensym("rest-json"));
 }
 
-/**
- * Performs rest method 
- * 
- * Executes a rest command 
- */
 void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char *request_type;
 	char database[MAX_STRING_SIZE];
@@ -113,6 +103,7 @@ void *execute_rest_thread(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
 		result = curl_easy_perform(curl_handle);
+		
 		if (result == CURLE_OK) {
 			/* Parse JSON */
 			json_object *jobj = json_tokener_parse(out_memory.memory);
@@ -128,9 +119,7 @@ void *execute_rest_thread(void *thread_args) {
 	} else {
 		error("Cannot init curl.");
 	}
-	if (data) {
-		free(data);
-	}
+	free(thread_args);
 	
 	pthread_exit(NULL);
 }
@@ -150,7 +139,11 @@ void execute_rest(char *request_url, char *request_type, char *database, char *p
 	rc = pthread_create(&thread, NULL, execute_rest_thread, (void *)data);
 	if (rc) {
 		error("Could not create thread with code %d", rc);
+		free(data);
+	} else {
+		pthread_detach(thread);
 	}
+	free(cleaned_parameters);
 }
 
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {

@@ -50,6 +50,7 @@ void json_encode_bang(t_json_encode *x) {
 			}
 		}
 		outlet_symbol(x->x_ob.ob_outlet, gensym(json_object_to_json_string(jobj)));
+		json_object_put(jobj);
 	}
 }
 

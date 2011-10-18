@@ -1,5 +1,9 @@
 Changelog
 
+0.3:
+- Fixed memory leaks
+- Added manual
+
 0.2.1:
 - Added this Changelog
 

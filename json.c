@@ -37,9 +37,11 @@ void json_encode_bang(t_json_encode *x) {
 								break;
 							}
 						}
-						json_object_array_add(value, create_object(x->data[j].value));
+						json_object *array_member = create_object(x->data[j].value);
+						json_object_array_add(value, array_member);
 						array_member_numbers[array_member_count] = j;
 						array_member_count++;
+						json_object_put(array_member);
 					}
 				}
 			} else {

@@ -3,7 +3,7 @@
 #include "json.c"
 
 void purest_json_setup(void) {
-	post("PuREST JSON version 0.2.1: A library for executing HTTP queries and encoding and decoding JSON data from Puredata.");
+	post("PuREST JSON version 0.3: A library for executing HTTP queries and encoding and decoding JSON data from Puredata.");
 	post("(c) Thomas Mayer (Residuum) 2011");
 	post("Get the latest source from https://github.com/residuum/PuRestJson");
 	setup_rest();
@@ -19,11 +19,10 @@ char *remove_backslashes(char *source_string) {
 	unsigned int i = 0;
 	int j = 0;
 
-	dest = (char *) malloc(sizeof(char) * len_src + 1);
+	dest = (char *) calloc(len_src + 1, sizeof(char));
 	if (dest == NULL) {
 		printf("Unable to allocate memory\n");
 	}
-
 	memset(dest, 0x00,sizeof(char) * len_src + 1 );
 
 	for ( i = 0; i < len_src; i++ ) {

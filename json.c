@@ -118,10 +118,14 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 }
 
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
-	/* NULL only in json-c after 2010-12-08, see 
+	if (is_error(jobj)) {
+		if (jobj != NULL) {
+			/* NULL only in json-c after 2010-12-08, see 
 https://github.com/json-c/json-c/commit/a503ee8217a9912f3c58acae33cf3d1d840dab6c */
-	if (jobj == NULL || ((int)jobj < 0 && (int)jobj > -15)) {
-		error("Not a JSON object: %d", jobj);
+			error("Not a JSON object: %d", jobj);
+		} else {
+			error("Not a JSON object.");
+		}
 		return;
 	}
 	enum json_type outer_type = json_object_get_type(jobj);

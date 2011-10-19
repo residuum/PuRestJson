@@ -1,4 +1,4 @@
-#N canvas 0 0 994 506 10;
+#N canvas 44 51 994 506 10;
 #X obj 566 321 json-encode;
 #X obj 566 390 json-decode;
 #X obj 47 -14 json-encode;
@@ -25,7 +25,7 @@ stored one;
 #X text 696 263 output the value;
 #X msg 697 282 bang;
 #X obj 656 391 print JSON string;
-#N canvas 93 21 453 402 nested-objects 0;
+#N canvas 91 51 453 402 nested-objects 0;
 #X obj -74 -56 json-encode;
 #X obj -74 2 json-decode;
 #X msg 104 -101 add name Residuum;
@@ -59,7 +59,7 @@ stored one;
 #X obj 697 427 print decoding done;
 #X obj 566 427 print decoded values;
 #X obj 566 348 t a a;
-#N canvas 320 20 693 648 about-decoded-json-strings 0;
+#N canvas 318 51 693 648 about-decoded-json-strings 0;
 #X obj 218 -185 json-encode;
 #X obj 94 -86 json-decode;
 #X msg 218 -232 bang;
@@ -75,55 +75,58 @@ stored one;
 #X msg 255 35 \$1 \, \$2 \$3;
 #X obj 255 -30 route start end duration;
 #X text 264 -110 wrong;
-#X obj 94 56 line;
-#X floatatom 94 89 5 0 0 0 - - -;
+#X obj 94 72 line;
+#X floatatom 94 105 5 0 0 0 - - -;
 #X obj 94 -29 route start end duration;
-#X msg 94 36 \$2 \, \$3 \$4;
 #X text 105 -121 right;
+#X obj 94 -58 list trim;
+#X obj 255 -59 list trim;
+#X obj 255 13 pack 0 0 0;
+#X msg 252 -286 add start 100;
+#X msg 235 -255 add end 500;
+#X obj 79 1 f;
+#X obj 94 30 pack 0 0 0;
+#X msg 94 52 \$1 \, \$2 \$3;
+#X text -178 -316 This will give you a chance to wait fotr other data
+from the JSON object.;
 #X text -179 -398 You should not assume too much about the order of
 keys and values in a JSON object. In this example \, a JSON string
 is decoded to drive a [line] object from start to stop using [route]
 and [pack]. When using [pack] you should not feed the left-most inlet
-with data \, when you may be waiting for other data from the JSON object
-\, leave it empty and trigger [pack] with the output from the right
-outlet of [json-decode] or [couchdb] \, which will bang \, when the
-JSON object is fully decoded.;
-#X obj 94 -58 list trim;
-#X obj 255 -59 list trim;
-#X obj 94 14 pack 0 0 0 0;
-#X obj 255 13 pack 0 0 0;
-#X msg 252 -286 add start 100;
-#X msg 235 -255 add end 500;
+with data immediately \, but store a value \, e.g. in a [f] and bang
+the store \, with the right outlet of [json-decode] or [rest-json].
+;
 #X connect 0 0 7 0;
-#X connect 1 0 20 0;
-#X connect 1 1 22 0;
+#X connect 1 0 18 0;
+#X connect 1 1 23 0;
 #X connect 2 0 0 0;
 #X connect 4 0 5 0;
 #X connect 5 0 2 0;
-#X connect 5 1 25 0;
-#X connect 5 2 24 0;
+#X connect 5 1 22 0;
+#X connect 5 2 21 0;
 #X connect 5 3 6 0;
 #X connect 6 0 0 0;
 #X connect 7 0 1 0;
 #X connect 7 1 8 0;
 #X connect 7 2 3 0;
-#X connect 8 0 21 0;
+#X connect 8 0 19 0;
 #X connect 9 0 10 0;
 #X connect 11 0 9 0;
-#X connect 12 0 23 0;
-#X connect 12 1 23 1;
-#X connect 12 2 23 2;
+#X connect 12 0 20 0;
+#X connect 12 1 20 1;
+#X connect 12 2 20 2;
 #X connect 14 0 15 0;
-#X connect 16 0 22 1;
-#X connect 16 1 22 2;
-#X connect 16 2 22 3;
-#X connect 17 0 14 0;
-#X connect 20 0 16 0;
-#X connect 21 0 12 0;
-#X connect 22 0 17 0;
-#X connect 23 0 11 0;
-#X connect 24 0 0 0;
-#X connect 25 0 0 0;
+#X connect 16 0 23 1;
+#X connect 16 1 24 1;
+#X connect 16 2 24 2;
+#X connect 18 0 16 0;
+#X connect 19 0 12 0;
+#X connect 20 0 11 0;
+#X connect 21 0 0 0;
+#X connect 22 0 0 0;
+#X connect 23 0 24 0;
+#X connect 24 0 25 0;
+#X connect 25 0 14 0;
 #X restore 173 430 pd about-decoded-json-strings;
 #X text 46 114 [json-decode] will accept a JSON string at its input
 and will output the decoded object as a series of lists of key/value
@@ -134,7 +137,7 @@ output them as symbols \, nested objects and arrays are output as strings
 \, that can be parsed. After the object is fully parsed \, the right
 outlet will issue a bang \, so that you can differenciate between subsequent
 objects. The messages will come as list key value.;
-#N canvas 0 0 450 465 json-arrays 0;
+#N canvas 44 51 450 465 json-arrays 0;
 #X obj 42 73 json-encode;
 #X msg 42 33 clear \, array storage textfile \, array storage couchdb
 \, array storage array \, bang;
@@ -144,12 +147,12 @@ objects. The messages will come as list key value.;
 #X obj 42 191 list trim;
 #X obj 42 224 route storage;
 #X obj 42 255 l2s;
-#X obj 43 313 json-decode;
-#X obj 43 280 t a a;
-#X obj 128 313 print JSON array string;
+#X obj 42 313 json-decode;
+#X obj 42 280 t a a;
+#X obj 127 313 print JSON array string;
 #X obj 132 155 print JSON object string;
-#X obj 106 349 print array member done;
-#X obj 43 374 print decoded;
+#X obj 105 349 print array member done;
+#X obj 42 374 print decoded;
 #X connect 0 0 3 0;
 #X connect 1 0 0 0;
 #X connect 2 0 5 0;

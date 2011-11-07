@@ -68,5 +68,5 @@ Here are the steps in detail:
 
 TODO:
 - Implementing OAUTH
-- JSON error when querying Twitter (json-c: "object value seperator expected")
-- Audio stutter when processing large amount of data
+- JSON error when querying Twitter
+- Stack overflow problem when accessing CouchDB to often with moneytalks

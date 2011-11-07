@@ -12,18 +12,18 @@ void setup_rest(void) {
 
 void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char *request_type;
-	char database[MAX_STRING_SIZE];
+	char path[MAX_STRING_SIZE];
 	char parameter[MAX_STRING_SIZE];
 	switch (argcount) {
 		case 0:
 			break;
 		default:
 			request_type = selector->s_name;
-			atom_string(argvec, database, MAX_STRING_SIZE);
+			atom_string(argvec, path, MAX_STRING_SIZE);
 			if (argcount > 1) {
 				atom_string(argvec + 1, parameter, MAX_STRING_SIZE);
 			}
-			execute_rest(x->couch_url, request_type, database, parameter, x);
+			execute_rest(x->base_url, request_type, path, parameter, x);
 			break;
 	}
 }
@@ -36,9 +36,9 @@ void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	switch (argcount) {
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
-				error("URL to CouchDB cannot be set.");
+				error("Base URL cannot be set.");
 			} else {
-				atom_string(argvec, x->couch_url, MAX_STRING_SIZE);
+				atom_string(argvec, x->base_url, MAX_STRING_SIZE);
 			}
 			break;
 		case 0:
@@ -54,9 +54,9 @@ void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	switch (argcount) {
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
-				error("URL to CouchDB cannot be set.");
+				error("Base URL cannot be set.");
 			} else {
-				atom_string(argvec, x->couch_url, MAX_STRING_SIZE);
+				atom_string(argvec, x->base_url, MAX_STRING_SIZE);
 			}
 			break;
 		case 0:
@@ -67,31 +67,35 @@ void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	}
 	outlet_new(&x->x_ob, NULL);
 	x->done_outlet = outlet_new(&x->x_ob, &s_bang);
+	x->is_data_locked = 0;
 	return (void *)x;
 }
 
 void *execute_rest_thread(void *thread_args) {
-	t_thread_data *data = (t_thread_data *)thread_args;
-	t_rest *x = data->pd_object; 
-	char *real_url = data->request_url;
-	char *request_type = data->request_type;
-	char *cleaned_parameters = data->parameters;
+	t_rest *x = (t_rest *)thread_args; 
+	char parameters[strlen(x->parameters) + 1];
+	char request_url[strlen(x->complete_url) + 1];;
+	char request_type[strlen(x->request_type) + 1];
 	CURL *curl_handle;
 	CURLcode result;
 	t_memory_struct in_memory;
 	t_memory_struct out_memory;
-	size_t parameter_len = strlen(cleaned_parameters);
+	strcpy(parameters, x->parameters);
+	strcpy(request_type, x->request_type);
+	strcpy(request_url, x->complete_url);
+	x->is_data_locked = 0;
+	size_t parameter_len = strlen(parameters);
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
 	if (curl_handle) {
-		curl_easy_setopt(curl_handle, CURLOPT_URL, real_url);
+		curl_easy_setopt(curl_handle, CURLOPT_URL, request_url);
 		if (strcmp(request_type, "PUT") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
 			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, read_memory_callback);
 			/* Prepare data for reading */
 			in_memory.memory = malloc(parameter_len + 1);
 			in_memory.size = parameter_len;
-			memcpy(in_memory.memory, cleaned_parameters, parameter_len);
+			memcpy(in_memory.memory, parameters, parameter_len);
 			curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
 		} else if (strcmp(request_type, "POST") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
@@ -108,7 +112,9 @@ void *execute_rest_thread(void *thread_args) {
 			/* Parse JSON */
 			json_object *jobj = json_tokener_parse(out_memory.memory);
 			output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
-			json_object_put(jobj);
+			if (!is_error(jobj)) {
+				json_object_put(jobj);
+			}
 			/* Free memory */
 			if (out_memory.memory) {
 				free(out_memory.memory);
@@ -120,32 +126,33 @@ void *execute_rest_thread(void *thread_args) {
 	} else {
 		error("Cannot init curl.");
 	}
-	if (thread_args) {
-		free(thread_args);
-	}
 
 	pthread_exit(NULL);
 }
 
-void execute_rest(char *request_url, char *request_type, char *database, char *parameters, t_rest *x) {
-	char real_url[strlen(request_url) + strlen(database)];
+void execute_rest(char *base_url, char *request_type, char *path, char *parameters, t_rest *x) {
 	char *cleaned_parameters = remove_backslashes(parameters);
-	t_thread_data *data = (t_thread_data *)malloc(sizeof(t_thread_data));
 	int rc;
 	pthread_t thread;
-	strcpy(real_url, request_url);
-	strcat(real_url, database);
-	data->pd_object = x;
-	strcpy(data->request_url, real_url);
-	strcpy(data->request_type, request_type);
-	strcpy(data->parameters, cleaned_parameters);
+	pthread_attr_t thread_attributes;
+	strcpy(x->complete_url, base_url);
+	strcat(x->complete_url, path);
+	strcpy(x->request_type, request_type);
+	strcpy(x->parameters, cleaned_parameters);
 	free(cleaned_parameters);
-	rc = pthread_create(&thread, NULL, execute_rest_thread, (void *)data);
+	pthread_attr_init(&thread_attributes);
+	pthread_attr_setstacksize(&thread_attributes, sizeof(double) * 1024 + 1000000);
+	pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_DETACHED);
+	if (x->is_data_locked) {
+		error("data of object locked");
+		return;
+	}
+	x->is_data_locked = 1;
+	rc = pthread_create(&thread, &thread_attributes, execute_rest_thread, (void *)x);
+	pthread_attr_destroy(&thread_attributes);
 	if (rc) {
 		error("Could not create thread with code %d", rc);
-		free(data);
-	} else {
-		pthread_detach(thread);
+		x->is_data_locked = 0;
 	}
 }
 

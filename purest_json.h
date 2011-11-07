@@ -25,8 +25,13 @@ typedef struct rest {
 	t_object x_ob;
 	t_outlet *done_outlet;
 	int out_count;
-	char couch_url[MAX_STRING_SIZE];
+	char base_url[MAX_STRING_SIZE];
 	t_atom out[MAX_ARRAY_SIZE];
+	/* Used for threading */
+	char request_type[6]; /*One of GET, PUT, POST; DELETE*/
+	char parameters[MAX_STRING_SIZE];
+	char complete_url[MAX_STRING_SIZE];
+	short is_data_locked;
 } t_rest;
 
 typedef struct json_encode {
@@ -40,13 +45,6 @@ typedef struct json_decode {
 	t_outlet *done_outlet;
 } t_json_decode;
  
-typedef struct thread_data {
-	t_rest *pd_object;
-	char request_type[MAX_STRING_SIZE];
-	char request_url[MAX_STRING_SIZE];
-	char parameters[MAX_STRING_SIZE];
-} t_thread_data;
-
 /* rest */
 t_class *rest_class;
 void setup_rest(void);
@@ -58,7 +56,7 @@ void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
 static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
-void execute_rest(char *request_url, char *request_type, char *database, char *parameters, t_rest *x);
+void execute_rest(char *base_url, char *request_type, char *path, char *parameters, t_rest *x);
 
 /* pthread functions */
 void *execute_rest_thread(void *thread_args);

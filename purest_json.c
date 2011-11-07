@@ -3,7 +3,7 @@
 #include "json.c"
 
 void purest_json_setup(void) {
-	post("PuREST JSON version 0.3: A library for executing HTTP queries and encoding and decoding JSON data from Puredata.");
+	post("PuREST JSON version 0.4: A library for executing HTTP queries and encoding and decoding JSON data from Puredata.");
 	post("(c) Thomas Mayer (Residuum) 2011");
 	post("Get the latest source from https://github.com/residuum/PuRestJson");
 	setup_rest();

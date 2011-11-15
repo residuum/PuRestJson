@@ -56,9 +56,9 @@ INSTALL = install
 INSTALL_FILE    = $(INSTALL) -p -m 644
 INSTALL_DIR     = $(INSTALL) -p -m 755 -d
 
-CFLAGS = -DPD -I$(PD_PATH)/src -Wall -W -g -std=c99
+CFLAGS = -DPD -I$(PD_PATH)/src -Wall -W -g -std=c99 -pthread
 LDFLAGS =  
-LIBS = -lcurl -ljson
+LIBS = -lcurl -ljson -pthread
 ALLSOURCES := $(SOURCES) $(SOURCES_android) $(SOURCES_cygwin) $(SOURCES_macosx) \
 	         $(SOURCES_iphoneos) $(SOURCES_linux) $(SOURCES_windows)
 

@@ -2,6 +2,8 @@ Changelog
 
 0.4:
 - Fixed cross-thread access to rest object
+- Fixed stack overflow issue of threads
+- Refactoring
 
 0.3:
 - Fixed memory leaks

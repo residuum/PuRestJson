@@ -54,9 +54,7 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 void rest_oauth(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 
-static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
-static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
-void execute_rest(char *base_url, char *request_type, char *path, char *parameters, t_rest *x);
+void execute_rest(t_rest *x);
 
 /* pthread functions */
 void *execute_rest_thread(void *thread_args);

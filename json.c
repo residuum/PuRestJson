@@ -127,57 +127,49 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 	const char *string_value;
 	int array_len;
 	int i;
-	
-	if (is_error(jobj)) {
-		if (jobj != NULL) {
-			/* NULL only in json-c after 2010-12-08, see 
-https://github.com/json-c/json-c/commit/a503ee8217a9912f3c58acae33cf3d1d840dab6c */
-			error("Not a JSON object: %d", jobj);
-		} else {
-			error("Not a JSON object.");
-		}
-		return;
-	}
 
-	switch (outer_type) {
-		/* We really have a JSON object */
-		case json_type_boolean:
-			SETFLOAT(&out_data[1], json_object_get_boolean(jobj) ? 1: 0);
-			out_float = atom_getfloat(&out_data[1]);
-			outlet_float(data_outlet, out_float);
-			outlet_bang(done_outlet);
-			break;
-		case json_type_double:
-			SETFLOAT(&out_data[1], json_object_get_double(jobj));
-			out_float = atom_getfloat(&out_data[1]);
-			outlet_float(data_outlet, out_float);
-			outlet_bang(done_outlet);
-			break;
-		case json_type_int:
-			SETFLOAT(&out_data[1], json_object_get_int(jobj));
-			out_float = atom_getfloat(&out_data[1]);
-			outlet_float(data_outlet, out_float);
-			outlet_bang(done_outlet);
-			break;
-		case json_type_string:
-			outlet_symbol(data_outlet, gensym(json_object_get_string(jobj)));
-			outlet_bang(done_outlet);
-			break;
-		case json_type_null:
-			outlet_symbol(data_outlet, gensym(""));
-			outlet_bang(done_outlet);
-			break;
-		case json_type_object: 
-			;
-			json_object_object_foreach(jobj, key, val) { /* Passing through every json object */
-				SETSYMBOL(&out_data[0], gensym(key));
-				/* Problem with null as value */
-				if (val == NULL) {
-					SETSYMBOL(&out_data[1], gensym(""));
-				} else {
-					inner_type = json_object_get_type(val);
-					switch (inner_type) {
-						case json_type_boolean:
+	if (is_error(jobj)) {
+		error("Not a JSON object.");
+	} else {
+		switch (outer_type) {
+			/* We really have a JSON object */
+			case json_type_boolean:
+				SETFLOAT(&out_data[1], json_object_get_boolean(jobj) ? 1: 0);
+				out_float = atom_getfloat(&out_data[1]);
+				outlet_float(data_outlet, out_float);
+				outlet_bang(done_outlet);
+				break;
+			case json_type_double:
+				SETFLOAT(&out_data[1], json_object_get_double(jobj));
+				out_float = atom_getfloat(&out_data[1]);
+				outlet_float(data_outlet, out_float);
+				outlet_bang(done_outlet);
+				break;
+			case json_type_int:
+				SETFLOAT(&out_data[1], json_object_get_int(jobj));
+				out_float = atom_getfloat(&out_data[1]);
+				outlet_float(data_outlet, out_float);
+				outlet_bang(done_outlet);
+				break;
+			case json_type_string:
+				outlet_symbol(data_outlet, gensym(json_object_get_string(jobj)));
+				outlet_bang(done_outlet);
+				break;
+			case json_type_null:
+				outlet_symbol(data_outlet, gensym(""));
+				outlet_bang(done_outlet);
+				break;
+			case json_type_object: 
+				;
+				json_object_object_foreach(jobj, key, val) { /* Passing through every json object */
+					SETSYMBOL(&out_data[0], gensym(key));
+					/* Problem with null as value */
+					if (val == NULL) {
+						SETSYMBOL(&out_data[1], gensym(""));
+					} else {
+						inner_type = json_object_get_type(val);
+						switch (inner_type) {
+							case json_type_boolean:
 							SETFLOAT(&out_data[1], json_object_get_boolean(val) ? 1: 0);
 							break;
 						case json_type_double:
@@ -226,6 +218,7 @@ https://github.com/json-c/json-c/commit/a503ee8217a9912f3c58acae33cf3d1d840dab6c
 				output_json(array_member, data_outlet, done_outlet);
 			}
 			break;
+		}
 	}
 }
 

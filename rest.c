@@ -120,6 +120,7 @@ void *execute_rest_thread(void *thread_args) {
 	curl_handle = curl_easy_init();
 	if (curl_handle) {
 		curl_easy_setopt(curl_handle, CURLOPT_URL, x->complete_url);
+		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 		if (strcmp(x->request_type, "PUT") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
 			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, read_memory_callback);
@@ -169,17 +170,16 @@ void execute_rest(t_rest *x) {
 	pthread_attr_t thread_attributes;
 
 	pthread_attr_init(&thread_attributes);
-	pthread_attr_setstacksize(&thread_attributes, sizeof(double) * 1024 + 1000000);
 	pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_DETACHED);
 	if (x->is_data_locked) {
 		error("data of object locked");
-		return;
-	}
-	x->is_data_locked = 1;
-	rc = pthread_create(&thread, &thread_attributes, execute_rest_thread, (void *)x);
-	pthread_attr_destroy(&thread_attributes);
-	if (rc) {
-		error("Could not create thread with code %d", rc);
-		x->is_data_locked = 0;
+	} else {
+		x->is_data_locked = 1;
+		rc = pthread_create(&thread, &thread_attributes, execute_rest_thread, (void *)x);
+		pthread_attr_destroy(&thread_attributes);
+		if (rc) {
+			error("Could not create thread with code %d", rc);
+			x->is_data_locked = 0;
+		}
 	}
 }

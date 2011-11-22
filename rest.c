@@ -45,22 +45,26 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char *request_type;
 	char path[MAX_STRING_SIZE];
 	char parameter[MAX_STRING_SIZE];
-
-	switch (argcount) {
-		case 0:
-			break;
-		default:
-			request_type = selector->s_name;
-			atom_string(argvec, path, MAX_STRING_SIZE);
-			if (argcount > 1) {
-				atom_string(argvec + 1, parameter, MAX_STRING_SIZE);
-			}
-			strcpy(x->complete_url, x->base_url);
-			strcat(x->complete_url, path);
-			strcpy(x->request_type, request_type);
-			strcpy(x->parameters, remove_backslashes(parameter));
-			execute_rest(x);
-			break;
+	if(x->is_data_locked) {
+		post("rest-json object is performing request and locked");
+	} else {
+		switch (argcount) {
+			case 0:
+				break;
+			default:
+				request_type = selector->s_name;
+				atom_string(argvec, path, MAX_STRING_SIZE);
+				if (argcount > 1) {
+					atom_string(argvec + 1, parameter, MAX_STRING_SIZE);
+				}
+				x->is_data_locked = 1;
+				strcpy(x->complete_url, x->base_url);
+				strcat(x->complete_url, path);
+				strcpy(x->request_type, request_type);
+				strcpy(x->parameters, remove_backslashes(parameter));
+				execute_rest(x);
+				break;
+		}
 	}
 }
 
@@ -69,19 +73,23 @@ void rest_oauth(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 }
 
 void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	switch (argcount) {
-		case 1:
-			if (argvec[0].a_type != A_SYMBOL) {
-				error("Base URL cannot be set.");
-			} else {
-				atom_string(argvec, x->base_url, MAX_STRING_SIZE);
-			}
-			break;
-		case 0:
-			break;
-		default:
-			error("Too many parameters.");
-			break;
+	if(x->is_data_locked) {
+		post("rest-json object is performing request and locked");
+	} else {
+		switch (argcount) {
+			case 1:
+				if (argvec[0].a_type != A_SYMBOL) {
+					error("Base URL cannot be set.");
+				} else {
+					atom_string(argvec, x->base_url, MAX_STRING_SIZE);
+				}
+				break;
+			case 0:
+				break;
+			default:
+				error("Too many parameters.");
+				break;
+		}
 	}
 }
 
@@ -171,15 +179,10 @@ void execute_rest(t_rest *x) {
 
 	pthread_attr_init(&thread_attributes);
 	pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_DETACHED);
-	if (x->is_data_locked) {
-		error("data of object locked");
-	} else {
-		x->is_data_locked = 1;
-		rc = pthread_create(&thread, &thread_attributes, execute_rest_thread, (void *)x);
-		pthread_attr_destroy(&thread_attributes);
-		if (rc) {
-			error("Could not create thread with code %d", rc);
-			x->is_data_locked = 0;
-		}
+	rc = pthread_create(&thread, &thread_attributes, execute_rest_thread, (void *)x);
+	pthread_attr_destroy(&thread_attributes);
+	if (rc) {
+		error("Could not create thread with code %d", rc);
+		x->is_data_locked = 0;
 	}
 }

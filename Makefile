@@ -18,21 +18,19 @@ SOURCES = purest_json.c
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically
-#PDOBJECTS = mypdobject.pd
+#PDOBJECTS = rest json-encode json-decode
 
 # example patches and related files, in the 'examples' subfolder
-#EXAMPLES = bothtogether.pd
+EXAMPLES = purest-json-test.pd the-sound-of-money.pd
 
 # manuals and related files, in the 'manual' subfolder
-#MANUAL = manual.txt
+MANUAL = index.html couchdb-example.png webservice-example.png
 
 # if you want to include any other files in the source and binary tarballs,
 # list them here.  This can be anything from header files, example patches,
 # documentation, etc.  README.txt and LICENSE.txt are required and therefore
 # automatically included
-#EXTRA_DIST = 
-
-
+EXTRA_DIST = json-help.pd rest-json-help.pd Changelog.txt json.c purest_json.h rest.c
 
 #------------------------------------------------------------------------------#
 #
@@ -231,7 +229,7 @@ $(DISTBINDIR):
 libdir: all $(DISTBINDIR)
 	$(INSTALL_FILE) $(LIBRARY_NAME)-meta.pd  $(DISTBINDIR)
 	$(INSTALL_FILE) $(SOURCES)  $(DISTBINDIR)
-	$(INSTALL_FILE) $(SOURCES:.c=-help.pd) $(DISTBINDIR)
+	#$(INSTALL_FILE) $(SOURCES:.c=-help.pd) $(DISTBINDIR)
 	test -z "$(strip $(EXTRA_DIST))" || \
 		$(INSTALL_FILE) $(EXTRA_DIST)    $(DISTBINDIR)
 #	tar --exclude-vcs -czpf $(DISTBINDIR).tar.gz $(DISTBINDIR)
@@ -246,8 +244,8 @@ dist: $(DISTDIR)
 	$(INSTALL_FILE) $(LIBRARY_NAME)-meta.pd  $(DISTDIR)
 	test -z "$(strip $(ALLSOURCES))" || \
 		$(INSTALL_FILE) $(ALLSOURCES)  $(DISTDIR)
-	test -z "$(strip $(ALLSOURCES))" || \
-		$(INSTALL_FILE) $(ALLSOURCES:.c=-help.pd) $(DISTDIR)
+	#test -z "$(strip $(ALLSOURCES))" || \
+	#	$(INSTALL_FILE) $(ALLSOURCES:.c=-help.pd) $(DISTDIR)
 	test -z "$(strip $(PDOBJECTS))" || \
 		$(INSTALL_FILE) $(PDOBJECTS)  $(DISTDIR)
 	test -z "$(strip $(PDOBJECTS))" || \

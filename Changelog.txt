@@ -1,4 +1,11 @@
 Changelog
+0.5:
+- Locking [rest-json] more restrictively
+- Makefile is now ready for packaging
+- Debian package is available
+
+0.4.1:
+- Hopefully fixed threading issues
 
 0.4:
 - Fixed cross-thread access to rest object

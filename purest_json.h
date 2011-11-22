@@ -7,6 +7,8 @@
 #include <json/json.h>
 #include <pthread.h>
 
+#define LIBRARY_VERSION "0.5"
+
 #define MAX_ARRAY_SIZE 256
 #define MAX_STRING_SIZE 2048 
 

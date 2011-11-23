@@ -69,4 +69,3 @@ Here are the steps in detail:
 TODO:
 - Implementing OAUTH
 - JSON error when querying Twitter
-- Stack overflow problem when accessing CouchDB to often with moneytalks

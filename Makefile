@@ -132,6 +132,8 @@ ifeq (CYGWIN,$(findstring CYGWIN,$(UNAME)))
 endif
 ifeq (MINGW,$(findstring MINGW,$(UNAME)))
   SOURCES += $(SOURCES_windows)
+  CFLAGS = -DPD -I$(PD_PATH)/src -Wall -W -g -std=c99 -mthreads
+  LIBS = -L./lib -lcurl -ljson -lpthread -mthreads
   EXTENSION = dll
   OS = windows
   OPT_CFLAGS = -O3 -funroll-loops -fomit-frame-pointer -march=i686 -mtune=pentium4

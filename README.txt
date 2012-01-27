@@ -6,7 +6,7 @@
  |_|     \__,_|_|  \_\______|_____/   |_|     \____/|_____/ \____/|_| \_|
                                                                          
 
-PuREST JSON is a library for connecting Puredata (PD) to HTTP services 
+PuREST JSON is a library for connecting Puredata (Pd) to HTTP services 
 and encoding and decoding JSON data.
 
 The library can issue GET, POST, PUT and DELETE statements, so consumation
@@ -64,6 +64,10 @@ Here are the steps in detail:
    are the *.pd files in the root folder.
 
 5. Some example patches are in the examples folder.
+
+6. To create a deb package, edit the file debian/control to change the 
+   value for Architecture to match your architecture (i386, amd64, powerpc, 
+   ...) and run equivs-build debian/control after make.
 
 
 TODO:

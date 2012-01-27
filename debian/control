@@ -1,5 +1,5 @@
 Package: purest-json
-Version: 0.5
+Version: 0.5-1
 Copyright: debian/copyright
 Readme: README.txt
 Architecture: i386
@@ -12,16 +12,16 @@ Section: sound
 Priority: optional
 Homepage: https://github.com/residuum/PuRestJson 
 Standards-Version: 3.9.2
-Files: purest_json.pd_linux /usr/lib/pd/extra/purest_json
-  purest_json-meta.pd /usr/lib/pd/extra/purest_json
-  json-help.pd /usr/lib/pd/extra/purest_json
-  rest-json-help.pd /usr/lib/pd/extra/purest_json
-  json-help.pd /usr/lib/pd/extra/purest_json
-  manual/index.html /usr/lib/pd/doc/purest_json
-  manual/couchdb-example.png /usr/lib/pd/doc/purest_json
-  manual/webservice-example.png /usr/lib/pd/doc/purest_json
-  examples/purest-json-test.pd /usr/lib/pd/doc/purest_json
-  examples/the-sound-of-money.pd /usr/lib/pd/doc/purest_json
+Files: purest_json.pd_linux /usr/lib/puredata/extra/purest_json
+  purest_json-meta.pd /usr/lib/puredata/extra/purest_json
+  json-help.pd /usr/lib/puredata/extra/purest_json
+  rest-json-help.pd /usr/lib/puredata/extra/purest_json
+  json-help.pd /usr/lib/puredata/extra/purest_json
+  manual/index.html /usr/lib/puredata/doc/purest_json
+  manual/couchdb-example.png /usr/lib/puredata/doc/purest_json
+  manual/webservice-example.png /usr/lib/puredata/doc/purest_json
+  examples/purest-json-test.pd /usr/lib/puredata/doc/purest_json
+  examples/the-sound-of-money.pd /usr/lib/puredata/doc/purest_json
 Extra-Files: Changelog.txt
 Description: A Pd library for working with JSON data and communication with RESTful webservices
  PuREST JSON is a library for decoding and encoding JSON data as well as communication

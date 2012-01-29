@@ -1,0 +1,5 @@
+*.o
+*.pd_*
+libpurest_json.so
+libpurest_json.dylib
+libpurest_json.dll

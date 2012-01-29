@@ -1,10 +1,10 @@
-purest-json (0.5-1) UNRELEASED; urgency=low
+pd-purest-json (0.5-1) UNRELEASED; urgency=low
 
   * Paths adjusted for puredata package instead of pd-extended.
 
  -- Thomas Mayer <thomas@residuum.org>  Thu, 26 Jan 2012 22:52:20 +0100
 
-purest-json (0.5) UNRELEASED; urgency=low
+pd-purest-json (0.5) UNRELEASED; urgency=low
 
   * Initial release. 
 

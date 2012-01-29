@@ -1,3 +1,7 @@
+#include "purest_json.h"
+
+static t_class *rest_class;
+
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
 	t_memory_struct *mem = (t_memory_struct *)data;
@@ -29,7 +33,7 @@ static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *d
 	return to_copy;
 }
 
-void setup_rest(void) {
+void setup_rest0x2djson(void) {
 	rest_class = class_new(gensym("rest-json"), (t_newmethod)rest_new,
 			0, sizeof(t_rest), 0, A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_oauth, gensym("oauth"), A_GIMME, 0);
@@ -38,7 +42,6 @@ void setup_rest(void) {
 	class_addmethod(rest_class, (t_method)rest_command, gensym("GET"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("DELETE"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("POST"), A_GIMME, 0);
-	class_sethelpsymbol(rest_class, gensym("rest-json"));
 }
 
 void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {

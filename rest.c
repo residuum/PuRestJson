@@ -38,7 +38,6 @@ void setup_rest(void) {
 	class_addmethod(rest_class, (t_method)rest_command, gensym("GET"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("DELETE"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("POST"), A_GIMME, 0);
-	class_sethelpsymbol(rest_class, gensym("rest-json"));
 }
 
 void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {

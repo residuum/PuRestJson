@@ -9,7 +9,7 @@ Build-Depends: debhelper (>= 7.0.50~),
 Standards-Version: 3.9.2
 Homepage: https://github.com/residuum/PuRestJson
 
-Package: purest-json
+Package: pd-purest-json
 Architecture: any
 Depends: ${shlibs:Depends},
          puredata-core | pd,

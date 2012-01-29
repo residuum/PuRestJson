@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
-LIBRARY_NAME = purest-json
-PACKAGE = pd-$(LIBRARY_NAME)
+LIBRARY_NAME = purest_json
+PACKAGE = pd-purest-json
 pkglibdir = /usr/lib/pd/extra
 
 %:

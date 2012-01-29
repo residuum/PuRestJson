@@ -1,5 +1,7 @@
 *.o
 *.pd_*
+*.deb
+*.dll
 libpurest_json.so
 libpurest_json.dylib
 libpurest_json.dll

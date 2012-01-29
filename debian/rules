@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-LIBRARY_NAME = template
+LIBRARY_NAME = purest-json
 PACKAGE = pd-$(LIBRARY_NAME)
 pkglibdir = /usr/lib/pd/extra
 

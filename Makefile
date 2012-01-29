@@ -36,6 +36,8 @@ ALL_CFLAGS = -I"$(PD_INCLUDE)" -std=c99
 ALL_LDFLAGS =  
 SHARED_LDFLAGS =
 ALL_LIBS = -lcurl -ljson
+LIBS_windows = -lpthread
+CFLAGS_windows = -mthreads
 
 
 #------------------------------------------------------------------------------#
@@ -217,7 +219,7 @@ ifeq (MINGW,$(findstring MINGW,$(UNAME)))
   # MinGW doesn't seem to include cc so force gcc
   CC=gcc
   OPT_CFLAGS = -O3 -funroll-loops -fomit-frame-pointer
-  ALL_CFLAGS += -mms-bitfields
+  ALL_CFLAGS += -mms-bitfields $(CFLAGS_windows)
   ALL_LDFLAGS += -s -shared -Wl,--enable-auto-import -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj"
   SHARED_LDFLAGS += -shared
   ALL_LIBS += -lpd -lwsock32 -lkernel32 -luser32 -lgdi32 $(LIBS_windows)

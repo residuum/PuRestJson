@@ -1,28 +1,20 @@
-Package: purest-json
-Version: 0.5-1
-Copyright: debian/copyright
-Readme: README.txt
-Architecture: i386
-Maintainer: Thomas Mayer <thomas@residuum.org>
-Depends: pd, libjson0, libcurl3
-#Depends: ${sh-libs:Depends}, ${misc:Depends}
-Recommends: pd-libdir
-Suggests: couchdb
+Source: purest-json
 Section: sound
 Priority: optional
-Homepage: https://github.com/residuum/PuRestJson 
+Maintainer: Thomas Mayer <thomas@residuum.org>
+Build-Depends: debhelper (>= 7.0.50~),
+               puredata-dev | puredata (<< 0.43)
 Standards-Version: 3.9.2
-Files: purest_json.pd_linux /usr/lib/puredata/extra/purest_json
-  purest_json-meta.pd /usr/lib/puredata/extra/purest_json
-  json-help.pd /usr/lib/puredata/extra/purest_json
-  rest-json-help.pd /usr/lib/puredata/extra/purest_json
-  json-help.pd /usr/lib/puredata/extra/purest_json
-  manual/index.html /usr/lib/puredata/doc/purest_json
-  manual/couchdb-example.png /usr/lib/puredata/doc/purest_json
-  manual/webservice-example.png /usr/lib/puredata/doc/purest_json
-  examples/purest-json-test.pd /usr/lib/puredata/doc/purest_json
-  examples/the-sound-of-money.pd /usr/lib/puredata/doc/purest_json
-Extra-Files: Changelog.txt
-Description: A Pd library for working with JSON data and communication with RESTful webservices
- PuREST JSON is a library for decoding and encoding JSON data as well as communication
- with RESTful webservices, that return JSON data. 
+Homepage: https://github.com/residuum/PuRestJson
+
+Package: purest-json
+Architecture: any
+Depends: ${shlibs:Depends},
+         puredata-core | pd,
+         ${misc:Depends}
+Recommends: pd-libdir
+Suggests: couchdb
+Description: pd library for working with JSON data and RESTful webservices
+ PuREST JSON is a library for Pure Data for decoding and encoding JSON
+ data as well as communication with RESTful webservices, that return
+ JSON data.

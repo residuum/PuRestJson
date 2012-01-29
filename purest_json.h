@@ -48,8 +48,7 @@ typedef struct json_decode {
 } t_json_decode;
  
 /* rest */
-t_class *rest_class;
-void setup_rest(void);
+void setup_rest0x2djson(void);
 void *rest_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec); 
@@ -62,8 +61,7 @@ void execute_rest(t_rest *x);
 void *execute_rest_thread(void *thread_args);
 
 /* json-encode */
-t_class *json_encode_class;
-void setup_json_encode(void);
+void setup_json0x2dencode(void);
 void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void json_encode_bang(t_json_encode *x);
@@ -74,8 +72,7 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 json_object *create_object(char *value);
 
 /* json-decode */
-t_class *json_decode_class;
-void setup_json_decode(void);
+void setup_json0x2ddecode(void);
 void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void json_decode_string(t_json_decode *x, t_symbol *data);

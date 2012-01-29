@@ -3,7 +3,9 @@ Section: sound
 Priority: optional
 Maintainer: Thomas Mayer <thomas@residuum.org>
 Build-Depends: debhelper (>= 7.0.50~),
-               puredata-dev | puredata (<< 0.43)
+               puredata-dev | puredata (<< 0.43),
+               libjson0-dev,
+               libcurl4-gnutls-dev | libcurl4-openssl-dev
 Standards-Version: 3.9.2
 Homepage: https://github.com/residuum/PuRestJson
 

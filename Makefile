@@ -349,6 +349,8 @@ dist: $(DISTDIR)
 		$(INSTALL_DATA) $(ALLSOURCES)  $(DISTDIR)
 	test -z "$(strip $(wildcard $(ALLSOURCES:.c=.tcl)))" || \
 		$(INSTALL_DATA) $(wildcard $(ALLSOURCES:.c=.tcl))  $(DISTDIR)
+	test -z "$(strip $(LIBRARY_NAME).c)" || \
+		$(INSTALL_DATA) $(LIBRARY_NAME).c  $(DISTDIR)
 	test -z "$(strip $(SHARED_HEADER))" || \
 		$(INSTALL_DATA) $(SHARED_HEADER)  $(DISTDIR)
 	test -z "$(strip $(SHARED_SOURCE))" || \

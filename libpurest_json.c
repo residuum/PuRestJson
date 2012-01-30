@@ -1,7 +1,7 @@
 #include "purest_json.h"
 
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
-	enum json_type outer_type = json_object_get_type(jobj);
+	enum json_type outer_type;
 	enum json_type inner_type;
 	t_atom out_data[2];
 	t_float out_float;
@@ -14,6 +14,7 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 	if (is_error(jobj)) {
 		error("Not a JSON object.");
 	} else {
+		outer_type = json_object_get_type(jobj);
 		switch (outer_type) {
 			/* We really have a JSON object */
 			case json_type_boolean:

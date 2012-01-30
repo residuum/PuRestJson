@@ -76,6 +76,7 @@ void setup_json0x2ddecode(void);
 void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void json_decode_string(t_json_decode *x, t_symbol *data);
+void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom *argvec);
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 
 /* general */ 

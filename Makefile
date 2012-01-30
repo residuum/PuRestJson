@@ -1,4 +1,4 @@
-## Pd library template version 1.0.11
+## Pd library template version 1.0.12
 # For instructions on how to use this template, see:
 #  http://puredata.info/docs/developer/MakefileTemplate
 LIBRARY_NAME = purest_json
@@ -24,7 +24,11 @@ MANUAL = index.html couchdb-example.png webservice-example.png
 # automatically included
 EXTRA_DIST = Changelog.txt
 
+# unit tests and related files here, in the 'unittests' subfolder
+UNITTESTS = 
+
 HELPPATCHES = json-help.pd rest-json-help.pd
+
 
 #------------------------------------------------------------------------------#
 #
@@ -234,12 +238,12 @@ ALL_CFLAGS := $(ALL_CFLAGS) $(CFLAGS) $(OPT_CFLAGS)
 ALL_LDFLAGS := $(LDFLAGS) $(ALL_LDFLAGS)
 ALL_LIBS := $(LIBS) $(ALL_LIBS)
 
-SHARED_SOURCE ?= $(shell test ! -e lib$(LIBRARY_NAME).c || \
-	echo lib$(LIBRARY_NAME).c )
+SHARED_SOURCE ?= $(wildcard lib$(LIBRARY_NAME).c)
 SHARED_HEADER ?= $(shell test ! -e $(LIBRARY_NAME).h || echo $(LIBRARY_NAME).h)
 SHARED_LIB = $(SHARED_SOURCE:.c=.$(SHARED_EXTENSION))
+SHARED_TCL_LIB = $(wildcard lib$(LIBRARY_NAME).tcl)
 
-.PHONY = install libdir_install single_install install-doc install-examples install-manual clean distclean dist etags $(LIBRARY_NAME)
+.PHONY = install libdir_install single_install install-doc install-examples install-manual install-unittests clean distclean dist etags $(LIBRARY_NAME)
 
 all: $(SOURCES:.c=.$(EXTENSION)) $(SHARED_LIB)
 
@@ -263,7 +267,7 @@ install: libdir_install
 
 # The meta and help files are explicitly installed to make sure they are
 # actually there.  Those files are not optional, then need to be there.
-libdir_install: $(SOURCES:.c=.$(EXTENSION)) $(SHARED_LIB) install-doc install-examples install-manual
+libdir_install: $(SOURCES:.c=.$(EXTENSION)) $(SHARED_LIB) install-doc install-examples install-manual install-unittests
 	$(INSTALL_DIR) $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)
 	$(INSTALL_DATA) $(LIBRARY_NAME)-meta.pd \
 		$(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)
@@ -279,9 +283,12 @@ libdir_install: $(SOURCES:.c=.$(EXTENSION)) $(SHARED_LIB) install-doc install-ex
 	test -z "$(strip $(PDOBJECTS))" || \
 		$(INSTALL_DATA) $(PDOBJECTS) \
 			$(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)
+	test -z "$(strip $(SHARED_TCL_LIB))" || \
+		$(INSTALL_DATA) $(SHARED_TCL_LIB) \
+			$(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)
 
 # install library linked as single binary
-single_install: $(LIBRARY_NAME) install-doc install-examples install-manual
+single_install: $(LIBRARY_NAME) install-doc install-examples install-manual install-unittests
 	$(INSTALL_DIR) $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)
 	$(INSTALL_PROGRAM) $(LIBRARY_NAME).$(EXTENSION) $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)
 	$(STRIP) $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/$(LIBRARY_NAME).$(EXTENSION)
@@ -308,6 +315,12 @@ install-manual:
 			$(INSTALL_DATA) manual/$$file $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/manual; \
 		done
 
+install-unittests:
+	test -z "$(strip $(UNITTESTS))" || \
+		$(INSTALL_DIR) $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/unittests && \
+		for file in $(UNITTESTS); do \
+			$(INSTALL_DATA) unittests/$$file $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/unittests; \
+		done
 
 clean:
 	-rm -f -- $(SOURCES:.c=.o) $(SOURCES_LIB:.c=.o) $(SHARED_SOURCE:.c=.o)
@@ -351,12 +364,14 @@ dist: $(DISTDIR)
 		$(INSTALL_DATA) $(ALLSOURCES)  $(DISTDIR)
 	test -z "$(strip $(wildcard $(ALLSOURCES:.c=.tcl)))" || \
 		$(INSTALL_DATA) $(wildcard $(ALLSOURCES:.c=.tcl))  $(DISTDIR)
-	test -z "$(strip $(LIBRARY_NAME).c)" || \
+	test -z "$(strip $(wildcard $(LIBRARY_NAME).c))" || \
 		$(INSTALL_DATA) $(LIBRARY_NAME).c  $(DISTDIR)
 	test -z "$(strip $(SHARED_HEADER))" || \
 		$(INSTALL_DATA) $(SHARED_HEADER)  $(DISTDIR)
 	test -z "$(strip $(SHARED_SOURCE))" || \
 		$(INSTALL_DATA) $(SHARED_SOURCE)  $(DISTDIR)
+	test -z "$(strip $(SHARED_TCL_LIB))" || \
+		$(INSTALL_DATA) $(SHARED_TCL_LIB)  $(DISTDIR)
 	test -z "$(strip $(PDOBJECTS))" || \
 		$(INSTALL_DATA) $(PDOBJECTS)  $(DISTDIR)
 	test -z "$(strip $(HELPPATCHES))" || \
@@ -373,6 +388,11 @@ dist: $(DISTDIR)
 		for file in $(MANUAL); do \
 			$(INSTALL_DATA) manual/$$file $(DISTDIR)/manual; \
 		done
+	test -z "$(strip $(UNITTESTS))" || \
+		$(INSTALL_DIR) $(DISTDIR)/unittests && \
+		for file in $(UNITTESTS); do \
+			$(INSTALL_DATA) unittests/$$file $(DISTDIR)/unittests; \
+		done
 	tar --exclude-vcs -czpf $(DISTDIR).tar.gz $(DISTDIR)
 
 # make a Debian source package
@@ -385,8 +405,12 @@ dpkg-source:
 	rm -rf -- $(DISTDIR) $(ORIGDIR)
 	cd .. && dpkg-source -b $(LIBRARY_NAME)
 
-etags:
-	etags *.h $(SOURCES) ../../pd/src/*.[ch] /usr/include/*.h /usr/include/*/*.h
+etags: TAGS
+
+TAGS: $(wildcard $(PD_INCLUDE)/*.h) $(SOURCES) $(SHARED_SOURCE) $(SHARED_HEADER)
+	etags $(wildcard $(PD_INCLUDE)/*.h)
+	etags -a *.h $(SOURCES) $(SHARED_SOURCE) $(SHARED_HEADER)
+	etags -a --language=none --regex="/proc[ \t]+\([^ \t]+\)/\1/" *.tcl
 
 showsetup:
 	@echo "CC: $(CC)"
@@ -405,6 +429,7 @@ showsetup:
 	@echo "SHARED_HEADER: $(SHARED_HEADER)"
 	@echo "SHARED_SOURCE: $(SHARED_SOURCE)"
 	@echo "SHARED_LIB: $(SHARED_LIB)"
+	@echo "SHARED_TCL_LIB: $(SHARED_TCL_LIB)"
 	@echo "PDOBJECTS: $(PDOBJECTS)"
 	@echo "ALLSOURCES: $(ALLSOURCES)"
 	@echo "ALLSOURCES TCL: $(wildcard $(ALLSOURCES:.c=.tcl))"

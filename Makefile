@@ -261,7 +261,7 @@ $(LIBRARY_NAME): $(SOURCES:.c=.o) $(LIBRARY_NAME).o lib$(LIBRARY_NAME).o
 	chmod a-x $(LIBRARY_NAME).$(EXTENSION)
 
 $(SHARED_LIB): $(SHARED_SOURCE:.c=.o)
-	$(CC) $(SHARED_LDFLAGS) -o $(SHARED_LIB) $(SHARED_SOURCE:.c=.o) $(LIBS)
+	$(CC) $(ALL_LDFLAGS) $(SHARED_LDFLAGS) -o $(SHARED_LIB) $(SHARED_SOURCE:.c=.o) $(ALL_LIBS)
 
 install: libdir_install
 

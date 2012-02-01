@@ -54,6 +54,8 @@ CFLAGS_windows = -mthreads
 CFLAGS = -Wall -W -g
 LDFLAGS =
 LIBS =
+CROSS =
+CROSS_PATH = 
 
 # get library version from meta file
 LIBRARY_VERSION = $(shell sed -n 's|^\#X text [0-9][0-9]* [0-9][0-9]* VERSION \(.*\);|\1|p' $(LIBRARY_NAME)-meta.pd)
@@ -222,6 +224,15 @@ ifeq (MINGW,$(findstring MINGW,$(UNAME)))
   PD_PATH = $(shell cd "$$PROGRAMFILES/pd" && pwd)
   # MinGW doesn't seem to include cc so force gcc
   CC=gcc
+  ifneq ($(strip $(CROSS)),)
+    CC = $(CROSS)-gcc
+    LD = $(CROSS)-ld
+    AR = $(CROSS)-ar
+    PKG_CONFIG = $(CROSS)-pkg-config
+    CFLAGS += -I$(CROSS_PATH)/$(CROSS)/include -I../../pd/src
+    LIBS += -L$(CROSS_PATH)/$(CROSS)/bin -L$(CROSS_PATH)/$(CROSS)/lib -L/../../pd/bin
+    PATH := $(CROSS_PATH)/bin:$(PATH)
+  endif
   OPT_CFLAGS = -O3 -funroll-loops -fomit-frame-pointer
   ALL_CFLAGS += -mms-bitfields $(CFLAGS_windows)
   ALL_LDFLAGS += -s -shared -Wl,--enable-auto-import -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj"

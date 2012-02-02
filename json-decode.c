@@ -38,6 +38,7 @@ void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom
 			atom_string(argvec + i, value, MAX_STRING_SIZE);
 			strcat(json_string, value);
 		}
+		/*post("%s", json_string);*/
 		jobj = json_tokener_parse(json_string);
 		output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
 		if (!is_error(jobj)) {

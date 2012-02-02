@@ -152,6 +152,7 @@ void *execute_rest_thread(void *thread_args) {
 		result = curl_easy_perform(curl_handle);
 
 		if (result == CURLE_OK) {
+			/* post("%s", out_memory.memory);*/
 			/* Parse JSON */
 			jobj = json_tokener_parse(out_memory.memory);
 			/*outlet_symbol(x->x_ob.ob_outlet, gensym(out_memory.memory));*/

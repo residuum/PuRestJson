@@ -1,4 +1,4 @@
-#N canvas 424 94 871 495 10;
+#N canvas 420 90 871 495 10;
 #N canvas 260 56 853 470 CouchDB-basics 0;
 #X text 416 71 CRUD documents:;
 #X text 15 10 Basic CRUD methods for databases and individual documents
@@ -179,14 +179,12 @@ to be used by a simple sequencer.;
 #X connect 44 0 45 1;
 #X restore 21 282 pd couchdb;
 #X obj 458 216 rest-json;
-#X obj 458 248 print data;
 #X msg 497 149 GET http://search.twitter.com/search.json?q=%23puredata
 ;
 #X msg 474 64 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
 #X msg 458 10 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master
 ;
-#X text 498 131 Getting error while parsing the return value;
 #X text 76 -59 - object for HTTP communication with REST webservices
 ;
 #X text 21 191 An example for a RESTful interface is CouchDB:;
@@ -206,7 +204,8 @@ need to have a local installation of CouchDB.;
 #X text 18 61 HTTP requests are asynchronous. Do not expect two subsequent
 requests to arrive in the same order as sending them. [rest-json] does
 all its work in separate threads.;
-#X connect 8 0 9 0;
+#X obj 458 248 print data;
+#X connect 8 0 19 0;
+#X connect 9 0 8 0;
 #X connect 10 0 8 0;
 #X connect 11 0 8 0;
-#X connect 12 0 8 0;

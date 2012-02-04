@@ -125,7 +125,6 @@ void *execute_rest_thread(void *thread_args) {
 	CURLcode result;
 	t_memory_struct in_memory;
 	t_memory_struct out_memory;
-	json_object *jobj;
 	
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
@@ -152,17 +151,10 @@ void *execute_rest_thread(void *thread_args) {
 		result = curl_easy_perform(curl_handle);
 
 		if (result == CURLE_OK) {
-			/* post("%s", out_memory.memory);*/
-			/* Parse JSON */
-			jobj = json_tokener_parse(out_memory.memory);
-			/*outlet_symbol(x->x_ob.ob_outlet, gensym(out_memory.memory));*/
+			output_json_string(out_memory.memory, x->x_ob.ob_outlet, x->done_outlet);
 			/* Free memory */
 			if (out_memory.memory) {
 				free(out_memory.memory);
-			}
-			output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
-			if (!is_error(jobj)) {
-				json_object_put(jobj);
 			}
 		} else {
 			error("Error while performing request: %s", curl_easy_strerror(result));

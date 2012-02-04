@@ -18,31 +18,19 @@ void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 }
 
 void json_decode_string(t_json_decode *x, t_symbol *data) {
-	char *json_string = data->s_name;
-	json_object *jobj;
-	jobj = json_tokener_parse(json_string);
-	output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
-	if (!is_error(jobj)) {
-		json_object_put(jobj);
-	}
+	output_json_string(data->s_name, x->x_ob.ob_outlet, x->done_outlet);
 }
 
 void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char json_string[MAX_STRING_SIZE];
 	char value[MAX_STRING_SIZE];
 	int i;
-	json_object *jobj;
 	if (argcount > 1) {
 		atom_string(argvec + 1, json_string, MAX_STRING_SIZE);
 		for (i = 2; i < argcount; i++) {
 			atom_string(argvec + i, value, MAX_STRING_SIZE);
 			strcat(json_string, value);
 		}
-		/*post("%s", json_string);*/
-		jobj = json_tokener_parse(json_string);
-		output_json(jobj, x->x_ob.ob_outlet, x->done_outlet);
-		if (!is_error(jobj)) {
-			json_object_put(jobj);
-		}
+		output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
 	}
 }

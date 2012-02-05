@@ -10,7 +10,6 @@ void lowercase_unicode(char *orig) {
 	if (tmp) {
 		memset(orig_return, 0, strlen(orig));
 		strncpy(orig_return, orig, strlen(orig) - strlen(tmp));
-		post("length old %d, new %d", strlen(orig), strlen(orig_return));
 		do {	
 			for (i = 2; i < 2 + uni_len; i++) {
 				switch (tmp[i]) {

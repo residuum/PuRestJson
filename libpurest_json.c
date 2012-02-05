@@ -33,7 +33,6 @@ void lowercase_unicode(char *orig) {
 				}
 			}
 			strcat(orig_return, unicode_intro);
-			post("orig_return %s", orig_return);
 			tmp_without_intro = tmp + 2;
 			tmp = strstr(tmp_without_intro, unicode_intro);
 			if (tmp) {

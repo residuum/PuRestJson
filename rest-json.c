@@ -160,7 +160,6 @@ void *execute_rest_thread(void *thread_args) {
 			error("Error while performing request: %s", curl_easy_strerror(result));
 		}
 		curl_easy_cleanup(curl_handle);
-		free((void *)result);
 	} else {
 		error("Cannot init curl.");
 	}

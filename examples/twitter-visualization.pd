@@ -1,4 +1,4 @@
-#N canvas 440 51 756 544 10;
+#N canvas 438 51 756 544 10;
 #X obj 156 85 rest-json;
 #X obj 12 148 print original-data;
 #X obj 156 113 list trim;
@@ -24,19 +24,19 @@
 #X msg 117 471 text \$1;
 #X obj 169 371 l2s;
 #X obj 34 444 gemhead;
-#X msg 405 391 font \$1;
-#X obj 405 368 openpanel;
-#X obj 378 304 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X msg 343 343 font \$1;
+#X obj 343 320 openpanel;
+#X obj 343 298 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X obj 117 445 list-abs/list-fifo;
 #X obj 117 413 metro 2000;
 #X obj 34 473 scale 0.2;
-#X obj 378 332 t b b;
 #X text 401 95 1: Create Gem window and start rendering;
 #X text 310 277 3: Select font and start pumping data into text3d;
 #X text 154 32 2: Search Twitter;
 #X text -36 12 Simple Twitter visualization with GEM and list-abstractions
 ;
+#X obj 343 367 t b a;
 #X connect 0 0 1 0;
 #X connect 0 0 2 0;
 #X connect 2 0 4 0;
@@ -61,11 +61,11 @@
 #X connect 20 0 19 0;
 #X connect 21 0 26 1;
 #X connect 22 0 28 0;
-#X connect 23 0 19 0;
+#X connect 23 0 33 0;
 #X connect 24 0 23 0;
-#X connect 25 0 29 0;
+#X connect 25 0 24 0;
 #X connect 26 0 20 0;
 #X connect 27 0 26 0;
 #X connect 28 0 19 0;
-#X connect 29 0 27 0;
-#X connect 29 1 24 0;
+#X connect 33 0 27 0;
+#X connect 33 1 19 0;

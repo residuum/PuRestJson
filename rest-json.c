@@ -73,9 +73,17 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 
 void rest_oauth(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	error("OAUTH not implemented yet.");
+
+	(void) x;
+	(void) selector;
+	(void) argcount;
+	(void) argvec;
 }
 
 void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
+
+	(void) selector;
+
 	if(x->is_data_locked) {
 		post("rest-json object is performing request and locked");
 	} else {
@@ -98,6 +106,8 @@ void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 
 void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_rest *x = (t_rest *)pd_new(rest_class);
+
+	(void) selector;
 
 	switch (argcount) {
 		case 1:

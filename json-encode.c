@@ -14,6 +14,11 @@ void setup_json0x2dencode(void) {
 
 void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_json_encode *x = (t_json_encode*)pd_new(json_encode_class);
+
+	(void) selector;
+	(void) argcount;
+	(void) argvec;
+
 	x->data_count = 0;
 	outlet_new(&x->x_ob, NULL);
 	return (void *)x;
@@ -79,6 +84,9 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 	char key[MAX_STRING_SIZE];
 	char value[MAX_STRING_SIZE];
 	int i;
+	
+	(void) selector;
+
 	if (argcount < 2) {
 		error("For method 'add' You need to specify a value.");
 	} else {
@@ -100,6 +108,9 @@ void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t
 	char key[MAX_STRING_SIZE];
 	char value[MAX_STRING_SIZE];
 	int i;
+
+	(void) selector;
+
 	if (argcount < 2) {
 		error("For method 'array' You need to specify a value.");
 	} else {
@@ -118,5 +129,9 @@ void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t
 }
 
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
+	(void) selector;
+	(void) argcount;
+	(void) argvec;
+	
 	x->data_count = 0;
 }

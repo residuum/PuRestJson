@@ -12,6 +12,11 @@ void setup_json0x2ddecode(void) {
 
 void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_json_decode *x = (t_json_decode*)pd_new(json_decode_class);
+	
+	(void) selector;
+	(void) argcount;
+	(void) argvec;
+	
 	outlet_new(&x->x_ob, NULL);
 	x->done_outlet = outlet_new(&x->x_ob, &s_bang);
 	return (void *)x;
@@ -25,12 +30,16 @@ void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom
 	char json_string[MAX_STRING_SIZE];
 	char value[MAX_STRING_SIZE];
 	int i;
+
+	(void) selector;
+
+
 	if (argcount > 1) {
 		atom_string(argvec + 1, json_string, MAX_STRING_SIZE);
 		for (i = 2; i < argcount; i++) {
 			atom_string(argvec + i, value, MAX_STRING_SIZE);
 			strcat(json_string, value);
 		}
-		output_json_string(*json_string, x->x_ob.ob_outlet, x->done_outlet);
+		output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
 	}
 }

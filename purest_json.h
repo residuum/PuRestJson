@@ -30,7 +30,7 @@ typedef struct rest {
 	char base_url[MAX_STRING_SIZE];
 	t_atom out[MAX_ARRAY_SIZE];
 	/* Used for threading */
-	char request_type[6]; /*One of GET, PUT, POST; DELETE*/
+	char request_type[7]; /*One of GET, PUT, POST; DELETE*/
 	char parameters[MAX_STRING_SIZE];
 	char complete_url[MAX_STRING_SIZE];
 	short is_data_locked;

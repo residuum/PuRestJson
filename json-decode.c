@@ -23,7 +23,7 @@ void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 }
 
 void json_decode_string(t_json_decode *x, t_symbol *data) {
-	output_json_string(data->s_name, x->x_ob.ob_outlet, x->done_outlet);
+	output_json_string(remove_backslashes(data->s_name), x->x_ob.ob_outlet, x->done_outlet);
 }
 
 void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom *argvec) {

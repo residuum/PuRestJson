@@ -4,7 +4,7 @@ static t_class *json_encode_class;
 
 void setup_json0x2dencode(void) {
 	json_encode_class = class_new(gensym("json-encode"), (t_newmethod)json_encode_new,
-		0, sizeof(t_json_encode), 0, A_GIMME, 0);
+			0, sizeof(t_json_encode), 0, A_GIMME, 0);
 	class_addbang(json_encode_class, (t_method)json_encode_bang);
 	class_addmethod(json_encode_class, (t_method)json_encode_add, gensym("add"), A_GIMME, 0);
 	class_addmethod(json_encode_class, (t_method)json_encode_array_add, gensym("array"), A_GIMME, 0);
@@ -31,6 +31,8 @@ void json_encode_bang(t_json_encode *x) {
 	short already_added = 0;
 	json_object *jobj = json_object_new_object();
 	json_object *value;
+	json_object *array_members[x->data_count];
+
 	if (x->data_count > 0) {
 		for (i = 0; i < x->data_count; i++) {
 			already_added = 0;
@@ -46,11 +48,13 @@ void json_encode_bang(t_json_encode *x) {
 								break;
 							}
 						}
-						json_object *array_member = create_object(x->data[j].value);
-						json_object_array_add(value, array_member);
-						array_member_numbers[array_member_count] = j;
-						array_member_count++;
-						json_object_put(array_member);
+						if (already_added == 0) {
+							json_object *array_member = create_object(x->data[j].value);
+							json_object_array_add(value, array_member);
+							array_member_numbers[array_member_count] = j;
+							array_members[array_member_count] = array_member;
+							array_member_count++;
+						}
 					}
 				}
 			} else {
@@ -61,6 +65,9 @@ void json_encode_bang(t_json_encode *x) {
 			}
 		}
 		outlet_symbol(x->x_ob.ob_outlet, gensym(json_object_to_json_string(jobj)));
+		for (i = 0; i < array_member_count; i++) {
+			json_object_put(array_members[i]);
+		}
 		json_object_put(jobj);
 	}
 }
@@ -84,7 +91,7 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 	char key[MAX_STRING_SIZE];
 	char value[MAX_STRING_SIZE];
 	int i;
-	
+
 	(void) selector;
 
 	if (argcount < 2) {
@@ -132,6 +139,6 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 	(void) selector;
 	(void) argcount;
 	(void) argvec;
-	
+
 	x->data_count = 0;
 }

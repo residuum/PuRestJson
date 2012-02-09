@@ -166,6 +166,7 @@ void *execute_rest_thread(void *thread_args) {
 			if (out_memory.memory) {
 				free(out_memory.memory);
 			}
+			free((void *)result);
 		} else {
 			error("Error while performing request: %s", curl_easy_strerror(result));
 		}

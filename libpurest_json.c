@@ -4,11 +4,11 @@ void lowercase_unicode(char *orig) {
 	char *unicode_intro = "\\u";
 	char *tmp = strstr(orig, unicode_intro);
 	char *tmp_without_intro;
-	char orig_return[strlen(orig)];
+	char orig_return[strlen(orig) + 1];
 	short i;
 	short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
 	if (tmp) {
-		memset(orig_return, 0, strlen(orig));
+		memset(orig_return, 0, strlen(orig) + 1);
 		strncpy(orig_return, orig, strlen(orig) - strlen(tmp));
 		do {	
 			for (i = 2; i < 2 + uni_len; i++) {
@@ -57,98 +57,97 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 	int array_len;
 	int i;
 
-	if (is_error(jobj)) {
-		error("Not a JSON object.");
-	} else {
-		outer_type = json_object_get_type(jobj);
-		switch (outer_type) {
-			/* We really have a JSON object */
-			case json_type_boolean:
-				SETFLOAT(&out_data[1], json_object_get_boolean(jobj) ? 1: 0);
-				out_float = atom_getfloat(&out_data[1]);
-				outlet_float(data_outlet, out_float);
-				outlet_bang(done_outlet);
-				break;
-			case json_type_double:
-				SETFLOAT(&out_data[1], json_object_get_double(jobj));
-				out_float = atom_getfloat(&out_data[1]);
-				outlet_float(data_outlet, out_float);
-				outlet_bang(done_outlet);
-				break;
-			case json_type_int:
-				SETFLOAT(&out_data[1], json_object_get_int(jobj));
-				out_float = atom_getfloat(&out_data[1]);
-				outlet_float(data_outlet, out_float);
-				outlet_bang(done_outlet);
-				break;
-			case json_type_string:
-				outlet_symbol(data_outlet, gensym(json_object_get_string(jobj)));
-				outlet_bang(done_outlet);
-				break;
-			case json_type_null:
-				outlet_symbol(data_outlet, gensym(""));
-				outlet_bang(done_outlet);
-				break;
-			case json_type_object: 
-				;
-				json_object_object_foreach(jobj, key, val) { /* Passing through every json object */
-					SETSYMBOL(&out_data[0], gensym(key));
-					/* Problem with null as value */
-					if (val == NULL) {
-						SETSYMBOL(&out_data[1], gensym(""));
-					} else {
-						inner_type = json_object_get_type(val);
-						switch (inner_type) {
-							case json_type_boolean:
-								SETFLOAT(&out_data[1], json_object_get_boolean(val) ? 1: 0);
-								break;
-							case json_type_double:
-								SETFLOAT(&out_data[1], json_object_get_double(val));
-								break;
-							case json_type_int:
-								SETFLOAT(&out_data[1], json_object_get_int(val));
-								break;
-							case json_type_string: 
-								/* Float values might come as string */
-								string_value = json_object_get_string(val);
-								float_value = (float)strtod(string_value, &remainder);
-								/* String to float has no remainder => float */
-								if (strlen(remainder) == 0) {
-									SETFLOAT(&out_data[1], float_value);
-									/* Boolean values might come as string */
-								} else if (str_ccmp(string_value, "true") == 0) {
-									SETFLOAT(&out_data[1], 1);
-								} else if (str_ccmp(string_value, "false") == 0) {
-									SETFLOAT(&out_data[1], 0);
-									/* String */
-								} else {
-									SETSYMBOL(&out_data[1], gensym(string_value));
-								}
-								break;
-							case json_type_object:
-								SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
-								break;
-							case json_type_array:
-								SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
-								break;
-							case json_type_null:
-								SETSYMBOL(&out_data[1], gensym(""));
-								break;
-						}
+	outer_type = json_object_get_type(jobj);
+	switch (outer_type) {
+		case json_type_boolean:
+			SETFLOAT(&out_data[1], json_object_get_boolean(jobj) ? 1: 0);
+			out_float = atom_getfloat(&out_data[1]);
+			outlet_float(data_outlet, out_float);
+			outlet_bang(done_outlet);
+			break;
+		case json_type_double:
+			SETFLOAT(&out_data[1], json_object_get_double(jobj));
+			out_float = atom_getfloat(&out_data[1]);
+			outlet_float(data_outlet, out_float);
+			outlet_bang(done_outlet);
+			break;
+		case json_type_int:
+			SETFLOAT(&out_data[1], json_object_get_int(jobj));
+			out_float = atom_getfloat(&out_data[1]);
+			outlet_float(data_outlet, out_float);
+			outlet_bang(done_outlet);
+			break;
+		case json_type_string:
+			outlet_symbol(data_outlet, gensym(json_object_get_string(jobj)));
+			outlet_bang(done_outlet);
+			break;
+		case json_type_null:
+			outlet_symbol(data_outlet, gensym(""));
+			outlet_bang(done_outlet);
+			break;
+		case json_type_object: 
+			;
+			json_object_object_foreach(jobj, key, val) { /* Passing through every json object */
+				SETSYMBOL(&out_data[0], gensym(key));
+				/* Problem with null as value */
+				if (val == NULL) {
+					SETSYMBOL(&out_data[1], gensym(""));
+				} else {
+					inner_type = json_object_get_type(val);
+					switch (inner_type) {
+						case json_type_boolean:
+							SETFLOAT(&out_data[1], json_object_get_boolean(val) ? 1: 0);
+							break;
+						case json_type_double:
+							SETFLOAT(&out_data[1], json_object_get_double(val));
+							break;
+						case json_type_int:
+							SETFLOAT(&out_data[1], json_object_get_int(val));
+							break;
+						case json_type_string: 
+							/* Float values might come as string */
+							string_value = json_object_get_string(val);
+							float_value = (float)strtod(string_value, &remainder);
+							/* String to float has no remainder => float */
+							if (strlen(remainder) == 0) {
+								SETFLOAT(&out_data[1], float_value);
+								/* Boolean values might come as string */
+							} else if (str_ccmp(string_value, "true") == 0) {
+								SETFLOAT(&out_data[1], 1);
+							} else if (str_ccmp(string_value, "false") == 0) {
+								SETFLOAT(&out_data[1], 0);
+								/* String */
+							} else {
+								SETSYMBOL(&out_data[1], gensym(string_value));
+							}
+							break;
+						case json_type_object:
+							SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
+							json_object_put(val);
+							break;
+						case json_type_array:
+							SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
+							break;
+						case json_type_null:
+							SETSYMBOL(&out_data[1], gensym(""));
+							break;
 					}
-					outlet_list(data_outlet, &s_list, 2, &out_data[0]);
 				}
-				outlet_bang(done_outlet);
-				break;
-			case json_type_array: 
-				;
-				array_len = json_object_array_length(jobj);
-				for (i = 0; i < array_len; i++) {
-					json_object *array_member = json_object_array_get_idx(jobj, i);
+				outlet_list(data_outlet, &s_list, 2, &out_data[0]);
+			}
+			outlet_bang(done_outlet);
+			break;
+		case json_type_array: 
+			;
+			array_len = json_object_array_length(jobj);
+			for (i = 0; i < array_len; i++) {
+				json_object *array_member = json_object_array_get_idx(jobj, i);
+				if (!is_error(array_member)) {
 					output_json(array_member, data_outlet, done_outlet);
+					json_object_put(array_member);
 				}
-				break;
-		}
+			}
+			break;
 	}
 }
 
@@ -158,9 +157,11 @@ void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done
 	lowercase_unicode(json_string);
 	/* Parse JSON */
 	jobj = json_tokener_parse(json_string);
-	output_json(jobj, data_outlet, done_outlet);
 	if (!is_error(jobj)) {
+		output_json(jobj, data_outlet, done_outlet);
 		json_object_put(jobj);
+	} else {
+		error("Not a JSON object");
 	}
 }
 

@@ -84,5 +84,5 @@ void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done
 void purest_json_setup(void);
 char *remove_backslashes(char *source_string);
 int str_ccmp(const char *s1, const char *s2);
-void lowercase_unicode(char *orig);
+char *lowercase_unicode(char *orig);
 

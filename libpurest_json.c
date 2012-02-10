@@ -1,49 +1,56 @@
 #include "purest_json.h"
 
-void lowercase_unicode(char *orig) {
+char *lowercase_unicode(char *orig) {
 	char *unicode_intro = "\\u";
 	char *tmp = strstr(orig, unicode_intro);
 	char *tmp_without_intro;
-	char orig_return[strlen(orig) + 1];
+	char *return_string = (char *) calloc(strlen(orig) + 1, sizeof(char));
 	short i;
 	short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
-	if (tmp) {
-		memset(orig_return, 0, strlen(orig) + 1);
-		strncpy(orig_return, orig, strlen(orig) - strlen(tmp));
-		do {	
-			for (i = 2; i < 2 + uni_len; i++) {
-				switch (tmp[i]) {
-					case 'A':
-						tmp[i] = 'a';
-						break;
-					case 'B':
-						tmp[i] = 'b';
-						break;
-					case 'C':
-						tmp[i] = 'c';
-						break;
-					case 'D':
-						tmp[i] = 'd';
-						break;
-					case 'E':
-						tmp[i] = 'e';
-						break;
-					case 'F':
-						tmp[i] = 'f';
-						break;
+
+	if (return_string != NULL) {
+		if (tmp) {
+			memset(return_string, 0x00, strlen(orig) + 1);
+			strncpy(return_string, orig, strlen(orig) - strlen(tmp));
+			do {	
+				for (i = 2; i < 2 + uni_len; i++) {
+					switch (tmp[i]) {
+						case 'A':
+							tmp[i] = 'a';
+							break;
+						case 'B':
+							tmp[i] = 'b';
+							break;
+						case 'C':
+							tmp[i] = 'c';
+							break;
+						case 'D':
+							tmp[i] = 'd';
+							break;
+						case 'E':
+							tmp[i] = 'e';
+							break;
+						case 'F':
+							tmp[i] = 'f';
+							break;
+					}
 				}
-			}
-			strcat(orig_return, unicode_intro);
-			tmp_without_intro = tmp + 2;
-			tmp = strstr(tmp_without_intro, unicode_intro);
-			if (tmp) {
-				strncat(orig_return, tmp_without_intro, strlen(tmp_without_intro) - strlen(tmp));
-			} else {
-				strcat(orig_return, tmp_without_intro);
-			}
-		} while(tmp);
-		strcpy(orig, orig_return);
+				strcat(return_string, unicode_intro);
+				tmp_without_intro = tmp + 2;
+				tmp = strstr(tmp_without_intro, unicode_intro);
+				if (tmp) {
+					strncat(return_string, tmp_without_intro, strlen(tmp_without_intro) - strlen(tmp));
+				} else {
+					strcat(return_string, tmp_without_intro);
+				}
+			} while(tmp);
+		} else {
+			strcpy(return_string, orig);
+		}
+	} else {
+		error("Could not allocate memory");
 	}
+	return return_string;
 }
 
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
@@ -154,15 +161,16 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done_outlet) {
 	json_object *jobj;
 	/* Needed because of bug in json-c 0.9 */
-	lowercase_unicode(json_string);
+	char* corrected_json_string = lowercase_unicode(json_string);
 	/* Parse JSON */
-	jobj = json_tokener_parse(json_string);
+	jobj = json_tokener_parse(corrected_json_string);
 	if (!is_error(jobj)) {
 		output_json(jobj, data_outlet, done_outlet);
 		json_object_put(jobj);
 	} else {
 		error("Not a JSON object");
 	}
+	free(corrected_json_string);
 }
 
 char *remove_backslashes(char *source_string) {

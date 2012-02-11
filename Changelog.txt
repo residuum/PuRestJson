@@ -1,4 +1,7 @@
 Changelog
+0.6:
+- Lots of bugfixes
+
 0.5:
 - Locking [rest-json] more restrictively
 - Makefile is now ready for packaging

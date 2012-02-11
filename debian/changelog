@@ -1,3 +1,9 @@
+pd-purest-json (0.6) UNRELEASED; urgency=low
+
+  * Lots of bugfixes.
+
+ -- Thomas Mayer <thomas@residuum.org>  Sat, 11 Feb 2012 23:17:40 +0100
+
 pd-purest-json (0.5-1) UNRELEASED; urgency=low
 
   * Paths adjusted for puredata package instead of pd-extended.

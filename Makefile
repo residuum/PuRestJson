@@ -78,7 +78,7 @@ ALLSOURCES := $(SOURCES) $(SOURCES_android) $(SOURCES_cygwin) $(SOURCES_macosx) 
 	         $(SOURCES_iphoneos) $(SOURCES_linux) $(SOURCES_windows)
 
 DISTDIR=$(LIBRARY_NAME)-$(LIBRARY_VERSION)
-ORIGDIR=pd-$(LIBRARY_NAME:~=)_$(LIBRARY_VERSION)
+ORIGDIR=pd-`echo $(LIBRARY_NAME:~=)|tr '_' '-'`_$(LIBRARY_VERSION)
 
 UNAME := $(shell uname -s)
 ifeq ($(UNAME),Darwin)
@@ -415,6 +415,9 @@ dpkg-source:
 	rm -f -- $(DISTDIR).tar.gz
 	rm -rf -- $(DISTDIR) $(ORIGDIR)
 	cd .. && dpkg-source -b $(LIBRARY_NAME)
+
+dpkg-deb: dpkg-source
+	dpkg-buildpackage -b -us
 
 etags: TAGS
 

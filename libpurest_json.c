@@ -1,13 +1,15 @@
 #include "purest_json.h"
 
-char *lowercase_unicode(char *orig) {
+char *lowercase_unicode(char *orig, size_t memsize) {
 	char *unicode_intro = "\\u";
 	char *tmp = strstr(orig, unicode_intro);
 	char *tmp_without_intro;
-	char *return_string = (char *) calloc(strlen(orig) + 1, sizeof(char));
+	char *return_string;
 	short i;
 	short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
 
+	memsize = (strlen(orig) + 1) * sizeof(char);
+	return_string = (char *)getbytes(memsize);
 	if (return_string != NULL) {
 		if (tmp) {
 			memset(return_string, 0x00, strlen(orig) + 1);
@@ -67,20 +69,20 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 	outer_type = json_object_get_type(jobj);
 	switch (outer_type) {
 		case json_type_boolean:
-			SETFLOAT(&out_data[1], json_object_get_boolean(jobj) ? 1: 0);
-			out_float = atom_getfloat(&out_data[1]);
+			SETFLOAT(&out_data[0], json_object_get_boolean(jobj) ? 1: 0);
+			out_float = atom_getfloat(&out_data[0]);
 			outlet_float(data_outlet, out_float);
 			outlet_bang(done_outlet);
 			break;
 		case json_type_double:
-			SETFLOAT(&out_data[1], json_object_get_double(jobj));
-			out_float = atom_getfloat(&out_data[1]);
+			SETFLOAT(&out_data[0], json_object_get_double(jobj));
+			out_float = atom_getfloat(&out_data[0]);
 			outlet_float(data_outlet, out_float);
 			outlet_bang(done_outlet);
 			break;
 		case json_type_int:
-			SETFLOAT(&out_data[1], json_object_get_int(jobj));
-			out_float = atom_getfloat(&out_data[1]);
+			SETFLOAT(&out_data[0], json_object_get_int(jobj));
+			out_float = atom_getfloat(&out_data[0]);
 			outlet_float(data_outlet, out_float);
 			outlet_bang(done_outlet);
 			break;
@@ -160,8 +162,9 @@ void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet
 
 void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done_outlet) {
 	json_object *jobj;
+	size_t memsize = 0;
 	/* Needed because of bug in json-c 0.9 */
-	char* corrected_json_string = lowercase_unicode(json_string);
+	char* corrected_json_string = lowercase_unicode(json_string, memsize);
 	/* Parse JSON */
 	jobj = json_tokener_parse(corrected_json_string);
 	if (!is_error(jobj)) {
@@ -170,26 +173,27 @@ void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done
 	} else {
 		error("Not a JSON object");
 	}
-	free(corrected_json_string);
+	freebytes(corrected_json_string, memsize);
 }
 
-char *remove_backslashes(char *source_string) {
+char *remove_backslashes(char *source_string, size_t memsize) {
 	char *dest = NULL;
 	char remove[2] = "\\,";
-	size_t len_src = strlen(source_string);
 	int found;
-	unsigned int i = 0;
-	int j = 0;
+	size_t i = 0;
+	size_t j = 0;
+	size_t len_src = strlen(source_string);
 
-	dest = (char *) calloc(len_src + 1, sizeof(char));
+	memsize = (len_src + 1) * sizeof(char);
+	
+	dest = (char *) getbytes(memsize * sizeof(char));
 	if (dest == NULL) {
-		printf("Unable to allocate memory\n");
+		error("Unable to allocate memory\n");
 	}
-	memset(dest, 0x00,sizeof(char) * len_src + 1 );
 
-	for ( i = 0; i < len_src; i++ ) {
+	for (i = 0; i < memsize; i++ ) {
 		found = FALSE;
-		if (source_string[i] == remove[0] && source_string[i +1] == remove[1]) {
+		if (source_string[i] == remove[0] && source_string[i + 1] == remove[1]) {
 			i++;
 			found = TRUE;
 		}

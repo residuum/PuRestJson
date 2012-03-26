@@ -1,6 +1,43 @@
+/*
+ * [json-encodes] encodes data as JSON and outputs it as a symbol.
+ * */
+
 #include "purest_json.h"
 
 static t_class *json_encode_class;
+
+void json_encode_free_memory(t_json_encode *x) {
+	t_key_value_pair *data_to_free;
+	t_key_value_pair *next_data;
+
+	data_to_free = x->data;
+	while(data_to_free != NULL) {
+		next_data = data_to_free->next;
+		freebytes(data_to_free->key, MAXPDSTRING);
+		freebytes(data_to_free->value, MAXPDSTRING);
+		freebytes(data_to_free, sizeof(t_key_value_pair));
+		data_to_free = next_data;
+	}
+
+	x->data_count = 0;
+	x->data = NULL;
+}
+
+static json_object *create_object(char *value) {
+	json_object *object;
+	char *parsed_string;
+	size_t memsize = 0;
+	/* if stored value is string is starting with { and ending with }, 
+	   then create a json object from it. */
+	if (value[0] == '{' && value[strlen(value) - 1] == '}') {
+		parsed_string = remove_backslashes(value, memsize);;
+		object = json_tokener_parse(parsed_string);
+		freebytes(parsed_string, memsize);
+	} else {
+		object = json_object_new_string(value);
+	}
+	return object;
+}
 
 void setup_json0x2dencode(void) {
 	json_encode_class = class_new(gensym("json-encode"), (t_newmethod)json_encode_new,
@@ -84,22 +121,6 @@ void json_encode_bang(t_json_encode *x) {
 		}
 		json_object_put(jobj);
 	}
-}
-
-json_object *create_object(char *value) {
-	json_object *object;
-	char *parsed_string;
-	size_t memsize = 0;
-	/* if stored value is string is starting with { and ending with }, 
-	   then create a json object from it. */
-	if (value[0] == '{' && value[strlen(value) - 1] == '}') {
-		parsed_string = remove_backslashes(value, memsize);;
-		object = json_tokener_parse(parsed_string);
-		freebytes(parsed_string, memsize);
-	} else {
-		object = json_object_new_string(value);
-	}
-	return object;
 }
 
 void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
@@ -197,21 +218,4 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 	(void) argvec;
 
 	json_encode_free_memory(x);
-}
-
-void json_encode_free_memory(t_json_encode *x) {
-	t_key_value_pair *data_to_free;
-	t_key_value_pair *next_data;
-
-	data_to_free = x->data;
-	while(data_to_free != NULL) {
-		next_data = data_to_free->next;
-		freebytes(data_to_free->key, MAXPDSTRING);
-		freebytes(data_to_free->value, MAXPDSTRING);
-		freebytes(data_to_free, sizeof(t_key_value_pair));
-		data_to_free = next_data;
-	}
-
-	x->data_count = 0;
-	x->data = NULL;
 }

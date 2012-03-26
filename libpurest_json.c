@@ -1,6 +1,10 @@
+/*
+ * Shared functions for working with JSON data.
+ * */
+
 #include "purest_json.h"
 
-char *lowercase_unicode(char *orig, size_t memsize) {
+static char *lowercase_unicode(char *orig, size_t memsize) {
 	char *unicode_intro = "\\u";
 	char *tmp = strstr(orig, unicode_intro);
 	char *tmp_without_intro;

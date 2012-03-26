@@ -1,3 +1,7 @@
+/*
+ * [json-decode] decodes JSON data and outputs it as lists.
+ * */
+
 #include "purest_json.h"
 
 static t_class *json_decode_class;

@@ -54,11 +54,6 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 void rest_oauth(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 
-void execute_rest(t_rest *x);
-
-/* pthread functions */
-void *execute_rest_thread(void *thread_args);
-
 /* json-encode */
 void setup_json0x2dencode(void);
 void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
@@ -69,8 +64,6 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
-json_object *create_object(char *value);
-void json_encode_free_memory(t_json_encode *x);
 
 /* json-decode */
 void setup_json0x2ddecode(void);
@@ -85,4 +78,3 @@ void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done
 void purest_json_setup(void);
 char *remove_backslashes(char *source_string, size_t memsize);
 int str_ccmp(const char *s1, const char *s2);
-char *lowercase_unicode(char *orig, size_t memsize);

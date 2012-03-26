@@ -1,3 +1,7 @@
+/*
+ * [rest-json] makes RESTful calls to webservices that work with JSON data.
+ * */
+
 #include "purest_json.h"
 
 static t_class *rest_class;
@@ -30,6 +34,73 @@ static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *d
 	mem->size -= to_copy;
 	mem->memory += to_copy;
 	return to_copy;
+}
+
+static void *execute_rest_thread(void *thread_args) {
+	t_rest *x = (t_rest *)thread_args; 
+	CURL *curl_handle;
+	CURLcode result;
+	t_memory_struct in_memory;
+	t_memory_struct out_memory;
+
+	curl_global_init(CURL_GLOBAL_ALL);
+	curl_handle = curl_easy_init();
+	if (curl_handle) {
+		curl_easy_setopt(curl_handle, CURLOPT_URL, x->complete_url);
+		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
+		if (strcmp(x->request_type, "PUT") == 0) {
+			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
+			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, read_memory_callback);
+			/* Prepare data for reading */
+			in_memory.memory = getbytes(strlen(x->parameters) + 1);
+			if (in_memory.memory == NULL) {
+				error("not enough memory");
+			}
+			in_memory.size = strlen(x->parameters);
+			memcpy(in_memory.memory, x->parameters, strlen(x->parameters));
+			curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
+		} else if (strcmp(x->request_type, "POST") == 0) {
+			curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
+		} else if (strcmp(x->request_type, "DELETE") == 0) {
+			curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+		}
+		out_memory.memory = getbytes(1);
+		out_memory.size = 0;
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
+		result = curl_easy_perform(curl_handle);
+
+		if (result == CURLE_OK) {
+			output_json_string(out_memory.memory, x->x_ob.ob_outlet, x->done_outlet);
+			/* Free memory */
+			if (out_memory.memory) {
+				freebytes(out_memory.memory, out_memory.size + 1);
+			}
+			free((void *)result);
+		} else {
+			error("Error while performing request: %s", curl_easy_strerror(result));
+		}
+		curl_easy_cleanup(curl_handle);
+	} else {
+		error("Cannot init curl.");
+	}
+	x->is_data_locked = 0;
+	pthread_exit(NULL);
+}
+
+static void execute_rest(t_rest *x) {
+	int rc;
+	pthread_t thread;
+	pthread_attr_t thread_attributes;
+
+	pthread_attr_init(&thread_attributes);
+	pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_DETACHED);
+	rc = pthread_create(&thread, &thread_attributes, execute_rest_thread, (void *)x);
+	pthread_attr_destroy(&thread_attributes);
+	if (rc) {
+		error("Could not create thread with code %d", rc);
+		x->is_data_locked = 0;
+	}
 }
 
 void setup_rest0x2djson(void) {
@@ -156,73 +227,5 @@ void rest_free (t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 
 	if (x->base_url != NULL) {
 		freebytes(x->base_url, MAXPDSTRING * sizeof(char));
-	}
-}
-
-void *execute_rest_thread(void *thread_args) {
-	t_rest *x = (t_rest *)thread_args; 
-	CURL *curl_handle;
-	CURLcode result;
-	t_memory_struct in_memory;
-	t_memory_struct out_memory;
-
-	curl_global_init(CURL_GLOBAL_ALL);
-	curl_handle = curl_easy_init();
-	post("url: %s", x->complete_url);
-	if (curl_handle) {
-		curl_easy_setopt(curl_handle, CURLOPT_URL, x->complete_url);
-		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
-		if (strcmp(x->request_type, "PUT") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
-			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, read_memory_callback);
-			/* Prepare data for reading */
-			in_memory.memory = getbytes(strlen(x->parameters) + 1);
-			if (in_memory.memory == NULL) {
-				error("not enough memory");
-			}
-			in_memory.size = strlen(x->parameters);
-			memcpy(in_memory.memory, x->parameters, strlen(x->parameters));
-			curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
-		} else if (strcmp(x->request_type, "POST") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
-		} else if (strcmp(x->request_type, "DELETE") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
-		}
-		out_memory.memory = getbytes(1);
-		out_memory.size = 0;
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
-		result = curl_easy_perform(curl_handle);
-
-		if (result == CURLE_OK) {
-			output_json_string(out_memory.memory, x->x_ob.ob_outlet, x->done_outlet);
-			/* Free memory */
-			if (out_memory.memory) {
-				freebytes(out_memory.memory, out_memory.size + 1);
-			}
-			free((void *)result);
-		} else {
-			error("Error while performing request: %s", curl_easy_strerror(result));
-		}
-		curl_easy_cleanup(curl_handle);
-	} else {
-		error("Cannot init curl.");
-	}
-	x->is_data_locked = 0;
-	pthread_exit(NULL);
-}
-
-void execute_rest(t_rest *x) {
-	int rc;
-	pthread_t thread;
-	pthread_attr_t thread_attributes;
-
-	pthread_attr_init(&thread_attributes);
-	pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_DETACHED);
-	rc = pthread_create(&thread, &thread_attributes, execute_rest_thread, (void *)x);
-	pthread_attr_destroy(&thread_attributes);
-	if (rc) {
-		error("Could not create thread with code %d", rc);
-		x->is_data_locked = 0;
 	}
 }

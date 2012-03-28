@@ -10,7 +10,7 @@ static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *
 	size_t realsize = size * nmemb;
 	t_memory_struct *mem = (t_memory_struct *)data;
 
-	mem->memory = (char *) resizebytes(mem->memory, mem->size, mem->size + realsize + 1);
+	mem->memory = (char *) resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
 		/* out of memory! */ 
 		error("not enough memory");

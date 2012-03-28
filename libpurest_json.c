@@ -5,58 +5,54 @@
 #include "purest_json.h"
 
 static char *lowercase_unicode(char *orig, size_t memsize) {
-	char *unicode_intro = "\\u";
-	char *tmp = strstr(orig, unicode_intro);
-	char *tmp_without_intro;
-	char *return_string;
+	char *unicode_intro = "\\";
+	char *segment; 
+	char *cleaned_string;
 	short i;
 	short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
 
 	memsize = (strlen(orig) + 1) * sizeof(char);
-	return_string = (char *)getbytes(memsize);
-	if (return_string != NULL) {
-		if (tmp) {
-			memset(return_string, 0x00, strlen(orig) + 1);
-			strncpy(return_string, orig, strlen(orig) - strlen(tmp));
-			do {	
-				for (i = 2; i < 2 + uni_len; i++) {
-					switch (tmp[i]) {
+	cleaned_string = (char *)getbytes(memsize);
+	if (cleaned_string != NULL) {
+		segment = strtok(orig, unicode_intro);
+		memset(cleaned_string, 0x00, strlen(orig) + 1);
+		strcpy(cleaned_string, segment);
+		segment = strtok(NULL, unicode_intro);
+
+		while(segment != NULL) {
+			strcat(cleaned_string, unicode_intro);
+			if (segment[0] == 'u') {
+				for (i = 1; i < 1 + uni_len; i++) {
+					switch (segment[i]) {
 						case 'A':
-							tmp[i] = 'a';
+							segment[i] = 'a';
 							break;
 						case 'B':
-							tmp[i] = 'b';
+							segment[i] = 'b';
 							break;
 						case 'C':
-							tmp[i] = 'c';
+							segment[i] = 'c';
 							break;
 						case 'D':
-							tmp[i] = 'd';
+							segment[i] = 'd';
 							break;
 						case 'E':
-							tmp[i] = 'e';
+							segment[i] = 'e';
 							break;
 						case 'F':
-							tmp[i] = 'f';
+							segment[i] = 'f';
 							break;
 					}
 				}
-				strcat(return_string, unicode_intro);
-				tmp_without_intro = tmp + 2;
-				tmp = strstr(tmp_without_intro, unicode_intro);
-				if (tmp) {
-					strncat(return_string, tmp_without_intro, strlen(tmp_without_intro) - strlen(tmp));
-				} else {
-					strcat(return_string, tmp_without_intro);
-				}
-			} while(tmp);
-		} else {
-			strcpy(return_string, orig);
+			}
+			strcat(cleaned_string, segment);
+			segment = strtok(NULL, unicode_intro);
 		}
+
 	} else {
 		error("Could not allocate memory");
 	}
-	return return_string;
+	return cleaned_string;
 }
 
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
@@ -181,35 +177,31 @@ void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done
 }
 
 char *remove_backslashes(char *source_string, size_t memsize) {
-	char *dest = NULL;
-	char remove[2] = "\\,";
-	int found;
-	size_t i = 0;
-	size_t j = 0;
+	char *cleaned_string = NULL;
+	char *masking = "\\";
+	char *segment;
 	size_t len_src = strlen(source_string);
 
 	memsize = (len_src + 1) * sizeof(char);
-	
-	dest = (char *) getbytes(memsize * sizeof(char));
-	if (dest == NULL) {
+
+	cleaned_string = (char *) getbytes(memsize * sizeof(char));
+	if (cleaned_string == NULL) {
 		error("Unable to allocate memory\n");
 	}
-
-	for (i = 0; i < memsize; i++ ) {
-		found = FALSE;
-		if (source_string[i] == remove[0] && source_string[i + 1] == remove[1]) {
-			i++;
-			found = TRUE;
+	else if (len_src > 0) {
+		segment = strtok(source_string, masking);
+		strcpy(cleaned_string, segment);
+		segment = strtok(NULL, masking);
+		while (segment != NULL) {
+			if (segment[0] != ',') {
+				/* We keep the backslash */
+				strcat(cleaned_string, masking);
+			}
+				strcat(cleaned_string, segment);
+				segment = strtok(NULL, masking);
 		}
-
-		if (FALSE == found)	{
-			dest[j] = source_string[i];
-		} else {
-			dest[j] = ',';
-		}
-		j++;
 	}
-	return (dest);
+	return (cleaned_string);
 }
 
 int str_ccmp(const char *s1, const char *s2) {

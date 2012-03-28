@@ -9,11 +9,13 @@
 
 #define LIBRARY_VERSION "0.7"
 
+/* reading / writing data in HTTP requests */
 typedef struct memory_struct {
   char *memory;
   size_t size;
 } t_memory_struct;
 
+/* storing data before encoding to JSON */
 typedef struct key_value_pair {
   char *key;
   char *value;
@@ -21,40 +23,49 @@ typedef struct key_value_pair {
   struct key_value_pair *next;
 } t_key_value_pair;
 
+/* [rest-json] */
 typedef struct rest {
 	t_object x_ob;
 	t_outlet *done_outlet;
 	int out_count;
-	char *base_url;
+	char base_url[MAXPDSTRING];
+	/* cookie authentication */
+	char login_path[MAXPDSTRING];
+	char username[MAXPDSTRING];
+	char password[MAXPDSTRING];
+	char auth_token[MAXPDSTRING];
+	/* end cookie authentication */
 	t_atom *out;
-	/* Used for threading */
+	/* threading */
 	char request_type[7]; /*One of GET, PUT, POST; DELETE*/
 	char parameters[MAXPDSTRING];
 	char complete_url[MAXPDSTRING];
 	short is_data_locked;
+	/* end threading */
 } t_rest;
 
+/* [json-encode] */
 typedef struct json_encode {
 	t_object x_ob;
 	t_key_value_pair *data;
 	int data_count;
 } t_json_encode;
 
+/* [json-decode] */
 typedef struct json_decode {
 	t_object x_ob;
 	t_outlet *done_outlet;
 } t_json_decode;
  
-/* rest */
+/* [rest-json] */
 void setup_rest0x2djson(void);
 void *rest_new(t_symbol *selector, int argcount, t_atom *argvec);
-void rest_free(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec); 
-void rest_oauth(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
+void rest_oauth(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 
-/* json-encode */
+/* [json-encode] */
 void setup_json0x2dencode(void);
 void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
 void json_encode_free(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
@@ -64,8 +75,7 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
-
-/* json-decode */
+/* [json-decode] */
 void setup_json0x2ddecode(void);
 void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec);
 

@@ -1,53 +1,80 @@
-#N canvas 44 51 1114 567 10;
-#X obj 88 70 version;
-#X obj 61 19 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+#N canvas 44 51 1114 650 10;
+#X obj 242 98 version;
+#X obj 203 47 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
-#X obj 88 98 unpack f f f s s s;
-#X msg 88 125 add major \$1;
-#X obj 61 44 t b b;
-#X msg 109 149 add minor \$1;
-#X msg 130 172 add bugfix \$1;
-#X msg 192 243 add time \$1;
-#X obj 61 308 json-encode;
-#X obj 61 413 rest-json;
-#X obj 213 333 print json-data;
-#X obj 61 440 print;
-#X obj 411 166 rest-json https://residuum.cloudant.com/ _session tyfordarringlichatenteds
-IahoEPP50FTg2DaInWYjw70a;
-#X msg 479 417 url https://residuum.cloudant.com/ _session tyfordarringlichatenteds
-IahoEPP50FTg2DaInWYjw70a;
-#X msg 173 220 add date \$1;
-#X msg 152 196 add distribution \$1;
-#X obj 479 461 rest-json;
-#X msg 61 359 PUT https://tyfordarringlichatenteds:IahoEPP50FTg2DaInWYjw70a@residuum.cloudant.com/purest-json-stat/
-\$1;
-#X msg 439 128 url;
-#X obj 411 209 print;
-#X msg 490 105 GET https://tyfordarringlichatenteds:IahoEPP50FTg2DaInWYjw70a@residuum.cloudant.com/purest-json-stat/
+#X obj 242 126 unpack f f f s s s;
+#X msg 242 153 add major \$1;
+#X msg 263 177 add minor \$1;
+#X msg 284 200 add bugfix \$1;
+#X obj 222 336 json-encode;
+#X obj 685 282 rest-json;
+#X obj 375 367 print json-data;
+#X obj 685 309 print;
+#X msg 306 224 add distribution \$1;
+#X obj 775 389 rest-json;
+#X obj 177 443 rest-json https://residuum.cloudant.com/ _session nownestortedidirevinesti
+dBukE2WR07A7PtE8FIXECl8c;
+#X msg 775 345 url https://residuum.cloudant.com/ _session nownestortedidirevinesti
+dBukE2WR07A7PtE8FIXECl8c;
+#X msg 327 248 add compilation-date \$1;
+#X msg 346 272 add compilation-time \$1;
+#X msg 89 179 GET _uuids?count=1;
+#X obj 203 72 t b b b;
+#X obj 177 369 pack s s;
+#X msg 177 395 PUT purest-json-stat/\$1 \$2;
+#X obj 177 511 print raw-return;
+#X obj 316 492 list trim;
+#X obj 316 566 json-decode;
+#X obj 316 517 route uuids;
+#X obj 316 540 l2s;
+#X obj 79 455 print command;
+#X obj 316 597 route symbol;
+#X msg 685 104 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_version
 ;
-#X msg 411 44 GET purest-json-stat/;
+#X msg 716 202 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_distribution
+;
+#X text 487 448 Parameter 1: Base Url;
+#X text 487 436 Using 4 parameters to get authentication cookie:;
+#X text 487 459 Parameter 2: Path to Login;
+#X text 487 482 Parameter 4: Password;
+#X text 487 471 Parameter 3: Username;
+#X text 299 96 We get version information about Puredata for the statistics
+;
+#X text -13 210 We get new document id;
+#X text -14 222 for storing our version;
+#X text -13 233 as a new document in;
+#X text -14 245 CouchDB;
 #X connect 0 0 2 0;
-#X connect 1 0 4 0;
+#X connect 1 0 17 0;
 #X connect 2 0 3 0;
-#X connect 2 1 5 0;
-#X connect 2 2 6 0;
-#X connect 2 3 15 0;
+#X connect 2 1 4 0;
+#X connect 2 2 5 0;
+#X connect 2 3 10 0;
 #X connect 2 4 14 0;
-#X connect 2 5 7 0;
-#X connect 3 0 8 0;
-#X connect 4 0 8 0;
-#X connect 4 1 0 0;
-#X connect 5 0 8 0;
+#X connect 2 5 15 0;
+#X connect 3 0 6 0;
+#X connect 4 0 6 0;
+#X connect 5 0 6 0;
 #X connect 6 0 8 0;
-#X connect 7 0 8 0;
-#X connect 8 0 10 0;
-#X connect 8 0 17 0;
-#X connect 9 0 11 0;
-#X connect 12 0 19 0;
-#X connect 13 0 16 0;
-#X connect 14 0 8 0;
-#X connect 15 0 8 0;
-#X connect 17 0 9 0;
-#X connect 18 0 12 0;
-#X connect 20 0 12 0;
-#X connect 21 0 12 0;
+#X connect 6 0 18 1;
+#X connect 7 0 9 0;
+#X connect 10 0 6 0;
+#X connect 12 0 20 0;
+#X connect 12 0 21 0;
+#X connect 13 0 11 0;
+#X connect 14 0 6 0;
+#X connect 15 0 6 0;
+#X connect 16 0 12 0;
+#X connect 17 0 16 0;
+#X connect 17 1 6 0;
+#X connect 17 2 0 0;
+#X connect 18 0 19 0;
+#X connect 19 0 25 0;
+#X connect 19 0 12 0;
+#X connect 21 0 23 0;
+#X connect 22 0 26 0;
+#X connect 23 0 24 0;
+#X connect 24 0 22 0;
+#X connect 26 0 18 0;
+#X connect 27 0 7 0;
+#X connect 28 0 7 0;

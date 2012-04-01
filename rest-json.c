@@ -74,6 +74,7 @@ static void *execute_rest_thread(void *thread_args) {
 		result = curl_easy_perform(curl_handle);
 
 		if (result == CURLE_OK) {
+			x->is_data_locked = 0;
 			output_json_string(out_memory.memory, x->x_ob.ob_outlet, x->done_outlet);
 			/* Free memory */
 			if (out_memory.memory) {
@@ -81,13 +82,14 @@ static void *execute_rest_thread(void *thread_args) {
 			}
 			free((void *)result);
 		} else {
+			x->is_data_locked = 0;
 			error("Error while performing request: %s", curl_easy_strerror(result));
 		}
 		curl_easy_cleanup(curl_handle);
 	} else {
 		error("Cannot init curl.");
+		x->is_data_locked = 0;
 	}
-	x->is_data_locked = 0;
 	pthread_exit(NULL);
 }
 
@@ -167,7 +169,7 @@ static void *get_auth_token_thread(void *thread_args) {
 					header_line = strtok(NULL, "\n");
 				}
 
-			/* Free memory */
+				/* Free memory */
 				freebytes(out_header.memory, (out_header.size + 1) * sizeof(char));
 			}
 			if (out_content.memory) {
@@ -184,7 +186,7 @@ static void get_auth_token(t_rest *x) {
 	int rc;
 	pthread_t thread;
 	pthread_attr_t thread_attributes;
-	
+
 	pthread_attr_init(&thread_attributes);
 	pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_DETACHED);
 	rc = pthread_create(&thread, &thread_attributes, get_auth_token_thread, (void *)x);

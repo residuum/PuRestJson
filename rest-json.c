@@ -90,7 +90,7 @@ static void *execute_rest_thread(void *thread_args) {
 		error("Cannot init curl.");
 		x->is_data_locked = 0;
 	}
-	pthread_exit(NULL);
+	return NULL;
 }
 
 static void execute_rest(t_rest *x) {
@@ -179,7 +179,7 @@ static void *get_auth_token_thread(void *thread_args) {
 		freebytes(post_data, post_data_length * sizeof(char));
 	}
 	x->is_data_locked = 0;
-	pthread_exit(NULL);
+	return NULL;
 }
 
 static void get_auth_token(t_rest *x) {

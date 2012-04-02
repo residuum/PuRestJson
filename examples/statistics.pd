@@ -29,10 +29,6 @@ dBukE2WR07A7PtE8FIXECl8c;
 #X obj 316 540 l2s;
 #X obj 79 455 print command;
 #X obj 316 597 route symbol;
-#X msg 685 104 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_version
-;
-#X msg 716 202 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_distribution
-;
 #X text 487 448 Parameter 1: Base Url;
 #X text 487 436 Using 4 parameters to get authentication cookie:;
 #X text 487 459 Parameter 2: Path to Login;
@@ -44,6 +40,10 @@ dBukE2WR07A7PtE8FIXECl8c;
 #X text -14 222 for storing our version;
 #X text -13 233 as a new document in;
 #X text -14 245 CouchDB;
+#X msg 685 104 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_version?group=true
+;
+#X msg 716 202 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_distribution?group=true
+;
 #X connect 0 0 2 0;
 #X connect 1 0 17 0;
 #X connect 2 0 3 0;
@@ -76,5 +76,5 @@ dBukE2WR07A7PtE8FIXECl8c;
 #X connect 23 0 24 0;
 #X connect 24 0 22 0;
 #X connect 26 0 18 0;
-#X connect 27 0 7 0;
-#X connect 28 0 7 0;
+#X connect 37 0 7 0;
+#X connect 38 0 7 0;

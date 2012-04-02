@@ -1,80 +1,100 @@
-#N canvas 44 51 1114 650 10;
-#X obj 242 98 version;
-#X obj 203 47 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
-#X obj 242 126 unpack f f f s s s;
-#X msg 242 153 add major \$1;
-#X msg 263 177 add minor \$1;
-#X msg 284 200 add bugfix \$1;
-#X obj 222 336 json-encode;
-#X obj 685 282 rest-json;
-#X obj 375 367 print json-data;
-#X obj 685 309 print;
-#X msg 306 224 add distribution \$1;
-#X obj 775 389 rest-json;
-#X obj 177 443 rest-json https://residuum.cloudant.com/ _session nownestortedidirevinesti
+#N canvas 44 51 1175 694 10;
+#X obj 279 127 version;
+#X obj 240 76 bng 15 250 50 0 empty empty Warning:_Clicking_here_will_send_data_about_your_Pd_version_to_an_open_databas*
+17 7 0 10 -262144 -1 -1;
+#X obj 279 155 unpack f f f s s s;
+#X msg 279 182 add major \$1;
+#X msg 300 206 add minor \$1;
+#X msg 321 229 add bugfix \$1;
+#X obj 259 365 json-encode;
+#X obj 722 364 rest-json;
+#X obj 412 396 print json-data;
+#X obj 722 391 print;
+#X msg 343 253 add distribution \$1;
+#X obj 214 472 rest-json https://residuum.cloudant.com/ _session nownestortedidirevinesti
 dBukE2WR07A7PtE8FIXECl8c;
-#X msg 775 345 url https://residuum.cloudant.com/ _session nownestortedidirevinesti
-dBukE2WR07A7PtE8FIXECl8c;
-#X msg 327 248 add compilation-date \$1;
-#X msg 346 272 add compilation-time \$1;
-#X msg 89 179 GET _uuids?count=1;
-#X obj 203 72 t b b b;
-#X obj 177 369 pack s s;
-#X msg 177 395 PUT purest-json-stat/\$1 \$2;
-#X obj 177 511 print raw-return;
-#X obj 316 492 list trim;
-#X obj 316 566 json-decode;
-#X obj 316 517 route uuids;
-#X obj 316 540 l2s;
-#X obj 79 455 print command;
-#X obj 316 597 route symbol;
-#X text 487 448 Parameter 1: Base Url;
-#X text 487 436 Using 4 parameters to get authentication cookie:;
-#X text 487 459 Parameter 2: Path to Login;
-#X text 487 482 Parameter 4: Password;
-#X text 487 471 Parameter 3: Username;
-#X text 299 96 We get version information about Puredata for the statistics
+#X msg 364 277 add compilation-date \$1;
+#X msg 383 301 add compilation-time \$1;
+#X msg 126 208 GET _uuids?count=1;
+#X obj 240 101 t b b b;
+#X obj 214 398 pack s s;
+#X msg 214 424 PUT purest-json-stat/\$1 \$2;
+#X obj 214 540 print raw-return;
+#X obj 353 521 list trim;
+#X obj 353 595 json-decode;
+#X obj 353 546 route uuids;
+#X obj 353 569 l2s;
+#X obj 116 484 print command;
+#X obj 353 626 route symbol;
+#X text 524 477 Parameter 1: Base Url;
+#X text 524 465 Using 4 parameters to get authentication cookie:;
+#X text 524 488 Parameter 2: Path to Login;
+#X text 524 511 Parameter 4: Password;
+#X text 524 500 Parameter 3: Username;
+#X text 336 125 We get version information about Puredata for the statistics
 ;
-#X text -13 210 We get new document id;
-#X text -14 222 for storing our version;
-#X text -13 233 as a new document in;
-#X text -14 245 CouchDB;
-#X msg 685 104 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_version?group=true
+#X text 24 239 We get new document id;
+#X text 23 251 for storing our version;
+#X text 24 262 as a new document in;
+#X text 23 274 CouchDB;
+#X msg 722 186 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_version?group=true
 ;
-#X msg 716 202 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_distribution?group=true
+#X msg 753 284 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_distribution?group=true
 ;
+#X text 339 364 We create a JSON object from the version information
+;
+#X text 389 423 We store the data using the uniqueidentifier.;
+#X text 27 9 This is a simple example for using cookie authentication.
+The example sends data to a BigCouch instance hosted by http://cloudant.com/.
+;
+#X text 26 43 The data will only include information from the output
+of [version] \, and nothing else.;
+#X text 718 124 Other possibilities for basic HTTP authentication:
+send the username and password seperated by a colon (:) after the specification
+of the protocol \, followed by an at sign (@) and the url.;
+#N canvas 44 51 493 359 or-in-base-url 0;
+#X obj 34 269 print;
+#X text 34 30 The trick with : and @ also works for the base url.;
+#X msg 77 101 GET usage_by_distribution?group=true;
+#X msg 34 64 GET usage_by_version?group=true;
+#X obj 34 144 rest-json https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/
+;
+#X connect 2 0 4 0;
+#X connect 3 0 4 0;
+#X connect 4 0 0 0;
+#X restore 722 418 pd or-in-base-url;
+#X obj 505 567 print status-information;
 #X connect 0 0 2 0;
-#X connect 1 0 17 0;
+#X connect 1 0 15 0;
 #X connect 2 0 3 0;
 #X connect 2 1 4 0;
 #X connect 2 2 5 0;
 #X connect 2 3 10 0;
-#X connect 2 4 14 0;
-#X connect 2 5 15 0;
+#X connect 2 4 12 0;
+#X connect 2 5 13 0;
 #X connect 3 0 6 0;
 #X connect 4 0 6 0;
 #X connect 5 0 6 0;
 #X connect 6 0 8 0;
-#X connect 6 0 18 1;
+#X connect 6 0 16 1;
 #X connect 7 0 9 0;
 #X connect 10 0 6 0;
-#X connect 12 0 20 0;
-#X connect 12 0 21 0;
-#X connect 13 0 11 0;
-#X connect 14 0 6 0;
-#X connect 15 0 6 0;
-#X connect 16 0 12 0;
-#X connect 17 0 16 0;
-#X connect 17 1 6 0;
-#X connect 17 2 0 0;
-#X connect 18 0 19 0;
-#X connect 19 0 25 0;
-#X connect 19 0 12 0;
-#X connect 21 0 23 0;
-#X connect 22 0 26 0;
-#X connect 23 0 24 0;
-#X connect 24 0 22 0;
-#X connect 26 0 18 0;
-#X connect 37 0 7 0;
-#X connect 38 0 7 0;
+#X connect 11 0 18 0;
+#X connect 11 0 19 0;
+#X connect 11 2 43 0;
+#X connect 12 0 6 0;
+#X connect 13 0 6 0;
+#X connect 14 0 11 0;
+#X connect 15 0 14 0;
+#X connect 15 1 6 0;
+#X connect 15 2 0 0;
+#X connect 16 0 17 0;
+#X connect 17 0 23 0;
+#X connect 17 0 11 0;
+#X connect 19 0 21 0;
+#X connect 20 0 24 0;
+#X connect 21 0 22 0;
+#X connect 22 0 20 0;
+#X connect 24 0 16 0;
+#X connect 35 0 7 0;
+#X connect 36 0 7 0;

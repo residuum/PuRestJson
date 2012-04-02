@@ -27,6 +27,7 @@ typedef struct key_value_pair {
 typedef struct rest {
 	t_object x_ob;
 	t_outlet *done_outlet;
+	t_outlet *status_info_outlet;
 	int out_count;
 	char base_url[MAXPDSTRING];
 	/* cookie authentication */

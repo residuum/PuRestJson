@@ -42,6 +42,8 @@ static void *execute_rest_thread(void *thread_args) {
 	CURLcode result;
 	t_memory_struct in_memory;
 	t_memory_struct out_memory;
+	long http_code;
+	t_atom http_status_data[3];
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
@@ -73,17 +75,28 @@ static void *execute_rest_thread(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
 		result = curl_easy_perform(curl_handle);
 
-		if (result == CURLE_OK) {
-			x->is_data_locked = 0;
-			output_json_string(out_memory.memory, x->x_ob.ob_outlet, x->done_outlet);
-			/* Free memory */
-			if (out_memory.memory) {
-				freebytes(out_memory.memory, (out_memory.size + 1) * sizeof(char));
+		/* output status */
+		curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+		SETSYMBOL(&http_status_data[0], gensym(x->request_type));
+		if (http_code == 200 && result == CURLE_OK) {
+			SETSYMBOL(&http_status_data[1], gensym("bang"));
+			outlet_list(x->status_info_outlet, &s_list, 2, &http_status_data[0]);
+			if (result == CURLE_OK) {
+				x->is_data_locked = 0;
+				output_json_string(out_memory.memory, x->x_ob.ob_outlet, x->done_outlet);
+				/* Free memory */
+				if (out_memory.memory) {
+					freebytes(out_memory.memory, (out_memory.size + 1) * sizeof(char));
+				}
+				free((void *)result);
+			} else {
+				x->is_data_locked = 0;
+				error("Error while performing request: %s", curl_easy_strerror(result));
 			}
-			free((void *)result);
 		} else {
-			x->is_data_locked = 0;
-			error("Error while performing request: %s", curl_easy_strerror(result));
+			SETFLOAT(&http_status_data[1], (float)http_code);
+			SETFLOAT(&http_status_data[2], (float)result);
+			outlet_list(x->status_info_outlet, &s_list, 3, &http_status_data[0]);
 		}
 		curl_easy_cleanup(curl_handle);
 	} else {
@@ -118,6 +131,8 @@ static void *get_auth_token_thread(void *thread_args) {
 	size_t post_data_length;
 	char *header_line;
 	char *cookie_params;
+	long http_code;
+	t_atom auth_status_data[3];
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
@@ -148,6 +163,18 @@ static void *get_auth_token_thread(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, write_memory_callback);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEHEADER, (void *)&out_header);
 		result = curl_easy_perform(curl_handle);
+
+		/* output the status code at third outlet */
+		curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+		SETSYMBOL(&auth_status_data[0], gensym("cookie"));
+		if (http_code == 200 && result == CURLE_OK) {
+			SETSYMBOL(&auth_status_data[1], gensym("bang"));
+			outlet_list(x->status_info_outlet, &s_list, 2, &auth_status_data[0]);
+		} else {
+			SETFLOAT(&auth_status_data[1], (float)http_code);
+			SETFLOAT(&auth_status_data[2], (float)result);
+			outlet_list(x->status_info_outlet, &s_list, 3, &auth_status_data[0]);
+		}
 
 		if (result == CURLE_OK) {
 			if (out_header.memory) {
@@ -325,6 +352,7 @@ void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 
 	outlet_new(&x->x_ob, NULL);
 	x->done_outlet = outlet_new(&x->x_ob, &s_bang);
+	x->status_info_outlet = outlet_new(&x->x_ob, NULL);
 	x->is_data_locked = 0;
 
 	return (void *)x;

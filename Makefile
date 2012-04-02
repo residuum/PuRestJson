@@ -13,7 +13,7 @@ SOURCES = rest-json.c json-decode.c json-encode.c
 PDOBJECTS = 
 
 # example patches and related files, in the 'examples' subfolder
-EXAMPLES = purest-json-test.pd the-sound-of-money.pd twitter-visualization.pd
+EXAMPLES = purest-json-test.pd the-sound-of-money.pd twitter-visualization.pd statistics.pd
 
 # manuals and related files, in the 'manual' subfolder
 MANUAL = index.html couchdb-example.png webservice-example.png

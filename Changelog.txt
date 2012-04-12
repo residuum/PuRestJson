@@ -1,4 +1,10 @@
 Changelog
+
+0.7:
+- Cookie authentication, useful for CouchDB login
+- [rest-json] has a third outlet
+- Refactoring
+
 0.6:
 - Lots of bugfixes
 

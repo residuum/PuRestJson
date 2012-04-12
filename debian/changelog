@@ -1,3 +1,11 @@
+pd-purest-json (0.7) UNRELEASED; urgency=low
+
+  *  Cookie authentication, useful for CouchDB login
+  *  [rest-json] has a third outlet
+  *  Refactoring
+
+ -- Thomas Mayer <thomas@residuum.org>  Thu, 12 Apr 2012 20:17:20 +0200
+
 pd-purest-json (0.6) UNRELEASED; urgency=low
 
   * Lots of bugfixes.

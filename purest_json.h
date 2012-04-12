@@ -48,7 +48,8 @@ typedef struct rest {
 /* [json-encode] */
 typedef struct json_encode {
 	t_object x_ob;
-	t_key_value_pair *data;
+	t_key_value_pair *first_data;
+	t_key_value_pair *last_data;
 	int data_count;
 } t_json_encode;
 

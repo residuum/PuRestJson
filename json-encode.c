@@ -10,7 +10,7 @@ void json_encode_free_memory(t_json_encode *x) {
 	t_key_value_pair *data_to_free;
 	t_key_value_pair *next_data;
 
-	data_to_free = x->data;
+	data_to_free = x->first_data;
 	while(data_to_free != NULL) {
 		next_data = data_to_free->next;
 		freebytes(data_to_free->key, MAXPDSTRING);
@@ -20,7 +20,8 @@ void json_encode_free_memory(t_json_encode *x) {
 	}
 
 	x->data_count = 0;
-	x->data = NULL;
+	x->first_data = NULL;
+	x->last_data = NULL;
 }
 
 static json_object *create_object(char *value) {
@@ -81,7 +82,7 @@ void json_encode_bang(t_json_encode *x) {
 	json_object *array_members[x->data_count];
 
 	if (x->data_count > 0) {
-		data_member = x->data;
+		data_member = x->first_data;
 		for (i = 0; i < x->data_count; i++) {
 			already_added = 0;
 			/* Is it an array member? */
@@ -128,7 +129,6 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 	char *value;
 	char temp_value[MAXPDSTRING];
 	t_key_value_pair *created_data = NULL;
-	t_key_value_pair *previous_data = NULL;
 	int i;
 
 	(void) selector;
@@ -154,15 +154,12 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 		created_data->value = value;
 		created_data->next = NULL;
 		created_data->is_array = 0;
-		if (x->data == NULL) {
-			x->data = created_data;
+		if (x->first_data == NULL) {
+			x->first_data = created_data;
 		} else {
-			previous_data = x->data;
-			while (previous_data->next) {
-				previous_data = previous_data->next;
-			}
-			previous_data->next = created_data;
+			x->last_data->next = created_data;
 		}
+		x->last_data = created_data;
 
 		x->data_count++;
 	}
@@ -173,7 +170,6 @@ void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t
 	char *value;
 	char temp_value[MAXPDSTRING];
 	t_key_value_pair *created_data = NULL;
-	t_key_value_pair *previous_data = NULL;
 	int i;
 
 	(void) selector;
@@ -199,15 +195,13 @@ void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t
 		created_data->value = value;
 		created_data->next = NULL;
 		created_data->is_array = 1;
-		if (x->data == NULL) {
-			x->data = created_data;
+		if (x->first_data == NULL) {
+			x->first_data = created_data;
 		} else {
-			previous_data = x->data;
-			while (previous_data->next) {
-				previous_data = previous_data->next;
-			}
-			previous_data->next = created_data;
+			x->last_data->next = created_data;
 		}
+		x->last_data = created_data;
+		
 		x->data_count++;
 	}
 }

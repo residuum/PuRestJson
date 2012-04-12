@@ -226,6 +226,13 @@ static void get_auth_token(t_rest *x) {
 
 static void set_url_parameters(t_rest *x, int argcount, t_atom *argvec) {
 	switch (argcount) {
+		case 0:
+			memset(x->base_url, 0x00, MAXPDSTRING);
+			memset(x->login_path, 0x00, MAXPDSTRING);
+			memset(x->username, 0x00, MAXPDSTRING);
+			memset(x->password, 0x00, MAXPDSTRING);
+			memset(x->auth_token, 0x00, MAXPDSTRING);
+			break;
 		case 1:
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
@@ -260,13 +267,6 @@ static void set_url_parameters(t_rest *x, int argcount, t_atom *argvec) {
 				atom_string(argvec + 3, x->password, MAXPDSTRING);
 			}
 			get_auth_token(x);
-			break;
-		case 0:
-			memset(x->base_url, 0x00, MAXPDSTRING);
-			memset(x->login_path, 0x00, MAXPDSTRING);
-			memset(x->username, 0x00, MAXPDSTRING);
-			memset(x->password, 0x00, MAXPDSTRING);
-			memset(x->auth_token, 0x00, MAXPDSTRING);
 			break;
 		default:
 			error("Wrong number of parameters.");

@@ -169,7 +169,8 @@ void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done
 	jobj = json_tokener_parse(corrected_json_string);
 	if (!is_error(jobj)) {
 		output_json(jobj, data_outlet, done_outlet);
-		json_object_put(jobj);
+		/* TODO: This sometimes results in a segfault. Why? */
+		/*json_object_put(jobj);*/
 	} else {
 		error("Not a JSON object");
 	}

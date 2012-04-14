@@ -7,7 +7,7 @@
 #include <json/json.h>
 #include <pthread.h>
 
-#define LIBRARY_VERSION "0.7"
+#define LIBRARY_VERSION "0.7.1"
 
 /* reading / writing data in HTTP requests */
 typedef struct memory_struct {

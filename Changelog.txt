@@ -1,4 +1,8 @@
 Changelog
+---------
+0.7.1:
+- Unlocking [rest-json] when HTTP status is not 200.
+- Fix for segfault at json_object_put().
 
 0.7:
 - Cookie authentication, useful for CouchDB login

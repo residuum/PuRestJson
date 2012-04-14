@@ -82,7 +82,6 @@ static void *execute_rest_thread(void *thread_args) {
 			SETSYMBOL(&http_status_data[1], gensym("bang"));
 			outlet_list(x->status_info_outlet, &s_list, 2, &http_status_data[0]);
 			if (result == CURLE_OK) {
-				x->is_data_locked = 0;
 				output_json_string(out_memory.memory, x->x_ob.ob_outlet, x->done_outlet);
 				/* Free memory */
 				if (out_memory.memory) {
@@ -90,7 +89,6 @@ static void *execute_rest_thread(void *thread_args) {
 				}
 				free((void *)result);
 			} else {
-				x->is_data_locked = 0;
 				error("Error while performing request: %s", curl_easy_strerror(result));
 			}
 		} else {
@@ -101,8 +99,8 @@ static void *execute_rest_thread(void *thread_args) {
 		curl_easy_cleanup(curl_handle);
 	} else {
 		error("Cannot init curl.");
-		x->is_data_locked = 0;
 	}
+	x->is_data_locked = 0;
 	return NULL;
 }
 

@@ -118,51 +118,52 @@ array-done: bang
 		<p>Here is the output from the main example in examples/purest-json-test.pd with explanations.</p>
 		<p>First, we create the database and get info about the database:</p>
 		<pre>
-couchdb return: list ok 1
-couchdb return: list db_name test
-couchdb return: list doc_count 0
-couchdb return: list doc_del_count 0
-couchdb return: list update_seq 0
-couchdb return: list purge_seq 0
-couchdb return: list compact_running 0
-couchdb return: list disk_size 79
-couchdb return: list instance_start_time 1.31733e+15
-couchdb return: list disk_format_version 5
-couchdb return: list committed_update_seq 0
+status_messages: list PUT 201 0
+status_messages: list GET bang
+couchdb_return: list db_name test
+couchdb_return: list doc_count 0
+couchdb_return: list doc_del_count 0
+couchdb_return: list update_seq 0
+couchdb_return: list purge_seq 0
+couchdb_return: list compact_running 0
+couchdb_return: list disk_size 79
+couchdb_return: list instance_start_time 1.33686e+15
+couchdb_return: list disk_format_version 5
+couchdb_return: list committed_update_seq 0
 		</pre>
 		<p>After that, we build a JSON document and store it in the database:</p>
 		<pre>
-json-encoded data: symbol \{ "value": "440"\\, "duration": "1000"\\, "start": "10"\\, "name": "first note"\\, "var": [ "yabba"\\, "dabba"\\, "doo" ]\\, "on": "TRUE" \}
-decode json data: list value 440
-decode json data: list duration 1000
-decode json data: list start 10
-decode json data: list name first note
-decode json data: list var [ "yabba"\\, "dabba"\\, "doo" ]
-decode json data: list on 1
-couchdb return: list ok 1
-couchdb return: list id 1
-couchdb return: list rev 1-b7a3cb13c20812a4c7845e9a86f92099
+json-encoded data: symbol { "value": "440"\, "duration": "1000"\, "start": "10"\, "name": "first note"\, "var": [ "yabba"\, "dabba"\, "doo" ]\, "on": "TRUE" }
+decode_json_data: list value 440
+decode_json_data: list duration 1000
+decode_json_data: list start 10
+decode_json_data: list name first note
+decode_json_data: list var [ "yabba"\, "dabba"\, "doo" ]
+decode_json_data: list on 1
+status_messages: list PUT 201 0
 		</pre>
 		<p>Then we query the database for the stored document and use it to drive a simple ramp:</p>
 		<pre>
+status_messages: list GET bang
 id: 1
-couchdb return: list _id 1
-couchdb return: list _rev 1-b7a3cb13c20812a4c7845e9a86f92099
-couchdb return: list value 440
-couchdb return: list duration 1000
-couchdb return: list start 10
+couchdb_return: list _id 1
+couchdb_return: list _rev 1-b7a3cb13c20812a4c7845e9a86f92099
+couchdb_return: list value 440
+couchdb_return: list duration 1000
+couchdb_return: list start 10
 name: first note
-couchdb return: list name first note
-couchdb return: list var [ "yabba"\\, "dabba"\\, "doo" ]
-couchdb return: list on 1
+couchdb_return: list name first note
+couchdb_return: list var [ "yabba"\, "dabba"\, "doo" ]
+couchdb_return: list on 1
 		</pre>
 		<p>In the end we delete the database:</p>
 		<pre>
-couchdb return: list ok 1
+status_messages: list DELETE bang
+couchdb_return: list ok 1
 		</pre>
 		<h2>Author and License</h2>
 		<p>Author: Thomas Mayer <thomas@residuum.org></p>
-		<p>Copyright (c) 2011 Thomas Mayer</p>
+		<p>Copyright (c) 2012 Thomas Mayer</p>
 		<p>Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal
 		in the Software without restriction, including without limitation the rights

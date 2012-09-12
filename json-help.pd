@@ -1,4 +1,5 @@
 #N canvas 44 51 994 506 10;
+#X declare -lib purest_json;
 #X obj 566 321 json-encode;
 #X obj 566 390 json-decode;
 #X obj 47 -14 json-encode;
@@ -168,6 +169,7 @@ objects. The messages will come as list key value.;
 #X obj 566 427 print decoded_values;
 #X obj 697 427 print decoding_done;
 #X obj 656 391 print JSON_string;
+#X obj 841 425 import purest_json;
 #X connect 0 0 20 0;
 #X connect 1 0 25 0;
 #X connect 1 1 26 0;

@@ -1,4 +1,5 @@
-#N canvas 369 82 914 513 10;
+#N canvas 367 80 914 513 10;
+#X declare -lib purest_json;
 #N canvas 258 54 853 470 CouchDB-basics 0;
 #X text 416 71 CRUD documents:;
 #X text 15 10 Basic CRUD methods for databases and individual documents
@@ -246,6 +247,7 @@ request;
 #X text 497 170 This will give you an error on the third outlet;
 #X msg 499 188 GET http://search.twitter.com/wrongsearch.json?q=%23puredata
 ;
+#X obj 457 -40 import purest_json;
 #X connect 5 0 15 0;
 #X connect 5 1 23 0;
 #X connect 5 2 24 0;

@@ -1,4 +1,5 @@
-#N canvas 452 51 756 544 10;
+#N canvas 450 51 756 544 10;
+#X declare -lib purest_json;
 #X obj 156 36 rest-json;
 #X obj 188 434 dac~;
 #X obj 193 173 fifop;
@@ -28,6 +29,7 @@ array outputs a bang at the right outlet of rest-json;
 #X text 400 171 use a fifo buffer for the values (from zexy);
 #X obj 266 232 * 20;
 #X obj 193 230 * 10;
+#X obj 19 241 import purest_json;
 #X connect 0 0 7 0;
 #X connect 0 0 16 0;
 #X connect 0 1 18 0;

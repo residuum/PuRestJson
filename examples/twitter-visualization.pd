@@ -1,5 +1,5 @@
-#N canvas 436 51 756 544 10;
-#X declare -lib purest_json;
+#N canvas 434 51 756 544 10;
+#X declare -lib gem -lib purest_json;
 #X obj 156 85 rest-json;
 #X obj 12 148 print original-data;
 #X obj 156 113 list trim;
@@ -38,7 +38,7 @@
 #X text -36 12 Simple Twitter visualization with GEM and list-abstractions
 ;
 #X obj 343 367 t b a;
-#X obj 570 22 import purest_json;
+#X obj 528 46 import gem purest_json;
 #X connect 0 0 1 0;
 #X connect 0 0 2 0;
 #X connect 2 0 4 0;

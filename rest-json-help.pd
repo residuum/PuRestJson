@@ -1,4 +1,4 @@
-#N canvas 367 80 914 513 10;
+#N canvas 363 76 952 532 10;
 #X declare -lib purest_json;
 #N canvas 258 54 853 470 CouchDB-basics 0;
 #X text 416 71 CRUD documents:;
@@ -202,11 +202,33 @@ all its work in separate threads.;
 empty url message will clean a previous set base url. You can also
 use four parameters for the [url( message to use basic cookie authentication
 \, see below.;
-#N canvas 504 82 450 300 OAUTH 0;
-#X text 68 54 OAUTH is not yet implemented. Sorry about that.;
+#N canvas 498 76 619 521 OAUTH 0;
+#X obj -18 383 rest-json;
+#X msg -18 129 oauth http/term.ie/example key secret requestkey requestsecret
+;
+#X text -23 15 The oauth message needs five parameters: the base url
+of the REST service \, consumer key \, consumer secret \, access token
+\, and access token secret.;
+#X text -23 54 For the terminology \, see http://hueniverse.com/oauth/guide/terminology/
+;
+#X obj 33 427 print oauth-status;
+#X text -23 84 The OAUTH test server does not return JSON data \, so
+only the status is relevant \, see http://term.ie/oauth/example/;
+#X text 23 185 After setting oauth \, only GET and POST requests are
+possible.;
+#X msg 25 223 GET /echo_api.php?method=foo&bar=baz;
+#X msg 40 255 POST /echo_api.php?method=foo&bar=baz;
+#X msg 50 289 PUT /echo_api.php?method=foo&bar=baz;
+#X msg 62 354 url;
+#X text 62 322 To reset [rest-json] and disable oauth \, just send
+[url( to the object;
+#X connect 0 2 4 0;
+#X connect 1 0 0 0;
+#X connect 7 0 0 0;
+#X connect 8 0 0 0;
+#X connect 9 0 0 0;
+#X connect 10 0 0 0;
 #X restore 462 390 pd OAUTH;
-#X text 461 372 When OAUTH is implemented \, you will find infos about
-it here;
 #X text 18 385 Using cookie authentication with rest-json;
 #N canvas 500 78 443 465 cookie-auth 0;
 #X obj 40 347 rest-json;
@@ -249,9 +271,9 @@ request;
 ;
 #X obj 457 -40 import purest_json;
 #X connect 5 0 15 0;
-#X connect 5 1 23 0;
-#X connect 5 2 24 0;
+#X connect 5 1 22 0;
+#X connect 5 2 23 0;
 #X connect 6 0 5 0;
 #X connect 7 0 5 0;
 #X connect 8 0 5 0;
-#X connect 26 0 5 0;
+#X connect 25 0 5 0;

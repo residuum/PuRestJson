@@ -403,6 +403,7 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 							SETSYMBOL(&auth_status_data[1], gensym("Request method not supported"));
 							error("Request method %s not supported.", x->request_type);
 							outlet_list(x->status_info_outlet, &s_list, 2, &auth_status_data[0]);
+							x->is_data_locked = 0;
 						} else {
 							thread_execute(x, execute_rest_request);
 						}
@@ -414,6 +415,7 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 							SETSYMBOL(&auth_status_data[1], gensym("Request Method not supported"));
 							error("Request method %s not supported.", x->request_type);
 							outlet_list(x->status_info_outlet, &s_list, 2, &auth_status_data[0]);
+							x->is_data_locked = 0;
 						} else {
 							thread_execute(x, execute_oauth_request);
 						}

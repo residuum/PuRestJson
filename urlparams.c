@@ -74,7 +74,7 @@ void urlparams_free (t_urlparams *x, t_symbol *selector, int argcount, t_atom *a
 }
 
 void urlparams_bang(t_urlparams *x) {
-	int i, j;
+	int i;
 	t_key_value_pair *data_member;
 	char output[MAXPDSTRING];
 	char *encoded_string = NULL;

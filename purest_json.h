@@ -6,8 +6,14 @@
 #include <curl/curl.h>
 #include <json/json.h>
 #include <pthread.h>
+#include <oauth.h>
 
 #define LIBRARY_VERSION "0.7.1"
+
+typedef enum {
+	COOKIE,
+	OAUTH
+} AuthType;
 
 /* reading / writing data in HTTP requests */
 typedef struct memory_struct {
@@ -30,12 +36,23 @@ typedef struct rest {
 	t_outlet *status_info_outlet;
 	int out_count;
 	char base_url[MAXPDSTRING];
-	/* cookie authentication */
-	char login_path[MAXPDSTRING];
-	char username[MAXPDSTRING];
-	char password[MAXPDSTRING];
-	char auth_token[MAXPDSTRING];
-	/* end cookie authentication */
+	/* authentication: cookie / oauth */
+	AuthType auth_type;
+	union {
+		struct {
+			char login_path[MAXPDSTRING];
+			char username[MAXPDSTRING];
+			char password[MAXPDSTRING];
+			char auth_token[MAXPDSTRING];
+		} cookie;
+		struct {
+			char request_type[5]; /*GET or POST*/
+			char client_key[MAXPDSTRING];
+			char client_secret[MAXPDSTRING];
+			char token_key[MAXPDSTRING];
+			char token_secret[MAXPDSTRING];
+		} oauth;
+	} auth;
 	t_atom *out;
 	/* threading */
 	char request_type[7]; /*One of GET, PUT, POST; DELETE*/
@@ -58,7 +75,15 @@ typedef struct json_decode {
 	t_object x_ob;
 	t_outlet *done_outlet;
 } t_json_decode;
- 
+
+/* [urlparams] */
+typedef struct urlparams {
+	t_object x_ob;
+	t_key_value_pair *first_data;
+	t_key_value_pair *last_data;
+	int data_count;
+} t_urlparams;
+
 /* [rest-json] */
 void setup_rest0x2djson(void);
 void *rest_new(t_symbol *selector, int argcount, t_atom *argvec);
@@ -85,6 +110,15 @@ void json_decode_string(t_json_decode *x, t_symbol *data);
 void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom *argvec);
 void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done_outlet);
+
+/* [urlparams] */
+void urlparams_setup(void);
+void *urlparams_new(t_symbol *selector, int argcount, t_atom *argvec);
+void urlparams_free(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec);
+
+void urlparams_bang(t_urlparams *x);
+void urlparams_add(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec);
+void urlparams_clear(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* general */ 
 void purest_json_setup(void);

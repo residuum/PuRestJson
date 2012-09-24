@@ -6,7 +6,7 @@ LIBRARY_NAME = purest_json
 # add your .c source files, one object per file, to the SOURCES
 # variable, help files will be included automatically, and for GUI
 # objects, the matching .tcl file too
-SOURCES = rest-json.c json-decode.c json-encode.c
+SOURCES = rest-json.c json-decode.c json-encode.c urlparams.c
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically
@@ -27,7 +27,7 @@ EXTRA_DIST = Changelog.txt
 # unit tests and related files here, in the 'unittests' subfolder
 UNITTESTS = 
 
-HELPPATCHES = json-help.pd rest-json-help.pd
+HELPPATCHES = json-help.pd rest-json-help.pd urlparams-help.pd
 
 
 #------------------------------------------------------------------------------#
@@ -39,8 +39,8 @@ HELPPATCHES = json-help.pd rest-json-help.pd
 ALL_CFLAGS = -I"$(PD_INCLUDE)" -std=c99
 ALL_LDFLAGS =  
 SHARED_LDFLAGS =
-ALL_LIBS = -lcurl -ljson
-LIBS_windows = -lpthread -lrtmp -lidn -lssl -lssh2 -lcrypto -lz -lws2_32 -lwldap32 -lwinmm -lgdi32
+ALL_LIBS = -lcurl -ljson -loauth
+LIBS_windows = -lpthread
 CFLAGS_windows = -mthreads -DCURL_STATICLIB
 
 
@@ -221,7 +221,9 @@ ifeq (MINGW,$(findstring MINGW,$(UNAME)))
   EXTENSION = dll
   SHARED_EXTENSION = dll
   OS = windows
-  PD_PATH = $(shell cd "$$PROGRAMFILES/pd" && pwd)
+  ifeq ($(strip $(PD_PATH)),)
+    PD_PATH = $(shell cd "$$PROGRAMFILES/pd" && pwd)
+  endif
   # MinGW doesn't seem to include cc so force gcc
   CC=gcc
   ifneq ($(strip $(CROSS)),)
@@ -229,12 +231,12 @@ ifeq (MINGW,$(findstring MINGW,$(UNAME)))
     LD = $(CROSS)-ld
     AR = $(CROSS)-ar
     PKG_CONFIG = $(CROSS)-pkg-config
-    CFLAGS += -I$(CROSS_PATH)/$(CROSS)/include -I../../pd/src
-    LIBS += -L$(CROSS_PATH)/$(CROSS)/bin -L$(CROSS_PATH)/$(CROSS)/lib -L/../../pd/bin
-    PATH := $(CROSS_PATH)/bin:$(PATH)
+    CFLAGS += -I$(CROSS_PATH)/$(CROSS)/include
+    LDFLAGS += -L$(CROSS_PATH)/$(CROSS)/bin -L$(CROSS_PATH)/$(CROSS)/lib
+    PATH := ${PATH}:$(CROSS_PATH)/bin
   endif
   OPT_CFLAGS = -O3 -funroll-loops -fomit-frame-pointer
-  ALL_CFLAGS += -mms-bitfields $(CFLAGS_windows)
+  ALL_CFLAGS += -mms-bitfields -I"$(PD_PATH)/src"  $(CFLAGS_windows)
   ALL_LDFLAGS += -s -shared -Wl,--enable-auto-import -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj"
   SHARED_LDFLAGS += -shared -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj"
   ALL_LIBS += -lpd -lwsock32 -lkernel32 -luser32 -lgdi32 $(LIBS_windows)

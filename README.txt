@@ -38,6 +38,9 @@ Object for encoding data to JSON.
 [json-decode]
 Object for decoding JSON data.
 
+[urlparams]
+Object for url encoding and contatenating url parameters.
+
 For the usage of the externals see the help patches for the objects.
 
 

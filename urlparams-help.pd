@@ -1,0 +1,34 @@
+#N canvas 44 51 994 506 10;
+#X declare -lib purest_json;
+#X text 127 -13 - encodes data into a JSON string.;
+#X msg 548 57 add id 1;
+#X text 545 24 Will add key id and value of 1 to object;
+#X msg 590 87 add name Residuum;
+#X msg 636 183 add year 2011;
+#X msg 654 229 add id 2;
+#X msg 363 271 clear;
+#X text 359 252 This will clear the object;
+#X text 696 263 output the value;
+#X msg 697 282 bang;
+#X obj 841 425 import purest_json;
+#X obj 47 -14 urlparams;
+#X obj 566 321 urlparams;
+#X text 43 14 [urlparams] has three methods: add \, clear and bang.
+add adds a new key/value pair to the internally stored object. clear
+clears the internally stored object. bang outputs the stored object
+as urlencoded parameter string.;
+#X text 616 113 This will add a string with url encoded spaces and
+special characters;
+#X obj 566 356 print;
+#X msg 616 141 add anothername who will tweet to @residuummuc with
+hashtag #Pd?;
+#X text 651 202 adding a different value will not overwrite the previously
+stored one \, but add it to the end;
+#X connect 1 0 12 0;
+#X connect 3 0 12 0;
+#X connect 4 0 12 0;
+#X connect 5 0 12 0;
+#X connect 6 0 12 0;
+#X connect 9 0 12 0;
+#X connect 12 0 15 0;
+#X connect 16 0 12 0;

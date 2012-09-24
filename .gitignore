@@ -5,3 +5,4 @@
 libpurest_json.so
 libpurest_json.dylib
 libpurest_json.dll
+*-my.pd

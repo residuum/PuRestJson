@@ -8,7 +8,7 @@
 #include <pthread.h>
 #include <oauth.h>
 
-#define LIBRARY_VERSION "0.7.1"
+#define LIBRARY_VERSION "0.8"
 
 /* reading / writing data in HTTP requests */
 typedef struct memory_struct {

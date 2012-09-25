@@ -1,5 +1,11 @@
 Changelog
 ---------
+0.8:
+- Added objects: [oauth] [urlparams] [rest]
+- [rest-json] is now an abstraction
+- Bugfixes
+- Better examples and help patches
+
 0.7.1:
 - Unlocking [rest-json] when HTTP status is not 200.
 - Fix for segfault at json_object_put().

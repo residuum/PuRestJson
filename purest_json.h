@@ -52,7 +52,6 @@ typedef struct oauth {
 	char base_url[MAXPDSTRING];
 	/* authentication*/
 	struct {
-		char request_type[5]; /*GET or POST*/
 		char client_key[MAXPDSTRING];
 		char client_secret[MAXPDSTRING];
 		char token_key[MAXPDSTRING];
@@ -60,7 +59,7 @@ typedef struct oauth {
 	} oauth;
 	t_atom *out;
 	/* threading */
-	char request_type[7]; /*One of GET, PUT, POST; DELETE*/
+	char request_type[5]; /*GET or POST*/
 	char parameters[MAXPDSTRING];
 	char complete_url[MAXPDSTRING];
 	short is_data_locked;
@@ -102,8 +101,9 @@ void *oauth_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec); 
 void oauth_url(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
+
 /* [json-encode] */
-void json0x2dencode_setup(void);
+void setup_json0x2dencode(void);
 void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
 void json_encode_free(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
@@ -113,7 +113,7 @@ void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* [json-decode] */
-void json0x2ddecode_setup(void);
+void setup_json0x2ddecode(void);
 void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void json_decode_string(t_json_decode *x, t_symbol *data);

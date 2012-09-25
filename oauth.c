@@ -12,16 +12,17 @@ static void *execute_oauth_request(void *thread_args) {
 	char *postargs = NULL;
 	char *reply = NULL;
 	t_atom http_status_data[3];
+		
+	if (x->parameters) {
+		if (strchr(x->complete_url, '?')) {
+			strcat(x->complete_url, "&");
+		} else {
+			strcat(x->complete_url, "?");
+		}
+		strcat(x->complete_url, x->parameters);
+	}
 
 	if (strcmp(x->request_type, "POST") == 0) {
-		if (x->parameters) {
-			if (strchr(x->complete_url, '?')) {
-				strcat(x->complete_url, "&");
-			} else {
-				strcat(x->complete_url, "?");
-			}
-			strcat(x->complete_url, x->parameters);
-		}
 		req_url = oauth_sign_url2(x->complete_url, &postargs, OA_HMAC, NULL, 
 				x->oauth.client_key, x->oauth.client_secret, 
 				x->oauth.token_key, x->oauth.token_secret);
@@ -143,7 +144,7 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 	if(x->is_data_locked) {
 		post("oauth object is performing request and locked");
 	} else {
-		memset(x->request_type, 0x00, 7);
+		memset(x->request_type, 0x00, 5);
 		memset(x->parameters, 0x00, MAXPDSTRING);
 		memset(x->complete_url, 0x00, MAXPDSTRING);
 		switch (argcount) {

@@ -266,6 +266,7 @@ all: $(SOURCES:.c=.$(EXTENSION)) $(SHARED_LIB)
 %.$(EXTENSION): %.o $(SHARED_LIB)
 	$(CC) $(ALL_LDFLAGS) -o "$*.$(EXTENSION)" "$*.o"  $(ALL_LIBS) $(SHARED_LIB)
 	chmod a-x "$*.$(EXTENSION)"
+	chmod a-x "$(SHARED_LIB)"
 
 # this links everything into a single binary file
 $(LIBRARY_NAME): $(SOURCES:.c=.o) $(LIBRARY_NAME).o lib$(LIBRARY_NAME).o

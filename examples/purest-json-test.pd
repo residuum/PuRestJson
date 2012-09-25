@@ -1,4 +1,4 @@
-#N canvas 61 51 1002 589 10;
+#N canvas 59 51 1002 589 10;
 #X declare -lib purest_json;
 #X msg 9 38 url http://127.0.0.1:5984/;
 #X obj 363 136 json-encode;

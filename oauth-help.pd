@@ -1,0 +1,36 @@
+#N canvas 180 176 952 389 10;
+#X declare -lib purest_json;
+#X obj 457 -40 import purest_json;
+#X obj 19 -60 oauth;
+#X text 57 -61 - object for HTTP communication with OAUTH webservices
+;
+#X text 17 -33 [oauth] is an object for communication with OAUTH enbabled
+webservices that return JSON data. Request methods GET and POST are
+available.;
+#X text 17 3 All requests are issued with [REQUEST_METHOD URL DATA(
+where REQUEST_METHOD is the uppercase verb of the method \, URL is
+the relative server path \, and DATA are url parameters to add to the
+url. For creating the data \, see;
+#X obj 21 58 urlparams;
+#X text 18 90 HTTP requests are asynchronous. While [oauth] waits for
+the webservice to return data \, the object is locked and does not
+allow other methods.;
+#X text 18 128 Set the base url \, consumer key and secret (client
+credentials) \, and optionally access token and secret (token credentials)
+at creation or use [url( message.;
+#X obj 20 174 oauth http://example.com/ CLIENTKEY CLIENTSECRET ACCESSTOKEN
+ACCESSSECRET;
+#X text 455 -14 The second output of [oauth] will output status data
+of the request.;
+#X msg 486 99 GET /echo_api.php?method=foo&bar=baz;
+#X msg 504 144 POST /echo_api.php?method=foo&bar=baz;
+#X obj 452 194 oauth;
+#X obj 503 238 print status;
+#X obj 414 233 print data;
+#X msg 452 53 url http/term.ie/example key secret requestkey requestsecret
+;
+#X connect 10 0 12 0;
+#X connect 11 0 12 0;
+#X connect 12 0 14 0;
+#X connect 12 1 13 0;
+#X connect 15 0 12 0;

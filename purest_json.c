@@ -6,7 +6,7 @@ void purest_json_setup(void) {
 	post("Get the latest source from https://github.com/residuum/PuRestJson");
 	rest_setup();
 	oauth_setup();
-	json0x2dencode_setup();
-	json0x2ddecode_setup();
+	setup_json0x2dencode();
+	setup_json0x2ddecode();
 	urlparams_setup();
 }

@@ -29,8 +29,11 @@ package very much a community effort.
 
 Externals in the library
 
-[rest-json]
-Object for issuing HTTP request. Received data is parsed as JSON data. 
+[rest]
+Object for issuing HTTP request.
+
+[oauth]
+Object for issuing GET and POST requests with OAUTH.
 
 [json-encode]
 Object for encoding data to JSON.
@@ -40,6 +43,9 @@ Object for decoding JSON data.
 
 [urlparams]
 Object for url encoding and contatenating url parameters.
+
+[rest-json]
+Object for issuing HTTP request. Received data is parsed as JSON data. 
 
 For the usage of the externals see the help patches for the objects.
 

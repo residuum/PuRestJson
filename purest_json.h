@@ -10,11 +10,6 @@
 
 #define LIBRARY_VERSION "0.7.1"
 
-typedef enum {
-	COOKIE,
-	OAUTH
-} AuthType;
-
 /* reading / writing data in HTTP requests */
 typedef struct memory_struct {
   char *memory;
@@ -29,30 +24,18 @@ typedef struct key_value_pair {
   struct key_value_pair *next;
 } t_key_value_pair;
 
-/* [rest-json] */
+/* [rest] */
 typedef struct rest {
 	t_object x_ob;
-	t_outlet *done_outlet;
 	t_outlet *status_info_outlet;
-	int out_count;
 	char base_url[MAXPDSTRING];
-	/* authentication: cookie / oauth */
-	AuthType auth_type;
-	union {
-		struct {
-			char login_path[MAXPDSTRING];
-			char username[MAXPDSTRING];
-			char password[MAXPDSTRING];
-			char auth_token[MAXPDSTRING];
-		} cookie;
-		struct {
-			char request_type[5]; /*GET or POST*/
-			char client_key[MAXPDSTRING];
-			char client_secret[MAXPDSTRING];
-			char token_key[MAXPDSTRING];
-			char token_secret[MAXPDSTRING];
-		} oauth;
-	} auth;
+	/* authentication: cookie */
+	struct {
+		char login_path[MAXPDSTRING];
+		char username[MAXPDSTRING];
+		char password[MAXPDSTRING];
+		char auth_token[MAXPDSTRING];
+	} cookie;
 	t_atom *out;
 	/* threading */
 	char request_type[7]; /*One of GET, PUT, POST; DELETE*/
@@ -61,6 +44,28 @@ typedef struct rest {
 	short is_data_locked;
 	/* end threading */
 } t_rest;
+
+/* [oauth] */
+typedef struct oauth {
+	t_object x_ob;
+	t_outlet *status_info_outlet;
+	char base_url[MAXPDSTRING];
+	/* authentication*/
+	struct {
+		char request_type[5]; /*GET or POST*/
+		char client_key[MAXPDSTRING];
+		char client_secret[MAXPDSTRING];
+		char token_key[MAXPDSTRING];
+		char token_secret[MAXPDSTRING];
+	} oauth;
+	t_atom *out;
+	/* threading */
+	char request_type[7]; /*One of GET, PUT, POST; DELETE*/
+	char parameters[MAXPDSTRING];
+	char complete_url[MAXPDSTRING];
+	short is_data_locked;
+	/* end threading */
+} t_oauth;
 
 /* [json-encode] */
 typedef struct json_encode {
@@ -84,16 +89,21 @@ typedef struct urlparams {
 	int data_count;
 } t_urlparams;
 
-/* [rest-json] */
-void setup_rest0x2djson(void);
+/* [rest] */
+void rest_setup(void);
 void *rest_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec); 
 void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
-void rest_oauth(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 
+/* [oauth] */
+void oauth_setup(void);
+void *oauth_new(t_symbol *selector, int argcount, t_atom *argvec);
+
+void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec); 
+void oauth_url(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
 /* [json-encode] */
-void setup_json0x2dencode(void);
+void json0x2dencode_setup(void);
 void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
 void json_encode_free(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
@@ -103,7 +113,7 @@ void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* [json-decode] */
-void setup_json0x2ddecode(void);
+void json0x2ddecode_setup(void);
 void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void json_decode_string(t_json_decode *x, t_symbol *data);

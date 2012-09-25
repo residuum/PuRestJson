@@ -1,0 +1,14 @@
+#N canvas 44 51 937 616 10;
+#X declare -lib purest_json;
+#X obj 110 120 import purest_json;
+#X obj 323 98 rest;
+#X obj 259 137 json-decode;
+#X obj 323 49 inlet;
+#X obj 259 178 outlet;
+#X obj 322 178 outlet;
+#X obj 387 178 outlet;
+#X connect 1 0 2 0;
+#X connect 1 1 6 0;
+#X connect 2 0 4 0;
+#X connect 2 1 5 0;
+#X connect 3 0 1 0;

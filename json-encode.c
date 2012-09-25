@@ -40,7 +40,7 @@ static json_object *create_object(char *value) {
 	return object;
 }
 
-void setup_json0x2dencode(void) {
+void json0x2dencode_setup(void) {
 	json_encode_class = class_new(gensym("json-encode"), (t_newmethod)json_encode_new,
 			(t_method)json_encode_free, sizeof(t_json_encode), 0, A_GIMME, 0);
 	class_addbang(json_encode_class, (t_method)json_encode_bang);

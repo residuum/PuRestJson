@@ -6,7 +6,7 @@
 
 static t_class *json_decode_class;
 
-void setup_json0x2ddecode(void) {
+void json0x2ddecode_setup(void) {
 	json_decode_class = class_new(gensym("json-decode"), (t_newmethod)json_decode_new,
 			0, sizeof(t_json_decode), 0, A_GIMME, 0);
 	class_addsymbol(json_decode_class, (t_method)json_decode_string);

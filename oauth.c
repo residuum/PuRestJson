@@ -23,12 +23,12 @@ static void *execute_oauth_request(void *thread_args) {
 	}
 
 	if (strcmp(x->request_type, "POST") == 0) {
-		req_url = oauth_sign_url2(x->complete_url, &postargs, OA_HMAC, NULL, 
+		req_url = oauth_sign_url2(x->complete_url, &postargs, x->oauth.method, NULL, 
 				x->oauth.client_key, x->oauth.client_secret, 
 				x->oauth.token_key, x->oauth.token_secret);
 		reply = oauth_http_post(req_url, postargs);
 	} else {
-		req_url = oauth_sign_url2(x->complete_url, NULL, OA_HMAC, NULL, 
+		req_url = oauth_sign_url2(x->complete_url, NULL, x->oauth.method, NULL, 
 				x->oauth.client_key, x->oauth.client_secret, 
 				x->oauth.token_key, x->oauth.token_secret);
 		reply = oauth_http_get(req_url, NULL);
@@ -138,6 +138,7 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_url, gensym("url"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("GET"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("POST"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_method, gensym("method"), A_GIMME, 0);
 }
 
 void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
@@ -188,6 +189,31 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 		}
 	}
 }
+void oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
+	char method_name[11];
+
+	(void) selector;
+
+	if (argcount != 1) {
+		error("'method' only takes one argument. See help for more");
+	} else {
+		if (argvec[0].a_type != A_SYMBOL) {
+			error("'method' only takes a symbol argument. See help for more");
+		} else {
+			atom_string(argvec, method_name, 11);
+			if (strcmp(method_name, "HMAC") == 0) {
+				x->oauth.method = OA_HMAC;
+			/*} else if (strcmp(method_name, "RSA") == 0) {
+				x->oauth.method = OA_RSA;*/
+			} else if (strcmp(method_name, "PLAINTEXT") == 0) {
+				x->oauth.method = OA_PLAINTEXT;
+				post("Warning: You are using plaintext now");
+			} else {
+				error("Only HMAC, RSA, and PLAINTEXT allowed");
+			}
+		}
+	}
+}
 
 void oauth_url(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
 
@@ -206,6 +232,7 @@ void *oauth_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	(void) selector;
 
 	set_url_parameters(x, argcount, argvec); 
+	x->oauth.method = OA_HMAC;
 
 	outlet_new(&x->x_ob, NULL);
 	x->status_info_outlet = outlet_new(&x->x_ob, NULL);

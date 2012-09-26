@@ -56,6 +56,7 @@ typedef struct oauth {
 		char client_secret[MAXPDSTRING];
 		char token_key[MAXPDSTRING];
 		char token_secret[MAXPDSTRING];
+		OAuthMethod method;
 	} oauth;
 	t_atom *out;
 	/* threading */
@@ -101,6 +102,7 @@ void *oauth_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec); 
 void oauth_url(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
+void oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* [json-encode] */
 void setup_json0x2dencode(void);

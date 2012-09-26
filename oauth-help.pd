@@ -1,4 +1,4 @@
-#N canvas 180 176 952 389 10;
+#N canvas 178 174 952 389 10;
 #X declare -lib purest_json;
 #X obj 457 -40 import purest_json;
 #X obj 19 -60 oauth;
@@ -27,8 +27,8 @@ of the request.;
 #X obj 452 194 oauth;
 #X obj 503 238 print status;
 #X obj 414 233 print data;
-#X msg 452 53 url http/term.ie/example key secret requestkey requestsecret
-;
+#X msg 452 53 url http://term.ie/oauth/example key secret accesskey
+accesssecret;
 #X connect 10 0 12 0;
 #X connect 11 0 12 0;
 #X connect 12 0 14 0;

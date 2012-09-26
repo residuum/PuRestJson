@@ -291,20 +291,20 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 			default:
 				request_type = selector->s_name;
 				atom_string(argvec, path, MAXPDSTRING);
+				x->is_data_locked = 1;
 				if (argcount > 1) {
 					atom_string(argvec + 1, parameters, MAXPDSTRING);
+					if (parameters != NULL) {
+						cleaned_parameters = remove_backslashes(parameters, memsize);
+						strcpy(x->parameters, cleaned_parameters);
+						freebytes(cleaned_parameters, memsize);
+					}
 				}
-				x->is_data_locked = 1;
 				if (x->base_url != NULL) {
 					strcpy(x->complete_url, x->base_url);
 				}
 				strcat(x->complete_url, path);
 				strcpy(x->request_type, request_type);
-				if (parameters != NULL) {
-					cleaned_parameters = remove_backslashes(parameters, memsize);
-					strcpy(x->parameters, cleaned_parameters);
-					freebytes(cleaned_parameters, memsize);
-				}
 				if ((strcmp(x->request_type, "GET") && 
 							strcmp(x->request_type, "POST") && 
 							strcmp(x->request_type, "PUT") &&

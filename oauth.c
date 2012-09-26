@@ -1,5 +1,5 @@
 /*
- * [oauth] makes RESTful calls to webservices.
+ * [oauth] communicates with OAUTH webservices via GET and POST.
  * */
 
 #include "purest_json.h"
@@ -73,6 +73,13 @@ static void thread_execute(t_oauth *x, void *(*func) (void *)) {
 
 static void set_url_parameters(t_oauth *x, int argcount, t_atom *argvec) {
 	switch (argcount) {
+		case 0:
+			memset(x->base_url, 0x00, MAXPDSTRING);
+			memset(x->oauth.client_key, 0x00, MAXPDSTRING);
+			memset(x->oauth.client_secret, 0x00, MAXPDSTRING);
+			memset(x->oauth.token_key, 0x00, MAXPDSTRING);
+			memset(x->oauth.token_secret, 0x00, MAXPDSTRING);
+			break;
 		case 3:
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
@@ -153,20 +160,20 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 			default:
 				request_type = selector->s_name;
 				atom_string(argvec, path, MAXPDSTRING);
+				x->is_data_locked = 1;
 				if (argcount > 1) {
 					atom_string(argvec + 1, parameters, MAXPDSTRING);
+					if (strlen(parameters)) {
+						cleaned_parameters = remove_backslashes(parameters, memsize);
+						strcpy(x->parameters, cleaned_parameters);
+						freebytes(cleaned_parameters, memsize);
+					}
 				}
-				x->is_data_locked = 1;
 				if (x->base_url != NULL) {
 					strcpy(x->complete_url, x->base_url);
 				}
 				strcat(x->complete_url, path);
 				strcpy(x->request_type, request_type);
-				if (parameters != NULL) {
-					cleaned_parameters = remove_backslashes(parameters, memsize);
-					strcpy(x->parameters, cleaned_parameters);
-					freebytes(cleaned_parameters, memsize);
-				}
 				if ((strcmp(x->request_type, "GET") && 
 							strcmp(x->request_type, "POST"))) {
 					SETSYMBOL(&auth_status_data[0], gensym("oauth"));

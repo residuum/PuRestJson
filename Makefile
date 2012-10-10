@@ -13,7 +13,7 @@ SOURCES = rest.c oauth.c json-decode.c json-encode.c urlparams.c
 PDOBJECTS = rest-json.pd
 
 # example patches and related files, in the 'examples' subfolder
-EXAMPLES = purest-json-test.pd the-sound-of-money.pd twitter-visualization.pd statistics.pd
+EXAMPLES = purest-json-test.pd the-sound-of-money.pd twitter-visualization.pd statistics.pd twitter-client.pd
 
 # manuals and related files, in the 'manual' subfolder
 MANUAL = index.html couchdb-example.png webservice-example.png
@@ -266,7 +266,6 @@ all: $(SOURCES:.c=.$(EXTENSION)) $(SHARED_LIB)
 %.$(EXTENSION): %.o $(SHARED_LIB)
 	$(CC) $(ALL_LDFLAGS) -o "$*.$(EXTENSION)" "$*.o"  $(ALL_LIBS) $(SHARED_LIB)
 	chmod a-x "$*.$(EXTENSION)"
-	chmod a-x "$(SHARED_LIB)"
 
 # this links everything into a single binary file
 $(LIBRARY_NAME): $(SOURCES:.c=.o) $(LIBRARY_NAME).o lib$(LIBRARY_NAME).o

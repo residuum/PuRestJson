@@ -120,8 +120,6 @@ void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 void json_decode_string(t_json_decode *x, t_symbol *data);
 void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom *argvec);
-void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
-void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done_outlet);
 
 /* [urlparams] */
 void urlparams_setup(void);
@@ -135,4 +133,32 @@ void urlparams_clear(t_urlparams *x, t_symbol *selector, int argcount, t_atom *a
 /* general */ 
 void purest_json_setup(void);
 char *remove_backslashes(char *source_string, size_t memsize);
-int str_ccmp(const char *s1, const char *s2);
+
+
+char *remove_backslashes(char *source_string, size_t memsize) {
+	char *cleaned_string = NULL;
+	char *masking = "\\";
+	char *segment;
+	size_t len_src = strlen(source_string);
+
+	memsize = (len_src + 1) * sizeof(char);
+
+	cleaned_string = (char *) getbytes(memsize * sizeof(char));
+	if (cleaned_string == NULL) {
+		error("Unable to allocate memory\n");
+	}
+	else if (len_src > 0) {
+		segment = strtok(source_string, masking);
+		strcpy(cleaned_string, segment);
+		segment = strtok(NULL, masking);
+		while (segment != NULL) {
+			if (segment[0] != ',') {
+				/* We keep the backslash */
+				strcat(cleaned_string, masking);
+			}
+				strcat(cleaned_string, segment);
+				segment = strtok(NULL, masking);
+		}
+	}
+	return (cleaned_string);
+}

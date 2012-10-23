@@ -27,7 +27,7 @@ EXTRA_DIST = Changelog.txt
 # unit tests and related files here, in the 'unittests' subfolder
 UNITTESTS = 
 
-HELPPATCHES = json-help.pd rest-json-help.pd urlparams-help.pd
+HELPPATCHES = json-help.pd rest-json-help.pd urlparams-help.pd oauth-help.pd rest-help.pd
 
 
 #------------------------------------------------------------------------------#
@@ -274,7 +274,9 @@ $(LIBRARY_NAME): $(SOURCES:.c=.o) $(LIBRARY_NAME).o lib$(LIBRARY_NAME).o
 	chmod a-x $(LIBRARY_NAME).$(EXTENSION)
 
 $(SHARED_LIB): $(SHARED_SOURCE:.c=.o)
-	$(CC) $(SHARED_LDFLAGS) -o $(SHARED_LIB) $(SHARED_SOURCE:.c=.o) $(ALL_LIBS)
+  ifneq ($(strip $(SHARED_LIB)),)
+    $(CC) $(SHARED_LDFLAGS) -o $(SHARED_LIB) $(SHARED_SOURCE:.c=.o) $(ALL_LIBS)
+  endif 
 
 install: libdir_install
 

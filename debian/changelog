@@ -1,9 +1,18 @@
+pd-purest-json (0.8) UNRELEASED; urgency=low
+
+  *  Added [oauth] object
+  *  Added [urlparams] object
+  *  Added [rest] object
+  *  [rest-json] is now an abstraction
+  *  Bugfixes
+
+ -- Thomas Mayer <thomas@residuum.org>  Sat, 14 Apr 2012 23:50:00 +0200
+
 pd-purest-json (0.7.1) UNRELEASED; urgency=low
 
   *  Bugfixes 
 
  -- Thomas Mayer <thomas@residuum.org>  Sat, 14 Apr 2012 23:50:00 +0200
-
 pd-purest-json (0.7) UNRELEASED; urgency=low
 
   *  Cookie authentication, useful for CouchDB login

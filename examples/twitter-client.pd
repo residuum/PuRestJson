@@ -1,0 +1,37 @@
+#N canvas 343 139 974 536 10;
+#X declare -lib purest_json;
+#X msg 494 235 GET /1.1/statuses/home_timeline.json;
+#X msg 574 367 POST /1.1/statuses/update.json \$1;
+#X obj 577 333 urlparams;
+#X obj 594 31 import purest_json;
+#X obj 814 364 print urlparams;
+#X obj 488 408 oauth;
+#X msg 24 36 POST /oauth/request_token;
+#X obj 24 148 oauth https://api.twitter.com SEJpJksCRpcgyoP4nk73Ng
+FEHGi9k8jF3zTPrBLbnBonF94gbUGZLrGKMgl4Td5bc;
+#X obj 24 210 print data1;
+#X obj 173 216 print status1;
+#X text 491 219 Get your timeline;
+#X msg 577 282 clear \, add status I can haz my own twitter client
+#Pd #Puredata \, bang;
+#X text 594 265 Tweet;
+#X obj 488 497 print data2;
+#X obj 539 453 print status2;
+#X msg 296 109 POST /oauth/access_token oauth_identifier=YOUR_PIN;
+#X msg 426 161 url https://api.twitter.com SEJpJksCRpcgyoP4nk73Ng FEHGi9k8jF3zTPrBLbnBonF94gbUGZLrGKMgl4Td5bc
+YOUR_ACCESS_TOKEN YOUR_ACCESS_TOKEN_SECRET;
+#X msg 207 40 url https://api.twitter.com SEJpJksCRpcgyoP4nk73Ng FEHGi9k8jF3zTPrBLbnBonF94gbUGZLrGKMgl4Td5bc
+YOUR_TEMP_TOKEN YOUR_TEMP_TOKEN_SECRET;
+#X connect 0 0 5 0;
+#X connect 1 0 5 0;
+#X connect 2 0 1 0;
+#X connect 2 0 4 0;
+#X connect 5 0 13 0;
+#X connect 5 1 14 0;
+#X connect 6 0 7 0;
+#X connect 7 0 8 0;
+#X connect 7 1 9 0;
+#X connect 11 0 2 0;
+#X connect 15 0 7 0;
+#X connect 16 0 5 0;
+#X connect 17 0 7 0;

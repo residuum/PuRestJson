@@ -16,7 +16,7 @@ PDOBJECTS = rest-json.pd
 EXAMPLES = purest-json-test.pd the-sound-of-money.pd twitter-visualization.pd statistics.pd twitter-client.pd
 
 # manuals and related files, in the 'manual' subfolder
-MANUAL = index.html couchdb-example.png webservice-example.png
+MANUAL = index.html couchdb-example.png webservice-example.png twitter.html twitter-documentation.png
 
 # if you want to include any other files in the source and binary tarballs,
 # list them here.  This can be anything from header files, test patches,

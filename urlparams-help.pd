@@ -1,6 +1,5 @@
 #N canvas 44 51 994 506 10;
 #X declare -lib purest_json;
-#X text 127 -13 - encodes data into a JSON string.;
 #X msg 548 57 add id 1;
 #X text 545 24 Will add key id and value of 1 to object;
 #X msg 590 87 add name Residuum;
@@ -24,11 +23,13 @@ special characters;
 hashtag #Pd?;
 #X text 651 202 adding a different value will not overwrite the previously
 stored one \, but add it to the end;
-#X connect 1 0 12 0;
-#X connect 3 0 12 0;
-#X connect 4 0 12 0;
-#X connect 5 0 12 0;
-#X connect 6 0 12 0;
-#X connect 9 0 12 0;
-#X connect 12 0 15 0;
-#X connect 16 0 12 0;
+#X text 127 -13 - create a list of URL encoded parameters for request
+parameters.;
+#X connect 0 0 11 0;
+#X connect 2 0 11 0;
+#X connect 3 0 11 0;
+#X connect 4 0 11 0;
+#X connect 5 0 11 0;
+#X connect 8 0 11 0;
+#X connect 11 0 14 0;
+#X connect 15 0 11 0;

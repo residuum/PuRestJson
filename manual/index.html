@@ -15,10 +15,10 @@
 		<h3>Objects in The Library</h3>
 		<p>This is only a brief introduction to the objects, for a full explanation, see the help patches for them.</p>
 		<dl>
-			<dt>[rest-json]</dt>
+			<dt>[rest]</dt>
 			<dd>
-			This is the object for making RESTful queries to webservices that return JSON data.
-			<br/><em>Methods:</em>
+			This is the object for making RESTful queries to webservices.
+			<br><em>Methods:</em>
 			<dl>
 				<dt>url</dt>
 				<dd>Sets the base URL for requests.</dd>
@@ -30,15 +30,26 @@
 				<dd>Makes a DELETE http request.</dd>
 				<dt>POST</dt>
 				<dd>Makes a POST http request.</dd>
-				<dt>oauth</dt>
-				<dd>Sets OAUTH parameters (<strong>Not implemented yet</strong>).</dd>
+			</dl>
+			</dd>
+			<dt>[oauth]</dt>
+			<dd>
+			Communication with OAuth webservices. See <a href="twitter.html">how to create your own Twitter client</a>
+			<br><em>Methods:</em>
+			<dl>
+				<dt>url</dt>
+				<dd>Sets the base URL for requests.</dd>
+				<dt>GET</dt>
+				<dd>Makes a GET http request.</dd>
+				<dt>POST</dt>
+				<dd>Makes a POST http request.</dd>
 			</dl>
 			</dd>
 			<dt>[json-encode]</dt>
 			<dd>
 			With this object you can create JSON objects, e.g. for sending JSON data to a webservice with 
 			[rest-json].
-			<br/><em>Methods:</em>
+			<br><em>Methods:</em>
 			<dl>
 				<dt>add</dt>
 				<dd>Adds a key/value pair to the stored JSON object. If the value is a JSON string, then this will
@@ -49,15 +60,35 @@
 				<dt>bang</dt>
 				<dd>Outputs the stored JSON object as string.</dd>
 				<dt>clear</dt>
-				<dd>Clears the stored object.</dd>
+				<dd>Clears the stored objects.</dd>
 			</dl>
 			</dd>
 			<dt>[json-decode]</dt>
 			<dd>Decodes JSON objects. For the output, see below.</dd>
+			<dt>[urlparams]</dt>
+			<dd>
+			Creates a list of URL encoded parameters.
+			<br><em>Methods:</em>
+			<dl>
+				<dt>add</dt>
+				<dd>Adds a key/value pair to the object. Value will be URL encoded while storing.</dd>
+				<dt>bang</dt>
+				<dd>Outputs the list of key/value pairs as URL parameter list.</dd>
+				<dt>clear</dt>
+				<dd>Clears the stored objects.</dd>
+			</dl>
+			</dd>
+			<dt>[rest-json]</dt>
+			<dd>
+			An abstraction wrapping [rest] and [json-decode]. The returned data from the webservice is parsed.
+			<br><em>Methods:</em>
+			<br>It uses the same methods as [rest]
+			</dd>
 		</dl>
 		<h2>Building PuREST JSON</h2>
 		<p>The library uses the Pd-extended library template. Therefore, the easiest way to build PuREST JSON is
 		using the compilation methods provided by Pd-extended.</p>
+		<p><strong>This section is outdated! I must update it</strong></p>
 		<ol>
 			<li>Download the source code of Pd-extended from 
 			<a href="http://puredata.info/community/projects/software/pd-extended">http://puredata.info/community/projects/software/pd-extended</a>
@@ -65,10 +96,10 @@
 			<li>Get the source code of PuREST JSON from the repository 
 			<a href="https://github.com/residuum/PuRestJson">https://github.com/residuum/PuRestJson</a> and put or 
 			extract it in a subfolder <tt>path/to/pd-extended-source/externals/purest_json/</tt>.</li>
-			<li>Make sure to have <a href="http://oss.metaparadigm.com/json-c/">json-c</a> and 
-			<a href="http://curl.haxx.se/download.html">libcurl</a> installed, including the development headers.
-			On Debian the libraries are called libjson0-dev and libcurl-dev (with several packages
-			providing this virtual package) respectively. </li>
+			<li>Make sure to have <a href="http://oss.metaparadigm.com/json-c/">json-c</a>, 
+			<a href="http://curl.haxx.se/download.html">libcurl</a>, and <a href="https://dev.twitter.com/docs/api/1.1/post/statuses/update">liboauth</a> installed, including the development headers.
+			On Debian the libraries are called libjson0-dev, libcurl-dev (with several packages
+			providing this virtual package), and liboauth-dev respectively. </li>
 			<li>Change to the <tt>path/to/pd-extended-source/externals/purest_json/</tt> folder and run
 			<kbd>make</kbd>. To install run <kbd>make install</kbd>.</li>
 		</ol>
@@ -78,7 +109,7 @@
 		<h3>Querying Webservices</h3>
 		<p>You can use [rest-json] to query webservices. I will explain this querying the history of the Makefile 
 		in the repository. You will see the handling of arrays in this example.</p>
-		<img src="webservice-example.png">
+		<img src="webservice-example.png" alt="Example for calling webservices">
 		<p>As you can see, the webservice from Github returns an object with only one array.
 		This array is then parsed by an instance of [json-decode].</p>
 		<pre>
@@ -114,7 +145,7 @@ array-done: bang
 		<p>This example will show the usage of diverse HTTP request methods, <tt>GET</tt>, <tt>PUT</tt>, and 
 		<tt>DELETE</tt>. You will also see, how you can add data to <tt>PUT</tt> requests.</p>
 		<p>A CouchDB running on the same computer is implied.</p>
-		<img src="couchdb-example.png">
+		<img src="couchdb-example.png" alt="Using CouchDB">
 		<p>Here is the output from the main example in examples/purest-json-test.pd with explanations.</p>
 		<p>First, we create the database and get info about the database:</p>
 		<pre>

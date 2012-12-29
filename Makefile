@@ -40,8 +40,7 @@ ALL_CFLAGS = -I"$(PD_INCLUDE)" -std=c99
 ALL_LDFLAGS =  
 SHARED_LDFLAGS =
 ALL_LIBS = -lcurl -ljson -loauth
-LIBS_windows = -lpthread# -lssh2 -lidn -lgnutls -lnettle -lwldap32 -lz -lgcrypt -lintl -liconv -lgmp
-#LIBS_windows += -lssl -lcrypto -lz -lgpg-error -lgmpxx
+LIBS_windows = -lpthread
 CFLAGS_windows = -mthreads -DCURL_STATICLIB
 
 

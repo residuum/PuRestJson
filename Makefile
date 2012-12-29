@@ -40,7 +40,8 @@ ALL_CFLAGS = -I"$(PD_INCLUDE)" -std=c99
 ALL_LDFLAGS =  
 SHARED_LDFLAGS =
 ALL_LIBS = -lcurl -ljson -loauth
-LIBS_windows = -lpthread
+LIBS_windows = -lpthread# -lssh2 -lidn -lgnutls -lnettle -lwldap32 -lz -lgcrypt -lintl -liconv -lgmp
+#LIBS_windows += -lssl -lcrypto -lz -lgpg-error -lgmpxx
 CFLAGS_windows = -mthreads -DCURL_STATICLIB
 
 
@@ -240,6 +241,8 @@ ifeq (MINGW,$(findstring MINGW,$(UNAME)))
   ALL_LDFLAGS += -s -shared -Wl,--enable-auto-import -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj"
   SHARED_LDFLAGS += -shared -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj"
   ALL_LIBS += -lpd -lwsock32 -lkernel32 -luser32 -lgdi32 $(LIBS_windows)
+  # oauth depends on libcurl, so all libraries are included.
+  ALL_LIBS += `'$(PKG_CONFIG)' oauth --cflags --libs`
   STRIP = strip --strip-unneeded -R .note -R .comment
   DISTBINDIR=$(DISTDIR)-$(OS)
 endif

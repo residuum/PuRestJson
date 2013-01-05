@@ -241,7 +241,7 @@ ifeq (MINGW,$(findstring MINGW,$(UNAME)))
   SHARED_LDFLAGS += -shared -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj"
   ALL_LIBS += -lpd -lwsock32 -lkernel32 -luser32 -lgdi32 $(LIBS_windows)
   # oauth depends on libcurl, so all libraries are included.
-  ALL_LIBS += `'$(PKG_CONFIG)' oauth --cflags --libs`
+  ALL_LIBS += `'$(PKG_CONFIG)' oauth --cflags --libs --static`
   STRIP = strip --strip-unneeded -R .note -R .comment
   DISTBINDIR=$(DISTDIR)-$(OS)
 endif

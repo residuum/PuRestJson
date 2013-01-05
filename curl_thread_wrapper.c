@@ -90,7 +90,7 @@ static void *execute_request(void *thread_args) {
 		} else {
 			SETFLOAT(&http_status_data[1], (float)http_code);
 			SETFLOAT(&http_status_data[2], (float)result);
-			error("Error while performing request: %s", curl_easy_strerror(result));
+			error("HTTP error while performing request: %i", http_code);
 			outlet_list(x->status_info_outlet, &s_list, 3, &http_status_data[0]);
 		}
 		curl_easy_cleanup(curl_handle);

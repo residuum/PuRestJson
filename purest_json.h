@@ -24,10 +24,19 @@ typedef struct key_value_pair {
   struct key_value_pair *next;
 } t_key_value_pair;
 
+/* data for threading */
+typedef struct threaddata {
+	char request_type[7]; /*One of GET, PUT, POST; DELETE*/
+	char parameters[MAXPDSTRING];
+	char complete_url[MAXPDSTRING];
+	short is_data_locked;
+} t_threaddata;
+
 /* [rest] */
 typedef struct rest {
 	t_object x_ob;
 	t_outlet *status_info_outlet;
+	t_threaddata threaddata;
 	char base_url[MAXPDSTRING];
 	/* authentication: cookie */
 	struct {
@@ -37,18 +46,13 @@ typedef struct rest {
 		char auth_token[MAXPDSTRING];
 	} cookie;
 	t_atom *out;
-	/* threading */
-	char request_type[7]; /*One of GET, PUT, POST; DELETE*/
-	char parameters[MAXPDSTRING];
-	char complete_url[MAXPDSTRING];
-	short is_data_locked;
-	/* end threading */
 } t_rest;
 
 /* [oauth] */
 typedef struct oauth {
 	t_object x_ob;
 	t_outlet *status_info_outlet;
+	t_threaddata threaddata;
 	char base_url[MAXPDSTRING];
 	/* authentication*/
 	struct {
@@ -59,12 +63,6 @@ typedef struct oauth {
 		OAuthMethod method;
 	} oauth;
 	t_atom *out;
-	/* threading */
-	char request_type[5]; /*GET or POST*/
-	char parameters[MAXPDSTRING];
-	char complete_url[MAXPDSTRING];
-	short is_data_locked;
-	/* end threading */
 } t_oauth;
 
 /* [json-encode] */

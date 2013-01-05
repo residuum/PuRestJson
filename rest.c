@@ -3,110 +3,9 @@
  * */
 
 #include "purest_json.h"
+#include "curl_thread_wrapper.c"
 
 static t_class *rest_class;
-
-static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
-	size_t realsize = size * nmemb;
-	t_memory_struct *mem = (t_memory_struct *)data;
-
-	mem->memory = (char *) resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
-	if (mem->memory == NULL) {
-		/* out of memory! */ 
-		error("not enough memory");
-	}
-	memcpy(&mem->memory[mem->size], ptr, realsize);
-	if (mem->size + realsize - mem->size != realsize) {
-		error("Integer overflow or similar. Bad Things can happen.");
-	}
-	mem->size += realsize;
-	mem->memory[mem->size] = '\0';
-
-	return realsize;
-}
-
-static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
-	size_t realsize = size * nmemb;
-	t_memory_struct *mem = (t_memory_struct *)data;
-	size_t to_copy = (mem->size < realsize) ? mem->size : realsize;
-
-	memcpy(ptr, mem->memory, to_copy);
-	mem->size -= to_copy;
-	mem->memory += to_copy;
-	return to_copy;
-}
-
-static void *execute_rest_request(void *thread_args) {
-	t_rest *x = (t_rest *)thread_args; 
-	CURL *curl_handle;
-	CURLcode result;
-	t_memory_struct in_memory;
-	t_memory_struct out_memory;
-	long http_code;
-	t_atom http_status_data[3];
-
-	curl_global_init(CURL_GLOBAL_ALL);
-	curl_handle = curl_easy_init();
-	if (curl_handle) {
-		curl_easy_setopt(curl_handle, CURLOPT_URL, x->complete_url);
-		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
-		if (strlen(x->cookie.auth_token) != 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, x->cookie.auth_token);
-		}
-		if (strcmp(x->request_type, "PUT") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
-			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, read_memory_callback);
-			/* Prepare data for reading */
-			in_memory.memory = getbytes(strlen(x->parameters) + 1);
-			if (in_memory.memory == NULL) {
-				error("not enough memory");
-			}
-			in_memory.size = strlen(x->parameters);
-			memcpy(in_memory.memory, x->parameters, strlen(x->parameters));
-			curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
-		} else if (strcmp(x->request_type, "POST") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
-		} else if (strcmp(x->request_type, "DELETE") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
-		}
-		out_memory.memory = getbytes(1);
-		out_memory.size = 0;
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
-		result = curl_easy_perform(curl_handle);
-
-		/* output status */
-		curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
-		SETSYMBOL(&http_status_data[0], gensym(x->request_type));
-		if (http_code == 200) {
-			SETSYMBOL(&http_status_data[1], gensym("bang"));
-			outlet_list(x->status_info_outlet, &s_list, 2, &http_status_data[0]);
-			if (result == CURLE_OK) {
-				outlet_symbol(x->x_ob.ob_outlet, gensym(out_memory.memory));
-				/* Free memory */
-				if (out_memory.memory) {
-					freebytes(out_memory.memory, (out_memory.size + 1) * sizeof(char));
-				}
-				free((void *)result);
-			} else {
-				SETFLOAT(&http_status_data[1], (float)http_code);
-				SETFLOAT(&http_status_data[2], (float)result);
-				outlet_list(x->status_info_outlet, &s_list, 3, &http_status_data[0]);
-				error("Error while performing request: %s", curl_easy_strerror(result));
-			}
-		} else {
-			SETFLOAT(&http_status_data[1], (float)http_code);
-			SETFLOAT(&http_status_data[2], (float)result);
-			error("Error while performing request: %s", curl_easy_strerror(result));
-			outlet_list(x->status_info_outlet, &s_list, 3, &http_status_data[0]);
-		}
-		curl_easy_cleanup(curl_handle);
-	} else {
-		error("Cannot init curl.");
-	}
-	x->is_data_locked = 0;
-	return NULL;
-}
 
 static void *get_cookie_auth_token(void *thread_args) {
 	t_rest *x = (t_rest *)thread_args; 
@@ -124,7 +23,7 @@ static void *get_cookie_auth_token(void *thread_args) {
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
 	if (curl_handle) {
-		memset(x->complete_url, 0x00, MAXPDSTRING);
+		memset(x->threaddata.complete_url, 0x00, MAXPDSTRING);
 		post_data_length = strlen(x->cookie.username) + strlen(x->cookie.password) + 17;/*name=&password=*/
 		post_data = (char *)getbytes(sizeof(char) * post_data_length);
 		if (post_data == NULL) {
@@ -135,9 +34,9 @@ static void *get_cookie_auth_token(void *thread_args) {
 			strcat(post_data, "&password=");
 			strcat(post_data, x->cookie.password);
 		}
-		strcpy(x->complete_url, x->base_url);
-		strcat(x->complete_url, x->cookie.login_path);
-		curl_easy_setopt(curl_handle, CURLOPT_URL, x->complete_url);
+		strcpy(x->threaddata.complete_url, x->base_url);
+		strcat(x->threaddata.complete_url, x->cookie.login_path);
+		curl_easy_setopt(curl_handle, CURLOPT_URL, x->threaddata.complete_url);
 		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 		curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
 		curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, post_data);
@@ -192,7 +91,7 @@ static void *get_cookie_auth_token(void *thread_args) {
 		}
 		freebytes(post_data, post_data_length * sizeof(char));
 	}
-	x->is_data_locked = 0;
+	x->threaddata.is_data_locked = 0;
 	return NULL;
 }
 
@@ -207,7 +106,7 @@ static void thread_execute(t_rest *x, void *(*func) (void *)) {
 	pthread_attr_destroy(&thread_attributes);
 	if (rc) {
 		error("Could not create thread with code %d", rc);
-		x->is_data_locked = 0;
+		x->threaddata.is_data_locked = 0;
 	}
 }
 
@@ -232,7 +131,7 @@ static void set_url_parameters(t_rest *x, int argcount, t_atom *argvec) {
 			memset(x->cookie.auth_token, 0x00, MAXPDSTRING);
 			break;
 		case 4:
-			x->is_data_locked = 1;
+			x->threaddata.is_data_locked = 1;
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
 			} else {
@@ -279,43 +178,43 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	size_t memsize = 0;
 	t_atom auth_status_data[2];
 
-	if(x->is_data_locked) {
+	if(x->threaddata.is_data_locked) {
 		post("rest object is performing request and locked");
 	} else {
-		memset(x->request_type, 0x00, 7);
-		memset(x->parameters, 0x00, MAXPDSTRING);
-		memset(x->complete_url, 0x00, MAXPDSTRING);
+		memset(x->threaddata.request_type, 0x00, 7);
+		memset(x->threaddata.parameters, 0x00, MAXPDSTRING);
+		memset(x->threaddata.complete_url, 0x00, MAXPDSTRING);
 		switch (argcount) {
 			case 0:
 				break;
 			default:
 				request_type = selector->s_name;
 				atom_string(argvec, path, MAXPDSTRING);
-				x->is_data_locked = 1;
+				x->threaddata.is_data_locked = 1;
 				if (argcount > 1) {
 					atom_string(argvec + 1, parameters, MAXPDSTRING);
 					if (parameters != NULL) {
 						cleaned_parameters = remove_backslashes(parameters, memsize);
-						strcpy(x->parameters, cleaned_parameters);
+						strcpy(x->threaddata.parameters, cleaned_parameters);
 						freebytes(cleaned_parameters, memsize);
 					}
 				}
 				if (x->base_url != NULL) {
-					strcpy(x->complete_url, x->base_url);
+					strcpy(x->threaddata.complete_url, x->base_url);
 				}
-				strcat(x->complete_url, path);
-				strcpy(x->request_type, request_type);
-				if ((strcmp(x->request_type, "GET") && 
-							strcmp(x->request_type, "POST") && 
-							strcmp(x->request_type, "PUT") &&
-							strcmp(x->request_type, "DELETE"))) {
+				strcat(x->threaddata.complete_url, path);
+				strcpy(x->threaddata.request_type, request_type);
+				if ((strcmp(x->threaddata.request_type, "GET") && 
+							strcmp(x->threaddata.request_type, "POST") && 
+							strcmp(x->threaddata.request_type, "PUT") &&
+							strcmp(x->threaddata.request_type, "DELETE"))) {
 					SETSYMBOL(&auth_status_data[0], gensym("request"));
 					SETSYMBOL(&auth_status_data[1], gensym("Request method not supported"));
-					error("Request method %s not supported.", x->request_type);
+					error("Request method %s not supported.", x->threaddata.request_type);
 					outlet_list(x->status_info_outlet, &s_list, 2, &auth_status_data[0]);
-					x->is_data_locked = 0;
+					x->threaddata.is_data_locked = 0;
 				} else {
-					thread_execute(x, execute_rest_request);
+					thread_execute(x, execute_request);
 				}
 				break;
 		}
@@ -326,7 +225,7 @@ void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 
 	(void) selector;
 
-	if(x->is_data_locked) {
+	if(x->threaddata.is_data_locked) {
 		post("rest object is performing request and locked");
 	} else {
 		set_url_parameters(x, argcount, argvec); 
@@ -342,7 +241,7 @@ void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 
 	outlet_new(&x->x_ob, NULL);
 	x->status_info_outlet = outlet_new(&x->x_ob, NULL);
-	x->is_data_locked = 0;
+	x->threaddata.is_data_locked = 0;
 
 	return (void *)x;
 }

@@ -10,6 +10,8 @@
 
 #define LIBRARY_VERSION "0.8"
 
+#define REQUEST_TYPE_LEN 7
+
 /* reading / writing data in HTTP requests */
 typedef struct memory_struct {
   char *memory;
@@ -25,19 +27,20 @@ typedef struct key_value_pair {
 } t_key_value_pair;
 
 /* data for threading */
-typedef struct threaddata {
-	char request_type[7]; /*One of GET, PUT, POST; DELETE*/
+typedef struct rest_common {
+	t_object x_ob;
+	t_outlet *status_info_outlet;
+	char request_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST; DELETE*/
 	char parameters[MAXPDSTRING];
 	char complete_url[MAXPDSTRING];
 	short is_data_locked;
-} t_threaddata;
+	char base_url[MAXPDSTRING];
+	t_atom *out;
+} t_rest_common;
 
 /* [rest] */
 typedef struct rest {
-	t_object x_ob;
-	t_outlet *status_info_outlet;
-	t_threaddata threaddata;
-	char base_url[MAXPDSTRING];
+	t_rest_common threaddata;
 	/* authentication: cookie */
 	struct {
 		char login_path[MAXPDSTRING];
@@ -45,15 +48,11 @@ typedef struct rest {
 		char password[MAXPDSTRING];
 		char auth_token[MAXPDSTRING];
 	} cookie;
-	t_atom *out;
 } t_rest;
 
 /* [oauth] */
 typedef struct oauth {
-	t_object x_ob;
-	t_outlet *status_info_outlet;
-	t_threaddata threaddata;
-	char base_url[MAXPDSTRING];
+	t_rest_common threaddata;
 	/* authentication*/
 	struct {
 		char client_key[MAXPDSTRING];
@@ -62,7 +61,6 @@ typedef struct oauth {
 		char token_secret[MAXPDSTRING];
 		OAuthMethod method;
 	} oauth;
-	t_atom *out;
 } t_oauth;
 
 /* [json-encode] */

@@ -7,25 +7,10 @@
 
 static t_class *oauth_class;
 
-static void thread_execute(t_oauth *x, void *(*func) (void *)) {
-	int rc;
-	pthread_t thread;
-	pthread_attr_t thread_attributes;
-
-	pthread_attr_init(&thread_attributes);
-	pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_DETACHED);
-	rc = pthread_create(&thread, &thread_attributes, func, (void *)x);
-	pthread_attr_destroy(&thread_attributes);
-	if (rc) {
-		error("Could not create thread with code %d", rc);
-		x->threaddata.is_data_locked = 0;
-	}
-}
-
 static void set_url_parameters(t_oauth *x, int argcount, t_atom *argvec) {
 	switch (argcount) {
 		case 0:
-			memset(x->base_url, 0x00, MAXPDSTRING);
+			memset(x->threaddata.base_url, 0x00, MAXPDSTRING);
 			memset(x->oauth.client_key, 0x00, MAXPDSTRING);
 			memset(x->oauth.client_secret, 0x00, MAXPDSTRING);
 			memset(x->oauth.token_key, 0x00, MAXPDSTRING);
@@ -35,7 +20,7 @@ static void set_url_parameters(t_oauth *x, int argcount, t_atom *argvec) {
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
 			} else {
-				atom_string(argvec, x->base_url, MAXPDSTRING);
+				atom_string(argvec, x->threaddata.base_url, MAXPDSTRING);
 			}
 			if (argvec[1].a_type != A_SYMBOL) {
 				error("Client key cannot be set.");
@@ -54,7 +39,7 @@ static void set_url_parameters(t_oauth *x, int argcount, t_atom *argvec) {
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
 			} else {
-				atom_string(argvec, x->base_url, MAXPDSTRING);
+				atom_string(argvec, x->threaddata.base_url, MAXPDSTRING);
 			}
 			if (argvec[1].a_type != A_SYMBOL) {
 				error("Client key cannot be set.");
@@ -124,17 +109,18 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 						freebytes(cleaned_parameters, memsize);
 					}
 				}
-				if (x->base_url != NULL) {
-					strcpy(req_path, x->base_url);
+				if (x->threaddata.base_url != NULL) {
+					strcpy(req_path, x->threaddata.base_url);
 				}
 				strcat(req_path, path);
+				memset(x->threaddata.request_type, 0x00, REQUEST_TYPE_LEN);
 				strcpy(x->threaddata.request_type, request_type);
 				if ((strcmp(x->threaddata.request_type, "GET") && 
 							strcmp(x->threaddata.request_type, "POST"))) {
 					SETSYMBOL(&auth_status_data[0], gensym("oauth"));
 					SETSYMBOL(&auth_status_data[1], gensym("Request Method not supported"));
 					error("Request method %s not supported.", x->threaddata.request_type);
-					outlet_list(x->status_info_outlet, &s_list, 2, &auth_status_data[0]);
+					outlet_list(x->threaddata.status_info_outlet, &s_list, 2, &auth_status_data[0]);
 					x->threaddata.is_data_locked = 0;
 				} else {
 					if (strcmp(x->threaddata.request_type, "POST") == 0) {
@@ -156,7 +142,7 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 					if (req_url) {
 						free(req_url);
 					}
-					thread_execute(x, execute_request);
+					thread_execute((t_rest_common *)x, execute_request);
 				}
 				break;
 		}
@@ -207,8 +193,8 @@ void *oauth_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	set_url_parameters(x, argcount, argvec); 
 	x->oauth.method = OA_HMAC;
 
-	outlet_new(&x->x_ob, NULL);
-	x->status_info_outlet = outlet_new(&x->x_ob, NULL);
+	outlet_new(&x->threaddata.x_ob, NULL);
+	x->threaddata.status_info_outlet = outlet_new(&x->threaddata.x_ob, NULL);
 	x->threaddata.is_data_locked = 0;
 
 	return (void *)x;

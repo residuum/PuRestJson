@@ -34,7 +34,7 @@ static void *get_cookie_auth_token(void *thread_args) {
 			strcat(post_data, "&password=");
 			strcat(post_data, x->cookie.password);
 		}
-		strcpy(x->threaddata.complete_url, x->base_url);
+		strcpy(x->threaddata.complete_url, x->threaddata.base_url);
 		strcat(x->threaddata.complete_url, x->cookie.login_path);
 		curl_easy_setopt(curl_handle, CURLOPT_URL, x->threaddata.complete_url);
 		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
@@ -55,11 +55,11 @@ static void *get_cookie_auth_token(void *thread_args) {
 		SETSYMBOL(&auth_status_data[0], gensym("cookie"));
 		if (http_code == 200 && result == CURLE_OK) {
 			SETSYMBOL(&auth_status_data[1], gensym("bang"));
-			outlet_list(x->status_info_outlet, &s_list, 2, &auth_status_data[0]);
+			outlet_list(x->threaddata.status_info_outlet, &s_list, 2, &auth_status_data[0]);
 		} else {
 			SETFLOAT(&auth_status_data[1], (float)http_code);
 			SETFLOAT(&auth_status_data[2], (float)result);
-			outlet_list(x->status_info_outlet, &s_list, 3, &auth_status_data[0]);
+			outlet_list(x->threaddata.status_info_outlet, &s_list, 3, &auth_status_data[0]);
 		}
 
 		if (result == CURLE_OK) {
@@ -95,25 +95,10 @@ static void *get_cookie_auth_token(void *thread_args) {
 	return NULL;
 }
 
-static void thread_execute(t_rest *x, void *(*func) (void *)) {
-	int rc;
-	pthread_t thread;
-	pthread_attr_t thread_attributes;
-
-	pthread_attr_init(&thread_attributes);
-	pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_DETACHED);
-	rc = pthread_create(&thread, &thread_attributes, func, (void *)x);
-	pthread_attr_destroy(&thread_attributes);
-	if (rc) {
-		error("Could not create thread with code %d", rc);
-		x->threaddata.is_data_locked = 0;
-	}
-}
-
 static void set_url_parameters(t_rest *x, int argcount, t_atom *argvec) {
 	switch (argcount) {
 		case 0:
-			memset(x->base_url, 0x00, MAXPDSTRING);
+			memset(x->threaddata.base_url, 0x00, MAXPDSTRING);
 			memset(x->cookie.login_path, 0x00, MAXPDSTRING);
 			memset(x->cookie.username, 0x00, MAXPDSTRING);
 			memset(x->cookie.password, 0x00, MAXPDSTRING);
@@ -123,7 +108,7 @@ static void set_url_parameters(t_rest *x, int argcount, t_atom *argvec) {
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
 			} else {
-				atom_string(argvec, x->base_url, MAXPDSTRING);
+				atom_string(argvec, x->threaddata.base_url, MAXPDSTRING);
 			}
 			memset(x->cookie.login_path, 0x00, MAXPDSTRING);
 			memset(x->cookie.username, 0x00, MAXPDSTRING);
@@ -135,7 +120,7 @@ static void set_url_parameters(t_rest *x, int argcount, t_atom *argvec) {
 			if (argvec[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
 			} else {
-				atom_string(argvec, x->base_url, MAXPDSTRING);
+				atom_string(argvec, x->threaddata.base_url, MAXPDSTRING);
 			}
 			if (argvec[1].a_type != A_SYMBOL) {
 				error("Username cannot be set.");
@@ -152,7 +137,7 @@ static void set_url_parameters(t_rest *x, int argcount, t_atom *argvec) {
 			} else {
 				atom_string(argvec + 3, x->cookie.password, MAXPDSTRING);
 			}
-			thread_execute(x, get_cookie_auth_token);
+			thread_execute((t_rest_common *)x, get_cookie_auth_token);
 			break;
 		default:
 			error("Wrong number of parameters.");
@@ -181,7 +166,7 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	if(x->threaddata.is_data_locked) {
 		post("rest object is performing request and locked");
 	} else {
-		memset(x->threaddata.request_type, 0x00, 7);
+		memset(x->threaddata.request_type, 0x00, REQUEST_TYPE_LEN);
 		memset(x->threaddata.parameters, 0x00, MAXPDSTRING);
 		memset(x->threaddata.complete_url, 0x00, MAXPDSTRING);
 		switch (argcount) {
@@ -199,8 +184,8 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 						freebytes(cleaned_parameters, memsize);
 					}
 				}
-				if (x->base_url != NULL) {
-					strcpy(x->threaddata.complete_url, x->base_url);
+				if (x->threaddata.base_url != NULL) {
+					strcpy(x->threaddata.complete_url, x->threaddata.base_url);
 				}
 				strcat(x->threaddata.complete_url, path);
 				strcpy(x->threaddata.request_type, request_type);
@@ -211,10 +196,10 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 					SETSYMBOL(&auth_status_data[0], gensym("request"));
 					SETSYMBOL(&auth_status_data[1], gensym("Request method not supported"));
 					error("Request method %s not supported.", x->threaddata.request_type);
-					outlet_list(x->status_info_outlet, &s_list, 2, &auth_status_data[0]);
+					outlet_list(x->threaddata.status_info_outlet, &s_list, 2, &auth_status_data[0]);
 					x->threaddata.is_data_locked = 0;
 				} else {
-					thread_execute(x, execute_request);
+					thread_execute((t_rest_common *)x, execute_request);
 				}
 				break;
 		}
@@ -239,8 +224,8 @@ void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 
 	set_url_parameters(x, argcount, argvec); 
 
-	outlet_new(&x->x_ob, NULL);
-	x->status_info_outlet = outlet_new(&x->x_ob, NULL);
+	outlet_new(&x->threaddata.x_ob, NULL);
+	x->threaddata.status_info_outlet = outlet_new(&x->threaddata.x_ob, NULL);
 	x->threaddata.is_data_locked = 0;
 
 	return (void *)x;

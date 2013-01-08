@@ -1,7 +1,7 @@
-#N canvas 44 51 994 506 10;
+#N canvas 44 51 1025 676 10;
 #X declare -lib purest_json;
-#X obj 566 321 json-encode;
-#X obj 566 390 json-decode;
+#X obj 567 419 json-encode;
+#X obj 567 488 json-decode;
 #X obj 47 -14 json-encode;
 #X obj 47 14 json-decode;
 #X text 127 -13 - encodes data into a JSON string.;
@@ -51,7 +51,7 @@ stored one;
 #X connect 10 0 1 0;
 #X connect 10 1 12 0;
 #X restore 57 429 pd nested-objects;
-#X obj 566 348 t a a;
+#X obj 567 446 t a a;
 #N canvas 316 51 693 648 about-decoded-json-strings 0;
 #X obj 218 -185 json-encode;
 #X obj 94 -86 json-decode;
@@ -161,16 +161,20 @@ objects. The messages will come as list key value.;
 #X restore 364 430 pd json-arrays;
 #X text 45 259 [json-decode] treats json arrays as a series of objects.
 ;
-#X obj 566 427 print decoded_values;
-#X obj 697 427 print decoding_done;
-#X obj 656 391 print JSON_string;
-#X obj 841 425 import purest_json;
+#X obj 567 525 print decoded_values;
+#X obj 698 525 print decoding_done;
+#X obj 657 489 print JSON_string;
+#X obj 842 523 import purest_json;
 #X text 47 46 [json-encode] has four methods: add \, array \, clear
 and bang. add adds a new key/value pair to the internally stored object.
 array adds a new value to an array. clear clears the internally stored
 object. bang outputs the stored object as a JSON string. If you call
 add with a value that is already a JSON string \, then the object will
 be added as a nested object.;
+#X msg 701 331 write /tmp/test.json;
+#X msg 699 393 read test.json;
+#X text 699 312 write the content as JSON to a file;
+#X text 696 374 read data from a JSON file;
 #X connect 0 0 19 0;
 #X connect 1 0 24 0;
 #X connect 1 1 25 0;
@@ -183,3 +187,5 @@ be added as a nested object.;
 #X connect 17 0 0 0;
 #X connect 19 0 1 0;
 #X connect 19 1 26 0;
+#X connect 29 0 0 0;
+#X connect 30 0 0 0;

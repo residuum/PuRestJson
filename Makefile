@@ -22,7 +22,7 @@ MANUAL = index.html couchdb-example.png webservice-example.png twitter.html twit
 # list them here.  This can be anything from header files, test patches,
 # documentation, etc.  README.txt and LICENSE.txt are required and therefore
 # automatically included
-EXTRA_DIST = Changelog.txt
+EXTRA_DIST = Changelog.txt test.json
 
 # unit tests and related files here, in the 'unittests' subfolder
 UNITTESTS = 

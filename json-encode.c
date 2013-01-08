@@ -3,10 +3,12 @@
  * */
 
 #include "purest_json.h"
+#include <sys/stat.h>
+#include <stdio.h>
 
 static t_class *json_encode_class;
 
-void json_encode_free_memory(t_json_encode *x) {
+static void json_encode_free_memory(t_json_encode *x) {
 	t_key_value_pair *data_to_free;
 	t_key_value_pair *next_data;
 
@@ -40,37 +42,7 @@ static json_object *create_object(char *value) {
 	return object;
 }
 
-void setup_json0x2dencode(void) {
-	json_encode_class = class_new(gensym("json-encode"), (t_newmethod)json_encode_new,
-			(t_method)json_encode_free, sizeof(t_json_encode), 0, A_GIMME, 0);
-	class_addbang(json_encode_class, (t_method)json_encode_bang);
-	class_addmethod(json_encode_class, (t_method)json_encode_add, gensym("add"), A_GIMME, 0);
-	class_addmethod(json_encode_class, (t_method)json_encode_array_add, gensym("array"), A_GIMME, 0);
-	class_addmethod(json_encode_class, (t_method)json_encode_clear, gensym("clear"), A_GIMME, 0);
-	class_sethelpsymbol(json_encode_class, gensym("json"));
-}
-
-void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec) {
-	t_json_encode *x = (t_json_encode *)pd_new(json_encode_class);
-
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
-
-	x->data_count = 0;
-	outlet_new(&x->x_ob, NULL);
-	return (void *)x;
-}
-
-void json_encode_free (t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
-
-	json_encode_free_memory(x);
-}
-
-void json_encode_bang(t_json_encode *x) {
+static t_symbol *get_json_symbol(t_json_encode *x) {
 	int i, j, k; 
 	int array_member_numbers[x->data_count];
 	int array_member_count = 0;
@@ -80,6 +52,7 @@ void json_encode_bang(t_json_encode *x) {
 	json_object *jobj = json_object_new_object();
 	json_object *value;
 	json_object *array_members[x->data_count];
+	t_symbol *json_symbol = NULL;
 
 	if (x->data_count > 0) {
 		data_member = x->first_data;
@@ -116,12 +89,50 @@ void json_encode_bang(t_json_encode *x) {
 			}
 			data_member = data_member->next;
 		}
-		outlet_symbol(x->x_ob.ob_outlet, gensym(json_object_to_json_string(jobj)));
+		json_symbol = gensym(json_object_to_json_string(jobj));
 		for (i = 0; i < array_member_count; i++) {
 			json_object_put(array_members[i]);
 		}
 		json_object_put(jobj);
 	}
+	return json_symbol;
+}
+
+void setup_json0x2dencode(void) {
+	json_encode_class = class_new(gensym("json-encode"), (t_newmethod)json_encode_new,
+			(t_method)json_encode_free, sizeof(t_json_encode), 0, A_GIMME, 0);
+	class_addbang(json_encode_class, (t_method)json_encode_bang);
+	class_addmethod(json_encode_class, (t_method)json_encode_add, gensym("add"), A_GIMME, 0);
+	class_addmethod(json_encode_class, (t_method)json_encode_array_add, gensym("array"), A_GIMME, 0);
+	class_addmethod(json_encode_class, (t_method)json_encode_read, gensym("read"), A_SYMBOL, A_DEFSYM, 0);
+	class_addmethod(json_encode_class, (t_method)json_encode_write, gensym("write"), A_SYMBOL, A_DEFSYM, 0);
+	class_addmethod(json_encode_class, (t_method)json_encode_clear, gensym("clear"), A_GIMME, 0);
+	class_sethelpsymbol(json_encode_class, gensym("json"));
+}
+
+void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec) {
+	t_json_encode *x = (t_json_encode *)pd_new(json_encode_class);
+
+	(void) selector;
+	(void) argcount;
+	(void) argvec;
+
+	x->data_count = 0;
+	outlet_new(&x->x_ob, NULL);
+	x->x_canvas = canvas_getcurrent();
+	return (void *)x;
+}
+
+void json_encode_free (t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
+	(void) selector;
+	(void) argcount;
+	(void) argvec;
+
+	json_encode_free_memory(x);
+}
+
+void json_encode_bang(t_json_encode *x) {
+	outlet_symbol(x->x_ob.ob_outlet, get_json_symbol(x));
 }
 
 void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
@@ -201,8 +212,55 @@ void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t
 			x->last_data->next = created_data;
 		}
 		x->last_data = created_data;
-		
+
 		x->data_count++;
+	}
+}
+
+void json_encode_read(t_json_encode *x, t_symbol *filename) {
+	char buf[MAXPDSTRING];
+	FILE *file = NULL;
+	struct stat st;
+	char *json_string;
+	json_object *jobj;
+
+	canvas_makefilename(x->x_canvas, filename->s_name, buf, MAXPDSTRING);
+	if ((file = fopen(buf, "r"))) {
+		stat(buf, &st);
+		json_string = (char *)getbytes((st.st_size + 1) * sizeof(char));
+		json_string[st.st_size] = 0x00;
+		fread(json_string, sizeof(char), st.st_size, file);
+		fclose(file);
+		jobj = json_object_new_string(json_string);
+		freebytes(json_string, (st.st_size + 1) * sizeof(char));
+		if (!is_error(jobj)) {
+			/*TODO*/
+		} else {
+			post("File does not contain valid JSON.");
+		}
+
+
+	} else {
+		post("Cannot open file %s for reading", filename->s_name);
+	}
+}
+
+void json_encode_write(t_json_encode *x, t_symbol *filename) {
+	char buf[MAXPDSTRING];
+	FILE *file = NULL;
+	t_symbol *json_symbol = get_json_symbol(x);
+	char *json_string = json_symbol->s_name;
+
+	if (json_string) {
+		canvas_makefilename(x->x_canvas, filename->s_name, buf, MAXPDSTRING);
+		if ((file = fopen(buf, "w"))) {
+			fprintf(file, json_string);
+			fclose(file);
+		} else {
+			post("Cannot open %s for writing", filename->s_name);
+		}
+	} else {
+		post("No JSON data for writing available.");
 	}
 }
 

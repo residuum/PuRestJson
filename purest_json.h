@@ -66,6 +66,7 @@ typedef struct oauth {
 /* [json-encode] */
 typedef struct json_encode {
 	t_object x_ob;
+	t_canvas *x_canvas;
 	t_key_value_pair *first_data;
 	t_key_value_pair *last_data;
 	int data_count;
@@ -108,6 +109,8 @@ void json_encode_free(t_json_encode *x, t_symbol *selector, int argcount, t_atom
 void json_encode_bang(t_json_encode *x);
 void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
+void json_encode_read(t_json_encode *x, t_symbol *filename);
+void json_encode_write(t_json_encode *x, t_symbol *filename);
 void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* [json-decode] */

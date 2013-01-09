@@ -77,7 +77,7 @@ INSTALL_DATA = $(INSTALL) -p -m 644
 INSTALL_DIR     = $(INSTALL) -p -m 755 -d
 
 ALLSOURCES := $(SOURCES) $(SOURCES_android) $(SOURCES_cygwin) $(SOURCES_macosx) \
-	         $(SOURCES_iphoneos) $(SOURCES_linux) $(SOURCES_windows) curl_thread_wrapper.c
+	         $(SOURCES_iphoneos) $(SOURCES_linux) $(SOURCES_windows) curl_thread_wrapper.c key_value_pair.c
 
 DISTDIR=$(LIBRARY_NAME)-$(LIBRARY_VERSION)
 ORIGDIR=pd-`echo $(LIBRARY_NAME:~=)|tr '_' '-'`_$(LIBRARY_VERSION)

@@ -5,46 +5,9 @@
 #include "purest_json.h"
 #include <sys/stat.h>
 #include <stdio.h>
-
-static t_key_value_pair *create_key_value_pair(char *key, char *value, int is_array){
-	t_key_value_pair *created_data = NULL;
-
-	created_data = (t_key_value_pair *)getbytes(sizeof(t_key_value_pair));
-	created_data->key = (char *)getbytes(MAXPDSTRING * sizeof(char));
-	created_data->value = (char *)getbytes(MAXPDSTRING * sizeof(char));
-	if (created_data == NULL || key == NULL || value == NULL) {
-		error("Could not get data");
-		return NULL;
-	}
-	strcpy(created_data->key, key);
-	strcpy(created_data->value, value);
-	created_data->value = value;
-	created_data->next = NULL;
-	created_data->is_array = is_array;
-
-	return created_data;
-}
+#include "key_value_pair.c"
 
 static t_class *json_encode_class;
-
-static void json_encode_free_memory(t_json_encode *x) {
-	t_key_value_pair *data_to_free;
-	t_key_value_pair *next_data;
-
-	data_to_free = x->first_data;
-	while(data_to_free != NULL) {
-		next_data = data_to_free->next;
-		/* TODO: Investigate the reason for segfault */
-		/*freebytes(data_to_free->key, MAXPDSTRING);
-		freebytes(data_to_free->value, MAXPDSTRING);*/
-		freebytes(data_to_free, sizeof(t_key_value_pair));
-		data_to_free = next_data;
-	}
-
-	x->data_count = 0;
-	x->first_data = NULL;
-	x->last_data = NULL;
-}
 
 static json_object *create_object(char *value) {
 	json_object *object;
@@ -68,7 +31,7 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 	t_key_value_pair *new_pair;
 	char value[MAXPDSTRING];
 
-	json_encode_free_memory(x);
+	kvp_storage_free_memory((t_kvp_storage *)x);
 	outer_type = json_object_get_type(jobj);
 	post("%i", outer_type);
 	switch (outer_type) {
@@ -108,13 +71,13 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 				}
 
 				if (new_pair) {
-					x->data_count++;
-					if (!x->first_data) {
-						x->first_data = new_pair;
+					x->storage.data_count++;
+					if (!x->storage.first_data) {
+						x->storage.first_data = new_pair;
 					} else {
-						x->last_data->next = new_pair;
+						x->storage.last_data->next = new_pair;
 					}
-					x->last_data = new_pair;
+					x->storage.last_data = new_pair;
 				}
 			}
 			break;
@@ -126,25 +89,25 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 
 static t_symbol *get_json_symbol(t_json_encode *x) {
 	int i, j, k; 
-	int array_member_numbers[x->data_count];
+	int array_member_numbers[x->storage.data_count];
 	int array_member_count = 0;
 	short already_added = 0;
 	t_key_value_pair *data_member;
 	t_key_value_pair *data_member_compare;
 	json_object *jobj = json_object_new_object();
 	json_object *value;
-	json_object *array_members[x->data_count];
+	json_object *array_members[x->storage.data_count];
 	t_symbol *json_symbol = NULL;
 
-	if (x->data_count > 0) {
-		data_member = x->first_data;
-		for (i = 0; i < x->data_count; i++) {
+	if (x->storage.data_count > 0) {
+		data_member = x->storage.first_data;
+		for (i = 0; i < x->storage.data_count; i++) {
 			already_added = 0;
 			/* Is it an array member? */
 			if (data_member->is_array == 1) {
 				value = json_object_new_array();
 				data_member_compare = data_member;
-				for (j = i; j < x->data_count; j++) {
+				for (j = i; j < x->storage.data_count; j++) {
 					if (strcmp(data_member_compare->key, data_member->key) == 0) {
 						for (k = 0; k < array_member_count; k++) {
 							/* If already inserted, continue i loop */
@@ -199,8 +162,8 @@ void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	(void) argcount;
 	(void) argvec;
 
-	x->data_count = 0;
-	outlet_new(&x->x_ob, NULL);
+	x->storage.data_count = 0;
+	outlet_new(&x->storage.x_ob, NULL);
 	x->x_canvas = canvas_getcurrent();
 	return (void *)x;
 }
@@ -210,11 +173,11 @@ void json_encode_free (t_json_encode *x, t_symbol *selector, int argcount, t_ato
 	(void) argcount;
 	(void) argvec;
 
-	json_encode_free_memory(x);
+	kvp_storage_free_memory((t_kvp_storage *)x);
 }
 
 void json_encode_bang(t_json_encode *x) {
-	outlet_symbol(x->x_ob.ob_outlet, get_json_symbol(x));
+	outlet_symbol(x->storage.x_ob.ob_outlet, get_json_symbol(x));
 }
 
 void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
@@ -240,14 +203,14 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 			strcat(value, temp_value);
 		}
 		created_data = create_key_value_pair(key, value, is_array);
-		if (x->first_data == NULL) {
-				x->first_data = created_data;
+		if (x->storage.first_data == NULL) {
+				x->storage.first_data = created_data;
 			} else {
-				x->last_data->next = created_data;
+				x->storage.last_data->next = created_data;
 			}
-		x->last_data = created_data;
+		x->storage.last_data = created_data;
 
-		x->data_count++;
+		x->storage.data_count++;
 	}
 }
 
@@ -305,5 +268,5 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 	(void) argcount;
 	(void) argvec;
 
-	json_encode_free_memory(x);
+	kvp_storage_free_memory((t_kvp_storage *)x);
 }

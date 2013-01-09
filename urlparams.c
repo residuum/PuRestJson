@@ -3,6 +3,7 @@
  * */
 
 #include "purest_json.h"
+#include "key_value_pair.c"
 
 static t_class *urlparams_class;
 
@@ -27,24 +28,6 @@ static char *urlencode(char *str) {
 	return buf;
 }
 
-void urlparams_free_memory(t_urlparams *x) {
-	t_key_value_pair *data_to_free;
-	t_key_value_pair *next_data;
-
-	data_to_free = x->first_data;
-	while(data_to_free != NULL) {
-		next_data = data_to_free->next;
-		freebytes(data_to_free->key, MAXPDSTRING);
-		freebytes(data_to_free->value, MAXPDSTRING);
-		freebytes(data_to_free, sizeof(t_key_value_pair));
-		data_to_free = next_data;
-	}
-
-	x->data_count = 0;
-	x->first_data = NULL;
-	x->last_data = NULL;
-}
-
 void urlparams_setup(void) {
 	urlparams_class = class_new(gensym("urlparams"), (t_newmethod)urlparams_new,
 			(t_method)urlparams_free, sizeof(t_urlparams), 0, A_GIMME, 0);
@@ -60,8 +43,8 @@ void *urlparams_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	(void) argcount;
 	(void) argvec;
 
-	x->data_count = 0;
-	outlet_new(&x->x_ob, NULL);
+	x->storage.data_count = 0;
+	outlet_new(&x->storage.x_ob, NULL);
 	return (void *)x;
 }
 
@@ -70,7 +53,7 @@ void urlparams_free (t_urlparams *x, t_symbol *selector, int argcount, t_atom *a
 	(void) argcount;
 	(void) argvec;
 
-	urlparams_free_memory(x);
+	kvp_storage_free_memory((t_kvp_storage *)x);
 }
 
 void urlparams_bang(t_urlparams *x) {
@@ -81,9 +64,9 @@ void urlparams_bang(t_urlparams *x) {
 
 	memset(output, 0x00, MAXPDSTRING);
 
-	if (x->data_count > 0) {
-		data_member = x->first_data;
-		for (i = 0; i < x->data_count; i++) {
+	if (x->storage.data_count > 0) {
+		data_member = x->storage.first_data;
+		for (i = 0; i < x->storage.data_count; i++) {
 			strcat(output, data_member->key);
 			strcat(output, "=");
 			encoded_string = urlencode(data_member->value);
@@ -91,53 +74,43 @@ void urlparams_bang(t_urlparams *x) {
 			if (encoded_string) {
 				free(encoded_string);
 			}
-			if (i <x->data_count - 1) {
+			if (i < x->storage.data_count - 1) {
 				strcat(output, "&");
 			}
 			data_member = data_member->next;
 		}
-		outlet_symbol(x->x_ob.ob_outlet, gensym(output));
+		outlet_symbol(x->storage.x_ob.ob_outlet, gensym(output));
 	}
 }
 
 void urlparams_add(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char *key;
-	char *value;
+	char key[MAXPDSTRING];
+	char value[MAXPDSTRING];
 	char temp_value[MAXPDSTRING];
 	t_key_value_pair *created_data = NULL;
 	int i;
 
 	(void) selector;
-
+	
 	if (argcount < 2) {
 		error("For method 'add' You need to specify a value.");
 	} else {
-		created_data = (t_key_value_pair *)getbytes(sizeof(t_key_value_pair));
-		key = (char *)getbytes(MAXPDSTRING * sizeof(char));
-		value = (char *)getbytes(MAXPDSTRING * sizeof(char));
-		if (created_data == NULL || key == NULL || value == NULL) {
-			error("Could not allocate memory.");
-			return;
-		}
 		atom_string(argvec, key, MAXPDSTRING);
-		created_data->key = key;
 		atom_string(argvec + 1, value, MAXPDSTRING);
 		for(i = 2; i < argcount; i++) {
 			atom_string(argvec + i, temp_value, MAXPDSTRING);
 			strcat(value, " ");
 			strcat(value, temp_value);
 		}
-		created_data->value = value;
-		created_data->next = NULL;
-		created_data->is_array = 0;
-		if (x->first_data == NULL) {
-			x->first_data = created_data;
-		} else {
-			x->last_data->next = created_data;
-		}
-		x->last_data = created_data;
+		created_data = create_key_value_pair(key, value, 0);
+		if (x->storage.first_data == NULL) {
+				x->storage.first_data = created_data;
+			} else {
+				x->storage.last_data->next = created_data;
+			}
+		x->storage.last_data = created_data;
 
-		x->data_count++;
+		x->storage.data_count++;
 	}
 }
 
@@ -146,5 +119,5 @@ void urlparams_clear(t_urlparams *x, t_symbol *selector, int argcount, t_atom *a
 	(void) argcount;
 	(void) argvec;
 
-	urlparams_free_memory(x);
+	kvp_storage_free_memory((t_kvp_storage *)x);
 }

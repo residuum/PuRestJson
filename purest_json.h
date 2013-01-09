@@ -63,13 +63,17 @@ typedef struct oauth {
 	} oauth;
 } t_oauth;
 
-/* [json-encode] */
-typedef struct json_encode {
+typedef struct kvp_storage {
 	t_object x_ob;
-	t_canvas *x_canvas;
 	t_key_value_pair *first_data;
 	t_key_value_pair *last_data;
 	int data_count;
+} t_kvp_storage;
+
+/* [json-encode] */
+typedef struct json_encode {
+	t_kvp_storage storage;
+	t_canvas *x_canvas;
 } t_json_encode;
 
 /* [json-decode] */
@@ -80,10 +84,7 @@ typedef struct json_decode {
 
 /* [urlparams] */
 typedef struct urlparams {
-	t_object x_ob;
-	t_key_value_pair *first_data;
-	t_key_value_pair *last_data;
-	int data_count;
+	t_kvp_storage storage;
 } t_urlparams;
 
 /* [rest] */

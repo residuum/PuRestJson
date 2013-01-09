@@ -6,6 +6,25 @@
 #include <sys/stat.h>
 #include <stdio.h>
 
+static t_key_value_pair *create_key_value_pair(char *key, char *value, int is_array){
+	t_key_value_pair *created_data = NULL;
+
+	created_data = (t_key_value_pair *)getbytes(sizeof(t_key_value_pair));
+	created_data->key = (char *)getbytes(MAXPDSTRING * sizeof(char));
+	created_data->value = (char *)getbytes(MAXPDSTRING * sizeof(char));
+	if (created_data == NULL || key == NULL || value == NULL) {
+		error("Could not get data");
+		return NULL;
+	}
+	strcpy(created_data->key, key);
+	strcpy(created_data->value, value);
+	created_data->value = value;
+	created_data->next = NULL;
+	created_data->is_array = is_array;
+
+	return created_data;
+}
+
 static t_class *json_encode_class;
 
 static void json_encode_free_memory(t_json_encode *x) {
@@ -15,8 +34,9 @@ static void json_encode_free_memory(t_json_encode *x) {
 	data_to_free = x->first_data;
 	while(data_to_free != NULL) {
 		next_data = data_to_free->next;
-		freebytes(data_to_free->key, MAXPDSTRING);
-		freebytes(data_to_free->value, MAXPDSTRING);
+		/* TODO: Investigate the reason for segfault */
+		/*freebytes(data_to_free->key, MAXPDSTRING);
+		freebytes(data_to_free->value, MAXPDSTRING);*/
 		freebytes(data_to_free, sizeof(t_key_value_pair));
 		data_to_free = next_data;
 	}
@@ -40,6 +60,68 @@ static json_object *create_object(char *value) {
 		object = json_object_new_string(value);
 	}
 	return object;
+}
+
+static void load_json_data(t_json_encode *x, json_object *jobj) {
+	enum json_type outer_type;
+	enum json_type inner_type;
+	t_key_value_pair *new_pair;
+	char value[MAXPDSTRING];
+
+	json_encode_free_memory(x);
+	outer_type = json_object_get_type(jobj);
+	post("%i", outer_type);
+	switch (outer_type) {
+		case json_type_object:
+			;
+			json_object_object_foreach(jobj, key, val) {
+				new_pair = NULL;
+				inner_type = json_object_get_type(val);
+				switch (inner_type) {
+					case json_type_boolean:
+						new_pair = create_key_value_pair(key, json_object_get_boolean(val) ? "1" : "0", 0);
+						break;
+					case json_type_double:
+						sprintf(value, "%f", json_object_get_double(val));
+						new_pair = create_key_value_pair(key, value, 0);
+						break;
+					case json_type_int:
+						sprintf(value, "%i", json_object_get_int(val));
+						new_pair = create_key_value_pair(key, value, 0);
+						break;
+					case json_type_string:
+						sprintf(value,  "%s", json_object_get_string(val));
+						new_pair = create_key_value_pair(key, value, 0);
+						break;
+					case json_type_object:
+						sprintf(value, "%s", json_object_get_string(val));
+						new_pair = create_key_value_pair(key, value, 0);
+						json_object_put(val);
+						break;
+					case json_type_array:
+						/* TODO: Split array */ 
+						/*new_pair = create_key_value_pair(key, json_object_get_string(val), 0);*/
+						break;
+					case json_type_null:
+						new_pair = create_key_value_pair(key, "", 0);
+						break;
+				}
+
+				if (new_pair) {
+					x->data_count++;
+					if (!x->first_data) {
+						x->first_data = new_pair;
+					} else {
+						x->last_data->next = new_pair;
+					}
+					x->last_data = new_pair;
+				}
+			}
+			break;
+		default: 
+			error("This JSON data cannot be represented internally, sorry");
+			break;
+	}
 }
 
 static t_symbol *get_json_symbol(t_json_encode *x) {
@@ -103,7 +185,7 @@ void setup_json0x2dencode(void) {
 			(t_method)json_encode_free, sizeof(t_json_encode), 0, A_GIMME, 0);
 	class_addbang(json_encode_class, (t_method)json_encode_bang);
 	class_addmethod(json_encode_class, (t_method)json_encode_add, gensym("add"), A_GIMME, 0);
-	class_addmethod(json_encode_class, (t_method)json_encode_array_add, gensym("array"), A_GIMME, 0);
+	class_addmethod(json_encode_class, (t_method)json_encode_add, gensym("array"), A_GIMME, 0);
 	class_addmethod(json_encode_class, (t_method)json_encode_read, gensym("read"), A_SYMBOL, A_DEFSYM, 0);
 	class_addmethod(json_encode_class, (t_method)json_encode_write, gensym("write"), A_SYMBOL, A_DEFSYM, 0);
 	class_addmethod(json_encode_class, (t_method)json_encode_clear, gensym("clear"), A_GIMME, 0);
@@ -136,81 +218,33 @@ void json_encode_bang(t_json_encode *x) {
 }
 
 void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char *key;
-	char *value;
+	char key[MAXPDSTRING];
+	char value[MAXPDSTRING];
 	char temp_value[MAXPDSTRING];
 	t_key_value_pair *created_data = NULL;
 	int i;
+	int is_array = 0;
 
-	(void) selector;
-
-	if (argcount < 2) {
-		error("For method 'add' You need to specify a value.");
-	} else {
-		created_data = (t_key_value_pair *)getbytes(sizeof(t_key_value_pair));
-		key = (char *)getbytes(MAXPDSTRING * sizeof(char));
-		value = (char *)getbytes(MAXPDSTRING * sizeof(char));
-		if (created_data == NULL || key == NULL || value == NULL) {
-			error("Could not allocate memory.");
-			return;
-		}
-		atom_string(argvec, key, MAXPDSTRING);
-		created_data->key = key;
-		atom_string(argvec + 1, value, MAXPDSTRING);
-		for(i = 2; i < argcount; i++) {
-			atom_string(argvec + i, temp_value, MAXPDSTRING);
-			strcat(value, " ");
-			strcat(value, temp_value);
-		}
-		created_data->value = value;
-		created_data->next = NULL;
-		created_data->is_array = 0;
-		if (x->first_data == NULL) {
-			x->first_data = created_data;
-		} else {
-			x->last_data->next = created_data;
-		}
-		x->last_data = created_data;
-
-		x->data_count++;
+	if (selector == gensym("array")) {
+		is_array = 1;
 	}
-}
-
-void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char *key;
-	char *value;
-	char temp_value[MAXPDSTRING];
-	t_key_value_pair *created_data = NULL;
-	int i;
-
-	(void) selector;
 
 	if (argcount < 2) {
-		error("For method 'array' You need to specify a value.");
+		error("For method '%s' You need to specify a value.", is_array ? "array": "add");
 	} else {
-		created_data = (t_key_value_pair *)getbytes(sizeof(t_key_value_pair));
-		key = (char *)getbytes(MAXPDSTRING * sizeof(char));
-		value = (char *)getbytes(MAXPDSTRING * sizeof(char));
-		if (created_data == NULL || key == NULL || value == NULL) {
-			error("Could not get data");
-			return;
-		}
 		atom_string(argvec, key, MAXPDSTRING);
-		created_data->key = key;
 		atom_string(argvec + 1, value, MAXPDSTRING);
 		for(i = 2; i < argcount; i++) {
 			atom_string(argvec + i, temp_value, MAXPDSTRING);
 			strcat(value, " ");
 			strcat(value, temp_value);
 		}
-		created_data->value = value;
-		created_data->next = NULL;
-		created_data->is_array = 1;
+		created_data = create_key_value_pair(key, value, is_array);
 		if (x->first_data == NULL) {
-			x->first_data = created_data;
-		} else {
-			x->last_data->next = created_data;
-		}
+				x->first_data = created_data;
+			} else {
+				x->last_data->next = created_data;
+			}
 		x->last_data = created_data;
 
 		x->data_count++;
@@ -234,7 +268,9 @@ void json_encode_read(t_json_encode *x, t_symbol *filename) {
 		jobj = json_object_new_string(json_string);
 		freebytes(json_string, (st.st_size + 1) * sizeof(char));
 		if (!is_error(jobj)) {
+			load_json_data(x, jobj);
 			/*TODO*/
+			json_object_put(jobj);
 		} else {
 			post("File does not contain valid JSON.");
 		}

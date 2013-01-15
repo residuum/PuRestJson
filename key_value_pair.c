@@ -16,6 +16,18 @@ static t_key_value_pair *create_key_value_pair(char *key, char *value, int is_ar
 	return created_data;
 }
 
+static void kvp_storage_add(t_kvp_storage *x, t_key_value_pair *new_pair) {
+	if (new_pair) {
+		x->data_count++;
+		if (!x->first_data) {
+			x->first_data = new_pair;
+		} else {
+			x->last_data->next = new_pair;
+		}
+		x->last_data = new_pair;
+	}
+}
+
 static void kvp_storage_free_memory(t_kvp_storage *x) {
 	t_key_value_pair *data_to_free;
 	t_key_value_pair *next_data;

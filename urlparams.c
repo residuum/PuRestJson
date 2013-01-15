@@ -103,14 +103,7 @@ void urlparams_add(t_urlparams *x, t_symbol *selector, int argcount, t_atom *arg
 			strcat(value, temp_value);
 		}
 		created_data = create_key_value_pair(key, value, 0);
-		if (x->storage.first_data == NULL) {
-				x->storage.first_data = created_data;
-			} else {
-				x->storage.last_data->next = created_data;
-			}
-		x->storage.last_data = created_data;
-
-		x->storage.data_count++;
+		kvp_storage_add((t_kvp_storage *)x, created_data);
 	}
 }
 

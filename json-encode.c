@@ -30,10 +30,12 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 	enum json_type inner_type;
 	t_key_value_pair *new_pair;
 	char value[MAXPDSTRING];
+	int array_len;
+	int i;
 
 	kvp_storage_free_memory((t_kvp_storage *)x);
 	outer_type = json_object_get_type(jobj);
-	post("%i", outer_type);
+	
 	switch (outer_type) {
 		case json_type_object:
 			;
@@ -53,7 +55,7 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 						new_pair = create_key_value_pair(key, value, 0);
 						break;
 					case json_type_string:
-						sprintf(value,  "%s", json_object_get_string(val));
+						sprintf(value, "%s", json_object_get_string(val));
 						new_pair = create_key_value_pair(key, value, 0);
 						break;
 					case json_type_object:
@@ -62,23 +64,23 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 						json_object_put(val);
 						break;
 					case json_type_array:
-						/* TODO: Split array */ 
-						/*new_pair = create_key_value_pair(key, json_object_get_string(val), 0);*/
+						array_len = json_object_array_length(val);
+						for (i = 0; i < array_len; i++) {
+							json_object *array_member = json_object_array_get_idx(val, i);
+							if (!is_error(array_member)) {
+								sprintf(value, "%s", json_object_get_string(array_member));
+								new_pair = create_key_value_pair(key, value, 1);
+								kvp_storage_add((t_kvp_storage *)x, new_pair);
+								json_object_put(array_member);
+							}
+						}
+						new_pair = NULL;
 						break;
 					case json_type_null:
 						new_pair = create_key_value_pair(key, "", 0);
 						break;
 				}
-
-				if (new_pair) {
-					x->storage.data_count++;
-					if (!x->storage.first_data) {
-						x->storage.first_data = new_pair;
-					} else {
-						x->storage.last_data->next = new_pair;
-					}
-					x->storage.last_data = new_pair;
-				}
+				kvp_storage_add((t_kvp_storage *)x, new_pair);
 			}
 			break;
 		default: 
@@ -139,6 +141,8 @@ static t_symbol *get_json_symbol(t_json_encode *x) {
 			json_object_put(array_members[i]);
 		}
 		json_object_put(jobj);
+	} else {
+		json_symbol = gensym("");
 	}
 	return json_symbol;
 }
@@ -203,14 +207,7 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 			strcat(value, temp_value);
 		}
 		created_data = create_key_value_pair(key, value, is_array);
-		if (x->storage.first_data == NULL) {
-				x->storage.first_data = created_data;
-			} else {
-				x->storage.last_data->next = created_data;
-			}
-		x->storage.last_data = created_data;
-
-		x->storage.data_count++;
+		kvp_storage_add((t_kvp_storage *)x, created_data);
 	}
 }
 
@@ -228,11 +225,10 @@ void json_encode_read(t_json_encode *x, t_symbol *filename) {
 		json_string[st.st_size] = 0x00;
 		fread(json_string, sizeof(char), st.st_size, file);
 		fclose(file);
-		jobj = json_object_new_string(json_string);
+		jobj = json_tokener_parse(json_string);
 		freebytes(json_string, (st.st_size + 1) * sizeof(char));
 		if (!is_error(jobj)) {
 			load_json_data(x, jobj);
-			/*TODO*/
 			json_object_put(jobj);
 		} else {
 			post("File does not contain valid JSON.");

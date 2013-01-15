@@ -10,7 +10,6 @@ static t_key_value_pair *create_key_value_pair(char *key, char *value, int is_ar
 	}
 	strcpy(created_data->key, key);
 	strcpy(created_data->value, value);
-	created_data->value = value;
 	created_data->next = NULL;
 	created_data->is_array = is_array;
 
@@ -25,8 +24,8 @@ static void kvp_storage_free_memory(t_kvp_storage *x) {
 	while(data_to_free != NULL) {
 		next_data = data_to_free->next;
 		/* TODO: Investigate the reason for segfault */
-		/*freebytes(data_to_free->key, MAXPDSTRING);
-		freebytes(data_to_free->value, MAXPDSTRING);*/
+		freebytes(data_to_free->key, MAXPDSTRING);
+		freebytes(data_to_free->value, MAXPDSTRING);
 		freebytes(data_to_free, sizeof(t_key_value_pair));
 		data_to_free = next_data;
 	}

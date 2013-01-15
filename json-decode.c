@@ -30,41 +30,43 @@ static char *lowercase_unicode(char *orig, size_t memsize) {
 	memsize = (strlen(orig) + 1) * sizeof(char);
 	cleaned_string = (char *)getbytes(memsize);
 	if (cleaned_string != NULL) {
-		segment = strtok(orig, unicode_intro);
-		memset(cleaned_string, 0x00, strlen(orig) + 1);
-		strcpy(cleaned_string, segment);
-		segment = strtok(NULL, unicode_intro);
+		if (strlen(orig) > 0) {
+			segment = strtok(orig, unicode_intro);
+			memset(cleaned_string, 0x00, strlen(orig) + 1);
+			strcpy(cleaned_string, segment);
+			segment = strtok(NULL, unicode_intro);
 
-		while(segment != NULL) {
-			strcat(cleaned_string, unicode_intro);
-			if (segment[0] == 'u') {
-				for (i = 1; i < 1 + uni_len; i++) {
-					switch (segment[i]) {
-						case 'A':
-							segment[i] = 'a';
-							break;
-						case 'B':
-							segment[i] = 'b';
-							break;
-						case 'C':
-							segment[i] = 'c';
-							break;
-						case 'D':
-							segment[i] = 'd';
-							break;
-						case 'E':
-							segment[i] = 'e';
-							break;
-						case 'F':
-							segment[i] = 'f';
-							break;
+			while(segment != NULL) {
+				strcat(cleaned_string, unicode_intro);
+				if (segment[0] == 'u') {
+					for (i = 1; i < 1 + uni_len; i++) {
+						switch (segment[i]) {
+							case 'A':
+								segment[i] = 'a';
+								break;
+							case 'B':
+								segment[i] = 'b';
+								break;
+							case 'C':
+								segment[i] = 'c';
+								break;
+							case 'D':
+								segment[i] = 'd';
+								break;
+							case 'E':
+								segment[i] = 'e';
+								break;
+							case 'F':
+								segment[i] = 'f';
+								break;
+						}
 					}
 				}
+				strcat(cleaned_string, segment);
+				segment = strtok(NULL, unicode_intro);
 			}
-			strcat(cleaned_string, segment);
-			segment = strtok(NULL, unicode_intro);
-		}
 
+		}
 	} else {
 		error("Could not allocate memory");
 	}

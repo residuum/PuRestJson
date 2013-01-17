@@ -14,16 +14,16 @@
 
 /* reading / writing data in HTTP requests */
 typedef struct memory_struct {
-  char *memory;
-  size_t size;
+	char *memory;
+	size_t size;
 } t_memory_struct;
 
 /* storing data before encoding to JSON */
 typedef struct key_value_pair {
-  char *key;
-  char *value;
-  short is_array;
-  struct key_value_pair *next;
+	char *key;
+	char *value;
+	short is_array;
+	struct key_value_pair *next;
 } t_key_value_pair;
 
 /* data for threading */
@@ -146,8 +146,7 @@ char *remove_backslashes(char *source_string, size_t memsize) {
 	cleaned_string = (char *) getbytes(memsize * sizeof(char));
 	if (cleaned_string == NULL) {
 		error("Unable to allocate memory\n");
-	}
-	else if (len_src > 0) {
+	} else if (len_src > 0) {
 		segment = strtok(source_string, masking);
 		strcpy(cleaned_string, segment);
 		segment = strtok(NULL, masking);
@@ -156,8 +155,8 @@ char *remove_backslashes(char *source_string, size_t memsize) {
 				/* We keep the backslash */
 				strcat(cleaned_string, masking);
 			}
-				strcat(cleaned_string, segment);
-				segment = strtok(NULL, masking);
+			strcat(cleaned_string, segment);
+			segment = strtok(NULL, masking);
 		}
 	}
 	return (cleaned_string);

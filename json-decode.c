@@ -218,11 +218,15 @@ void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 
 void json_decode_string(t_json_decode *x, t_symbol *data) {
 	size_t memsize = 0;
-	char *json_string = remove_backslashes(data->s_name, memsize);
+	char *original_string = data->s_name;
+	char *json_string;
 
-	if (json_string != NULL) {
-		output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
-		freebytes(json_string, memsize);
+	if (original_string && strlen(original_string)) {
+		json_string = remove_backslashes(original_string, memsize);
+		if (json_string != NULL) {
+			output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
+			freebytes(json_string, memsize);
+		}
 	}
 }
 

@@ -12,6 +12,14 @@
 
 #define REQUEST_TYPE_LEN 7
 
+#ifdef _WIN32
+	#define APIEXPORT __declspec(dllexport)
+	#define APICALL __cdecl
+#else 
+	#define APIEXPORT
+	#define APICALL
+#endif
+
 /* reading / writing data in HTTP requests */
 typedef struct memory_struct {
 	char *memory;
@@ -53,7 +61,7 @@ typedef struct rest {
 /* [oauth] */
 typedef struct oauth {
 	t_rest_common threaddata;
-	/* authentication*/
+	/* authentication */
 	struct {
 		char client_key[MAXPDSTRING];
 		char client_secret[MAXPDSTRING];
@@ -88,52 +96,51 @@ typedef struct urlparams {
 } t_urlparams;
 
 /* [rest] */
-void rest_setup(void);
-void *rest_new(t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL rest_setup(void);
+APIEXPORT void APICALL *rest_new(t_symbol *selector, int argcount, t_atom *argvec);
 
-void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec); 
-void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec); 
+APIEXPORT void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* [oauth] */
-void oauth_setup(void);
-void *oauth_new(t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL oauth_setup(void);
+APIEXPORT void APICALL *oauth_new(t_symbol *selector, int argcount, t_atom *argvec);
 
-void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec); 
-void oauth_url(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
-void oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec); 
+APIEXPORT void APICALL oauth_url(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* [json-encode] */
-void setup_json0x2dencode(void);
-void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
-void json_encode_free(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL setup_json0x2dencode(void);
+APIEXPORT void APICALL *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL json_encode_free(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
-void json_encode_bang(t_json_encode *x);
-void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
-void json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
-void json_encode_read(t_json_encode *x, t_symbol *filename);
-void json_encode_write(t_json_encode *x, t_symbol *filename);
-void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL json_encode_bang(t_json_encode *x);
+APIEXPORT void APICALL json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL json_encode_array_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL json_encode_read(t_json_encode *x, t_symbol *filename);
+APIEXPORT void APICALL json_encode_write(t_json_encode *x, t_symbol *filename);
+APIEXPORT void APICALL json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* [json-decode] */
-void setup_json0x2ddecode(void);
-void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL setup_json0x2ddecode(void);
+APIEXPORT void APICALL *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec);
 
-void json_decode_string(t_json_decode *x, t_symbol *data);
-void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL json_decode_string(t_json_decode *x, t_symbol *data);
+APIEXPORT void APICALL json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* [urlparams] */
-void urlparams_setup(void);
-void *urlparams_new(t_symbol *selector, int argcount, t_atom *argvec);
-void urlparams_free(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL urlparams_setup(void);
+APIEXPORT void APICALL *urlparams_new(t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL urlparams_free(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec);
 
-void urlparams_bang(t_urlparams *x);
-void urlparams_add(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec);
-void urlparams_clear(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL urlparams_bang(t_urlparams *x);
+APIEXPORT void APICALL urlparams_add(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL urlparams_clear(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* general */ 
-void purest_json_setup(void);
+APIEXPORT void APICALL purest_json_setup(void);
 char *remove_backslashes(char *source_string, size_t memsize);
-
 
 char *remove_backslashes(char *source_string, size_t memsize) {
 	char *cleaned_string = NULL;

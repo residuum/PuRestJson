@@ -50,6 +50,11 @@ Object for issuing HTTP request. Received data is parsed as JSON data.
 For the usage of the externals see the help patches for the objects.
 
 
+Binary downloads
+
+Binary packages can be found at http://ix.residuum.org/pd/purest_json.html
+
+
 How to build PuREST JSON 
 
 The library uses the template for Pd-extended. Drop the library in a

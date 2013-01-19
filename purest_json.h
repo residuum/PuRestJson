@@ -8,7 +8,7 @@
 #include <pthread.h>
 #include <oauth.h>
 
-#define LIBRARY_VERSION "0.8"
+#define LIBRARY_VERSION "0.9"
 
 #define REQUEST_TYPE_LEN 7
 

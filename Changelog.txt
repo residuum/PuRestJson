@@ -1,5 +1,14 @@
 Changelog
 ---------
+0.9:
+- [json-encode] writes and reads JSON data to and from files
+- [oauth] does not use deprecated functions from liboauth 1.0
+- [oauth] and [rest] share functions
+- [json-encode] and [urlparams] share functions
+- Bugfixes:
+	-- POST sends correct parameter data
+	-- HTTP errors are displayed with error code
+
 0.8:
 - Added objects: [oauth] [urlparams] [rest]
 - [rest-json] is now an abstraction

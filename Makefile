@@ -41,8 +41,8 @@ ALL_LDFLAGS =
 SHARED_LDFLAGS =
 ALL_LIBS = -lcurl -ljson -loauth
 LIBS_windows = -lpthread -lm -lidn -lintl -lwldap32 -lgnutls -lhogweed -lgmp \
-			   -liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto -lws2_32 \
-			   -lgdi32 -lcrypt32 -lz  
+			   -liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto \
+			   -lws2_32 -lgdi32 -lcrypt32 -lz  
 CFLAGS_windows = -mthreads -DCURL_STATICLIB
 
 
@@ -77,7 +77,8 @@ INSTALL_DATA = $(INSTALL) -p -m 644
 INSTALL_DIR     = $(INSTALL) -p -m 755 -d
 
 ALLSOURCES := $(SOURCES) $(SOURCES_android) $(SOURCES_cygwin) $(SOURCES_macosx) \
-	         $(SOURCES_iphoneos) $(SOURCES_linux) $(SOURCES_windows) curl_thread_wrapper.c key_value_pair.c
+	         $(SOURCES_iphoneos) $(SOURCES_linux) $(SOURCES_windows) \
+			 curl_thread_wrapper.c key_value_pair.c shared_functions.c
 
 DISTDIR=$(LIBRARY_NAME)-$(LIBRARY_VERSION)
 ORIGDIR=pd-`echo $(LIBRARY_NAME:~=)|tr '_' '-'`_$(LIBRARY_VERSION)

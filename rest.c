@@ -3,7 +3,9 @@
  * */
 
 #include "purest_json.h"
+
 #include "curl_thread_wrapper.c"
+#include "shared_functions.c"
 
 static t_class *rest_class;
 
@@ -222,6 +224,7 @@ void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 
 	(void) selector;
 
+	set_url_parameters(x, 0, argvec); 
 	set_url_parameters(x, argcount, argvec); 
 
 	outlet_new(&x->threaddata.x_ob, NULL);

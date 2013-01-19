@@ -4,6 +4,8 @@
 
 #include "purest_json.h"
 
+#include "shared_functions.c"
+
 static t_class *json_decode_class;
 
 static int str_ccmp(const char *s1, const char *s2) {

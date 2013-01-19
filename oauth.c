@@ -3,7 +3,9 @@
  * */
 
 #include "purest_json.h"
+
 #include "curl_thread_wrapper.c"
+#include "shared_functions.c"
 
 static t_class *oauth_class;
 
@@ -85,13 +87,13 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 	char *cleaned_parameters;
 	size_t memsize = 0;
 	t_atom auth_status_data[2];
-	char *postargs;
-	char *req_url;
+	char *postargs = NULL;
+	char *req_url = NULL;
 
 	if(x->threaddata.is_data_locked) {
 		post("oauth object is performing request and locked");
 	} else {
-		memset(x->threaddata.request_type, 0x00, 5);
+		memset(x->threaddata.request_type, 0x00, REQUEST_TYPE_LEN);
 		memset(x->threaddata.parameters, 0x00, MAXPDSTRING);
 		memset(x->threaddata.complete_url, 0x00, MAXPDSTRING);
 		switch (argcount) {
@@ -113,7 +115,6 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 					strcpy(req_path, x->threaddata.base_url);
 				}
 				strcat(req_path, path);
-				memset(x->threaddata.request_type, 0x00, REQUEST_TYPE_LEN);
 				strcpy(x->threaddata.request_type, request_type);
 				if ((strcmp(x->threaddata.request_type, "GET") && 
 							strcmp(x->threaddata.request_type, "POST"))) {
@@ -148,6 +149,7 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 		}
 	}
 }
+
 void oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char method_name[11];
 
@@ -162,8 +164,9 @@ void oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) 
 			atom_string(argvec, method_name, 11);
 			if (strcmp(method_name, "HMAC") == 0) {
 				x->oauth.method = OA_HMAC;
-			/*} else if (strcmp(method_name, "RSA") == 0) {
-				x->oauth.method = OA_RSA;*/
+			} else if (strcmp(method_name, "RSA") == 0) {
+				error("RSA is not implemented yet");
+				/*x->oauth.method = OA_RSA;*/
 			} else if (strcmp(method_name, "PLAINTEXT") == 0) {
 				x->oauth.method = OA_PLAINTEXT;
 				post("Warning: You are using plaintext now");
@@ -190,6 +193,7 @@ void *oauth_new(t_symbol *selector, int argcount, t_atom *argvec) {
 
 	(void) selector;
 
+	set_url_parameters(x, 0, argvec); 
 	set_url_parameters(x, argcount, argvec); 
 	x->oauth.method = OA_HMAC;
 

@@ -5,7 +5,9 @@
 #include "purest_json.h"
 #include <sys/stat.h>
 #include <stdio.h>
+
 #include "key_value_pair.c"
+#include "shared_functions.c"
 
 static t_class *json_encode_class;
 

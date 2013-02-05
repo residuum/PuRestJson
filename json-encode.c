@@ -11,6 +11,11 @@
 
 static t_class *json_encode_class;
 
+struct _json_encode {
+	struct _kvp_storage storage;
+	t_canvas *x_canvas;
+};
+
 static json_object *create_object(char *value) {
 	json_object *object;
 	char *parsed_string;
@@ -30,12 +35,12 @@ static json_object *create_object(char *value) {
 static void load_json_data(t_json_encode *x, json_object *jobj) {
 	enum json_type outer_type;
 	enum json_type inner_type;
-	t_key_value_pair *new_pair;
+	struct _key_value_pair *new_pair;
 	char value[MAXPDSTRING];
 	int array_len;
 	int i;
 
-	kvp_storage_free_memory((t_kvp_storage *)x);
+	kvp_storage_free_memory((struct _kvp_storage *)x);
 	outer_type = json_object_get_type(jobj);
 	
 	switch (outer_type) {
@@ -72,7 +77,7 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 							if (!is_error(array_member)) {
 								sprintf(value, "%s", json_object_get_string(array_member));
 								new_pair = create_key_value_pair(key, value, 1);
-								kvp_storage_add((t_kvp_storage *)x, new_pair);
+								kvp_storage_add((struct _kvp_storage *)x, new_pair);
 								json_object_put(array_member);
 							}
 						}
@@ -82,7 +87,7 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 						new_pair = create_key_value_pair(key, "", 0);
 						break;
 				}
-				kvp_storage_add((t_kvp_storage *)x, new_pair);
+				kvp_storage_add((struct _kvp_storage *)x, new_pair);
 			}
 			break;
 		default: 
@@ -96,8 +101,8 @@ static t_symbol *get_json_symbol(t_json_encode *x) {
 	int array_member_numbers[x->storage.data_count];
 	int array_member_count = 0;
 	short already_added = 0;
-	t_key_value_pair *data_member;
-	t_key_value_pair *data_member_compare;
+	struct _key_value_pair *data_member;
+	struct _key_value_pair *data_member_compare;
 	json_object *jobj = json_object_new_object();
 	json_object *value;
 	json_object *array_members[x->storage.data_count];
@@ -179,7 +184,7 @@ void json_encode_free (t_json_encode *x, t_symbol *selector, int argcount, t_ato
 	(void) argcount;
 	(void) argvec;
 
-	kvp_storage_free_memory((t_kvp_storage *)x);
+	kvp_storage_free_memory((struct _kvp_storage *)x);
 }
 
 void json_encode_bang(t_json_encode *x) {
@@ -190,7 +195,7 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 	char key[MAXPDSTRING];
 	char value[MAXPDSTRING];
 	char temp_value[MAXPDSTRING];
-	t_key_value_pair *created_data = NULL;
+	struct _key_value_pair *created_data = NULL;
 	int i;
 	int is_array = 0;
 
@@ -209,7 +214,7 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 			strcat(value, temp_value);
 		}
 		created_data = create_key_value_pair(key, value, is_array);
-		kvp_storage_add((t_kvp_storage *)x, created_data);
+		kvp_storage_add((struct _kvp_storage *)x, created_data);
 	}
 }
 
@@ -266,5 +271,5 @@ void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_ato
 	(void) argcount;
 	(void) argvec;
 
-	kvp_storage_free_memory((t_kvp_storage *)x);
+	kvp_storage_free_memory((struct _kvp_storage *)x);
 }

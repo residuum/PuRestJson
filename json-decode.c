@@ -6,7 +6,16 @@
 
 #include "shared_functions.c"
 
+#ifndef JSON_C_MINOR_VERSION
+#define JSON_C_MINOR_VERSION 9
+#endif
+
 static t_class *json_decode_class;
+
+struct _json_decode {
+	t_object x_ob;
+	t_outlet *done_outlet;
+};
 
 static int str_ccmp(const char *s1, const char *s2) {
 	const unsigned char *p1 = (const unsigned char *)s1;
@@ -22,6 +31,7 @@ static int str_ccmp(const char *s1, const char *s2) {
 	return toupper(*p2) > toupper(*p1) ? -1 : 1;
 }
 
+#if JSON_C_MINOR_VERSION < 10
 static char *lowercase_unicode(char *orig, size_t memsize) {
 	char *unicode_intro = "\\";
 	char *segment; 
@@ -74,6 +84,7 @@ static char *lowercase_unicode(char *orig, size_t memsize) {
 	}
 	return cleaned_string;
 }
+#endif
 
 static void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	enum json_type outer_type;
@@ -182,11 +193,16 @@ static void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done
 
 static void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done_outlet) {
 	json_object *jobj;
+#if JSON_C_MINOR_VERSION < 10
 	size_t memsize = 0;
 	/* Needed because of bug in json-c 0.9 */
 	char* corrected_json_string = lowercase_unicode(json_string, memsize);
 	/* Parse JSON */
 	jobj = json_tokener_parse(corrected_json_string);
+#else
+	jobj = json_tokener_parse(json_string);
+#endif
+
 	if (!is_error(jobj)) {
 		output_json(jobj, data_outlet, done_outlet);
 		/* TODO: This sometimes results in a segfault. Why? */
@@ -194,7 +210,9 @@ static void output_json_string(char *json_string, t_outlet *data_outlet, t_outle
 	} else {
 		error("Not a JSON object");
 	}
+#if JSON_C_MINOR_VERSION < 10
 	freebytes(corrected_json_string, memsize);
+#endif
 }
 
 void setup_json0x2ddecode(void) {

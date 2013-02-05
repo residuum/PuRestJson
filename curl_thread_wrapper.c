@@ -1,6 +1,45 @@
+struct _memory_struct {
+	char *memory;
+	size_t size;
+};
+
+struct _rest_common {
+	t_object x_ob;
+	t_outlet *status_info_outlet;
+	char request_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST; DELETE*/
+	char parameters[MAXPDSTRING];
+	char complete_url[MAXPDSTRING];
+	short is_data_locked;
+	char base_url[MAXPDSTRING];
+	t_atom *out;
+};
+
+struct _rest {
+	struct _rest_common threaddata;
+	/* authentication: cookie */
+	struct {
+		char login_path[MAXPDSTRING];
+		char username[MAXPDSTRING];
+		char password[MAXPDSTRING];
+		char auth_token[MAXPDSTRING];
+	} cookie;
+};
+
+struct _oauth {
+	struct _rest_common threaddata;
+	/* authentication */
+	struct {
+		char client_key[MAXPDSTRING];
+		char client_secret[MAXPDSTRING];
+		char token_key[MAXPDSTRING];
+		char token_secret[MAXPDSTRING];
+		OAuthMethod method;
+	} oauth;
+};
+
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
-	t_memory_struct *mem = (t_memory_struct *)data;
+	struct _memory_struct *mem = (struct _memory_struct *)data;
 
 	mem->memory = (char *) resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
@@ -19,7 +58,7 @@ static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *
 
 static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
-	t_memory_struct *mem = (t_memory_struct *)data;
+	struct _memory_struct *mem = (struct _memory_struct *)data;
 	size_t to_copy = (mem->size < realsize) ? mem->size : realsize;
 
 	memcpy(ptr, mem->memory, to_copy);
@@ -29,11 +68,11 @@ static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *d
 }
 
 static void *execute_request(void *thread_args) {
-	t_rest_common *threaddata = (t_rest_common *)thread_args; 
+	struct _rest_common *threaddata = (struct _rest_common *)thread_args; 
 	CURL *curl_handle;
 	CURLcode result;
-	t_memory_struct in_memory;
-	t_memory_struct out_memory;
+	struct _memory_struct in_memory;
+	struct _memory_struct out_memory;
 	long http_status;
 	t_atom http_status_data[3];
 
@@ -102,7 +141,7 @@ static void *execute_request(void *thread_args) {
 	return NULL;
 }
 
-static void thread_execute(t_rest_common *x, void *(*func) (void *)) {
+static void thread_execute(struct _rest_common *x, void *(*func) (void *)) {
 	int rc;
 	pthread_t thread;
 	pthread_attr_t thread_attributes;

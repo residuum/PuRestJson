@@ -143,7 +143,7 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 					if (req_url) {
 						free(req_url);
 					}
-					thread_execute((t_rest_common *)x, execute_request);
+					thread_execute((struct _rest_common *)x, execute_request);
 				}
 				break;
 		}

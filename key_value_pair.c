@@ -1,7 +1,21 @@
-static t_key_value_pair *create_key_value_pair(char *key, char *value, int is_array){
-	t_key_value_pair *created_data = NULL;
+struct _key_value_pair {
+	char *key;
+	char *value;
+	short is_array;
+	struct _key_value_pair *next;
+};
 
-	created_data = (t_key_value_pair *)getbytes(sizeof(t_key_value_pair));
+struct _kvp_storage {
+	t_object x_ob;
+	struct _key_value_pair *first_data;
+	struct _key_value_pair *last_data;
+	int data_count;
+};
+
+static struct _key_value_pair *create_key_value_pair(char *key, char *value, int is_array){
+	struct _key_value_pair *created_data = NULL;
+
+	created_data = (struct _key_value_pair *)getbytes(sizeof(struct _key_value_pair));
 	created_data->key = (char *)getbytes(MAXPDSTRING * sizeof(char));
 	created_data->value = (char *)getbytes(MAXPDSTRING * sizeof(char));
 	if (created_data == NULL || key == NULL || value == NULL) {
@@ -16,7 +30,7 @@ static t_key_value_pair *create_key_value_pair(char *key, char *value, int is_ar
 	return created_data;
 }
 
-static void kvp_storage_add(t_kvp_storage *x, t_key_value_pair *new_pair) {
+static void kvp_storage_add(struct _kvp_storage *x, struct _key_value_pair *new_pair) {
 	if (new_pair) {
 		x->data_count++;
 		if (!x->first_data) {
@@ -28,9 +42,9 @@ static void kvp_storage_add(t_kvp_storage *x, t_key_value_pair *new_pair) {
 	}
 }
 
-static void kvp_storage_free_memory(t_kvp_storage *x) {
-	t_key_value_pair *data_to_free;
-	t_key_value_pair *next_data;
+static void kvp_storage_free_memory(struct _kvp_storage *x) {
+	struct _key_value_pair *data_to_free;
+	struct _key_value_pair *next_data;
 
 	data_to_free = x->first_data;
 	while(data_to_free != NULL) {
@@ -38,7 +52,7 @@ static void kvp_storage_free_memory(t_kvp_storage *x) {
 		/* TODO: Investigate the reason for segfault */
 		freebytes(data_to_free->key, MAXPDSTRING);
 		freebytes(data_to_free->value, MAXPDSTRING);
-		freebytes(data_to_free, sizeof(t_key_value_pair));
+		freebytes(data_to_free, sizeof(struct _key_value_pair));
 		data_to_free = next_data;
 	}
 

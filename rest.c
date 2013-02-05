@@ -13,8 +13,8 @@ static void *get_cookie_auth_token(void *thread_args) {
 	t_rest *x = (t_rest *)thread_args; 
 	CURL *curl_handle;
 	CURLcode result;
-	t_memory_struct out_content;
-	t_memory_struct out_header;
+	struct _memory_struct out_content;
+	struct _memory_struct out_header;
 	char *post_data;
 	size_t post_data_length;
 	char *header_line;
@@ -139,7 +139,7 @@ static void set_url_parameters(t_rest *x, int argcount, t_atom *argvec) {
 			} else {
 				atom_string(argvec + 3, x->cookie.password, MAXPDSTRING);
 			}
-			thread_execute((t_rest_common *)x, get_cookie_auth_token);
+			thread_execute((struct _rest_common *)x, get_cookie_auth_token);
 			break;
 		default:
 			error("Wrong number of parameters.");
@@ -201,7 +201,7 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 					outlet_list(x->threaddata.status_info_outlet, &s_list, 2, &auth_status_data[0]);
 					x->threaddata.is_data_locked = 0;
 				} else {
-					thread_execute((t_rest_common *)x, execute_request);
+					thread_execute((struct _rest_common *)x, execute_request);
 				}
 				break;
 		}

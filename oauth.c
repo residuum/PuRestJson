@@ -103,18 +103,23 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 				request_type = selector->s_name;
 				atom_string(argvec, path, MAXPDSTRING);
 				x->threaddata.is_data_locked = 1;
-				if (argcount > 1) {
-					atom_string(argvec + 1, parameters, MAXPDSTRING);
-					if (strlen(parameters)) {
-						cleaned_parameters = remove_backslashes(parameters, memsize);
-						strcpy(x->threaddata.parameters, cleaned_parameters);
-						freebytes(cleaned_parameters, memsize);
-					}
-				}
 				if (x->threaddata.base_url != NULL) {
 					strcpy(req_path, x->threaddata.base_url);
 				}
 				strcat(req_path, path);
+				if (argcount > 1) {
+					atom_string(argvec + 1, parameters, MAXPDSTRING);
+					if (strlen(parameters)) {
+						cleaned_parameters = remove_backslashes(parameters, memsize);
+						if (strchr(req_path, '?')) {
+							strcat(req_path, "&");
+						} else {
+							strcat(req_path, "?");
+						}
+						strcat(req_path, cleaned_parameters);
+						freebytes(cleaned_parameters, memsize);
+					}
+				}
 				strcpy(x->threaddata.request_type, request_type);
 				if ((strcmp(x->threaddata.request_type, "GET") && 
 							strcmp(x->threaddata.request_type, "POST"))) {

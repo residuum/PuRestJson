@@ -36,6 +36,7 @@ typedef struct _oauth t_oauth;
 
 APIEXPORT void APICALL oauth_setup(void);
 APIEXPORT void APICALL *oauth_new(t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL oauth_free(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 APIEXPORT void APICALL oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec); 
 APIEXPORT void APICALL oauth_url(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);

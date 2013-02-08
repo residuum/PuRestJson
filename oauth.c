@@ -72,7 +72,7 @@ static void set_url_parameters(t_oauth *x, int argcount, t_atom *argvec) {
 
 void oauth_setup(void) {
 	oauth_class = class_new(gensym("oauth"), (t_newmethod)oauth_new,
-			0, sizeof(t_oauth), 0, A_GIMME, 0);
+			(t_method)oauth_free, sizeof(t_oauth), 0, A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_url, gensym("url"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("GET"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("POST"), A_GIMME, 0);
@@ -160,26 +160,42 @@ void oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) 
 
 	(void) selector;
 
-	if (argcount != 1) {
-		error("'method' only takes one argument. See help for more");
-	} else {
-		if (argvec[0].a_type != A_SYMBOL) {
-			error("'method' only takes a symbol argument. See help for more");
-		} else {
+	if (argcount > 0) {
+		if (argvec[0].a_type == A_SYMBOL) {
 			atom_string(argvec, method_name, 11);
 			if (strcmp(method_name, "HMAC") == 0) {
 				x->oauth.method = OA_HMAC;
-			} else if (strcmp(method_name, "RSA") == 0) {
-				error("RSA is not implemented yet");
-				/*x->oauth.method = OA_RSA;*/
+				if (x->oauth.rsa_key) {
+					free(x->oauth.rsa_key);
+				}
+				if (argcount > 1)  {
+					post("Additional data is ignored");
+				}
 			} else if (strcmp(method_name, "PLAINTEXT") == 0) {
 				x->oauth.method = OA_PLAINTEXT;
+				if (x->oauth.rsa_key) {
+					free(x->oauth.rsa_key);
+				}
 				post("Warning: You are using plaintext now");
+				if (argcount > 1)  {
+					post("Additional data is ignored");
+				}
+			} else if (strcmp(method_name, "RSA") == 0) {
+				if (argcount > 1) {
+					x->oauth.method = OA_RSA;
+					/* TODO: Read RSA key */
+				} else {
+					error("RSA needs the RSA private key as additional data");
+				}
 			} else {
 				error("Only HMAC, RSA, and PLAINTEXT allowed");
 			}
+
+		} else {
+			error("'method' only takes a symbol argument. See help for more");
 		}
-	}
+	} else 
+		error("'method' needs at least one argument. See help for more");
 }
 
 void oauth_url(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
@@ -201,10 +217,22 @@ void *oauth_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	set_url_parameters(x, 0, argvec); 
 	set_url_parameters(x, argcount, argvec); 
 	x->oauth.method = OA_HMAC;
+	x->oauth.rsa_key = NULL;
 
 	outlet_new(&x->threaddata.x_ob, NULL);
 	x->threaddata.status_info_outlet = outlet_new(&x->threaddata.x_ob, NULL);
 	x->threaddata.is_data_locked = 0;
 
 	return (void *)x;
+}
+
+void oauth_free(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
+	(void) selector;
+	(void) argcount;
+	(void) argvec;
+
+	if (x->oauth.rsa_key) {
+		free(x->oauth.rsa_key);
+	}
+
 }

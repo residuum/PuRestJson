@@ -34,6 +34,7 @@ struct _oauth {
 		char token_key[MAXPDSTRING];
 		char token_secret[MAXPDSTRING];
 		OAuthMethod method;
+		char *rsa_key;
 	} oauth;
 };
 

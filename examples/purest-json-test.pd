@@ -1,4 +1,7 @@
-#N canvas 59 51 1002 589 10;
+#N canvas 44 51 1002 589 10;
+#X declare -lib purest_json;
+#X declare -lib purest_json;
+#X declare -lib purest_json;
 #X declare -lib purest_json;
 #X msg 9 38 url http://127.0.0.1:5984/;
 #X obj 363 136 json-encode;
@@ -38,7 +41,7 @@
 #X obj 671 483 print array-done;
 #X obj 552 483 print array-decode;
 #X obj 552 329 rest-json http://127.0.0.1:5984/;
-#N canvas 114 60 1112 677 webservices 0;
+#N canvas 94 51 1112 677 webservices 0;
 #X obj 129 351 rest-json;
 #X obj 204 399 print data;
 #X msg 381 310 GET http://search.twitter.com/search.json?q=%23puredata
@@ -49,8 +52,6 @@
 #X obj 129 482 json-decode;
 #X obj 250 516 print array-done;
 #X obj 129 515 print array-decode;
-#X obj 129 454 l2s;
-#X obj 129 429 route commits;
 #X msg 75 21 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master
 ;
 #X msg 129 72 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master/Makefile
@@ -61,20 +62,20 @@
 ;
 #X msg 264 210 GET http://gdata.youtube.com/feeds/api/videos?q?puredata&v=2&alt=jsonc
 ;
+#X obj 129 429 route results;
 #X connect 0 0 4 0;
-#X connect 0 0 1 0;
+#X connect 0 1 1 0;
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;
-#X connect 4 0 9 0;
+#X connect 4 0 13 0;
 #X connect 5 0 7 0;
 #X connect 5 1 6 0;
-#X connect 8 0 5 0;
-#X connect 9 0 8 0;
+#X connect 8 0 0 0;
+#X connect 9 0 0 0;
 #X connect 10 0 0 0;
 #X connect 11 0 0 0;
 #X connect 12 0 0 0;
-#X connect 13 0 0 0;
-#X connect 14 0 0 0;
+#X connect 13 0 5 0;
 #X restore -42 467 pd webservices;
 #X obj -48 381 print couchdb_return;
 #X obj 363 315 print decode_json_data;

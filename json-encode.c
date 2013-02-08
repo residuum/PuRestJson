@@ -23,9 +23,9 @@ static json_object *create_object(char *value) {
 	/* if stored value is string is starting with { and ending with }, 
 	   then create a json object from it. */
 	if (value[0] == '{' && value[strlen(value) - 1] == '}') {
-		parsed_string = remove_backslashes(value, memsize);;
+		parsed_string = remove_backslashes(value, &memsize);;
 		object = json_tokener_parse(parsed_string);
-		freebytes(parsed_string, memsize);
+		freebytes(parsed_string, memsize * sizeof(char));
 	} else {
 		object = json_object_new_string(value);
 	}
@@ -36,13 +36,14 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 	enum json_type outer_type;
 	enum json_type inner_type;
 	struct _key_value_pair *new_pair;
-	char value[MAXPDSTRING];
+	char *value;
+	size_t value_len = 0;
 	int array_len;
 	int i;
 
 	kvp_storage_free_memory((struct _kvp_storage *)x);
 	outer_type = json_object_get_type(jobj);
-	
+
 	switch (outer_type) {
 		case json_type_object:
 			;
@@ -54,20 +55,32 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 						new_pair = create_key_value_pair(key, json_object_get_boolean(val) ? "1" : "0", 0);
 						break;
 					case json_type_double:
+						value_len = 1 + snprintf(NULL, 0, "%f", json_object_get_double(val));
+						value = (char *)getbytes(value_len * sizeof(char));
 						sprintf(value, "%f", json_object_get_double(val));
 						new_pair = create_key_value_pair(key, value, 0);
+						freebytes(value, value_len * sizeof(char));
 						break;
 					case json_type_int:
-						sprintf(value, "%i", json_object_get_int(val));
+						value_len = 1 + snprintf(NULL, 0, "%d", json_object_get_int(val));
+						value = (char *)getbytes(value_len * sizeof(char));
+						sprintf(value, "%d", json_object_get_int(val));
 						new_pair = create_key_value_pair(key, value, 0);
+						freebytes(value, value_len * sizeof(char));
 						break;
 					case json_type_string:
+						value_len = 1 + snprintf(NULL, 0, "%s", json_object_get_string(val));
+						value = (char *)getbytes(value_len * sizeof(char));
 						sprintf(value, "%s", json_object_get_string(val));
 						new_pair = create_key_value_pair(key, value, 0);
+						freebytes(value, value_len * sizeof(char));
 						break;
 					case json_type_object:
+						value_len = 1 + snprintf(NULL, 0, "%s", json_object_get_string(val));
+						value = (char *)getbytes(value_len * sizeof(char));
 						sprintf(value, "%s", json_object_get_string(val));
 						new_pair = create_key_value_pair(key, value, 0);
+						freebytes(value, value_len * sizeof(char));
 						json_object_put(val);
 						break;
 					case json_type_array:
@@ -75,9 +88,12 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 						for (i = 0; i < array_len; i++) {
 							json_object *array_member = json_object_array_get_idx(val, i);
 							if (!is_error(array_member)) {
+								value_len = 1 + snprintf(NULL, 0, "%s", json_object_get_string(array_member));
+								value = (char *)getbytes(value_len * sizeof(char));
 								sprintf(value, "%s", json_object_get_string(array_member));
 								new_pair = create_key_value_pair(key, value, 1);
 								kvp_storage_add((struct _kvp_storage *)x, new_pair);
+								freebytes(value, value_len * sizeof(char));
 								json_object_put(array_member);
 							}
 						}
@@ -193,7 +209,8 @@ void json_encode_bang(t_json_encode *x) {
 
 void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char key[MAXPDSTRING];
-	char value[MAXPDSTRING];
+	size_t value_len = 0;
+	char *value;
 	char temp_value[MAXPDSTRING];
 	struct _key_value_pair *created_data = NULL;
 	int i;
@@ -207,6 +224,12 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 		error("For method '%s' You need to specify a value.", is_array ? "array": "add");
 	} else {
 		atom_string(argvec, key, MAXPDSTRING);
+
+		for (i = 1; i < argcount; i++) {
+			atom_string(argvec + i, temp_value, MAXPDSTRING);
+			value_len += strlen(temp_value) + 1;
+		}
+		value = (char *)getbytes(value_len * sizeof(char));
 		atom_string(argvec + 1, value, MAXPDSTRING);
 		for(i = 2; i < argcount; i++) {
 			atom_string(argvec + i, temp_value, MAXPDSTRING);
@@ -215,6 +238,7 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 		}
 		created_data = create_key_value_pair(key, value, is_array);
 		kvp_storage_add((struct _kvp_storage *)x, created_data);
+		freebytes(value, value_len * sizeof(char));
 	}
 }
 

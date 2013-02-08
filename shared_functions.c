@@ -1,12 +1,12 @@
-static char *remove_backslashes(char *source_string, size_t memsize) {
+static char *remove_backslashes(char *source_string, size_t *memsize) {
 	char *cleaned_string = NULL;
 	char *masking = "\\";
 	char *segment;
 	size_t len_src = strlen(source_string);
 
-	memsize = (len_src + 1) * sizeof(char);
+	(*memsize) = len_src + 1;
 
-	cleaned_string = (char *) getbytes(memsize * sizeof(char));
+	cleaned_string = (char *) getbytes((*memsize) * sizeof(char));
 	if (cleaned_string == NULL) {
 		error("Unable to allocate memory\n");
 	} else if (len_src > 0) {

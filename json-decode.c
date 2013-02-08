@@ -32,15 +32,15 @@ static int str_ccmp(const char *s1, const char *s2) {
 }
 
 #if JSON_C_MINOR_VERSION < 10
-static char *lowercase_unicode(char *orig, size_t memsize) {
+static char *lowercase_unicode(char *orig, size_t *memsize) {
 	char *unicode_intro = "\\";
 	char *segment; 
 	char *cleaned_string;
 	short i;
 	short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
 
-	memsize = (strlen(orig) + 1) * sizeof(char);
-	cleaned_string = (char *)getbytes(memsize);
+	(*memsize) = (strlen(orig) + 1);
+	cleaned_string = (char *)getbytes((*memsize) * sizeof(char));
 	if (cleaned_string != NULL) {
 		if (strlen(orig) > 0) {
 			segment = strtok(orig, unicode_intro);
@@ -184,7 +184,7 @@ static void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done
 				json_object *array_member = json_object_array_get_idx(jobj, i);
 				if (!is_error(array_member)) {
 					output_json(array_member, data_outlet, done_outlet);
-					json_object_put(array_member);
+					/*json_object_put(array_member);*/
 				}
 			}
 			break;
@@ -196,7 +196,7 @@ static void output_json_string(char *json_string, t_outlet *data_outlet, t_outle
 #if JSON_C_MINOR_VERSION < 10
 	size_t memsize = 0;
 	/* Needed because of bug in json-c 0.9 */
-	char* corrected_json_string = lowercase_unicode(json_string, memsize);
+	char* corrected_json_string = lowercase_unicode(json_string, &memsize);
 	/* Parse JSON */
 	jobj = json_tokener_parse(corrected_json_string);
 #else
@@ -211,7 +211,9 @@ static void output_json_string(char *json_string, t_outlet *data_outlet, t_outle
 		error("Not a JSON object");
 	}
 #if JSON_C_MINOR_VERSION < 10
-	freebytes(corrected_json_string, memsize);
+	if (corrected_json_string != NULL){
+		freebytes(corrected_json_string, memsize * sizeof(char));
+	}
 #endif
 }
 
@@ -219,8 +221,8 @@ void setup_json0x2ddecode(void) {
 	json_decode_class = class_new(gensym("json-decode"), (t_newmethod)json_decode_new,
 			0, sizeof(t_json_decode), 0, A_GIMME, 0);
 	class_addsymbol(json_decode_class, (t_method)json_decode_string);
-	/* Commented because it defeats json_decode_string: [l2s] is always needed */
 	/*class_addlist(json_decode_class, (t_method)json_decode_list);*/
+	class_addanything(json_decode_class, (t_method)json_decode_list);
 	class_sethelpsymbol(json_decode_class, gensym("json"));
 }
 
@@ -242,28 +244,57 @@ void json_decode_string(t_json_decode *x, t_symbol *data) {
 	char *json_string;
 
 	if (original_string && strlen(original_string)) {
-		json_string = remove_backslashes(original_string, memsize);
+		json_string = remove_backslashes(original_string, &memsize);
 		if (json_string != NULL) {
 			output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
-			freebytes(json_string, memsize);
+			freebytes(json_string, memsize * sizeof(char));
 		}
 	}
 }
 
 void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char json_string[MAXPDSTRING];
+	size_t original_len = 1;
+	char *original;
+	size_t json_len = 0;
+	char *json_string;
 	char value[MAXPDSTRING];
 	int i;
+	int use_selector = (strcmp(selector->s_name, "symbol") != 0 && strcmp(selector->s_name, "list") != 0);
 
-	(void) selector;
-
-
-	if (argcount > 1) {
-		atom_string(argvec + 1, json_string, MAXPDSTRING);
-		for (i = 2; i < argcount; i++) {
+	if (use_selector) {
+		original_len += strlen(selector->s_name);
+	}
+	if (argcount > 0) {
+		for (i = 0; i < argcount; i++) {
 			atom_string(argvec + i, value, MAXPDSTRING);
-			strcat(json_string, value);
+			original_len += 1 + strlen(value);
 		}
-		output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
+	}
+	original = (char *)getbytes(original_len * sizeof(char));
+
+	if (original) {
+		if (use_selector) {
+			strcpy(original, selector->s_name);
+		} else {
+			memset(original, 0x00, MAXPDSTRING);
+		}
+
+		if (argcount > 0) {
+			for (i = 0; i < argcount; i++) {
+				atom_string(argvec + i, value, MAXPDSTRING);
+				if (strlen(original)) {
+					strcat(original, " ");
+				}
+				strcat(original, value);
+			}
+		}
+		if (strlen(original)) {
+			json_string = remove_backslashes(original, &json_len);
+			if (json_string != NULL) {
+				output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
+				freebytes(json_string, json_len * sizeof(char));
+			}
+		}
+		freebytes(original, original_len * sizeof(char));
 	}
 }

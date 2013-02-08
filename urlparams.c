@@ -19,8 +19,14 @@ static char to_hex(char code) {
 }
 
 /* from http://www.geekhideout.com/urlcode.shtml */
-static char *urlencode(char *str) {
-	char *pstr = str, *buf = malloc(strlen(str) * 3 + 1), *pbuf = buf;
+static char *urlencode(char *str, size_t *str_len) {
+	char *pstr = str;
+	char *buf;
+	char *pbuf;
+
+	(*str_len) = strlen(str) * 3 + 1;
+	buf = (char *)getbytes((*str_len) * sizeof(char));
+	pbuf = buf;
 	while (*pstr) {
 		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~') {
 			*pbuf++ = *pstr;
@@ -64,20 +70,29 @@ void urlparams_free (t_urlparams *x, t_symbol *selector, int argcount, t_atom *a
 void urlparams_bang(t_urlparams *x) {
 	int i;
 	struct _key_value_pair *data_member;
-	char output[MAXPDSTRING];
+	size_t output_len = 0;
+	char *output;
+	size_t encoded_len;
 	char *encoded_string = NULL;
 
-	memset(output, 0x00, MAXPDSTRING);
-
 	if (x->storage.data_count > 0) {
+		data_member = x->storage.first_data;
+		for (i=0; i < x->storage.data_count; i++) {
+			encoded_string = urlencode(data_member->value, &encoded_len);
+			output_len += data_member->key_len + encoded_len + 2;
+			freebytes(encoded_string, encoded_len * sizeof(char));
+			data_member = data_member->next;
+		}
+		output = (char *)getbytes(output_len * sizeof(char));
+
 		data_member = x->storage.first_data;
 		for (i = 0; i < x->storage.data_count; i++) {
 			strcat(output, data_member->key);
 			strcat(output, "=");
-			encoded_string = urlencode(data_member->value);
+			encoded_string = urlencode(data_member->value, &encoded_len);
 			strcat(output, encoded_string);
 			if (encoded_string) {
-				free(encoded_string);
+				freebytes(encoded_string, encoded_len * sizeof(char));
 			}
 			if (i < x->storage.data_count - 1) {
 				strcat(output, "&");
@@ -85,22 +100,30 @@ void urlparams_bang(t_urlparams *x) {
 			data_member = data_member->next;
 		}
 		outlet_symbol(x->storage.x_ob.ob_outlet, gensym(output));
+		freebytes(output, output_len * sizeof(char));
 	}
 }
 
 void urlparams_add(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char key[MAXPDSTRING];
-	char value[MAXPDSTRING];
+	size_t value_len = 0;
+	char *value;
 	char temp_value[MAXPDSTRING];
 	struct _key_value_pair *created_data = NULL;
 	int i;
 
 	(void) selector;
-	
+
 	if (argcount < 2) {
 		error("For method 'add' You need to specify a value.");
 	} else {
 		atom_string(argvec, key, MAXPDSTRING);
+
+		for (i = 1; i < argcount; i++) {
+			atom_string(argvec + i, temp_value, MAXPDSTRING);
+			value_len += strlen(temp_value) + 1;
+		}
+		value = (char *)getbytes(value_len * sizeof(char));
 		atom_string(argvec + 1, value, MAXPDSTRING);
 		for(i = 2; i < argcount; i++) {
 			atom_string(argvec + i, temp_value, MAXPDSTRING);
@@ -109,6 +132,7 @@ void urlparams_add(t_urlparams *x, t_symbol *selector, int argcount, t_atom *arg
 		}
 		created_data = create_key_value_pair(key, value, 0);
 		kvp_storage_add((struct _kvp_storage *)x, created_data);
+		freebytes(value, value_len * sizeof(char));
 	}
 }
 

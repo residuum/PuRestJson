@@ -110,7 +110,7 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 				if (argcount > 1) {
 					atom_string(argvec + 1, parameters, MAXPDSTRING);
 					if (strlen(parameters)) {
-						cleaned_parameters = remove_backslashes(parameters, memsize);
+						cleaned_parameters = remove_backslashes(parameters, &memsize);
 						if (strchr(req_path, '?')) {
 							strcat(req_path, "&");
 						} else {

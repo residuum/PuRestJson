@@ -181,7 +181,7 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 				if (argcount > 1) {
 					atom_string(argvec + 1, parameters, MAXPDSTRING);
 					if (parameters != NULL) {
-						cleaned_parameters = remove_backslashes(parameters, memsize);
+						cleaned_parameters = remove_backslashes(parameters, &memsize);
 						strcpy(x->threaddata.parameters, cleaned_parameters);
 						freebytes(cleaned_parameters, memsize);
 					}

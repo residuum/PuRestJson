@@ -1,4 +1,4 @@
-#N canvas 172 168 952 574 10;
+#N canvas 170 166 952 574 10;
 #X declare -lib purest_json;
 #X obj 457 -40 import purest_json;
 #X obj 19 -60 oauth;
@@ -24,9 +24,9 @@ ACCESSSECRET;
 of the request.;
 #X msg 486 69 GET /echo_api.php?method=foo&bar=baz;
 #X msg 504 114 POST /echo_api.php?method=foo&bar=baz;
-#X obj 452 194 oauth;
-#X obj 503 238 print status;
-#X obj 414 233 print data;
+#X obj 452 267 oauth;
+#X obj 503 311 print status;
+#X obj 414 306 print data;
 #X msg 452 23 url http://term.ie/oauth/example key secret accesskey
 accesssecret;
 #X msg 58 314 method PLAINTEXT;
@@ -36,6 +36,12 @@ accesssecret;
 #X text 20 256 The method message will set the OAUTH signature method.
 Default is HMAC (HMAC-SHA1). The only other allowed value for now is
 PLAINTEXT.;
+#X msg 540 204 timeout 20;
+#X text 537 150 By default \, requests do not timeout. To set a maximal
+time in milliseconds \, set a value with [timeout( message. To clear
+the value and return to the default \, use an empty [timeout( message.
+;
+#X msg 556 238 timeout;
 #X connect 10 0 12 0;
 #X connect 11 0 12 0;
 #X connect 12 0 14 0;
@@ -44,3 +50,5 @@ PLAINTEXT.;
 #X connect 16 0 17 0;
 #X connect 18 0 17 0;
 #X connect 19 0 17 0;
+#X connect 21 0 12 0;
+#X connect 23 0 12 0;

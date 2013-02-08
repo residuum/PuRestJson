@@ -28,7 +28,8 @@ APIEXPORT void APICALL rest_setup(void);
 APIEXPORT void APICALL *rest_new(t_symbol *selector, int argcount, t_atom *argvec);
 
 APIEXPORT void APICALL rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec); 
-APIEXPORT void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL rest_timeout(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec); 
+APIEXPORT void APICALL rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 /* [oauth] */
 struct _oauth;
@@ -39,6 +40,7 @@ APIEXPORT void APICALL *oauth_new(t_symbol *selector, int argcount, t_atom *argv
 APIEXPORT void APICALL oauth_free(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 APIEXPORT void APICALL oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec); 
+APIEXPORT void APICALL oauth_timeout(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
 APIEXPORT void APICALL oauth_url(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
 APIEXPORT void APICALL oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec);
 

@@ -11,6 +11,7 @@ struct _rest_common {
 	char complete_url[MAXPDSTRING];
 	short is_data_locked;
 	char base_url[MAXPDSTRING];
+	long timeout;
 	t_atom *out;
 };
 
@@ -82,6 +83,7 @@ static void *execute_request(void *thread_args) {
 	if (curl_handle) {
 		curl_easy_setopt(curl_handle, CURLOPT_URL, threaddata->complete_url);
 		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
+		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, threaddata->timeout);
 		t_rest *x = (t_rest *)threaddata;
 		if (strlen(x->cookie.auth_token) != 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, x->cookie.auth_token);
@@ -155,4 +157,8 @@ static void thread_execute(struct _rest_common *x, void *(*func) (void *)) {
 		error("Could not create thread with code %d", rc);
 		x->is_data_locked = 0;
 	}
+}
+
+static void set_timeout(struct _rest_common *x, int timeout) {
+	x->timeout = (long) timeout;
 }

@@ -155,6 +155,7 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_command, gensym("GET"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("DELETE"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("POST"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_timeout, gensym("timeout"), A_GIMME, 0);
 }
 
 void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
@@ -219,11 +220,28 @@ void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	}
 }
 
+void rest_timeout(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
+
+	(void) selector;
+
+	if(x->threaddata.is_data_locked) {
+		post("rest object is performing request and locked");
+	} else if (argcount > 2){
+		error("timeout must have 0 or 1 parameter");
+	} else if (argcount == 0) {
+		set_timeout((struct _rest_common *)x, 0);
+	} else {
+		set_timeout((struct _rest_common *)x, atom_getint(argvec));
+	}
+}
+
 void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	t_rest *x = (t_rest *)pd_new(rest_class);
 
 	(void) selector;
 
+	set_timeout((struct _rest_common *)x, 0);
+	
 	set_url_parameters(x, 0, argvec); 
 	set_url_parameters(x, argcount, argvec); 
 

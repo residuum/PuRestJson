@@ -26,6 +26,7 @@ typedef struct _rest t_rest;
 
 APIEXPORT void APICALL rest_setup(void);
 APIEXPORT void APICALL *rest_new(t_symbol *selector, int argcount, t_atom *argvec);
+APIEXPORT void APICALL rest_free(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec);
 
 APIEXPORT void APICALL rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec); 
 APIEXPORT void APICALL rest_timeout(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec); 

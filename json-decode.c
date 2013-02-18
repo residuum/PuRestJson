@@ -221,7 +221,6 @@ void setup_json0x2ddecode(void) {
 	json_decode_class = class_new(gensym("json-decode"), (t_newmethod)json_decode_new,
 			0, sizeof(t_json_decode), 0, A_GIMME, 0);
 	class_addsymbol(json_decode_class, (t_method)json_decode_string);
-	/*class_addlist(json_decode_class, (t_method)json_decode_list);*/
 	class_addanything(json_decode_class, (t_method)json_decode_list);
 	class_sethelpsymbol(json_decode_class, gensym("json"));
 }
@@ -259,7 +258,7 @@ void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom
 	char *json_string;
 	char value[MAXPDSTRING];
 	int i;
-	int use_selector = (strcmp(selector->s_name, "symbol") != 0 && strcmp(selector->s_name, "list") != 0);
+	int use_selector = (strcmp(selector->s_name, "symbol") && strcmp(selector->s_name, "list"));
 
 	if (use_selector) {
 		original_len += strlen(selector->s_name);

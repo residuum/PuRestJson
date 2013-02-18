@@ -7,10 +7,13 @@ struct _rest_common {
 	t_object x_ob;
 	t_outlet *status_info_outlet;
 	char request_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST; DELETE*/
-	char parameters[MAXPDSTRING];
-	char complete_url[MAXPDSTRING];
+	size_t base_url_len;
+	char *base_url;
+	size_t parameters_len;
+	char *parameters;
+	size_t complete_url_len;
+	char *complete_url;
 	short is_data_locked;
-	char base_url[MAXPDSTRING];
 	long timeout;
 	t_atom *out;
 };
@@ -19,10 +22,14 @@ struct _rest {
 	struct _rest_common threaddata;
 	/* authentication: cookie */
 	struct {
-		char login_path[MAXPDSTRING];
-		char username[MAXPDSTRING];
-		char password[MAXPDSTRING];
-		char auth_token[MAXPDSTRING];
+		size_t login_path_len;
+		char *login_path;
+		size_t username_len;
+		char *username;
+		size_t password_len;
+		char *password;
+		size_t auth_token_len;
+		char *auth_token;
 	} cookie;
 };
 
@@ -30,14 +37,33 @@ struct _oauth {
 	struct _rest_common threaddata;
 	/* authentication */
 	struct {
-		char client_key[MAXPDSTRING];
-		char client_secret[MAXPDSTRING];
-		char token_key[MAXPDSTRING];
-		char token_secret[MAXPDSTRING];
+		size_t client_key_len;
+		char *client_key;
+		size_t client_secret_len;
+		char *client_secret;
+		size_t token_key_len;
+		char *token_key;
+		size_t token_secret_len;
+		char *token_secret;
 		OAuthMethod method;
+		size_t rsa_key_len;
 		char *rsa_key;
 	} oauth;
 };
+
+static char *get_string(size_t *string_len, size_t strlen) {
+	char *gen;
+	(*string_len) = 1 + strlen;
+	gen = (char *)getbytes((*string_len) * sizeof(char));
+	return memset(gen, 0x00, (*string_len));
+}
+
+static void free_string(char *string_content, size_t *string_len) {
+	if ((*string_len)) {
+		freebytes(string_content, (*string_len) * sizeof(char));
+		(*string_len) = 0;
+	}
+}
 
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
@@ -85,19 +111,25 @@ static void *execute_request(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, threaddata->timeout);
 		t_rest *x = (t_rest *)threaddata;
-		if (strlen(x->cookie.auth_token) != 0) {
+		if (x->cookie.auth_token_len) {
 			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, x->cookie.auth_token);
 		}
 		if (strcmp(threaddata->request_type, "PUT") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
 			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, read_memory_callback);
 			/* Prepare data for reading */
-			in_memory.memory = getbytes(strlen(threaddata->parameters) + 1);
-			if (in_memory.memory == NULL) {
-				error("not enough memory");
+			post("%i", threaddata->parameters_len);
+			if (threaddata->parameters_len) {
+				in_memory.memory = getbytes(strlen(threaddata->parameters) + 1);
+				in_memory.size = strlen(threaddata->parameters);
+				if (in_memory.memory == NULL) {
+					error("not enough memory");
+				}
+				memcpy(in_memory.memory, threaddata->parameters, threaddata->parameters_len - 1);
+			} else {
+				in_memory.memory = NULL;
+				in_memory.size = 0;
 			}
-			in_memory.size = strlen(threaddata->parameters);
-			memcpy(in_memory.memory, threaddata->parameters, strlen(threaddata->parameters));
 			curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
 		} else if (strcmp(threaddata->request_type, "POST") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
@@ -120,9 +152,7 @@ static void *execute_request(void *thread_args) {
 			if (result == CURLE_OK) {
 				outlet_symbol(threaddata->x_ob.ob_outlet, gensym(out_memory.memory));
 				/* Free memory */
-				if (out_memory.memory) {
-					freebytes(out_memory.memory, (out_memory.size + 1) * sizeof(char));
-				}
+				free_string(out_memory.memory, &out_memory.size);
 				free((void *)result);
 			} else {
 				SETFLOAT(&http_status_data[1], (float)http_status);
@@ -140,6 +170,8 @@ static void *execute_request(void *thread_args) {
 	} else {
 		error("Cannot init curl.");
 	}
+	free_string(threaddata->complete_url, &threaddata->complete_url_len);
+	free_string(threaddata->parameters, &threaddata->parameters_len);
 	threaddata->is_data_locked = 0;
 	return NULL;
 }
@@ -155,10 +187,18 @@ static void thread_execute(struct _rest_common *x, void *(*func) (void *)) {
 	pthread_attr_destroy(&thread_attributes);
 	if (rc) {
 		error("Could not create thread with code %d", rc);
+		free_string(x->complete_url, &x->complete_url_len);
+		free_string(x->parameters, &x->parameters_len);
 		x->is_data_locked = 0;
 	}
 }
 
 static void set_timeout(struct _rest_common *x, int timeout) {
 	x->timeout = (long) timeout;
+}
+
+static void rest_common_free(struct _rest_common *x) {
+	free_string(x->base_url, &x->base_url_len);
+	free_string(x->parameters, &x->parameters_len);
+	free_string(x->complete_url, &x->complete_url_len);
 }

@@ -225,12 +225,12 @@ void setup_json0x2ddecode(void) {
 	class_sethelpsymbol(json_decode_class, gensym("json"));
 }
 
-void *json_decode_new(t_symbol *selector, int argcount, t_atom *argvec) {
+void *json_decode_new(t_symbol *sel, int argc, t_atom *argv) {
 	t_json_decode *x = (t_json_decode*)pd_new(json_decode_class);
 
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
+	(void) sel;
+	(void) argc;
+	(void) argv;
 
 	outlet_new(&x->x_ob, NULL);
 	x->done_outlet = outlet_new(&x->x_ob, &s_bang);
@@ -251,36 +251,36 @@ void json_decode_string(t_json_decode *x, t_symbol *data) {
 	}
 }
 
-void json_decode_list(t_json_decode *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void json_decode_list(t_json_decode *x, t_symbol *sel, int argc, t_atom *argv) {
 	size_t original_len = 1;
 	char *original;
 	size_t json_len = 0;
 	char *json_string;
 	char value[MAXPDSTRING];
 	int i;
-	int use_selector = (strcmp(selector->s_name, "symbol") && strcmp(selector->s_name, "list"));
+	int use_sel = (strcmp(sel->s_name, "symbol") && strcmp(sel->s_name, "list"));
 
-	if (use_selector) {
-		original_len += strlen(selector->s_name);
+	if (use_sel) {
+		original_len += strlen(sel->s_name);
 	}
-	if (argcount > 0) {
-		for (i = 0; i < argcount; i++) {
-			atom_string(argvec + i, value, MAXPDSTRING);
+	if (argc > 0) {
+		for (i = 0; i < argc; i++) {
+			atom_string(argv + i, value, MAXPDSTRING);
 			original_len += 1 + strlen(value);
 		}
 	}
 	original = (char *)getbytes(original_len * sizeof(char));
 
 	if (original) {
-		if (use_selector) {
-			strcpy(original, selector->s_name);
+		if (use_sel) {
+			strcpy(original, sel->s_name);
 		} else {
 			memset(original, 0x00, MAXPDSTRING);
 		}
 
-		if (argcount > 0) {
-			for (i = 0; i < argcount; i++) {
-				atom_string(argvec + i, value, MAXPDSTRING);
+		if (argc > 0) {
+			for (i = 0; i < argc; i++) {
+				atom_string(argv + i, value, MAXPDSTRING);
 				if (strlen(original)) {
 					strcat(original, " ");
 				}

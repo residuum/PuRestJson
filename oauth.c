@@ -14,69 +14,69 @@ static void oauth_free_inner(t_oauth *x) {
 	free_string(x->oauth.rsa_key, &x->oauth.rsa_key_len);
 }
 
-static void set_url_parameters(t_oauth *x, int argcount, t_atom *argvec) {
+static void set_url_parameters(t_oauth *x, int argc, t_atom *argv) {
 	char temp[MAXPDSTRING];
 
 	oauth_free_inner(x);
-	switch (argcount) {
+	switch (argc) {
 		case 0:
 			break;
 		case 3:
-			if (argvec[0].a_type != A_SYMBOL) {
+			if (argv[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
 			} else {
-				atom_string(argvec, temp, MAXPDSTRING);
-				x->threaddata.base_url = get_string(&x->threaddata.base_url_len, strlen(temp));
-				strcpy(x->threaddata.base_url, temp);
+				atom_string(argv, temp, MAXPDSTRING);
+				x->common.base_url = get_string(&x->common.base_url_len, strlen(temp));
+				strcpy(x->common.base_url, temp);
 			}
-			if (argvec[1].a_type != A_SYMBOL) {
+			if (argv[1].a_type != A_SYMBOL) {
 				error("Client key cannot be set.");
 			} else {
-				atom_string(argvec + 1, temp, MAXPDSTRING);
+				atom_string(argv + 1, temp, MAXPDSTRING);
 				x->oauth.client_key = get_string(&x->oauth.client_key_len, strlen(temp));
 				strcpy(x->oauth.client_key, temp);
 			}
-			if (argvec[2].a_type != A_SYMBOL) {
+			if (argv[2].a_type != A_SYMBOL) {
 				error("Client secret cannot be set.");
 			} else {
-				atom_string(argvec + 2, temp, MAXPDSTRING);
+				atom_string(argv + 2, temp, MAXPDSTRING);
 				x->oauth.client_secret = get_string(&x->oauth.client_secret_len, strlen(temp));
 				strcpy(x->oauth.client_secret, temp);
 			}
 			break;
 		case 5:
-			if (argvec[0].a_type != A_SYMBOL) {
+			if (argv[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
 			} else {
-				atom_string(argvec, temp, MAXPDSTRING);
-				x->threaddata.base_url = get_string(&x->threaddata.base_url_len, strlen(temp));
-				strcpy(x->threaddata.base_url, temp);
+				atom_string(argv, temp, MAXPDSTRING);
+				x->common.base_url = get_string(&x->common.base_url_len, strlen(temp));
+				strcpy(x->common.base_url, temp);
 			}
-			if (argvec[1].a_type != A_SYMBOL) {
+			if (argv[1].a_type != A_SYMBOL) {
 				error("Client key cannot be set.");
 			} else {
-				atom_string(argvec + 1, temp, MAXPDSTRING);
+				atom_string(argv + 1, temp, MAXPDSTRING);
 				x->oauth.client_key = get_string(&x->oauth.client_key_len, strlen(temp));
 				strcpy(x->oauth.client_key, temp);
 			}
-			if (argvec[2].a_type != A_SYMBOL) {
+			if (argv[2].a_type != A_SYMBOL) {
 				error("Client secret cannot be set.");
 			} else {
-				atom_string(argvec + 2, temp, MAXPDSTRING);
+				atom_string(argv + 2, temp, MAXPDSTRING);
 				x->oauth.client_secret = get_string(&x->oauth.client_secret_len, strlen(temp));
 				strcpy(x->oauth.client_secret, temp);
 			}
-			if (argvec[3].a_type != A_SYMBOL) {
+			if (argv[3].a_type != A_SYMBOL) {
 				error("Client key cannot be set.");
 			} else {
-				atom_string(argvec + 3, temp, MAXPDSTRING);
+				atom_string(argv + 3, temp, MAXPDSTRING);
 				x->oauth.token_key = get_string(&x->oauth.token_key_len, strlen(temp));
 				strcpy(x->oauth.token_key, temp);
 			}
-			if (argvec[4].a_type != A_SYMBOL) {
+			if (argv[4].a_type != A_SYMBOL) {
 				error("Client secret cannot be set.");
 			} else {
-				atom_string(argvec + 4, temp, MAXPDSTRING);
+				atom_string(argv + 4, temp, MAXPDSTRING);
 				x->oauth.token_secret = get_string(&x->oauth.token_secret_len, strlen(temp));
 				strcpy(x->oauth.token_secret, temp);
 			}
@@ -97,8 +97,8 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_timeout, gensym("timeout"), A_GIMME, 0);
 }
 
-void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char *request_type;
+void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
+	char *req_type;
 	char path[MAXPDSTRING];
 	size_t req_path_len;
 	char *req_path;
@@ -109,36 +109,36 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 	char *postargs = NULL;
 	char *req_url = NULL;
 
-	if(x->threaddata.is_data_locked) {
+	if(x->common.locked) {
 		post("oauth object is performing request and locked");
 	} else {
-		memset(x->threaddata.request_type, 0x00, REQUEST_TYPE_LEN);
-		switch (argcount) {
+		memset(x->common.req_type, 0x00, REQUEST_TYPE_LEN);
+		switch (argc) {
 			case 0:
 				break;
 			default:
-				x->threaddata.is_data_locked = 1;
-				request_type = selector->s_name;
-				strcpy(x->threaddata.request_type, request_type);
-				if ((strcmp(x->threaddata.request_type, "GET") && 
-							strcmp(x->threaddata.request_type, "POST"))) {
+				x->common.locked = 1;
+				req_type = sel->s_name;
+				strcpy(x->common.req_type, req_type);
+				if ((strcmp(x->common.req_type, "GET") && 
+							strcmp(x->common.req_type, "POST"))) {
 					SETSYMBOL(&auth_status_data[0], gensym("oauth"));
 					SETSYMBOL(&auth_status_data[1], gensym("Request Method not supported"));
-					error("Request method %s not supported.", x->threaddata.request_type);
-					outlet_list(x->threaddata.status_info_outlet, &s_list, 2, &auth_status_data[0]);
-					x->threaddata.is_data_locked = 0;
+					error("Request method %s not supported.", x->common.req_type);
+					outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
+					x->common.locked = 0;
 				} else {
-					atom_string(argvec, path, MAXPDSTRING);
-					if (argcount > 1) {
-						atom_string(argvec + 1, parameters, MAXPDSTRING);
+					atom_string(argv, path, MAXPDSTRING);
+					if (argc > 1) {
+						atom_string(argv + 1, parameters, MAXPDSTRING);
 						if (strlen(parameters)) {
 							cleaned_parameters = remove_backslashes(parameters, &memsize);
 						}
 					}
 					req_path = get_string(&req_path_len, 
-							x->threaddata.base_url_len + strlen(path) + memsize + 1);
-					if (x->threaddata.base_url != NULL) {
-						strcpy(req_path, x->threaddata.base_url);
+							x->common.base_url_len + strlen(path) + memsize + 1);
+					if (x->common.base_url != NULL) {
+						strcpy(req_path, x->common.base_url);
 					}
 					strcat(req_path, path);
 					if (memsize) {
@@ -150,35 +150,34 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 						strcat(req_path, cleaned_parameters);
 						freebytes(cleaned_parameters, memsize);
 					}
-					/* TODO: RSA signing */
-					if (strcmp(x->threaddata.request_type, "POST") == 0) {
+					if (strcmp(x->common.req_type, "POST") == 0) {
 						if (x->oauth.method == OA_RSA) {
-							req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, x->threaddata.request_type, 
+							req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, x->common.req_type, 
 									x->oauth.client_key, x->oauth.rsa_key, 
 									x->oauth.token_key, NULL);
 						} else {
-							req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, x->threaddata.request_type, 
+							req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, x->common.req_type, 
 									x->oauth.client_key, x->oauth.client_secret, 
 									x->oauth.token_key, x->oauth.token_secret);
 						}
 					} else {
 						if (x->oauth.method == OA_RSA) {
-							req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->threaddata.request_type, 
+							req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->common.req_type, 
 									x->oauth.client_key, x->oauth.rsa_key, 
 									x->oauth.token_key, NULL);
 						} else {
-							req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->threaddata.request_type, 
+							req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->common.req_type, 
 									x->oauth.client_key, x->oauth.client_secret, 
 									x->oauth.token_key, x->oauth.token_secret);
 						}
 					}
-					x->threaddata.complete_url = get_string(&x->threaddata.complete_url_len, strlen(req_url));
-					strcpy(x->threaddata.complete_url, req_url);
-					if (strcmp(x->threaddata.request_type, "POST") == 0) {
-						x->threaddata.parameters = get_string(&x->threaddata.parameters_len, strlen(postargs));
-						strcpy(x->threaddata.parameters, postargs);
+					x->common.complete_url = get_string(&x->common.complete_url_len, strlen(req_url));
+					strcpy(x->common.complete_url, req_url);
+					if (strcmp(x->common.req_type, "POST") == 0) {
+						x->common.parameters = get_string(&x->common.parameters_len, strlen(postargs));
+						strcpy(x->common.parameters, postargs);
 					} else {
-						x->threaddata.parameters = get_string(&x->threaddata.parameters_len, 0);
+						x->common.parameters = get_string(&x->common.parameters_len, 0);
 					}
 					if (postargs) {
 						free(postargs);
@@ -186,9 +185,9 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 					if (req_url) {
 						free(req_url);
 					}
-					post("url: %s", x->threaddata.complete_url);
-					post("request: %s", x->threaddata.request_type);
-					post("params: %s", x->threaddata.parameters);
+					post("url: %s", x->common.complete_url);
+					post("request: %s", x->common.req_type);
+					post("params: %s", x->common.parameters);
 					thread_execute((struct _rest_common *)x, execute_request);
 				}
 				break;
@@ -196,40 +195,40 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 	}
 }
 
-void oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	char method_name[11];
 	char temp[MAXPDSTRING];
 	size_t rsa_key_len = 0;
 	int i;
 
-	(void) selector;
+	(void) sel;
 
 	free_string(x->oauth.rsa_key, &x->oauth.rsa_key_len);
 
-	if (argcount > 0) {
-		if (argvec[0].a_type == A_SYMBOL) {
-			atom_string(argvec, method_name, 11);
+	if (argc > 0) {
+		if (argv[0].a_type == A_SYMBOL) {
+			atom_string(argv, method_name, 11);
 			if (strcmp(method_name, "HMAC") == 0) {
 				x->oauth.method = OA_HMAC;
-				if (argcount > 1)  {
+				if (argc > 1)  {
 					post("Additional data is ignored");
 				}
 			} else if (strcmp(method_name, "PLAINTEXT") == 0) {
 				x->oauth.method = OA_PLAINTEXT;
 				post("Warning: You are using plaintext now");
-				if (argcount > 1)  {
+				if (argc > 1)  {
 					post("Additional data is ignored");
 				}
 			} else if (strcmp(method_name, "RSA") == 0) {
-				if (argcount > 1) {
+				if (argc > 1) {
 					x->oauth.method = OA_RSA;
-					for (i = 0; i < argcount; i++) {
-						atom_string(argvec, temp, MAXPDSTRING);
+					for (i = 0; i < argc; i++) {
+						atom_string(argv, temp, MAXPDSTRING);
 						rsa_key_len +=strlen(temp) + 1;
 					}
 					x->oauth.rsa_key = get_string(&x->oauth.rsa_key_len, rsa_key_len);
-					for (i = 0; i < argcount; i++) {
-						atom_string(argvec, temp, MAXPDSTRING);
+					for (i = 0; i < argc; i++) {
+						atom_string(argv, temp, MAXPDSTRING);
 						strcat(x->oauth.rsa_key, temp);
 					}
 				} else {
@@ -247,60 +246,61 @@ void oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) 
 	}
 }
 
-void oauth_url(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void oauth_url(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 
-	(void) selector;
+	(void) sel;
 
-	if(x->threaddata.is_data_locked) {
+	if(x->common.locked) {
 		post("oauth object is performing request and locked");
 	} else {
-		set_url_parameters(x, argcount, argvec); 
+		set_url_parameters(x, argc, argv); 
 	}
 }
 
-void oauth_timeout(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void oauth_timeout(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 
-	(void) selector;
+	(void) sel;
 
-	if(x->threaddata.is_data_locked) {
+	if(x->common.locked) {
 		post("oauth object is performing request and locked");
-	} else if (argcount > 2){
+	} else if (argc > 2){
 		error("timeout must have 0 or 1 parameter");
-	} else if (argcount == 0) {
+	} else if (argc == 0) {
 		set_timeout((struct _rest_common *)x, 0);
 	} else {
-		set_timeout((struct _rest_common *)x, atom_getint(argvec));
+		set_timeout((struct _rest_common *)x, atom_getint(argv));
 	}
 }
 
-void *oauth_new(t_symbol *selector, int argcount, t_atom *argvec) {
+void *oauth_new(t_symbol *sel, int argc, t_atom *argv) {
 	t_oauth *x = (t_oauth *)pd_new(oauth_class);
 
-	(void) selector;
+	(void) sel;
 
-	x->threaddata.base_url_len = 0;
-	x->threaddata.parameters_len = 0;
-	x->threaddata.complete_url_len = 0;
-	x->threaddata.parameters_len = 0;
+	x->common.base_url_len = 0;
+	x->common.parameters_len = 0;
+	x->common.complete_url_len = 0;
+	x->common.parameters_len = 0;
 
 	set_timeout((struct _rest_common *)x, 0);
 
-	set_url_parameters(x, 0, argvec); 
-	set_url_parameters(x, argcount, argvec); 
+	set_url_parameters(x, 0, argv); 
+	set_url_parameters(x, argc, argv); 
 	x->oauth.method = OA_HMAC;
 	x->oauth.rsa_key_len = 0;
 
-	outlet_new(&x->threaddata.x_ob, NULL);
-	x->threaddata.status_info_outlet = outlet_new(&x->threaddata.x_ob, NULL);
-	x->threaddata.is_data_locked = 0;
+	outlet_new(&x->common.x_ob, NULL);
+	x->common.stat_out = outlet_new(&x->common.x_ob, NULL);
+	x->common.locked = 0;
+	x->common.is_rest = 0;
 
 	return (void *)x;
 }
 
-void oauth_free(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
+void oauth_free(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
+	(void) sel;
+	(void) argc;
+	(void) argv;
 
 	oauth_free_inner(x);
 }

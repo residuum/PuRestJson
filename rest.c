@@ -43,11 +43,11 @@ static void *get_cookie_auth_token(void *thread_args) {
 			strcat(post_data, "&password=");
 			strcat(post_data, x->cookie.password);
 		}
-		x->threaddata.complete_url = get_string(&x->threaddata.complete_url_len, 
-				x->threaddata.base_url_len + x->cookie.login_path_len);
-		strcpy(x->threaddata.complete_url, x->threaddata.base_url);
-		strcat(x->threaddata.complete_url, x->cookie.login_path);
-		curl_easy_setopt(curl_handle, CURLOPT_URL, x->threaddata.complete_url);
+		x->common.complete_url = get_string(&x->common.complete_url_len, 
+				x->common.base_url_len + x->cookie.login_path_len);
+		strcpy(x->common.complete_url, x->common.base_url);
+		strcat(x->common.complete_url, x->cookie.login_path);
+		curl_easy_setopt(curl_handle, CURLOPT_URL, x->common.complete_url);
 		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 		curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
 		curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, post_data);
@@ -64,11 +64,11 @@ static void *get_cookie_auth_token(void *thread_args) {
 		SETSYMBOL(&auth_status_data[0], gensym("cookie"));
 		if (http_code == 200 && result == CURLE_OK) {
 			SETSYMBOL(&auth_status_data[1], gensym("bang"));
-			outlet_list(x->threaddata.status_info_outlet, &s_list, 2, &auth_status_data[0]);
+			outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
 		} else {
 			SETFLOAT(&auth_status_data[1], (float)http_code);
 			SETFLOAT(&auth_status_data[2], (float)result);
-			outlet_list(x->threaddata.status_info_outlet, &s_list, 3, &auth_status_data[0]);
+			outlet_list(x->common.stat_out, &s_list, 3, &auth_status_data[0]);
 		}
 
 		free_string(x->cookie.auth_token, &x->cookie.auth_token_len);
@@ -98,53 +98,53 @@ static void *get_cookie_auth_token(void *thread_args) {
 		}
 		free_string(post_data, &post_data_len);
 	}
-	x->threaddata.is_data_locked = 0;
+	x->common.locked = 0;
 	return NULL;
 }
 
-static void set_url_parameters(t_rest *x, int argcount, t_atom *argvec) {
+static void set_url_parameters(t_rest *x, int argc, t_atom *argv) {
 	char temp[MAXPDSTRING];
 
 	rest_free_inner(x);
-	switch (argcount) {
+	switch (argc) {
 		case 0:
 			break;
 		case 1:
-			if (argvec[0].a_type != A_SYMBOL) {
+			if (argv[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
 			} else {
-				atom_string(argvec, temp, MAXPDSTRING);
-				x->threaddata.base_url = get_string(&x->threaddata.base_url_len, strlen(temp));
-				strcpy(x->threaddata.base_url, temp);
+				atom_string(argv, temp, MAXPDSTRING);
+				x->common.base_url = get_string(&x->common.base_url_len, strlen(temp));
+				strcpy(x->common.base_url, temp);
 			}
 			break;
 		case 4:
-			x->threaddata.is_data_locked = 1;
-			if (argvec[0].a_type != A_SYMBOL) {
+			x->common.locked = 1;
+			if (argv[0].a_type != A_SYMBOL) {
 				error("Base URL cannot be set.");
 			} else {
-				atom_string(argvec, temp, MAXPDSTRING);
-				x->threaddata.base_url = get_string(&x->threaddata.base_url_len, strlen(temp));
-				strcpy(x->threaddata.base_url, temp);
+				atom_string(argv, temp, MAXPDSTRING);
+				x->common.base_url = get_string(&x->common.base_url_len, strlen(temp));
+				strcpy(x->common.base_url, temp);
 			}
-			if (argvec[1].a_type != A_SYMBOL) {
+			if (argv[1].a_type != A_SYMBOL) {
 				error("Cookie path cannot be set.");
 			} else {
-				atom_string(argvec + 1, temp, MAXPDSTRING);
+				atom_string(argv + 1, temp, MAXPDSTRING);
 				x->cookie.login_path = get_string(&x->cookie.login_path_len, strlen(temp));
 				strcpy(x->cookie.login_path, temp);
 			}
-			if (argvec[2].a_type != A_SYMBOL) {
+			if (argv[2].a_type != A_SYMBOL) {
 				error("Username cannot be set.");
 			} else {
-				atom_string(argvec + 2, temp, MAXPDSTRING);
+				atom_string(argv + 2, temp, MAXPDSTRING);
 				x->cookie.username = get_string(&x->cookie.username_len, strlen(temp));
 				strcpy(x->cookie.username, temp);
 			}
-			if (argvec[3].a_type != A_SYMBOL) {
+			if (argv[3].a_type != A_SYMBOL) {
 				error("Password cannot be set.");
 			} else {
-				atom_string(argvec + 3, temp, MAXPDSTRING);
+				atom_string(argv + 3, temp, MAXPDSTRING);
 				x->cookie.password = get_string(&x->cookie.password_len, strlen(temp));
 				strcpy(x->cookie.password, temp);
 			}
@@ -167,48 +167,48 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_timeout, gensym("timeout"), A_GIMME, 0);
 }
 
-void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	char *request_type;
+void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
+	char *req_type;
 	char path[MAXPDSTRING];
 	char parameters[MAXPDSTRING];
 	char *cleaned_parameters;
 	size_t memsize = 0;
 	t_atom auth_status_data[2];
 
-	if(x->threaddata.is_data_locked) {
+	if(x->common.locked) {
 		post("rest object is performing request and locked");
 	} else {
-		memset(x->threaddata.request_type, 0x00, REQUEST_TYPE_LEN);
-		switch (argcount) {
+		memset(x->common.req_type, 0x00, REQUEST_TYPE_LEN);
+		switch (argc) {
 			case 0:
 				break;
 			default:
-				x->threaddata.is_data_locked = 1;
-				request_type = selector->s_name;
-				strcpy(x->threaddata.request_type, request_type);
-				if ((strcmp(x->threaddata.request_type, "GET") && 
-							strcmp(x->threaddata.request_type, "POST") && 
-							strcmp(x->threaddata.request_type, "PUT") &&
-							strcmp(x->threaddata.request_type, "DELETE"))) {
+				x->common.locked = 1;
+				req_type = sel->s_name;
+				strcpy(x->common.req_type, req_type);
+				if ((strcmp(x->common.req_type, "GET") && 
+							strcmp(x->common.req_type, "POST") && 
+							strcmp(x->common.req_type, "PUT") &&
+							strcmp(x->common.req_type, "DELETE"))) {
 					SETSYMBOL(&auth_status_data[0], gensym("request"));
 					SETSYMBOL(&auth_status_data[1], gensym("Request method not supported"));
-					error("Request method %s not supported.", x->threaddata.request_type);
-					outlet_list(x->threaddata.status_info_outlet, &s_list, 2, &auth_status_data[0]);
-					x->threaddata.is_data_locked = 0;
+					error("Request method %s not supported.", x->common.req_type);
+					outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
+					x->common.locked = 0;
 				} else {
-					atom_string(argvec, path, MAXPDSTRING);
-					x->threaddata.complete_url = get_string(&x->threaddata.complete_url_len,
-							x->threaddata.base_url_len + strlen(path) + 1);
-					if (x->threaddata.base_url != NULL) {
-						strcpy(x->threaddata.complete_url, x->threaddata.base_url);
+					atom_string(argv, path, MAXPDSTRING);
+					x->common.complete_url = get_string(&x->common.complete_url_len,
+							x->common.base_url_len + strlen(path) + 1);
+					if (x->common.base_url != NULL) {
+						strcpy(x->common.complete_url, x->common.base_url);
 					}
-					strcat(x->threaddata.complete_url, path);
-					if (argcount > 1) {
-						atom_string(argvec + 1, parameters, MAXPDSTRING);
+					strcat(x->common.complete_url, path);
+					if (argc > 1) {
+						atom_string(argv + 1, parameters, MAXPDSTRING);
 						if (strlen(parameters)) {
 							cleaned_parameters = remove_backslashes(parameters, &memsize);
-							x->threaddata.parameters = get_string(&x->threaddata.parameters_len, memsize + 1);
-							strcpy(x->threaddata.parameters, cleaned_parameters);
+							x->common.parameters = get_string(&x->common.parameters_len, memsize + 1);
+							strcpy(x->common.parameters, cleaned_parameters);
 							freebytes(cleaned_parameters, memsize);
 						}
 					}
@@ -219,58 +219,59 @@ void rest_command(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	}
 }
 
-void rest_url(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void rest_url(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 
-	(void) selector;
+	(void) sel;
 
-	if(x->threaddata.is_data_locked) {
+	if(x->common.locked) {
 		post("rest object is performing request and locked");
 	} else {
-		set_url_parameters(x, argcount, argvec); 
+		set_url_parameters(x, argc, argv); 
 	}
 }
 
-void rest_timeout(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void rest_timeout(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 
-	(void) selector;
+	(void) sel;
 
-	if(x->threaddata.is_data_locked) {
+	if(x->common.locked) {
 		post("rest object is performing request and locked");
-	} else if (argcount > 2){
+	} else if (argc > 2){
 		error("timeout must have 0 or 1 parameter");
-	} else if (argcount == 0) {
+	} else if (argc == 0) {
 		set_timeout((struct _rest_common *)x, 0);
 	} else {
-		set_timeout((struct _rest_common *)x, atom_getint(argvec));
+		set_timeout((struct _rest_common *)x, atom_getint(argv));
 	}
 }
 
-void *rest_new(t_symbol *selector, int argcount, t_atom *argvec) {
+void *rest_new(t_symbol *sel, int argc, t_atom *argv) {
 	t_rest *x = (t_rest *)pd_new(rest_class);
 
-	(void) selector;
+	(void) sel;
 
 	set_timeout((struct _rest_common *)x, 0);
 
-	x->threaddata.base_url_len = 0;
-	x->threaddata.parameters_len = 0;
-	x->threaddata.complete_url_len = 0;
-	x->threaddata.parameters_len = 0;
+	x->common.base_url_len = 0;
+	x->common.parameters_len = 0;
+	x->common.complete_url_len = 0;
+	x->common.parameters_len = 0;
 
-	set_url_parameters(x, 0, argvec); 
-	set_url_parameters(x, argcount, argvec); 
+	set_url_parameters(x, 0, argv); 
+	set_url_parameters(x, argc, argv); 
 
-	outlet_new(&x->threaddata.x_ob, NULL);
-	x->threaddata.status_info_outlet = outlet_new(&x->threaddata.x_ob, NULL);
-	x->threaddata.is_data_locked = 0;
+	outlet_new(&x->common.x_ob, NULL);
+	x->common.stat_out = outlet_new(&x->common.x_ob, NULL);
+	x->common.locked = 0;
+	x->common.is_rest = 1;
 
 	return (void *)x;
 }
 
-void rest_free(t_rest *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
+void rest_free(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
+	(void) sel;
+	(void) argc;
+	(void) argv;
 
 	rest_free_inner(x);
 }

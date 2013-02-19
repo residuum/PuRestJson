@@ -23,7 +23,7 @@ static json_object *create_object(char *value) {
 	/* if stored value is string is starting with { and ending with }, 
 	   then create a json object from it. */
 	if (value[0] == '{' && value[strlen(value) - 1] == '}') {
-		parsed_string = remove_backslashes(value, &memsize);;
+		parsed_string = remove_backslashes(value, &memsize);
 		object = json_tokener_parse(parsed_string);
 		freebytes(parsed_string, memsize * sizeof(char));
 	} else {
@@ -182,12 +182,12 @@ void setup_json0x2dencode(void) {
 	class_sethelpsymbol(json_encode_class, gensym("json"));
 }
 
-void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec) {
+void *json_encode_new(t_symbol *sel, int argc, t_atom *argv) {
 	t_json_encode *x = (t_json_encode *)pd_new(json_encode_class);
 
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
+	(void) sel;
+	(void) argc;
+	(void) argv;
 
 	x->storage.data_count = 0;
 	outlet_new(&x->storage.x_ob, NULL);
@@ -195,10 +195,10 @@ void *json_encode_new(t_symbol *selector, int argcount, t_atom *argvec) {
 	return (void *)x;
 }
 
-void json_encode_free (t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
+void json_encode_free (t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
+	(void) sel;
+	(void) argc;
+	(void) argv;
 
 	kvp_storage_free_memory((struct _kvp_storage *)x);
 }
@@ -207,7 +207,7 @@ void json_encode_bang(t_json_encode *x) {
 	outlet_symbol(x->storage.x_ob.ob_outlet, get_json_symbol(x));
 }
 
-void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
 	char key[MAXPDSTRING];
 	size_t value_len = 0;
 	char *value;
@@ -216,23 +216,23 @@ void json_encode_add(t_json_encode *x, t_symbol *selector, int argcount, t_atom 
 	int i;
 	int is_array = 0;
 
-	if (selector == gensym("array")) {
+	if (sel == gensym("array")) {
 		is_array = 1;
 	}
 
-	if (argcount < 2) {
+	if (argc < 2) {
 		error("For method '%s' You need to specify a value.", is_array ? "array": "add");
 	} else {
-		atom_string(argvec, key, MAXPDSTRING);
+		atom_string(argv, key, MAXPDSTRING);
 
-		for (i = 1; i < argcount; i++) {
-			atom_string(argvec + i, temp_value, MAXPDSTRING);
+		for (i = 1; i < argc; i++) {
+			atom_string(argv + i, temp_value, MAXPDSTRING);
 			value_len += strlen(temp_value) + 1;
 		}
 		value = (char *)getbytes(value_len * sizeof(char));
-		atom_string(argvec + 1, value, MAXPDSTRING);
-		for(i = 2; i < argcount; i++) {
-			atom_string(argvec + i, temp_value, MAXPDSTRING);
+		atom_string(argv + 1, value, MAXPDSTRING);
+		for(i = 2; i < argc; i++) {
+			atom_string(argv + i, temp_value, MAXPDSTRING);
 			strcat(value, " ");
 			strcat(value, temp_value);
 		}
@@ -290,10 +290,10 @@ void json_encode_write(t_json_encode *x, t_symbol *filename) {
 	}
 }
 
-void json_encode_clear(t_json_encode *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
+void json_encode_clear(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
+	(void) sel;
+	(void) argc;
+	(void) argv;
 
 	kvp_storage_free_memory((struct _kvp_storage *)x);
 }

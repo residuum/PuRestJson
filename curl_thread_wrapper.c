@@ -5,21 +5,22 @@ struct _memory_struct {
 
 struct _rest_common {
 	t_object x_ob;
-	t_outlet *status_info_outlet;
-	char request_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST; DELETE*/
+	t_outlet *stat_out;
+	char req_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST; DELETE*/
 	size_t base_url_len;
 	char *base_url;
 	size_t parameters_len;
 	char *parameters;
 	size_t complete_url_len;
 	char *complete_url;
-	short is_data_locked;
+	short locked;
 	long timeout;
 	t_atom *out;
+	short is_rest;
 };
 
 struct _rest {
-	struct _rest_common threaddata;
+	struct _rest_common common;
 	/* authentication: cookie */
 	struct {
 		size_t login_path_len;
@@ -34,7 +35,7 @@ struct _rest {
 };
 
 struct _oauth {
-	struct _rest_common threaddata;
+	struct _rest_common common;
 	/* authentication */
 	struct {
 		size_t client_key_len;
@@ -51,17 +52,17 @@ struct _oauth {
 	} oauth;
 };
 
-static char *get_string(size_t *string_len, size_t strlen) {
+static char *get_string(size_t *newl, size_t strl) {
 	char *gen;
-	(*string_len) = 1 + strlen;
-	gen = (char *)getbytes((*string_len) * sizeof(char));
-	return memset(gen, 0x00, (*string_len));
+	(*newl) = 1 + strl;
+	gen = (char *)getbytes((*newl) * sizeof(char));
+	return memset(gen, 0x00, (*newl));
 }
 
-static void free_string(char *string_content, size_t *string_len) {
-	if ((*string_len)) {
-		freebytes(string_content, (*string_len) * sizeof(char));
-		(*string_len) = 0;
+static void free_string(char *string, size_t *strl) {
+	if ((*strl)) {
+		freebytes(string, (*strl) * sizeof(char));
+		(*strl) = 0;
 	}
 }
 
@@ -96,7 +97,7 @@ static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *d
 }
 
 static void *execute_request(void *thread_args) {
-	struct _rest_common *threaddata = (struct _rest_common *)thread_args; 
+	struct _rest_common *common = (struct _rest_common *)thread_args; 
 	CURL *curl_handle;
 	CURLcode result;
 	struct _memory_struct in_memory;
@@ -107,34 +108,36 @@ static void *execute_request(void *thread_args) {
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
 	if (curl_handle) {
-		curl_easy_setopt(curl_handle, CURLOPT_URL, threaddata->complete_url);
+		curl_easy_setopt(curl_handle, CURLOPT_URL, common->complete_url);
 		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
-		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, threaddata->timeout);
-		t_rest *x = (t_rest *)threaddata;
-		if (x->cookie.auth_token_len) {
-			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, x->cookie.auth_token);
+		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, common->timeout);
+		if (common->is_rest) {
+			t_rest *x = (t_rest *)common;
+			if (x->cookie.auth_token_len) {
+				curl_easy_setopt(curl_handle, CURLOPT_COOKIE, x->cookie.auth_token);
+			}
 		}
-		if (strcmp(threaddata->request_type, "PUT") == 0) {
+		if (strcmp(common->req_type, "PUT") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
 			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, read_memory_callback);
 			/* Prepare data for reading */
-			post("%i", threaddata->parameters_len);
-			if (threaddata->parameters_len) {
-				in_memory.memory = getbytes(strlen(threaddata->parameters) + 1);
-				in_memory.size = strlen(threaddata->parameters);
+			post("%i", common->parameters_len);
+			if (common->parameters_len) {
+				in_memory.memory = getbytes(strlen(common->parameters) + 1);
+				in_memory.size = strlen(common->parameters);
 				if (in_memory.memory == NULL) {
 					error("not enough memory");
 				}
-				memcpy(in_memory.memory, threaddata->parameters, threaddata->parameters_len - 1);
+				memcpy(in_memory.memory, common->parameters, common->parameters_len - 1);
 			} else {
 				in_memory.memory = NULL;
 				in_memory.size = 0;
 			}
 			curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
-		} else if (strcmp(threaddata->request_type, "POST") == 0) {
+		} else if (strcmp(common->req_type, "POST") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
-			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, threaddata->parameters);
-		} else if (strcmp(threaddata->request_type, "DELETE") == 0) {
+			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, common->parameters);
+		} else if (strcmp(common->req_type, "DELETE") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 		}
 		out_memory.memory = getbytes(1);
@@ -145,34 +148,34 @@ static void *execute_request(void *thread_args) {
 
 		/* output status */
 		curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_status);
-		SETSYMBOL(&http_status_data[0], gensym(threaddata->request_type));
+		SETSYMBOL(&http_status_data[0], gensym(common->req_type));
 		if (http_status >= 200 && http_status < 300) {
 			SETSYMBOL(&http_status_data[1], gensym("bang"));
-			outlet_list(threaddata->status_info_outlet, &s_list, 2, &http_status_data[0]);
+			outlet_list(common->stat_out, &s_list, 2, &http_status_data[0]);
 			if (result == CURLE_OK) {
-				outlet_symbol(threaddata->x_ob.ob_outlet, gensym(out_memory.memory));
+				outlet_symbol(common->x_ob.ob_outlet, gensym(out_memory.memory));
 				/* Free memory */
 				free_string(out_memory.memory, &out_memory.size);
 				free((void *)result);
 			} else {
 				SETFLOAT(&http_status_data[1], (float)http_status);
 				SETFLOAT(&http_status_data[2], (float)result);
-				outlet_list(threaddata->status_info_outlet, &s_list, 3, &http_status_data[0]);
+				outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
 				error("Error while performing request: %s", curl_easy_strerror(result));
 			}
 		} else {
 			SETFLOAT(&http_status_data[1], (float)http_status);
 			SETFLOAT(&http_status_data[2], (float)result);
 			error("HTTP error while performing request: %li", http_status);
-			outlet_list(threaddata->status_info_outlet, &s_list, 3, &http_status_data[0]);
+			outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
 		}
 		curl_easy_cleanup(curl_handle);
 	} else {
 		error("Cannot init curl.");
 	}
-	free_string(threaddata->complete_url, &threaddata->complete_url_len);
-	free_string(threaddata->parameters, &threaddata->parameters_len);
-	threaddata->is_data_locked = 0;
+	free_string(common->complete_url, &common->complete_url_len);
+	free_string(common->parameters, &common->parameters_len);
+	common->locked = 0;
 	return NULL;
 }
 
@@ -189,7 +192,7 @@ static void thread_execute(struct _rest_common *x, void *(*func) (void *)) {
 		error("Could not create thread with code %d", rc);
 		free_string(x->complete_url, &x->complete_url_len);
 		free_string(x->parameters, &x->parameters_len);
-		x->is_data_locked = 0;
+		x->locked = 0;
 	}
 }
 

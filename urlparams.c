@@ -47,22 +47,22 @@ void urlparams_setup(void) {
 	class_addmethod(urlparams_class, (t_method)urlparams_clear, gensym("clear"), A_GIMME, 0);
 }
 
-void *urlparams_new(t_symbol *selector, int argcount, t_atom *argvec) {
+void *urlparams_new(t_symbol *sel, int argc, t_atom *argv) {
 	t_urlparams *x = (t_urlparams *)pd_new(urlparams_class);
 
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
+	(void) sel;
+	(void) argc;
+	(void) argv;
 
 	x->storage.data_count = 0;
 	outlet_new(&x->storage.x_ob, NULL);
 	return (void *)x;
 }
 
-void urlparams_free (t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
+void urlparams_free (t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
+	(void) sel;
+	(void) argc;
+	(void) argv;
 
 	kvp_storage_free_memory((struct _kvp_storage *)x);
 }
@@ -104,7 +104,7 @@ void urlparams_bang(t_urlparams *x) {
 	}
 }
 
-void urlparams_add(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec) {
+void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 	char key[MAXPDSTRING];
 	size_t value_len = 0;
 	char *value;
@@ -112,21 +112,21 @@ void urlparams_add(t_urlparams *x, t_symbol *selector, int argcount, t_atom *arg
 	struct _key_value_pair *created_data = NULL;
 	int i;
 
-	(void) selector;
+	(void) sel;
 
-	if (argcount < 2) {
+	if (argc < 2) {
 		error("For method 'add' You need to specify a value.");
 	} else {
-		atom_string(argvec, key, MAXPDSTRING);
+		atom_string(argv, key, MAXPDSTRING);
 
-		for (i = 1; i < argcount; i++) {
-			atom_string(argvec + i, temp_value, MAXPDSTRING);
+		for (i = 1; i < argc; i++) {
+			atom_string(argv + i, temp_value, MAXPDSTRING);
 			value_len += strlen(temp_value) + 1;
 		}
 		value = (char *)getbytes(value_len * sizeof(char));
-		atom_string(argvec + 1, value, MAXPDSTRING);
-		for(i = 2; i < argcount; i++) {
-			atom_string(argvec + i, temp_value, MAXPDSTRING);
+		atom_string(argv + 1, value, MAXPDSTRING);
+		for(i = 2; i < argc; i++) {
+			atom_string(argv + i, temp_value, MAXPDSTRING);
 			strcat(value, " ");
 			strcat(value, temp_value);
 		}
@@ -136,10 +136,10 @@ void urlparams_add(t_urlparams *x, t_symbol *selector, int argcount, t_atom *arg
 	}
 }
 
-void urlparams_clear(t_urlparams *x, t_symbol *selector, int argcount, t_atom *argvec) {
-	(void) selector;
-	(void) argcount;
-	(void) argvec;
+void urlparams_clear(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
+	(void) sel;
+	(void) argc;
+	(void) argv;
 
 	kvp_storage_free_memory((struct _kvp_storage *)x);
 }

@@ -150,20 +150,34 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 						strcat(req_path, cleaned_parameters);
 						freebytes(cleaned_parameters, memsize);
 					}
+					/* TODO: RSA signing */
 					if (strcmp(x->threaddata.request_type, "POST") == 0) {
-						req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, NULL, 
-								x->oauth.client_key, x->oauth.client_secret, 
-								x->oauth.token_key, x->oauth.token_secret);
-						x->threaddata.complete_url = get_string(&x->threaddata.complete_url_len, strlen(req_url));
-						strcpy(x->threaddata.complete_url, req_url);
+						if (x->oauth.method == OA_RSA) {
+							req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, x->threaddata.request_type, 
+									x->oauth.client_key, x->oauth.rsa_key, 
+									x->oauth.token_key, NULL);
+						} else {
+							req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, x->threaddata.request_type, 
+									x->oauth.client_key, x->oauth.client_secret, 
+									x->oauth.token_key, x->oauth.token_secret);
+						}
+					} else {
+						if (x->oauth.method == OA_RSA) {
+							req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->threaddata.request_type, 
+									x->oauth.client_key, x->oauth.rsa_key, 
+									x->oauth.token_key, NULL);
+						} else {
+							req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->threaddata.request_type, 
+									x->oauth.client_key, x->oauth.client_secret, 
+									x->oauth.token_key, x->oauth.token_secret);
+						}
+					}
+					x->threaddata.complete_url = get_string(&x->threaddata.complete_url_len, strlen(req_url));
+					strcpy(x->threaddata.complete_url, req_url);
+					if (strcmp(x->threaddata.request_type, "POST") == 0) {
 						x->threaddata.parameters = get_string(&x->threaddata.parameters_len, strlen(postargs));
 						strcpy(x->threaddata.parameters, postargs);
 					} else {
-						req_url = oauth_sign_url2(req_path, NULL, x->oauth.method, NULL, 
-								x->oauth.client_key, x->oauth.client_secret, 
-								x->oauth.token_key, x->oauth.token_secret);
-						x->threaddata.complete_url = get_string(&x->threaddata.complete_url_len, strlen(req_url));
-						strcpy(x->threaddata.complete_url, req_url);
 						x->threaddata.parameters = get_string(&x->threaddata.parameters_len, 0);
 					}
 					if (postargs) {
@@ -172,6 +186,9 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 					if (req_url) {
 						free(req_url);
 					}
+					post("url: %s", x->threaddata.complete_url);
+					post("request: %s", x->threaddata.request_type);
+					post("params: %s", x->threaddata.parameters);
 					thread_execute((struct _rest_common *)x, execute_request);
 				}
 				break;
@@ -181,25 +198,24 @@ void oauth_command(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec)
 
 void oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) {
 	char method_name[11];
+	char temp[MAXPDSTRING];
+	size_t rsa_key_len = 0;
+	int i;
 
 	(void) selector;
+
+	free_string(x->oauth.rsa_key, &x->oauth.rsa_key_len);
 
 	if (argcount > 0) {
 		if (argvec[0].a_type == A_SYMBOL) {
 			atom_string(argvec, method_name, 11);
 			if (strcmp(method_name, "HMAC") == 0) {
 				x->oauth.method = OA_HMAC;
-				if (x->oauth.rsa_key) {
-					free(x->oauth.rsa_key);
-				}
 				if (argcount > 1)  {
 					post("Additional data is ignored");
 				}
 			} else if (strcmp(method_name, "PLAINTEXT") == 0) {
 				x->oauth.method = OA_PLAINTEXT;
-				if (x->oauth.rsa_key) {
-					free(x->oauth.rsa_key);
-				}
 				post("Warning: You are using plaintext now");
 				if (argcount > 1)  {
 					post("Additional data is ignored");
@@ -207,7 +223,15 @@ void oauth_method(t_oauth *x, t_symbol *selector, int argcount, t_atom *argvec) 
 			} else if (strcmp(method_name, "RSA") == 0) {
 				if (argcount > 1) {
 					x->oauth.method = OA_RSA;
-					/* TODO: Read RSA key */
+					for (i = 0; i < argcount; i++) {
+						atom_string(argvec, temp, MAXPDSTRING);
+						rsa_key_len +=strlen(temp) + 1;
+					}
+					x->oauth.rsa_key = get_string(&x->oauth.rsa_key_len, rsa_key_len);
+					for (i = 0; i < argcount; i++) {
+						atom_string(argvec, temp, MAXPDSTRING);
+						strcat(x->oauth.rsa_key, temp);
+					}
 				} else {
 					error("RSA needs the RSA private key as additional data");
 				}

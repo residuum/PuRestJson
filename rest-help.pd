@@ -1,4 +1,4 @@
-#N canvas 357 70 952 532 10;
+#N canvas 355 68 952 532 10;
 #X declare -lib purest_json;
 #N canvas 256 52 853 470 CouchDB-basics 0;
 #X text 416 71 CRUD documents:;
@@ -173,8 +173,6 @@ to be used by a simple sequencer.;
 ;
 #X msg 474 64 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
-#X msg 458 10 GET https://github.com/api/v2/json/commits/list/residuum/PuRestJson/master
-;
 #X text 55 -59 - object for HTTP communication with REST webservices
 ;
 #X text 19 217 An example for a RESTful interface is CouchDB:;
@@ -243,10 +241,12 @@ the request;
 time in milliseconds \, set a value with [timeout( message. To clear
 the value and return to the default \, use an empty [timeout( message.
 ;
-#X connect 2 0 21 0;
-#X connect 3 0 21 0;
-#X connect 4 0 21 0;
-#X connect 14 0 21 0;
-#X connect 21 0 9 0;
-#X connect 21 1 13 0;
-#X connect 23 0 21 0;
+#X msg 457 10 GET https://api.github.com/repos/residuum/PuRestJson/contents/Makefile
+;
+#X connect 2 0 20 0;
+#X connect 3 0 20 0;
+#X connect 13 0 20 0;
+#X connect 20 0 8 0;
+#X connect 20 1 12 0;
+#X connect 22 0 20 0;
+#X connect 24 0 20 0;

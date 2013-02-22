@@ -73,11 +73,11 @@ static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *
 	mem->memory = (char *) resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
 		/* out of memory! */ 
-		error("not enough memory");
+		myerror("not enough memory");
 	}
 	memcpy(&mem->memory[mem->size], ptr, realsize);
 	if (mem->size + realsize - mem->size != realsize) {
-		error("Integer overflow or similar. Bad Things can happen.");
+		myerror("Integer overflow or similar. Bad Things can happen.");
 	}
 	mem->size += realsize;
 	mem->memory[mem->size] = '\0';
@@ -126,7 +126,7 @@ static void *execute_request(void *thread_args) {
 				in_memory.memory = getbytes(strlen(common->parameters) + 1);
 				in_memory.size = strlen(common->parameters);
 				if (in_memory.memory == NULL) {
-					error("not enough memory");
+					myerror("not enough memory");
 				}
 				memcpy(in_memory.memory, common->parameters, common->parameters_len - 1);
 			} else {
@@ -161,17 +161,17 @@ static void *execute_request(void *thread_args) {
 				SETFLOAT(&http_status_data[1], (float)http_status);
 				SETFLOAT(&http_status_data[2], (float)result);
 				outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
-				error("Error while performing request: %s", curl_easy_strerror(result));
+				myerror("Error while performing request: %s", curl_easy_strerror(result));
 			}
 		} else {
 			SETFLOAT(&http_status_data[1], (float)http_status);
 			SETFLOAT(&http_status_data[2], (float)result);
-			error("HTTP error while performing request: %li", http_status);
+			myerror("HTTP error while performing request: %li", http_status);
 			outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
 		}
 		curl_easy_cleanup(curl_handle);
 	} else {
-		error("Cannot init curl.");
+		myerror("Cannot init curl.");
 	}
 	free_string(common->complete_url, &common->complete_url_len);
 	free_string(common->parameters, &common->parameters_len);
@@ -189,7 +189,7 @@ static void thread_execute(struct _rest_common *x, void *(*func) (void *)) {
 	rc = pthread_create(&thread, &thread_attributes, func, (void *)x);
 	pthread_attr_destroy(&thread_attributes);
 	if (rc) {
-		error("Could not create thread with code %d", rc);
+		myerror("Could not create thread with code %d", rc);
 		free_string(x->complete_url, &x->complete_url_len);
 		free_string(x->parameters, &x->parameters_len);
 		x->locked = 0;

@@ -80,7 +80,7 @@ static char *lowercase_unicode(char *orig, size_t *memsize) {
 
 		}
 	} else {
-		error("Could not allocate memory");
+		myerror("Could not allocate memory");
 	}
 	return cleaned_string;
 }
@@ -208,7 +208,7 @@ static void output_json_string(char *json_string, t_outlet *data_outlet, t_outle
 		/* TODO: This sometimes results in a segfault. Why? */
 		/*json_object_put(jobj);*/
 	} else {
-		error("Not a JSON object");
+		myerror("Not a JSON object");
 	}
 #if JSON_C_MINOR_VERSION < 10
 	if (corrected_json_string != NULL){

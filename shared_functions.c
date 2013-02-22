@@ -8,7 +8,7 @@ static char *remove_backslashes(char *source_string, size_t *memsize) {
 
 	cleaned_string = (char *) getbytes((*memsize) * sizeof(char));
 	if (cleaned_string == NULL) {
-		error("Unable to allocate memory\n");
+		myerror("Unable to allocate memory\n");
 	} else if (len_src > 0) {
 		segment = strtok(source_string, masking);
 		strcpy(cleaned_string, segment);

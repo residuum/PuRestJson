@@ -23,21 +23,21 @@ static void set_url_parameters(t_oauth *x, int argc, t_atom *argv) {
 			break;
 		case 3:
 			if (argv[0].a_type != A_SYMBOL) {
-				error("Base URL cannot be set.");
+				myerror("Base URL cannot be set.");
 			} else {
 				atom_string(argv, temp, MAXPDSTRING);
 				x->common.base_url = get_string(&x->common.base_url_len, strlen(temp));
 				strcpy(x->common.base_url, temp);
 			}
 			if (argv[1].a_type != A_SYMBOL) {
-				error("Client key cannot be set.");
+				myerror("Client key cannot be set.");
 			} else {
 				atom_string(argv + 1, temp, MAXPDSTRING);
 				x->oauth.client_key = get_string(&x->oauth.client_key_len, strlen(temp));
 				strcpy(x->oauth.client_key, temp);
 			}
 			if (argv[2].a_type != A_SYMBOL) {
-				error("Client secret cannot be set.");
+				myerror("Client secret cannot be set.");
 			} else {
 				atom_string(argv + 2, temp, MAXPDSTRING);
 				x->oauth.client_secret = get_string(&x->oauth.client_secret_len, strlen(temp));
@@ -46,35 +46,35 @@ static void set_url_parameters(t_oauth *x, int argc, t_atom *argv) {
 			break;
 		case 5:
 			if (argv[0].a_type != A_SYMBOL) {
-				error("Base URL cannot be set.");
+				myerror("Base URL cannot be set.");
 			} else {
 				atom_string(argv, temp, MAXPDSTRING);
 				x->common.base_url = get_string(&x->common.base_url_len, strlen(temp));
 				strcpy(x->common.base_url, temp);
 			}
 			if (argv[1].a_type != A_SYMBOL) {
-				error("Client key cannot be set.");
+				myerror("Client key cannot be set.");
 			} else {
 				atom_string(argv + 1, temp, MAXPDSTRING);
 				x->oauth.client_key = get_string(&x->oauth.client_key_len, strlen(temp));
 				strcpy(x->oauth.client_key, temp);
 			}
 			if (argv[2].a_type != A_SYMBOL) {
-				error("Client secret cannot be set.");
+				myerror("Client secret cannot be set.");
 			} else {
 				atom_string(argv + 2, temp, MAXPDSTRING);
 				x->oauth.client_secret = get_string(&x->oauth.client_secret_len, strlen(temp));
 				strcpy(x->oauth.client_secret, temp);
 			}
 			if (argv[3].a_type != A_SYMBOL) {
-				error("Client key cannot be set.");
+				myerror("Client key cannot be set.");
 			} else {
 				atom_string(argv + 3, temp, MAXPDSTRING);
 				x->oauth.token_key = get_string(&x->oauth.token_key_len, strlen(temp));
 				strcpy(x->oauth.token_key, temp);
 			}
 			if (argv[4].a_type != A_SYMBOL) {
-				error("Client secret cannot be set.");
+				myerror("Client secret cannot be set.");
 			} else {
 				atom_string(argv + 4, temp, MAXPDSTRING);
 				x->oauth.token_secret = get_string(&x->oauth.token_secret_len, strlen(temp));
@@ -82,7 +82,7 @@ static void set_url_parameters(t_oauth *x, int argc, t_atom *argv) {
 			}
 			break;
 		default:
-			error("Wrong number of parameters.");
+			myerror("Wrong number of parameters.");
 			break;
 	}
 }
@@ -124,7 +124,7 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 							strcmp(x->common.req_type, "POST"))) {
 					SETSYMBOL(&auth_status_data[0], gensym("oauth"));
 					SETSYMBOL(&auth_status_data[1], gensym("Request Method not supported"));
-					error("Request method %s not supported.", x->common.req_type);
+					myerror("Request method %s not supported.", x->common.req_type);
 					outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
 					x->common.locked = 0;
 				} else {
@@ -232,17 +232,17 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 						strcat(x->oauth.rsa_key, temp);
 					}
 				} else {
-					error("RSA needs the RSA private key as additional data");
+					myerror("RSA needs the RSA private key as additional data");
 				}
 			} else {
-				error("Only HMAC, RSA, and PLAINTEXT allowed");
+				myerror("Only HMAC, RSA, and PLAINTEXT allowed");
 			}
 
 		} else {
-			error("'method' only takes a symbol argument. See help for more");
+			myerror("'method' only takes a symbol argument. See help for more");
 		}
 	} else  {
-		error("'method' needs at least one argument. See help for more");
+		myerror("'method' needs at least one argument. See help for more");
 	}
 }
 
@@ -264,7 +264,7 @@ void oauth_timeout(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	if(x->common.locked) {
 		post("oauth object is performing request and locked");
 	} else if (argc > 2){
-		error("timeout must have 0 or 1 parameter");
+		myerror("timeout must have 0 or 1 parameter");
 	} else if (argc == 0) {
 		set_timeout((struct _rest_common *)x, 0);
 	} else {

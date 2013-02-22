@@ -107,7 +107,7 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 			}
 			break;
 		default: 
-			error("This JSON data cannot be represented internally, sorry");
+			myerror("This JSON data cannot be represented internally, sorry");
 			break;
 	}
 }
@@ -221,7 +221,7 @@ void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
 	}
 
 	if (argc < 2) {
-		error("For method '%s' You need to specify a value.", is_array ? "array": "add");
+		myerror("For method '%s' You need to specify a value.", is_array ? "array": "add");
 	} else {
 		atom_string(argv, key, MAXPDSTRING);
 

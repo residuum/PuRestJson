@@ -115,7 +115,7 @@ void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 	(void) sel;
 
 	if (argc < 2) {
-		error("For method 'add' You need to specify a value.");
+		myerror("For method 'add' You need to specify a value.");
 	} else {
 		atom_string(argv, key, MAXPDSTRING);
 

@@ -23,7 +23,7 @@ static struct _key_value_pair *create_key_value_pair(char *key, char *value, int
 	created_data->key = (char *)getbytes(created_data->key_len * sizeof(char));
 	created_data->value = (char *)getbytes(created_data->value_len * sizeof(char));
 	if (created_data == NULL || key == NULL || value == NULL) {
-		error("Could not get data");
+		myerror("Could not get data");
 		return NULL;
 	}
 	strcpy(created_data->key, key);

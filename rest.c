@@ -36,7 +36,7 @@ static void *get_cookie_auth_token(void *thread_args) {
 		/* length + name=&password=*/
 		post_data = get_string(&post_data_len, x->cookie.username_len + x->cookie.password_len + 17);
 		if (post_data == NULL) {
-			error("not enough memory");
+			myerror("not enough memory");
 		} else {
 			strcpy(post_data, "name=");
 			strcat(post_data, x->cookie.username);
@@ -111,7 +111,7 @@ static void set_url_parameters(t_rest *x, int argc, t_atom *argv) {
 			break;
 		case 1:
 			if (argv[0].a_type != A_SYMBOL) {
-				error("Base URL cannot be set.");
+				myerror("Base URL cannot be set.");
 			} else {
 				atom_string(argv, temp, MAXPDSTRING);
 				x->common.base_url = get_string(&x->common.base_url_len, strlen(temp));
@@ -121,28 +121,28 @@ static void set_url_parameters(t_rest *x, int argc, t_atom *argv) {
 		case 4:
 			x->common.locked = 1;
 			if (argv[0].a_type != A_SYMBOL) {
-				error("Base URL cannot be set.");
+				myerror("Base URL cannot be set.");
 			} else {
 				atom_string(argv, temp, MAXPDSTRING);
 				x->common.base_url = get_string(&x->common.base_url_len, strlen(temp));
 				strcpy(x->common.base_url, temp);
 			}
 			if (argv[1].a_type != A_SYMBOL) {
-				error("Cookie path cannot be set.");
+				myerror("Cookie path cannot be set.");
 			} else {
 				atom_string(argv + 1, temp, MAXPDSTRING);
 				x->cookie.login_path = get_string(&x->cookie.login_path_len, strlen(temp));
 				strcpy(x->cookie.login_path, temp);
 			}
 			if (argv[2].a_type != A_SYMBOL) {
-				error("Username cannot be set.");
+				myerror("Username cannot be set.");
 			} else {
 				atom_string(argv + 2, temp, MAXPDSTRING);
 				x->cookie.username = get_string(&x->cookie.username_len, strlen(temp));
 				strcpy(x->cookie.username, temp);
 			}
 			if (argv[3].a_type != A_SYMBOL) {
-				error("Password cannot be set.");
+				myerror("Password cannot be set.");
 			} else {
 				atom_string(argv + 3, temp, MAXPDSTRING);
 				x->cookie.password = get_string(&x->cookie.password_len, strlen(temp));
@@ -151,7 +151,7 @@ static void set_url_parameters(t_rest *x, int argc, t_atom *argv) {
 			thread_execute((struct _rest_common *)x, get_cookie_auth_token);
 			break;
 		default:
-			error("Wrong number of parameters.");
+			myerror("Wrong number of parameters.");
 			break;
 	}
 }
@@ -192,7 +192,7 @@ void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 							strcmp(x->common.req_type, "DELETE"))) {
 					SETSYMBOL(&auth_status_data[0], gensym("request"));
 					SETSYMBOL(&auth_status_data[1], gensym("Request method not supported"));
-					error("Request method %s not supported.", x->common.req_type);
+					myerror("Request method %s not supported.", x->common.req_type);
 					outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
 					x->common.locked = 0;
 				} else {
@@ -237,7 +237,7 @@ void rest_timeout(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 	if(x->common.locked) {
 		post("rest object is performing request and locked");
 	} else if (argc > 2){
-		error("timeout must have 0 or 1 parameter");
+		myerror("timeout must have 0 or 1 parameter");
 	} else if (argc == 0) {
 		set_timeout((struct _rest_common *)x, 0);
 	} else {

@@ -1,3 +1,20 @@
+pd-purest-json (0.11) UNRELEASED; urgency=low
+
+  * symbols can be longer than MAXPDLENGTH (1024 characters)
+
+  * [json-decode] works with lists and any other data type as well
+
+  * Setting request timeout for [rest] and [oauth] possible
+
+  * Bugfix:
+    - [oauth] posts data again
+
+  * Cleaning up of source code and help files
+
+  * Note: No version 0.10 due to restricutions in Pd
+
+ -- Thomas Mayer <thomas@residuum.org>  Sat, 23 Feb 2013 17:00:00 +0100
+
 pd-purest-json (0.9) UNRELEASED; urgency=low
 
   * [json-encode] writes and reads JSON data to and from files

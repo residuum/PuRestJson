@@ -121,7 +121,6 @@ static void *execute_request(void *thread_args) {
 			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
 			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, read_memory_callback);
 			/* Prepare data for reading */
-			post("%i", common->parameters_len);
 			if (common->parameters_len) {
 				in_memory.memory = getbytes(strlen(common->parameters) + 1);
 				in_memory.size = strlen(common->parameters);

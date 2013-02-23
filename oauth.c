@@ -9,15 +9,17 @@
 
 static t_class *oauth_class;
 
-static void oauth_free_inner(t_oauth *x) {
+static void oauth_free_inner(t_oauth *x, short free_rsa) {
 	rest_common_free((struct _rest_common *)x);
-	free_string(x->oauth.rsa_key, &x->oauth.rsa_key_len);
+	if (free_rsa == 1) {
+		free_string(x->oauth.rsa_key, &x->oauth.rsa_key_len);
+	}
 }
 
 static void set_url_parameters(t_oauth *x, int argc, t_atom *argv) {
 	char temp[MAXPDSTRING];
 
-	oauth_free_inner(x);
+	oauth_free_inner(x, 0);
 	switch (argc) {
 		case 0:
 			break;
@@ -185,9 +187,6 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 					if (req_url) {
 						free(req_url);
 					}
-					post("url: %s", x->common.complete_url);
-					post("request: %s", x->common.req_type);
-					post("params: %s", x->common.parameters);
 					thread_execute((struct _rest_common *)x, execute_request);
 				}
 				break;
@@ -198,8 +197,9 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	char method_name[11];
 	char temp[MAXPDSTRING];
-	size_t rsa_key_len = 0;
+	size_t rsa_key_len = 1;
 	int i;
+	short use_newline = 0;
 
 	(void) sel;
 
@@ -220,16 +220,30 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 					post("Additional data is ignored");
 				}
 			} else if (strcmp(method_name, "RSA") == 0) {
+				myerror("RSA-SHA1 is not supported by liboauth");
 				if (argc > 1) {
 					x->oauth.method = OA_RSA;
-					for (i = 0; i < argc; i++) {
-						atom_string(argv, temp, MAXPDSTRING);
+					for (i = 1; i < argc; i++) {
+						atom_string(argv + i, temp, MAXPDSTRING);
 						rsa_key_len +=strlen(temp) + 1;
 					}
 					x->oauth.rsa_key = get_string(&x->oauth.rsa_key_len, rsa_key_len);
-					for (i = 0; i < argc; i++) {
-						atom_string(argv, temp, MAXPDSTRING);
+					for (i = 1; i < argc; i++) {
+						atom_string(argv + i, temp, MAXPDSTRING);
+						if (strncmp(temp, "-----", 5) == 0 && strlen(x->oauth.rsa_key) > 1)  {
+							memset(x->oauth.rsa_key + strlen(x->oauth.rsa_key) - 1, 0x00, 1);
+							strcat(x->oauth.rsa_key, "\n");
+							use_newline = 0;
+						}
+						if (strlen(temp) >= 5 && strncmp(temp + strlen(temp) - 5, "-----", 5) == 0) {
+							use_newline = 1;
+						}
 						strcat(x->oauth.rsa_key, temp);
+						if (use_newline == 1)  {
+							strcat(x->oauth.rsa_key, "\n");
+						} else {
+							strcat(x->oauth.rsa_key, " ");
+						}
 					}
 				} else {
 					myerror("RSA needs the RSA private key as additional data");
@@ -302,5 +316,5 @@ void oauth_free(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	(void) argc;
 	(void) argv;
 
-	oauth_free_inner(x);
+	oauth_free_inner(x, 1);
 }

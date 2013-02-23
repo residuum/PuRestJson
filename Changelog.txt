@@ -1,5 +1,16 @@
 Changelog
 ---------
+0.10:
+- symbols can be longer than MAXPDLENGTH (1024 characters)
+- [json-decode] works with lists and any other data type as well
+- Setting request timeout for [rest] and [oauth] possible
+
+- Bugfixes:
+	-- [oauth] posts data again
+	-- Fixed segfault in Windows at errors
+
+- Cleaning up of source code and help files
+
 0.9:
 - [json-encode] writes and reads JSON data to and from files
 - [oauth] does not use deprecated functions from liboauth 1.0

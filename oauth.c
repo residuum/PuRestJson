@@ -167,6 +167,8 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 							req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->common.req_type, 
 									x->oauth.client_key, x->oauth.rsa_key, 
 									x->oauth.token_key, NULL);
+							post("rsa_key: %s", x->oauth.rsa_key);
+							post("url: %s", req_url);
 						} else {
 							req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->common.req_type, 
 									x->oauth.client_key, x->oauth.client_secret, 
@@ -239,10 +241,12 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 							use_newline = 1;
 						}
 						strcat(x->oauth.rsa_key, temp);
-						if (use_newline == 1)  {
-							strcat(x->oauth.rsa_key, "\n");
-						} else {
-							strcat(x->oauth.rsa_key, " ");
+						if (i < argc -1) {
+							if (use_newline == 1)  {
+								strcat(x->oauth.rsa_key, "\n");
+							} else {
+								strcat(x->oauth.rsa_key, " ");
+							}
 						}
 					}
 				} else {

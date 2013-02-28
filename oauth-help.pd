@@ -1,4 +1,4 @@
-#N canvas 152 148 952 574 10;
+#N canvas 146 142 952 574 10;
 #X declare -lib purest_json;
 #X obj 457 -40 import purest_json;
 #X obj 19 -60 oauth;
@@ -39,13 +39,19 @@ the value and return to the default \, use an empty [timeout( message.
 #X msg 556 238 timeout;
 #X msg 540 204 timeout 2000;
 #X msg 82 383 method RSA privatekey;
-#N canvas 103 105 913 619 RSA 0;
+#N canvas 97 99 913 619 RSA 0;
 #X msg -89 318 GET /echo_api.php?method=foo&bar=baz;
 #X msg -92 361 POST /echo_api.php?method=foo&bar=baz;
 #X obj -128 409 oauth;
 #X obj -166 448 print data-rsa;
 #X obj -46 445 print status-rsa;
-#X msg -114 -44 method RSA -----BEGIN PRIVATE KEY----- MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
+#X msg -142 -95 url http://term.ie/oauth/example key secret accesskey
+accesssecret;
+#X text 293 -39 RSA-SHA1 is not implemented in liboauth (at least up
+to version 1.0.0. So this will not work \, but is here for completeness.
+When your version of liboauth supports signing with RSA-SHA1 \, then
+this should work.;
+#X msg -106 -47 method RSA -----BEGIN PRIVATE KEY----- MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
 A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d 7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ
 hI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H X9u2AC2ry8vD/l7cqedtwMPp9k7TubgNFo+NGvKsl2ynyprOZR1xjQ7WgrgVB+mm
 uScOM/5HVceFuGRDhYTCObE+y1kxRloNYXnx3ei1zbeYLPCHdhxRYW7T0qcynNmw rn05/KO2RLjgQNalsQJBANeA3Q4Nugqy4QBUCEC09SqylT2K9FrrItqL2QKc9v0Z
@@ -53,18 +59,12 @@ zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn qkMsDmzt0EfNaAO
 WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
 3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8 AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A== -----END PRIVATE KEY-----;
-#X msg -142 -95 url http://term.ie/oauth/example key secret accesskey
-accesssecret;
-#X text 293 -39 RSA-SHA1 is not implemented in liboauth (at least up
-to version 1.0.0. So this will not work \, but is here for completeness.
-When your version of liboauth supports signing with RSA-SHA1 \, then
-this should work.;
 #X connect 0 0 2 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
 #X connect 2 1 4 0;
 #X connect 5 0 2 0;
-#X connect 6 0 2 0;
+#X connect 7 0 2 0;
 #X restore 327 300 pd RSA;
 #X text 20 256 The method message will set the OAUTH signature method.
 Default is HMAC (HMAC-SHA1). For RSA (RSA-SHA1) you have to submit

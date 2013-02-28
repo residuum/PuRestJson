@@ -1,4 +1,4 @@
-#N canvas 353 66 952 532 10;
+#N canvas 351 64 952 532 10;
 #X declare -lib purest_json;
 #N canvas 256 52 853 470 CouchDB-basics 0;
 #X text 416 71 CRUD documents:;
@@ -48,7 +48,7 @@ with [rest-json] \, you can even issue POST requests to a CouchDB server.
 If you want to do complex data operations on a CouchDB \, please refer
 to the manual: http://guide.couchdb.org/;
 #X restore 20 236 pd CouchDB-basics;
-#N canvas 194 51 932 709 couchdb 0;
+#N canvas 192 51 932 709 couchdb 0;
 #X msg 603 26 bang;
 #X msg 59 19 url http://localhost:5984/;
 #X obj 171 279 list trim;
@@ -231,8 +231,6 @@ Request methods GET \, POST \, PUT and DELETE are available.;
 to return data immediately. While one request is processed \, the object
 id blocked.;
 #X obj 20 158 rest http://localhost:5984/;
-#X text 18 188 The second outlet will output status information of
-the request;
 #X obj 458 357 rest;
 #X text 497 170 This will give you an error message on the second outlet
 ;
@@ -244,11 +242,13 @@ the value and return to the default \, use an empty [timeout( message.
 ;
 #X msg 520 271 timeout 2000;
 #X msg 536 303 timeout;
-#X connect 2 0 20 0;
-#X connect 3 0 20 0;
-#X connect 13 0 20 0;
-#X connect 20 0 8 0;
-#X connect 20 1 12 0;
-#X connect 23 0 20 0;
-#X connect 24 0 20 0;
-#X connect 25 0 20 0;
+#X text 18 189 The second outlet will output status information of
+the request.;
+#X connect 2 0 19 0;
+#X connect 3 0 19 0;
+#X connect 13 0 19 0;
+#X connect 19 0 8 0;
+#X connect 19 1 12 0;
+#X connect 22 0 19 0;
+#X connect 23 0 19 0;
+#X connect 24 0 19 0;

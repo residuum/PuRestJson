@@ -1,8 +1,8 @@
-#N canvas 343 139 974 536 10;
+#N canvas 339 135 974 536 10;
 #X declare -lib purest_json;
 #X msg 494 235 GET /1.1/statuses/home_timeline.json;
 #X msg 574 367 POST /1.1/statuses/update.json \$1;
-#X obj 577 333 urlparams;
+#X obj 574 333 urlparams;
 #X obj 594 31 import purest_json;
 #X obj 814 364 print urlparams;
 #X obj 488 408 oauth;
@@ -12,9 +12,9 @@ FEHGi9k8jF3zTPrBLbnBonF94gbUGZLrGKMgl4Td5bc;
 #X obj 24 210 print data1;
 #X obj 173 216 print status1;
 #X text 491 219 Get your timeline;
-#X msg 577 282 clear \, add status I can haz my own twitter client
+#X msg 574 282 clear \, add status I can haz my own twitter client
 #Pd #Puredata \, bang;
-#X text 594 265 Tweet;
+#X text 591 265 Tweet;
 #X obj 488 497 print data2;
 #X obj 539 453 print status2;
 #X msg 296 109 POST /oauth/access_token oauth_identifier=YOUR_PIN;

@@ -1,4 +1,4 @@
-#N canvas 146 142 952 574 10;
+#N canvas 144 140 952 574 10;
 #X declare -lib purest_json;
 #X obj 457 -40 import purest_json;
 #X obj 19 -60 oauth;
@@ -68,7 +68,7 @@ Lw03eHTNQghS0A== -----END PRIVATE KEY-----;
 #X restore 327 300 pd RSA;
 #X text 20 256 The method message will set the OAUTH signature method.
 Default is HMAC (HMAC-SHA1). For RSA (RSA-SHA1) you have to submit
-your private key \, but it not implemented in liboauth yet.;
+your private key \, but it does not work yet.;
 #X connect 10 0 12 0;
 #X connect 11 0 12 0;
 #X connect 12 0 14 0;

@@ -20,7 +20,7 @@ stored one;
 #X text 403 252 This will clear the object;
 #X text 696 263 output the value;
 #X msg 697 282 bang;
-#N canvas 87 51 453 402 nested-objects 0;
+#N canvas 85 51 453 402 nested-objects 0;
 #X obj -74 -56 json-encode;
 #X obj -74 2 json-decode;
 #X msg 104 -101 add name Residuum;
@@ -52,7 +52,7 @@ stored one;
 #X connect 10 1 12 0;
 #X restore 46 451 pd nested-objects;
 #X obj 567 446 t a a;
-#N canvas 314 51 693 648 about-decoded-json-strings 0;
+#N canvas 312 51 693 648 about-decoded-json-strings 0;
 #X obj 218 -185 json-encode;
 #X obj 94 -86 json-decode;
 #X msg 218 -232 bang;
@@ -121,15 +121,6 @@ the store \, with the right outlet of [json-decode] or [rest-json].
 #X connect 23 0 24 0;
 #X connect 24 0 13 0;
 #X restore 162 452 pd about-decoded-json-strings;
-#X text 46 272 [json-decode] will accept a JSON string at its input
-and will output the decoded object as a series of lists of key/value
-pairs. Boolean values of TRUE/FALSE will be translated to 1 or 0 \,
-float and integer values will be output as floats. Json-decode will
-try to convert string values to floats \, and if that fails \, will
-output them as symbols \, nested objects and arrays are output as strings
-\, that can be parsed. After the object is fully parsed \, the right
-outlet will issue a bang \, so that you can differenciate between subsequent
-objects. The messages will come as list key value.;
 #N canvas 44 51 450 465 json-arrays 0;
 #X obj 42 73 json-encode;
 #X msg 42 33 clear \, array storage textfile \, array storage couchdb
@@ -182,9 +173,18 @@ internally.;
 file.;
 #X obj 311 227 qlist;
 #X text 46 225 add \, read and write methods work analog to;
+#X text 46 272 [json-decode] will accept a JSON string at its input
+and will output the decoded object as a series of lists of key/value
+pairs. Boolean values of TRUE/FALSE will be translated to 1 or 0 \,
+float and integer values will be output as floats. [json-decode] will
+try to convert string values to floats \, and if that fails \, will
+output them as symbols \, nested objects and arrays are output as strings
+\, that can be parsed. After the object is fully parsed \, the right
+outlet will issue a bang \, so that you can differenciate between subsequent
+objects. The messages will come as list key value.;
 #X connect 0 0 19 0;
-#X connect 1 0 24 0;
-#X connect 1 1 25 0;
+#X connect 1 0 23 0;
+#X connect 1 1 24 0;
 #X connect 6 0 0 0;
 #X connect 8 0 0 0;
 #X connect 9 0 0 0;
@@ -193,6 +193,6 @@ file.;
 #X connect 14 0 0 0;
 #X connect 17 0 0 0;
 #X connect 19 0 1 0;
-#X connect 19 1 26 0;
+#X connect 19 1 25 0;
+#X connect 27 0 0 0;
 #X connect 28 0 0 0;
-#X connect 29 0 0 0;

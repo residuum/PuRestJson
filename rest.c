@@ -2,7 +2,7 @@
  * [rest] makes RESTful calls to webservices.
  * */
 
-#include "purest_json.h"
+#include "rest.h"
 
 #include "curl_thread_wrapper.c"
 #include "shared_functions.c"

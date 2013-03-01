@@ -2,7 +2,7 @@
  * [urlparams] encodes data as JSON and outputs it as a symbol.
  * */
 
-#include "purest_json.h"
+#include "urlparams.h"
 
 #include "key_value_pair.c"
 

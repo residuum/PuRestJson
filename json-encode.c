@@ -2,7 +2,7 @@
  * [json-encodes] encodes data as JSON and outputs it as a symbol.
  * */
 
-#include "purest_json.h"
+#include "json-encode.h"
 #include <sys/stat.h>
 #include <stdio.h>
 

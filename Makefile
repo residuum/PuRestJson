@@ -381,6 +381,8 @@ dist: $(DISTDIR)
 		$(INSTALL_DATA) $(ALLSOURCES)  $(DISTDIR)
 	test -z "$(strip $(wildcard $(ALLSOURCES:.c=.tcl)))" || \
 		$(INSTALL_DATA) $(wildcard $(ALLSOURCES:.c=.tcl))  $(DISTDIR)
+	test -z "$(strip $(wildcard $(ALLSOURCES:.c=.h)))" || \
+		$(INSTALL_DATA) $(wildcard $(ALLSOURCES:.c=.h))  $(DISTDIR)
 	test -z "$(strip $(wildcard $(LIBRARY_NAME).c))" || \
 		$(INSTALL_DATA) $(LIBRARY_NAME).c  $(DISTDIR)
 	test -z "$(strip $(SHARED_HEADER))" || \
@@ -452,6 +454,7 @@ showsetup:
 	@echo "SHARED_TCL_LIB: $(SHARED_TCL_LIB)"
 	@echo "PDOBJECTS: $(PDOBJECTS)"
 	@echo "ALLSOURCES: $(ALLSOURCES)"
+	@echo "ALLSOURCES HEADERS: $(wildcard $(ALLSOURCES:.c=.h))"
 	@echo "ALLSOURCES TCL: $(wildcard $(ALLSOURCES:.c=.tcl))"
 	@echo "UNAME: $(UNAME)"
 	@echo "CPU: $(CPU)"

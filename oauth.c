@@ -2,7 +2,7 @@
  * [oauth] communicates with OAUTH webservices via GET and POST.
  * */
 
-#include "purest_json.h"
+#include "oauth.h"
 
 #include "curl_thread_wrapper.c"
 #include "shared_functions.c"

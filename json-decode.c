@@ -2,7 +2,7 @@
  * [json-decode] decodes JSON data and outputs it as lists.
  * */
 
-#include "purest_json.h"
+#include "json-decode.h"
 
 #include "shared_functions.c"
 

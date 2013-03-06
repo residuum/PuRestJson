@@ -7,11 +7,11 @@
 #ifdef _WIN32
 	#define APIEXPORT __declspec(dllexport)
 	#define APICALL __cdecl
-	#define myerror(...) post(__VA_ARGS__)
+	#define MYERROR(...) post(__VA_ARGS__)
 #else 
 	#define APIEXPORT
 	#define APICALL
-	#define myerror(...) error(__VA_ARGS__)
+	#define MYERROR(...) error(__VA_ARGS__)
 #endif
 
 /* [rest] */

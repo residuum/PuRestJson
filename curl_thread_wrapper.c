@@ -13,49 +13,20 @@ struct _rest_common {
 	char *parameters;
 	size_t complete_url_len;
 	char *complete_url;
+	size_t auth_token_len;
+	char *auth_token;
 	short locked;
 	long timeout;
 	t_atom *out;
-	short is_rest;
-};
-
-struct _rest {
-	struct _rest_common common;
-	/* authentication: cookie */
-	struct {
-		size_t login_path_len;
-		char *login_path;
-		size_t username_len;
-		char *username;
-		size_t password_len;
-		char *password;
-		size_t auth_token_len;
-		char *auth_token;
-	} cookie;
-};
-
-struct _oauth {
-	struct _rest_common common;
-	/* authentication */
-	struct {
-		size_t client_key_len;
-		char *client_key;
-		size_t client_secret_len;
-		char *client_secret;
-		size_t token_key_len;
-		char *token_key;
-		size_t token_secret_len;
-		char *token_secret;
-		OAuthMethod method;
-		size_t rsa_key_len;
-		char *rsa_key;
-	} oauth;
 };
 
 static char *get_string(size_t *newl, size_t strl) {
 	char *gen;
 	(*newl) = 1 + strl;
-	gen = (char *)getbytes((*newl) * sizeof(char));
+	gen = getbytes((*newl) * sizeof(char));
+	if (gen == NULL) {
+		MYERROR("not enough memory");
+	}
 	return memset(gen, 0x00, (*newl));
 }
 
@@ -68,16 +39,15 @@ static void free_string(char *string, size_t *strl) {
 
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
-	struct _memory_struct *mem = (struct _memory_struct *)data;
+	struct _memory_struct *mem = data;
 
 	mem->memory = (char *) resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
-		/* out of memory! */ 
-		myerror("not enough memory");
+		MYERROR("not enough memory");
 	}
 	memcpy(&mem->memory[mem->size], ptr, realsize);
 	if (mem->size + realsize - mem->size != realsize) {
-		myerror("Integer overflow or similar. Bad Things can happen.");
+		MYERROR("Integer overflow or similar. Bad Things can happen.");
 	}
 	mem->size += realsize;
 	mem->memory[mem->size] = '\0';
@@ -87,7 +57,7 @@ static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *
 
 static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
-	struct _memory_struct *mem = (struct _memory_struct *)data;
+	struct _memory_struct *mem = data;
 	size_t to_copy = (mem->size < realsize) ? mem->size : realsize;
 
 	memcpy(ptr, mem->memory, to_copy);
@@ -97,7 +67,7 @@ static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *d
 }
 
 static void *execute_request(void *thread_args) {
-	struct _rest_common *common = (struct _rest_common *)thread_args; 
+	struct _rest_common *common = thread_args; 
 	CURL *curl_handle;
 	CURLcode result;
 	struct _memory_struct in_memory;
@@ -111,11 +81,8 @@ static void *execute_request(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_URL, common->complete_url);
 		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, common->timeout);
-		if (common->is_rest) {
-			t_rest *x = (t_rest *)common;
-			if (x->cookie.auth_token_len) {
-				curl_easy_setopt(curl_handle, CURLOPT_COOKIE, x->cookie.auth_token);
-			}
+		if (common->auth_token_len) {
+			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, common->auth_token);
 		}
 		if (strcmp(common->req_type, "PUT") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
@@ -125,7 +92,7 @@ static void *execute_request(void *thread_args) {
 				in_memory.memory = getbytes(strlen(common->parameters) + 1);
 				in_memory.size = strlen(common->parameters);
 				if (in_memory.memory == NULL) {
-					myerror("not enough memory");
+					MYERROR("not enough memory");
 				}
 				memcpy(in_memory.memory, common->parameters, common->parameters_len - 1);
 			} else {
@@ -160,17 +127,17 @@ static void *execute_request(void *thread_args) {
 				SETFLOAT(&http_status_data[1], (float)http_status);
 				SETFLOAT(&http_status_data[2], (float)result);
 				outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
-				myerror("Error while performing request: %s", curl_easy_strerror(result));
+				MYERROR("Error while performing request: %s", curl_easy_strerror(result));
 			}
 		} else {
 			SETFLOAT(&http_status_data[1], (float)http_status);
 			SETFLOAT(&http_status_data[2], (float)result);
-			myerror("HTTP error while performing request: %li", http_status);
+			MYERROR("HTTP error while performing request: %li", http_status);
 			outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
 		}
 		curl_easy_cleanup(curl_handle);
 	} else {
-		myerror("Cannot init curl.");
+		MYERROR("Cannot init curl.");
 	}
 	free_string(common->complete_url, &common->complete_url_len);
 	free_string(common->parameters, &common->parameters_len);
@@ -188,7 +155,7 @@ static void thread_execute(struct _rest_common *x, void *(*func) (void *)) {
 	rc = pthread_create(&thread, &thread_attributes, func, (void *)x);
 	pthread_attr_destroy(&thread_attributes);
 	if (rc) {
-		myerror("Could not create thread with code %d", rc);
+		MYERROR("Could not create thread with code %d", rc);
 		free_string(x->complete_url, &x->complete_url_len);
 		free_string(x->parameters, &x->parameters_len);
 		x->locked = 0;
@@ -199,8 +166,16 @@ static void set_timeout(struct _rest_common *x, int timeout) {
 	x->timeout = (long) timeout;
 }
 
+static void init_common(struct _rest_common *x) {
+	x->base_url_len = 0;
+	x->parameters_len = 0;
+	x->complete_url_len = 0;
+	x->auth_token_len = 0;
+}
+
 static void rest_common_free(struct _rest_common *x) {
 	free_string(x->base_url, &x->base_url_len);
 	free_string(x->parameters, &x->parameters_len);
 	free_string(x->complete_url, &x->complete_url_len);
+	free_string(x->auth_token, &x->auth_token_len);
 }

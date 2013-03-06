@@ -56,28 +56,28 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 						break;
 					case json_type_double:
 						value_len = 1 + snprintf(NULL, 0, "%f", json_object_get_double(val));
-						value = (char *)getbytes(value_len * sizeof(char));
+						value = getbytes(value_len * sizeof(char));
 						sprintf(value, "%f", json_object_get_double(val));
 						new_pair = create_key_value_pair(key, value, 0);
 						freebytes(value, value_len * sizeof(char));
 						break;
 					case json_type_int:
 						value_len = 1 + snprintf(NULL, 0, "%d", json_object_get_int(val));
-						value = (char *)getbytes(value_len * sizeof(char));
+						value = getbytes(value_len * sizeof(char));
 						sprintf(value, "%d", json_object_get_int(val));
 						new_pair = create_key_value_pair(key, value, 0);
 						freebytes(value, value_len * sizeof(char));
 						break;
 					case json_type_string:
 						value_len = 1 + snprintf(NULL, 0, "%s", json_object_get_string(val));
-						value = (char *)getbytes(value_len * sizeof(char));
+						value = getbytes(value_len * sizeof(char));
 						sprintf(value, "%s", json_object_get_string(val));
 						new_pair = create_key_value_pair(key, value, 0);
 						freebytes(value, value_len * sizeof(char));
 						break;
 					case json_type_object:
 						value_len = 1 + snprintf(NULL, 0, "%s", json_object_get_string(val));
-						value = (char *)getbytes(value_len * sizeof(char));
+						value = getbytes(value_len * sizeof(char));
 						sprintf(value, "%s", json_object_get_string(val));
 						new_pair = create_key_value_pair(key, value, 0);
 						freebytes(value, value_len * sizeof(char));
@@ -89,7 +89,7 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 							json_object *array_member = json_object_array_get_idx(val, i);
 							if (!is_error(array_member)) {
 								value_len = 1 + snprintf(NULL, 0, "%s", json_object_get_string(array_member));
-								value = (char *)getbytes(value_len * sizeof(char));
+								value = getbytes(value_len * sizeof(char));
 								sprintf(value, "%s", json_object_get_string(array_member));
 								new_pair = create_key_value_pair(key, value, 1);
 								kvp_storage_add((struct _kvp_storage *)x, new_pair);
@@ -107,7 +107,7 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 			}
 			break;
 		default: 
-			myerror("This JSON data cannot be represented internally, sorry");
+			MYERROR("This JSON data cannot be represented internally, sorry");
 			break;
 	}
 }
@@ -221,7 +221,7 @@ void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
 	}
 
 	if (argc < 2) {
-		myerror("For method '%s' You need to specify a value.", is_array ? "array": "add");
+		MYERROR("For method '%s' You need to specify a value.", is_array ? "array": "add");
 	} else {
 		atom_string(argv, key, MAXPDSTRING);
 
@@ -229,7 +229,7 @@ void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
 			atom_string(argv + i, temp_value, MAXPDSTRING);
 			value_len += strlen(temp_value) + 1;
 		}
-		value = (char *)getbytes(value_len * sizeof(char));
+		value = getbytes(value_len * sizeof(char));
 		atom_string(argv + 1, value, MAXPDSTRING);
 		for(i = 2; i < argc; i++) {
 			atom_string(argv + i, temp_value, MAXPDSTRING);
@@ -252,7 +252,7 @@ void json_encode_read(t_json_encode *x, t_symbol *filename) {
 	canvas_makefilename(x->x_canvas, filename->s_name, buf, MAXPDSTRING);
 	if ((file = fopen(buf, "r"))) {
 		stat(buf, &st);
-		json_string = (char *)getbytes((st.st_size + 1) * sizeof(char));
+		json_string = getbytes((st.st_size + 1) * sizeof(char));
 		json_string[st.st_size] = 0x00;
 		fread(json_string, sizeof(char), st.st_size, file);
 		fclose(file);

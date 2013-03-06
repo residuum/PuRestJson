@@ -40,7 +40,7 @@ static char *lowercase_unicode(char *orig, size_t *memsize) {
 	short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
 
 	(*memsize) = (strlen(orig) + 1);
-	cleaned_string = (char *)getbytes((*memsize) * sizeof(char));
+	cleaned_string = getbytes((*memsize) * sizeof(char));
 	if (cleaned_string != NULL) {
 		if (strlen(orig) > 0) {
 			segment = strtok(orig, unicode_intro);
@@ -80,7 +80,7 @@ static char *lowercase_unicode(char *orig, size_t *memsize) {
 
 		}
 	} else {
-		myerror("Could not allocate memory");
+		MYERROR("Could not allocate memory");
 	}
 	return cleaned_string;
 }
@@ -208,7 +208,7 @@ static void output_json_string(char *json_string, t_outlet *data_outlet, t_outle
 		/* TODO: This sometimes results in a segfault. Why? */
 		/*json_object_put(jobj);*/
 	} else {
-		myerror("Not a JSON object");
+		MYERROR("Not a JSON object");
 	}
 #if JSON_C_MINOR_VERSION < 10
 	if (corrected_json_string != NULL){
@@ -269,7 +269,7 @@ void json_decode_list(t_json_decode *x, t_symbol *sel, int argc, t_atom *argv) {
 			original_len += 1 + strlen(value);
 		}
 	}
-	original = (char *)getbytes(original_len * sizeof(char));
+	original = getbytes(original_len * sizeof(char));
 
 	if (original) {
 		if (use_sel) {

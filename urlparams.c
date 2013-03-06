@@ -25,7 +25,7 @@ static char *urlencode(char *str, size_t *str_len) {
 	char *pbuf;
 
 	(*str_len) = strlen(str) * 3 + 1;
-	buf = (char *)getbytes((*str_len) * sizeof(char));
+	buf = getbytes((*str_len) * sizeof(char));
 	pbuf = buf;
 	while (*pstr) {
 		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~') {
@@ -83,7 +83,7 @@ void urlparams_bang(t_urlparams *x) {
 			freebytes(encoded_string, encoded_len * sizeof(char));
 			data_member = data_member->next;
 		}
-		output = (char *)getbytes(output_len * sizeof(char));
+		output = getbytes(output_len * sizeof(char));
 
 		data_member = x->storage.first_data;
 		for (i = 0; i < x->storage.data_count; i++) {
@@ -115,7 +115,7 @@ void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 	(void) sel;
 
 	if (argc < 2) {
-		myerror("For method 'add' You need to specify a value.");
+		MYERROR("For method 'add' You need to specify a value.");
 	} else {
 		atom_string(argv, key, MAXPDSTRING);
 
@@ -123,7 +123,7 @@ void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 			atom_string(argv + i, temp_value, MAXPDSTRING);
 			value_len += strlen(temp_value) + 1;
 		}
-		value = (char *)getbytes(value_len * sizeof(char));
+		value = getbytes(value_len * sizeof(char));
 		atom_string(argv + 1, value, MAXPDSTRING);
 		for(i = 2; i < argc; i++) {
 			atom_string(argv + i, temp_value, MAXPDSTRING);

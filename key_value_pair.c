@@ -17,13 +17,13 @@ struct _kvp_storage {
 static struct _key_value_pair *create_key_value_pair(char *key, char *value, int is_array){
 	struct _key_value_pair *created_data = NULL;
 
-	created_data = (struct _key_value_pair *)getbytes(sizeof(struct _key_value_pair));
+	created_data = getbytes(sizeof(struct _key_value_pair));
 	created_data->key_len = strlen(key) + 1;
 	created_data->value_len = strlen(value) + 1;
-	created_data->key = (char *)getbytes(created_data->key_len * sizeof(char));
-	created_data->value = (char *)getbytes(created_data->value_len * sizeof(char));
+	created_data->key = getbytes(created_data->key_len * sizeof(char));
+	created_data->value = getbytes(created_data->value_len * sizeof(char));
 	if (created_data == NULL || key == NULL || value == NULL) {
-		myerror("Could not get data");
+		MYERROR("Could not get data");
 		return NULL;
 	}
 	strcpy(created_data->key, key);

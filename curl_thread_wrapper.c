@@ -94,7 +94,7 @@ static void *execute_request(void *thread_args) {
 				if (in_memory.memory == NULL) {
 					MYERROR("not enough memory");
 				}
-				memcpy(in_memory.memory, common->parameters, common->parameters_len - 1);
+				memcpy(in_memory.memory, common->parameters, strlen(common->parameters));
 			} else {
 				in_memory.memory = NULL;
 				in_memory.size = 0;

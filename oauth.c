@@ -238,7 +238,12 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 					post("Additional data is ignored");
 				}
 			} else if (strcmp(method_name, "RSA") == 0) {
-				MYERROR("RSA-SHA1 is not supported by liboauth");
+				if (LIBOAUTH_VERSION_MAJOR < 1
+						|| (LIBOAUTH_VERSION_MAJOR == 1 
+							&& LIBOAUTH_VERSION_MINOR == 0 
+							&& LIBOAUTH_VERSION_MICRO == 0)) {
+					MYERROR("RSA-SHA1 is not supported by liboauth version < 1.0.1");
+				}
 				if (argc > 1) {
 					x->oauth.method = OA_RSA;
 					for (i = 1; i < argc; i++) {

@@ -115,6 +115,7 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("POST"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_method, gensym("method"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_timeout, gensym("timeout"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_sslcheck, gensym("sslcheck"), A_GIMME, 0);
 }
 
 void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
@@ -308,6 +309,19 @@ void oauth_timeout(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 		set_timeout((struct _rest_common *)x, 0);
 	} else {
 		set_timeout((struct _rest_common *)x, atom_getint(argv));
+	}
+}
+
+void oauth_sslcheck(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
+
+	(void) sel;
+
+	if(x->common.locked) {
+		post("oauth object is performing request and locked");
+	} else if (argc != 1){
+		MYERROR("sslcheck must have 1 parameter");
+	} else {
+		set_sslcheck((struct _rest_common *)x, atom_getint(argv));
 	}
 }
 

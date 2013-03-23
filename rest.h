@@ -15,3 +15,4 @@ APIEXPORT void APICALL rest_free(t_rest *x, t_symbol *sel, int argc, t_atom *arg
 APIEXPORT void APICALL rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv); 
 APIEXPORT void APICALL rest_timeout(t_rest *x, t_symbol *sel, int argc, t_atom *argv); 
 APIEXPORT void APICALL rest_url(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL rest_sslcheck(t_rest *x, t_symbol *sel, int argc, t_atom *argv);

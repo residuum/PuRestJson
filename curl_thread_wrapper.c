@@ -6,6 +6,7 @@ struct _memory_struct {
 struct _rest_common {
 	t_object x_ob;
 	t_outlet *stat_out;
+	t_atom *out;
 	char req_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST; DELETE*/
 	size_t base_url_len;
 	char *base_url;
@@ -17,7 +18,7 @@ struct _rest_common {
 	char *auth_token;
 	short locked;
 	long timeout;
-	t_atom *out;
+	short sslcheck;
 };
 
 static char *get_string(size_t *newl, size_t strl) {
@@ -81,6 +82,7 @@ static void *execute_request(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_URL, common->complete_url);
 		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, common->timeout);
+		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck);
 		if (common->auth_token_len) {
 			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, common->auth_token);
 		}
@@ -162,8 +164,12 @@ static void thread_execute(struct _rest_common *x, void *(*func) (void *)) {
 	}
 }
 
-static void set_timeout(struct _rest_common *x, int timeout) {
-	x->timeout = (long) timeout;
+static void set_sslcheck(struct _rest_common *x, int val) {
+	x->sslcheck = (short) val;
+}
+
+static void set_timeout(struct _rest_common *x, int val) {
+	x->timeout = (long) val;
 }
 
 static void init_common(struct _rest_common *x) {
@@ -171,6 +177,7 @@ static void init_common(struct _rest_common *x) {
 	x->parameters_len = 0;
 	x->complete_url_len = 0;
 	x->auth_token_len = 0;
+	x->sslcheck = 0;
 }
 
 static void rest_common_free(struct _rest_common *x) {

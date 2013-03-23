@@ -1,4 +1,4 @@
-#N canvas 130 126 952 574 10;
+#N canvas 128 124 952 574 10;
 #X declare -lib purest_json;
 #X obj 457 -40 import purest_json;
 #X obj 19 -60 oauth;
@@ -24,9 +24,9 @@ ACCESSSECRET;
 of the request.;
 #X msg 486 69 GET /echo_api.php?method=foo&bar=baz;
 #X msg 504 114 POST /echo_api.php?method=foo&bar=baz;
-#X obj 452 267 oauth;
-#X obj 503 311 print status;
-#X obj 414 306 print data;
+#X obj 452 390 oauth;
+#X obj 503 434 print status;
+#X obj 414 429 print data;
 #X msg 452 23 url http://term.ie/oauth/example key secret accesskey
 accesssecret;
 #X msg 22 326 method PLAINTEXT;
@@ -69,6 +69,11 @@ ignored with the RSA key;
 Default is HMAC (HMAC-SHA1). For RSA (RSA-SHA1) you have to submit
 your private key. If your version of liboauth does not support RSA-SHA1
 signatures \, you will receive an error message.;
+#X msg 551 315 sslcheck 0;
+#X msg 582 344 sslcheck 1;
+#X text 549 277 By default correct SSL host is checked. Disbale check
+by sending sslcheck with a value to 0 \, enable the check by setting
+the value to 1;
 #X connect 10 0 12 0;
 #X connect 11 0 12 0;
 #X connect 12 0 14 0;
@@ -79,3 +84,5 @@ signatures \, you will receive an error message.;
 #X connect 20 0 12 0;
 #X connect 21 0 12 0;
 #X connect 22 0 17 0;
+#X connect 25 0 12 0;
+#X connect 26 0 12 0;

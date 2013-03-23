@@ -177,6 +177,7 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_command, gensym("DELETE"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("POST"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_timeout, gensym("timeout"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_sslcheck, gensym("sslcheck"), A_GIMME, 0);
 }
 
 void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
@@ -254,6 +255,19 @@ void rest_timeout(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 		set_timeout((struct _rest_common *)x, 0);
 	} else {
 		set_timeout((struct _rest_common *)x, atom_getint(argv));
+	}
+}
+
+void rest_sslcheck(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
+
+	(void) sel;
+
+	if(x->common.locked) {
+		post("rest object is performing request and locked");
+	} else if (argc != 1){
+		MYERROR("sslcheck must have 1 parameter");
+	} else {
+		set_sslcheck((struct _rest_common *)x, atom_getint(argv));
 	}
 }
 

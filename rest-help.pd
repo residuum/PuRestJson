@@ -1,4 +1,4 @@
-#N canvas 351 64 952 532 10;
+#N canvas 347 60 952 532 10;
 #X declare -lib purest_json;
 #N canvas 256 52 853 470 CouchDB-basics 0;
 #X text 416 71 CRUD documents:;
@@ -184,7 +184,7 @@ is used \, and DATA is the upload data for PUT or post data for POST.
 #X text 17 261 Here is a complex example for using [rest-json] to communicate
 with CouchDB. It uses GET \, POST and DELETE request methods. You will
 need to have a local installation of CouchDB.;
-#X obj 458 389 print data;
+#X obj 457 436 print data;
 #X text 18 99 Set the base url at creation or use [url( message. An
 empty url message will clean a previous set base url. You can also
 use four parameters for the [url( message to use basic cookie authentication
@@ -220,7 +220,7 @@ in.;
 #X obj 40 347 rest;
 #X connect 4 0 10 0;
 #X restore 19 362 pd cookie-auth;
-#X obj 540 389 print status;
+#X obj 539 436 print status;
 #X msg 499 188 GET http://search.twitter.com/wrongsearch.json?q=%23puredata
 ;
 #X obj 457 -40 import purest_json;
@@ -231,7 +231,7 @@ Request methods GET \, POST \, PUT and DELETE are available.;
 to return data immediately. While one request is processed \, the object
 id blocked.;
 #X obj 20 158 rest http://localhost:5984/;
-#X obj 458 357 rest;
+#X obj 457 404 rest;
 #X text 497 170 This will give you an error message on the second outlet
 ;
 #X text 517 217 By default \, requests do not timeout. To set a maximal
@@ -244,6 +244,11 @@ the value and return to the default \, use an empty [timeout( message.
 #X msg 536 303 timeout;
 #X text 18 189 The second outlet will output status information of
 the request.;
+#X msg 607 342 sslcheck 0;
+#X msg 638 371 sslcheck 1;
+#X text 605 304 By default correct SSL host is checked. Disbale check
+by sending sslcheck with a value to 0 \, enable the check by setting
+the value to 1;
 #X connect 2 0 19 0;
 #X connect 3 0 19 0;
 #X connect 13 0 19 0;
@@ -252,3 +257,5 @@ the request.;
 #X connect 22 0 19 0;
 #X connect 23 0 19 0;
 #X connect 24 0 19 0;
+#X connect 26 0 19 0;
+#X connect 27 0 19 0;

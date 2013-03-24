@@ -177,7 +177,7 @@ static void init_common(struct _rest_common *x) {
 	x->parameters_len = 0;
 	x->complete_url_len = 0;
 	x->auth_token_len = 0;
-	x->sslcheck = 0;
+	x->sslcheck = 1;
 }
 
 static void rest_common_free(struct _rest_common *x) {

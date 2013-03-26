@@ -4,6 +4,7 @@
 
 #include "urlparams.h"
 
+#include "shared_functions.c"
 #include "key_value_pair.c"
 
 static t_class *urlparams_class;
@@ -80,7 +81,7 @@ void urlparams_bang(t_urlparams *x) {
 		for (i=0; i < x->storage.data_count; i++) {
 			encoded_string = urlencode(data_member->value, &encoded_len);
 			output_len += data_member->key_len + encoded_len + 2;
-			freebytes(encoded_string, encoded_len * sizeof(char));
+			free_string(encoded_string, &encoded_len);
 			data_member = data_member->next;
 		}
 		output = getbytes(output_len * sizeof(char));
@@ -92,7 +93,7 @@ void urlparams_bang(t_urlparams *x) {
 			encoded_string = urlencode(data_member->value, &encoded_len);
 			strcat(output, encoded_string);
 			if (encoded_string) {
-				freebytes(encoded_string, encoded_len * sizeof(char));
+				free_string(encoded_string, &encoded_len);
 			}
 			if (i < x->storage.data_count - 1) {
 				strcat(output, "&");
@@ -100,7 +101,7 @@ void urlparams_bang(t_urlparams *x) {
 			data_member = data_member->next;
 		}
 		outlet_symbol(x->storage.x_ob.ob_outlet, gensym(output));
-		freebytes(output, output_len * sizeof(char));
+		free_string(output, &output_len);
 	}
 }
 
@@ -132,7 +133,7 @@ void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 		}
 		created_data = create_key_value_pair(key, value, 0);
 		kvp_storage_add((struct _kvp_storage *)x, created_data);
-		freebytes(value, value_len * sizeof(char));
+		free_string(value, &value_len);
 	}
 }
 

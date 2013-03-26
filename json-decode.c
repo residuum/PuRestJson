@@ -43,8 +43,7 @@ static char *lowercase_unicode(char *orig, size_t *memsize) {
 	short i;
 	short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
 
-	(*memsize) = (strlen(orig) + 1);
-	cleaned_string = getbytes((*memsize) * sizeof(char));
+	cleaned_string = get_string(memsize, strlen(orig));
 	if (cleaned_string != NULL) {
 		if (strlen(orig) > 0) {
 			segment = strtok(orig, unicode_intro);
@@ -216,7 +215,7 @@ static void output_json_string(char *json_string, t_outlet *data_outlet, t_outle
 	}
 #if JSON_C_MAJOR_VERSION < 1 && JSON_C_MINOR_VERSION < 10
 	if (corrected_json_string != NULL){
-		freebytes(corrected_json_string, memsize * sizeof(char));
+		free_string(corrected_json_string, &memsize);
 	}
 #endif
 }
@@ -250,7 +249,7 @@ void json_decode_string(t_json_decode *x, t_symbol *data) {
 		json_string = remove_backslashes(original_string, &memsize);
 		if (json_string != NULL) {
 			output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
-			freebytes(json_string, memsize * sizeof(char));
+			free_string(json_string, &memsize);
 		}
 	}
 }
@@ -295,9 +294,9 @@ void json_decode_list(t_json_decode *x, t_symbol *sel, int argc, t_atom *argv) {
 			json_string = remove_backslashes(original, &json_len);
 			if (json_string != NULL) {
 				output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
-				freebytes(json_string, json_len * sizeof(char));
+				free_string(json_string, &json_len);
 			}
 		}
-		freebytes(original, original_len * sizeof(char));
+		free_string(original, &original_len);
 	}
 }

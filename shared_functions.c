@@ -1,12 +1,28 @@
+static char *get_string(size_t *newl, size_t strl) {
+	char *gen;
+	(*newl) = 1 + strl;
+	gen = getbytes((*newl) * sizeof(char));
+	if (gen == NULL) {
+		MYERROR("not enough memory");
+	}
+	return memset(gen, 0x00, (*newl));
+}
+
+static void free_string(char *string, size_t *strl) {
+	if ((*strl)) {
+		freebytes(string, (*strl) * sizeof(char));
+		(*strl) = 0;
+		string = NULL;
+	}
+}
+
 static char *remove_backslashes(char *source_string, size_t *memsize) {
 	char *cleaned_string = NULL;
 	char *masking = "\\";
 	char *segment;
 	size_t len_src = strlen(source_string);
 
-	(*memsize) = len_src + 1;
-
-	cleaned_string = getbytes((*memsize) * sizeof(char));
+	cleaned_string = get_string(memsize, len_src);
 	if (cleaned_string == NULL) {
 		MYERROR("Unable to allocate memory\n");
 	} else if (len_src > 0) {

@@ -4,8 +4,8 @@
 
 #include "rest.h"
 
-#include "curl_thread_wrapper.c"
 #include "shared_functions.c"
+#include "curl_thread_wrapper.c"
 
 struct _rest {
 	struct _rest_common common;

@@ -21,23 +21,6 @@ struct _rest_common {
 	unsigned char sslcheck;
 };
 
-static char *get_string(size_t *newl, size_t strl) {
-	char *gen;
-	(*newl) = 1 + strl;
-	gen = getbytes((*newl) * sizeof(char));
-	if (gen == NULL) {
-		MYERROR("not enough memory");
-	}
-	return memset(gen, 0x00, (*newl));
-}
-
-static void free_string(char *string, size_t *strl) {
-	if ((*strl)) {
-		freebytes(string, (*strl) * sizeof(char));
-		(*strl) = 0;
-	}
-}
-
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
 	struct _memory_struct *mem = data;

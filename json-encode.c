@@ -6,8 +6,8 @@
 #include <sys/stat.h>
 #include <stdio.h>
 
-#include "key_value_pair.c"
 #include "shared_functions.c"
+#include "key_value_pair.c"
 
 static t_class *json_encode_class;
 
@@ -25,7 +25,7 @@ static json_object *create_object(char *value) {
 	if (value[0] == '{' && value[strlen(value) - 1] == '}') {
 		parsed_string = remove_backslashes(value, &memsize);
 		object = json_tokener_parse(parsed_string);
-		freebytes(parsed_string, memsize * sizeof(char));
+		free_string(parsed_string, &memsize);
 	} else {
 		object = json_object_new_string(value);
 	}
@@ -55,32 +55,28 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 						new_pair = create_key_value_pair(key, json_object_get_boolean(val) ? "1" : "0", 0);
 						break;
 					case json_type_double:
-						value_len = 1 + snprintf(NULL, 0, "%f", json_object_get_double(val));
-						value = getbytes(value_len * sizeof(char));
+						value = get_string(&value_len, snprintf(NULL, 0, "%f", json_object_get_double(val)));
 						sprintf(value, "%f", json_object_get_double(val));
 						new_pair = create_key_value_pair(key, value, 0);
-						freebytes(value, value_len * sizeof(char));
+						free_string(value, &value_len);
 						break;
 					case json_type_int:
-						value_len = 1 + snprintf(NULL, 0, "%d", json_object_get_int(val));
-						value = getbytes(value_len * sizeof(char));
+						value = get_string(&value_len, snprintf(NULL, 0, "%d", json_object_get_int(val)));
 						sprintf(value, "%d", json_object_get_int(val));
 						new_pair = create_key_value_pair(key, value, 0);
-						freebytes(value, value_len * sizeof(char));
+						free_string(value, &value_len);
 						break;
 					case json_type_string:
-						value_len = 1 + snprintf(NULL, 0, "%s", json_object_get_string(val));
-						value = getbytes(value_len * sizeof(char));
+						value = get_string(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
 						sprintf(value, "%s", json_object_get_string(val));
 						new_pair = create_key_value_pair(key, value, 0);
-						freebytes(value, value_len * sizeof(char));
+						free_string(value, &value_len);
 						break;
 					case json_type_object:
-						value_len = 1 + snprintf(NULL, 0, "%s", json_object_get_string(val));
-						value = getbytes(value_len * sizeof(char));
+						value = get_string(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
 						sprintf(value, "%s", json_object_get_string(val));
 						new_pair = create_key_value_pair(key, value, 0);
-						freebytes(value, value_len * sizeof(char));
+						free_string(value, &value_len);
 						json_object_put(val);
 						break;
 					case json_type_array:
@@ -88,12 +84,12 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 						for (i = 0; i < array_len; i++) {
 							json_object *array_member = json_object_array_get_idx(val, i);
 							if (!is_error(array_member)) {
-								value_len = 1 + snprintf(NULL, 0, "%s", json_object_get_string(array_member));
-								value = getbytes(value_len * sizeof(char));
+								value = get_string(&value_len, 
+										snprintf(NULL, 0, "%s", json_object_get_string(array_member)));
 								sprintf(value, "%s", json_object_get_string(array_member));
 								new_pair = create_key_value_pair(key, value, 1);
 								kvp_storage_add((struct _kvp_storage *)x, new_pair);
-								freebytes(value, value_len * sizeof(char));
+								free_string(value, &value_len);
 								json_object_put(array_member);
 							}
 						}
@@ -238,7 +234,7 @@ void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
 		}
 		created_data = create_key_value_pair(key, value, is_array);
 		kvp_storage_add((struct _kvp_storage *)x, created_data);
-		freebytes(value, value_len * sizeof(char));
+		free_string(value, &value_len);
 	}
 }
 

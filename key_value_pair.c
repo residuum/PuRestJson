@@ -18,10 +18,8 @@ static struct _key_value_pair *create_key_value_pair(char *key, char *value, int
 	struct _key_value_pair *created_data = NULL;
 
 	created_data = getbytes(sizeof(struct _key_value_pair));
-	created_data->key_len = strlen(key) + 1;
-	created_data->value_len = strlen(value) + 1;
-	created_data->key = getbytes(created_data->key_len * sizeof(char));
-	created_data->value = getbytes(created_data->value_len * sizeof(char));
+	created_data->key = get_string(&created_data->key_len, strlen(key));
+	created_data->value = get_string(&created_data->value_len, strlen(value));
 	if (created_data == NULL || key == NULL || value == NULL) {
 		MYERROR("Could not get data");
 		return NULL;
@@ -54,8 +52,8 @@ static void kvp_storage_free_memory(struct _kvp_storage *x) {
 	while(data_to_free != NULL) {
 		next_data = data_to_free->next;
 		/* TODO: Investigate the reason for segfault */
-		freebytes(data_to_free->key, data_to_free->key_len * sizeof(char));
-		freebytes(data_to_free->value, data_to_free->value_len * sizeof(char));
+		free_string(data_to_free->key, &data_to_free->key_len);
+		free_string(data_to_free->value, &data_to_free->value_len);
 		freebytes(data_to_free, sizeof(struct _key_value_pair));
 		data_to_free = next_data;
 	}

@@ -4,8 +4,8 @@
 
 #include "oauth.h"
 
-#include "curl_thread_wrapper.c"
 #include "shared_functions.c"
+#include "curl_thread_wrapper.c"
 
 static t_class *oauth_class;
 

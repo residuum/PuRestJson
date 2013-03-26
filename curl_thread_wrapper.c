@@ -16,9 +16,9 @@ struct _rest_common {
 	char *complete_url;
 	size_t auth_token_len;
 	char *auth_token;
-	unsigned short locked;
-	unsigned long timeout;
-	unsigned short sslcheck;
+	unsigned char locked;
+	long timeout;
+	unsigned char sslcheck;
 };
 
 static char *get_string(size_t *newl, size_t strl) {
@@ -173,7 +173,7 @@ static void set_sslcheck(struct _rest_common *x, int val) {
 }
 
 static void set_timeout(struct _rest_common *x, int val) {
-	x->timeout = (unsigned long) val;
+	x->timeout = (long) val;
 }
 
 static void init_common(struct _rest_common *x) {

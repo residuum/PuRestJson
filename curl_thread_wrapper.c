@@ -106,7 +106,7 @@ static void *execute_request(void *thread_args) {
 			if (result == CURLE_OK) {
 				outlet_symbol(common->x_ob.ob_outlet, gensym(out_memory.memory));
 				/* Free memory */
-				free_string(out_memory.memory, &out_memory.size);
+				string_free(out_memory.memory, &out_memory.size);
 				free((void *)result);
 			} else {
 				SETFLOAT(&http_status_data[1], (float)http_status);
@@ -124,8 +124,8 @@ static void *execute_request(void *thread_args) {
 	} else {
 		MYERROR("Cannot init curl.");
 	}
-	free_string(common->complete_url, &common->complete_url_len);
-	free_string(common->parameters, &common->parameters_len);
+	string_free(common->complete_url, &common->complete_url_len);
+	string_free(common->parameters, &common->parameters_len);
 	common->locked = 0;
 	return NULL;
 }
@@ -141,8 +141,8 @@ static void thread_execute(struct _rest_common *x, void *(*func) (void *)) {
 	pthread_attr_destroy(&thread_attributes);
 	if (rc) {
 		MYERROR("Could not create thread with code %d", rc);
-		free_string(x->complete_url, &x->complete_url_len);
-		free_string(x->parameters, &x->parameters_len);
+		string_free(x->complete_url, &x->complete_url_len);
+		string_free(x->parameters, &x->parameters_len);
 		x->locked = 0;
 	}
 }
@@ -170,8 +170,8 @@ static void init_common(struct _rest_common *x) {
 }
 
 static void rest_common_free(struct _rest_common *x) {
-	free_string(x->base_url, &x->base_url_len);
-	free_string(x->parameters, &x->parameters_len);
-	free_string(x->complete_url, &x->complete_url_len);
-	free_string(x->auth_token, &x->auth_token_len);
+	string_free(x->base_url, &x->base_url_len);
+	string_free(x->parameters, &x->parameters_len);
+	string_free(x->complete_url, &x->complete_url_len);
+	string_free(x->auth_token, &x->auth_token_len);
 }

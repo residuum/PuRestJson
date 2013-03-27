@@ -24,9 +24,9 @@ static t_class *rest_class;
 
 static void rest_free_inner(t_rest *x) {
 	rest_common_free((struct _rest_common *)x);
-	free_string(x->cookie.login_path, &x->cookie.login_path_len);
-	free_string(x->cookie.username, &x->cookie.username_len);
-	free_string(x->cookie.password, &x->cookie.password_len);
+	string_free(x->cookie.login_path, &x->cookie.login_path_len);
+	string_free(x->cookie.username, &x->cookie.username_len);
+	string_free(x->cookie.password, &x->cookie.password_len);
 }
 
 static void *get_cookie_auth_token(void *thread_args) {
@@ -46,7 +46,7 @@ static void *get_cookie_auth_token(void *thread_args) {
 	curl_handle = curl_easy_init();
 	if (curl_handle) {
 		/* length + name=&password=*/
-		post_data = get_string(&post_data_len, x->cookie.username_len + x->cookie.password_len + 17);
+		post_data = string_create(&post_data_len, x->cookie.username_len + x->cookie.password_len + 17);
 		if (post_data == NULL) {
 			MYERROR("not enough memory");
 		} else {
@@ -55,7 +55,7 @@ static void *get_cookie_auth_token(void *thread_args) {
 			strcat(post_data, "&password=");
 			strcat(post_data, x->cookie.password);
 		}
-		x->common.complete_url = get_string(&x->common.complete_url_len, 
+		x->common.complete_url = string_create(&x->common.complete_url_len, 
 				x->common.base_url_len + x->cookie.login_path_len);
 		strcpy(x->common.complete_url, x->common.base_url);
 		strcat(x->common.complete_url, x->cookie.login_path);
@@ -63,8 +63,8 @@ static void *get_cookie_auth_token(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 		curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
 		curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, post_data);
-		out_content.memory = get_string(&out_content.size, 0);
-		out_header.memory = get_string(&out_header.size, 0);
+		out_content.memory = string_create(&out_content.size, 0);
+		out_header.memory = string_create(&out_header.size, 0);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_content);
 		curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, write_memory_callback);
@@ -83,7 +83,7 @@ static void *get_cookie_auth_token(void *thread_args) {
 			outlet_list(x->common.stat_out, &s_list, 3, &auth_status_data[0]);
 		}
 
-		free_string(x->common.auth_token, &x->common.auth_token_len);
+		string_free(x->common.auth_token, &x->common.auth_token_len);
 		if (result == CURLE_OK) {
 			if (out_header.memory) {
 				header_line = strtok(out_header.memory, "\n");
@@ -94,7 +94,7 @@ static void *get_cookie_auth_token(void *thread_args) {
 						cookie_params = strtok(NULL, "; ");
 						while (cookie_params != NULL) {
 							if (strlen(cookie_params)) {
-								x->common.auth_token = get_string(&x->common.auth_token_len, strlen(cookie_params));
+								x->common.auth_token = string_create(&x->common.auth_token_len, strlen(cookie_params));
 								strcpy(x->common.auth_token, cookie_params);
 								break;
 							}
@@ -104,11 +104,11 @@ static void *get_cookie_auth_token(void *thread_args) {
 					}
 					header_line = strtok(NULL, "\n");
 				}
-				free_string(out_header.memory, &out_header.size);
+				string_free(out_header.memory, &out_header.size);
 			}
-			free_string(out_content.memory, &out_content.size);
+			string_free(out_content.memory, &out_content.size);
 		}
-		free_string(post_data, &post_data_len);
+		string_free(post_data, &post_data_len);
 	}
 	x->common.locked = 0;
 	return NULL;
@@ -126,7 +126,7 @@ static void set_url_parameters(t_rest *x, int argc, t_atom *argv) {
 				MYERROR("Base URL cannot be set.");
 			} else {
 				atom_string(argv, temp, MAXPDSTRING);
-				x->common.base_url = get_string(&x->common.base_url_len, strlen(temp));
+				x->common.base_url = string_create(&x->common.base_url_len, strlen(temp));
 				strcpy(x->common.base_url, temp);
 			}
 			break;
@@ -136,28 +136,28 @@ static void set_url_parameters(t_rest *x, int argc, t_atom *argv) {
 				MYERROR("Base URL cannot be set.");
 			} else {
 				atom_string(argv, temp, MAXPDSTRING);
-				x->common.base_url = get_string(&x->common.base_url_len, strlen(temp));
+				x->common.base_url = string_create(&x->common.base_url_len, strlen(temp));
 				strcpy(x->common.base_url, temp);
 			}
 			if (argv[1].a_type != A_SYMBOL) {
 				MYERROR("Cookie path cannot be set.");
 			} else {
 				atom_string(argv + 1, temp, MAXPDSTRING);
-				x->cookie.login_path = get_string(&x->cookie.login_path_len, strlen(temp));
+				x->cookie.login_path = string_create(&x->cookie.login_path_len, strlen(temp));
 				strcpy(x->cookie.login_path, temp);
 			}
 			if (argv[2].a_type != A_SYMBOL) {
 				MYERROR("Username cannot be set.");
 			} else {
 				atom_string(argv + 2, temp, MAXPDSTRING);
-				x->cookie.username = get_string(&x->cookie.username_len, strlen(temp));
+				x->cookie.username = string_create(&x->cookie.username_len, strlen(temp));
 				strcpy(x->cookie.username, temp);
 			}
 			if (argv[3].a_type != A_SYMBOL) {
 				MYERROR("Password cannot be set.");
 			} else {
 				atom_string(argv + 3, temp, MAXPDSTRING);
-				x->cookie.password = get_string(&x->cookie.password_len, strlen(temp));
+				x->cookie.password = string_create(&x->cookie.password_len, strlen(temp));
 				strcpy(x->cookie.password, temp);
 			}
 			thread_execute((struct _rest_common *)x, get_cookie_auth_token);
@@ -210,7 +210,7 @@ void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 					x->common.locked = 0;
 				} else {
 					atom_string(argv, path, MAXPDSTRING);
-					x->common.complete_url = get_string(&x->common.complete_url_len,
+					x->common.complete_url = string_create(&x->common.complete_url_len,
 							x->common.base_url_len + strlen(path) + 1);
 					if (x->common.base_url != NULL) {
 						strcpy(x->common.complete_url, x->common.base_url);
@@ -220,7 +220,7 @@ void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 						atom_string(argv + 1, parameters, MAXPDSTRING);
 						if (strlen(parameters)) {
 							cleaned_parameters = remove_backslashes(parameters, &memsize);
-							x->common.parameters = get_string(&x->common.parameters_len, memsize + 1);
+							x->common.parameters = string_create(&x->common.parameters_len, memsize + 1);
 							strcpy(x->common.parameters, cleaned_parameters);
 							freebytes(cleaned_parameters, memsize);
 						}

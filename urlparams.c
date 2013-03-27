@@ -10,7 +10,7 @@
 static t_class *urlparams_class;
 
 struct _urlparams {
-	struct _kvp_storage storage;
+	struct _kvp_store storage;
 };
 
 /* from http://www.geekhideout.com/urlcode.shtml */
@@ -65,12 +65,12 @@ void urlparams_free (t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 	(void) argc;
 	(void) argv;
 
-	kvp_storage_free_memory((struct _kvp_storage *)x);
+	kvp_store_free_memory((struct _kvp_store *)x);
 }
 
 void urlparams_bang(t_urlparams *x) {
 	int i;
-	struct _key_value_pair *data_member;
+	struct _kvp *data_member;
 	size_t output_len = 0;
 	char *output;
 	size_t encoded_len;
@@ -81,7 +81,7 @@ void urlparams_bang(t_urlparams *x) {
 		for (i=0; i < x->storage.data_count; i++) {
 			encoded_string = urlencode(data_member->value, &encoded_len);
 			output_len += data_member->key_len + encoded_len + 2;
-			free_string(encoded_string, &encoded_len);
+			string_free(encoded_string, &encoded_len);
 			data_member = data_member->next;
 		}
 		output = getbytes(output_len * sizeof(char));
@@ -93,7 +93,7 @@ void urlparams_bang(t_urlparams *x) {
 			encoded_string = urlencode(data_member->value, &encoded_len);
 			strcat(output, encoded_string);
 			if (encoded_string) {
-				free_string(encoded_string, &encoded_len);
+				string_free(encoded_string, &encoded_len);
 			}
 			if (i < x->storage.data_count - 1) {
 				strcat(output, "&");
@@ -101,7 +101,7 @@ void urlparams_bang(t_urlparams *x) {
 			data_member = data_member->next;
 		}
 		outlet_symbol(x->storage.x_ob.ob_outlet, gensym(output));
-		free_string(output, &output_len);
+		string_free(output, &output_len);
 	}
 }
 
@@ -110,7 +110,6 @@ void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 	size_t value_len = 0;
 	char *value;
 	char temp_value[MAXPDSTRING];
-	struct _key_value_pair *created_data = NULL;
 	int i;
 
 	(void) sel;
@@ -131,9 +130,8 @@ void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 			strcat(value, " ");
 			strcat(value, temp_value);
 		}
-		created_data = create_key_value_pair(key, value, 0);
-		kvp_storage_add((struct _kvp_storage *)x, created_data);
-		free_string(value, &value_len);
+		kvp_add((struct _kvp_store *)x, key, value, 0);
+		string_free(value, &value_len);
 	}
 }
 
@@ -142,5 +140,5 @@ void urlparams_clear(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 	(void) argc;
 	(void) argv;
 
-	kvp_storage_free_memory((struct _kvp_storage *)x);
+	kvp_store_free_memory((struct _kvp_store *)x);
 }

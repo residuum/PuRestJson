@@ -12,7 +12,7 @@
 static t_class *json_encode_class;
 
 struct _json_encode {
-	struct _kvp_storage storage;
+	struct _kvp_store storage;
 	t_canvas *x_canvas;
 };
 
@@ -25,7 +25,7 @@ static json_object *create_object(char *value) {
 	if (value[0] == '{' && value[strlen(value) - 1] == '}') {
 		parsed_string = remove_backslashes(value, &memsize);
 		object = json_tokener_parse(parsed_string);
-		free_string(parsed_string, &memsize);
+		string_free(parsed_string, &memsize);
 	} else {
 		object = json_object_new_string(value);
 	}
@@ -35,48 +35,46 @@ static json_object *create_object(char *value) {
 static void load_json_data(t_json_encode *x, json_object *jobj) {
 	enum json_type outer_type;
 	enum json_type inner_type;
-	struct _key_value_pair *new_pair;
 	char *value;
 	size_t value_len = 0;
 	int array_len;
 	int i;
 
-	kvp_storage_free_memory((struct _kvp_storage *)x);
+	kvp_store_free_memory((struct _kvp_store *)x);
 	outer_type = json_object_get_type(jobj);
 
 	switch (outer_type) {
 		case json_type_object:
 			;
 			json_object_object_foreach(jobj, key, val) {
-				new_pair = NULL;
 				inner_type = json_object_get_type(val);
 				switch (inner_type) {
 					case json_type_boolean:
-						new_pair = create_key_value_pair(key, json_object_get_boolean(val) ? "1" : "0", 0);
+						kvp_add((struct _kvp_store *)x, key, json_object_get_boolean(val) ? "1" : "0", 0);
 						break;
 					case json_type_double:
-						value = get_string(&value_len, snprintf(NULL, 0, "%f", json_object_get_double(val)));
+						value = string_create(&value_len, snprintf(NULL, 0, "%f", json_object_get_double(val)));
 						sprintf(value, "%f", json_object_get_double(val));
-						new_pair = create_key_value_pair(key, value, 0);
-						free_string(value, &value_len);
+						kvp_add((struct _kvp_store *)x, key, value, 0);
+						string_free(value, &value_len);
 						break;
 					case json_type_int:
-						value = get_string(&value_len, snprintf(NULL, 0, "%d", json_object_get_int(val)));
+						value = string_create(&value_len, snprintf(NULL, 0, "%d", json_object_get_int(val)));
 						sprintf(value, "%d", json_object_get_int(val));
-						new_pair = create_key_value_pair(key, value, 0);
-						free_string(value, &value_len);
+						kvp_add((struct _kvp_store *)x, key, value, 0);
+						string_free(value, &value_len);
 						break;
 					case json_type_string:
-						value = get_string(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
+						value = string_create(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
 						sprintf(value, "%s", json_object_get_string(val));
-						new_pair = create_key_value_pair(key, value, 0);
-						free_string(value, &value_len);
+						kvp_add((struct _kvp_store *)x, key, value, 0);
+						string_free(value, &value_len);
 						break;
 					case json_type_object:
-						value = get_string(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
+						value = string_create(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
 						sprintf(value, "%s", json_object_get_string(val));
-						new_pair = create_key_value_pair(key, value, 0);
-						free_string(value, &value_len);
+						kvp_add((struct _kvp_store *)x, key, value, 0);
+						string_free(value, &value_len);
 						json_object_put(val);
 						break;
 					case json_type_array:
@@ -84,22 +82,21 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 						for (i = 0; i < array_len; i++) {
 							json_object *array_member = json_object_array_get_idx(val, i);
 							if (!is_error(array_member)) {
-								value = get_string(&value_len, 
+								value = string_create(&value_len, 
 										snprintf(NULL, 0, "%s", json_object_get_string(array_member)));
 								sprintf(value, "%s", json_object_get_string(array_member));
-								new_pair = create_key_value_pair(key, value, 1);
-								kvp_storage_add((struct _kvp_storage *)x, new_pair);
-								free_string(value, &value_len);
+								kvp_add((struct _kvp_store *)x,
+									       key, value, 1);
+								string_free(value, &value_len);
 								json_object_put(array_member);
 							}
 						}
 						new_pair = NULL;
 						break;
 					case json_type_null:
-						new_pair = create_key_value_pair(key, "", 0);
+						kvp_add((struct _kvp_store *)x, key, "", 0);
 						break;
 				}
-				kvp_storage_add((struct _kvp_storage *)x, new_pair);
 			}
 			break;
 		default: 
@@ -113,8 +110,8 @@ static t_symbol *get_json_symbol(t_json_encode *x) {
 	int array_member_numbers[x->storage.data_count];
 	int array_member_count = 0;
 	short already_added = 0;
-	struct _key_value_pair *data_member;
-	struct _key_value_pair *data_member_compare;
+	struct _kvp *data_member;
+	struct _kvp *data_member_compare;
 	json_object *jobj = json_object_new_object();
 	json_object *value;
 	json_object *array_members[x->storage.data_count];
@@ -196,7 +193,7 @@ void json_encode_free (t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) 
 	(void) argc;
 	(void) argv;
 
-	kvp_storage_free_memory((struct _kvp_storage *)x);
+	kvp_store_free_memory((struct _kvp_store *)x);
 }
 
 void json_encode_bang(t_json_encode *x) {
@@ -208,9 +205,8 @@ void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
 	size_t value_len = 0;
 	char *value;
 	char temp_value[MAXPDSTRING];
-	struct _key_value_pair *created_data = NULL;
 	int i;
-	int is_array = 0;
+	unsigned char is_array = 0;
 
 	if (sel == gensym("array")) {
 		is_array = 1;
@@ -232,9 +228,8 @@ void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
 			strcat(value, " ");
 			strcat(value, temp_value);
 		}
-		created_data = create_key_value_pair(key, value, is_array);
-		kvp_storage_add((struct _kvp_storage *)x, created_data);
-		free_string(value, &value_len);
+		kvp_add((struct _kvp_store *)x, key, value, is_array);
+		string_free(value, &value_len);
 	}
 }
 
@@ -291,5 +286,5 @@ void json_encode_clear(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) 
 	(void) argc;
 	(void) argv;
 
-	kvp_storage_free_memory((struct _kvp_storage *)x);
+	kvp_store_free_memory((struct _kvp_store *)x);
 }

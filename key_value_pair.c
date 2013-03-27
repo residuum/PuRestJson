@@ -45,8 +45,6 @@ static void kvp_store_add(struct _kvp_store *x, struct _kvp *new_pair) {
 }
 
 static void kvp_add(struct _kvp_store *x, char *key, char *value, unsigned char is_array) {
-	int i;
-	unsigned char found = 0;
 	struct _kvp *compare = x->first_data;
 	struct _kvp *existing = NULL;
 	struct _kvp *new= NULL;
@@ -56,7 +54,7 @@ static void kvp_add(struct _kvp_store *x, char *key, char *value, unsigned char 
 				existing= compare;
 				break;
 			}
-			compare= x->next;
+			compare = compare->next;
 		}
 	}
 	if (existing != NULL) {

@@ -91,7 +91,6 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 								json_object_put(array_member);
 							}
 						}
-						new_pair = NULL;
 						break;
 					case json_type_null:
 						kvp_add((struct _kvp_store *)x, key, "", 0);

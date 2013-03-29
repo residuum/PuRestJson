@@ -4,6 +4,8 @@
 #include <json/json.h>
 #include "purest_json.h"
 
+#define NO_BACKSLASHES 1
+
 /* [urlparams] */
 struct _urlparams;
 typedef struct _urlparams t_urlparams;

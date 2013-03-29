@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 
-#include "shared_functions.c"
+#include "string.c"
 #include "key_value_pair.c"
 
 static t_class *json_encode_class;
@@ -23,7 +23,7 @@ static json_object *create_object(char *value) {
 	/* if stored value is string is starting with { and ending with }, 
 	   then create a json object from it. */
 	if (value[0] == '{' && value[strlen(value) - 1] == '}') {
-		parsed_string = remove_backslashes(value, &memsize);
+		parsed_string = string_remove_backslashes(value, &memsize);
 		object = json_tokener_parse(parsed_string);
 		string_free(parsed_string, &memsize);
 	} else {

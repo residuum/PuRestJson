@@ -4,7 +4,7 @@
 
 #include "oauth.h"
 
-#include "shared_functions.c"
+#include "string.c"
 #include "curl_thread_wrapper.c"
 
 static t_class *oauth_class;
@@ -153,7 +153,7 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 					if (argc > 1) {
 						atom_string(argv + 1, parameters, MAXPDSTRING);
 						if (strlen(parameters)) {
-							cleaned_parameters = remove_backslashes(parameters, &memsize);
+							cleaned_parameters = string_remove_backslashes(parameters, &memsize);
 						}
 					}
 					req_path = string_create(&req_path_len, 

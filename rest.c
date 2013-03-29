@@ -4,7 +4,7 @@
 
 #include "rest.h"
 
-#include "shared_functions.c"
+#include "string.c"
 #include "curl_thread_wrapper.c"
 
 struct _rest {
@@ -219,7 +219,7 @@ void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 					if (argc > 1) {
 						atom_string(argv + 1, parameters, MAXPDSTRING);
 						if (strlen(parameters)) {
-							cleaned_parameters = remove_backslashes(parameters, &memsize);
+							cleaned_parameters = string_remove_backslashes(parameters, &memsize);
 							x->common.parameters = string_create(&x->common.parameters_len, memsize + 1);
 							strcpy(x->common.parameters, cleaned_parameters);
 							freebytes(cleaned_parameters, memsize);

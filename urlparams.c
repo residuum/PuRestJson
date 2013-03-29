@@ -4,7 +4,7 @@
 
 #include "urlparams.h"
 
-#include "shared_functions.c"
+#include "string.c"
 #include "key_value_pair.c"
 
 static t_class *urlparams_class;

@@ -16,7 +16,7 @@ static void string_free(char *string, size_t *strl) {
 	}
 }
 
-static char *remove_backslashes(char *source_string, size_t *memsize) {
+static char *string_remove_backslashes(char *source_string, size_t *memsize) {
 	char *cleaned_string = NULL;
 	char *masking = "\\";
 	char *segment;

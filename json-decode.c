@@ -4,7 +4,7 @@
 
 #include "json-decode.h"
 
-#include "shared_functions.c"
+#include "string.c"
 
 #ifndef JSON_C_MAJOR_VERSION
 #define JSON_C_MAJOR_VERSION 0
@@ -246,7 +246,7 @@ void json_decode_string(t_json_decode *x, t_symbol *data) {
 	char *json_string;
 
 	if (original_string && strlen(original_string)) {
-		json_string = remove_backslashes(original_string, &memsize);
+		json_string = string_remove_backslashes(original_string, &memsize);
 		if (json_string != NULL) {
 			output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
 			string_free(json_string, &memsize);
@@ -291,7 +291,7 @@ void json_decode_list(t_json_decode *x, t_symbol *sel, int argc, t_atom *argv) {
 			}
 		}
 		if (strlen(original)) {
-			json_string = remove_backslashes(original, &json_len);
+			json_string = string_remove_backslashes(original, &json_len);
 			if (json_string != NULL) {
 				output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
 				string_free(json_string, &json_len);

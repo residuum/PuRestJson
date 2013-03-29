@@ -5,7 +5,7 @@
 #include "urlparams.h"
 
 #include "string.c"
-#include "key_value_pair.c"
+#include "kvp.c"
 
 static t_class *urlparams_class;
 
@@ -69,7 +69,7 @@ void urlparams_free (t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 }
 
 void urlparams_bang(t_urlparams *x) {
-	int i;
+	size_t i;
 	struct _kvp *data_member;
 	size_t output_len = 0;
 	char *output;
@@ -100,6 +100,7 @@ void urlparams_bang(t_urlparams *x) {
 			}
 			data_member = data_member->next;
 		}
+
 		outlet_symbol(x->storage.x_ob.ob_outlet, gensym(output));
 		string_free(output, &output_len);
 	}

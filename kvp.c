@@ -11,7 +11,7 @@ struct _kvp_store {
 	t_object x_ob;
 	struct _kvp *first_data;
 	struct _kvp *last_data;
-	int data_count;
+	size_t data_count;
 };
 
 static struct _kvp *kvp_create(char *key, char *value, unsigned char is_array){

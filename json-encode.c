@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 #include "string.c"
-#include "key_value_pair.c"
+#include "kvp.c"
 
 static t_class *json_encode_class;
 
@@ -105,10 +105,10 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 }
 
 static t_symbol *get_json_symbol(t_json_encode *x) {
-	int i, j, k; 
-	int array_member_numbers[x->storage.data_count];
-	int array_member_count = 0;
-	short already_added = 0;
+	size_t i, j, k; 
+	size_t array_member_numbers[x->storage.data_count];
+	size_t array_member_count = 0;
+	unsigned char already_added = 0;
 	struct _kvp *data_member;
 	struct _kvp *data_member_compare;
 	json_object *jobj = json_object_new_object();

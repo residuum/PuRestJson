@@ -5,12 +5,12 @@
 #include "oauth.h"
 
 #include "string.c"
-#include "curl_thread_wrapper.c"
+#include "ctw.c"
 
 static t_class *oauth_class;
 
 struct _oauth {
-	struct _rest_common common;
+	struct _ctw common;
 	/* authentication */
 	struct {
 		size_t client_key_len;
@@ -28,7 +28,7 @@ struct _oauth {
 };
 
 static void oauth_free_inner(t_oauth *x, short free_rsa) {
-	rest_common_free((struct _rest_common *)x);
+	ctw_free((struct _ctw *)x);
 	if (free_rsa == 1) {
 		string_free(x->oauth.rsa_key, &x->oauth.rsa_key_len);
 	}
@@ -206,7 +206,7 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 					if (req_url) {
 						free(req_url);
 					}
-					thread_execute((struct _rest_common *)x, execute_request);
+					ctw_thread_exec((struct _ctw *)x, ctw_exec_req);
 				}
 				break;
 		}
@@ -306,9 +306,9 @@ void oauth_timeout(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	} else if (argc > 2){
 		MYERROR("timeout must have 0 or 1 parameter");
 	} else if (argc == 0) {
-		set_timeout((struct _rest_common *)x, 0);
+		ctw_set_timeout((struct _ctw *)x, 0);
 	} else {
-		set_timeout((struct _rest_common *)x, atom_getint(argv));
+		ctw_set_timeout((struct _ctw *)x, atom_getint(argv));
 	}
 }
 
@@ -321,7 +321,7 @@ void oauth_sslcheck(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	} else if (argc != 1){
 		MYERROR("sslcheck must have 1 parameter");
 	} else {
-		set_sslcheck((struct _rest_common *)x, atom_getint(argv));
+		ctw_set_sslcheck((struct _ctw *)x, atom_getint(argv));
 	}
 }
 
@@ -330,8 +330,8 @@ void *oauth_new(t_symbol *sel, int argc, t_atom *argv) {
 
 	(void) sel;
 
-	init_common((struct _rest_common *)x);
-	set_timeout((struct _rest_common *)x, 0);
+	ctw_init((struct _ctw *)x);
+	ctw_set_timeout((struct _ctw *)x, 0);
 
 	set_url_parameters(x, 0, argv); 
 	set_url_parameters(x, argc, argv); 

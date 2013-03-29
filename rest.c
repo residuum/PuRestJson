@@ -5,10 +5,10 @@
 #include "rest.h"
 
 #include "string.c"
-#include "curl_thread_wrapper.c"
+#include "ctw.c"
 
 struct _rest {
-	struct _rest_common common;
+	struct _ctw common;
 	/* authentication: cookie */
 	struct {
 		size_t login_path_len;
@@ -23,7 +23,7 @@ struct _rest {
 static t_class *rest_class;
 
 static void rest_free_inner(t_rest *x) {
-	rest_common_free((struct _rest_common *)x);
+	ctw_free((struct _ctw *)x);
 	string_free(x->cookie.login_path, &x->cookie.login_path_len);
 	string_free(x->cookie.username, &x->cookie.username_len);
 	string_free(x->cookie.password, &x->cookie.password_len);
@@ -65,9 +65,9 @@ static void *get_cookie_auth_token(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, post_data);
 		out_content.memory = string_create(&out_content.size, 0);
 		out_header.memory = string_create(&out_header.size, 0);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_content);
-		curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, write_memory_callback);
+		curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEHEADER, (void *)&out_header);
 		result = curl_easy_perform(curl_handle);
 
@@ -160,7 +160,7 @@ static void set_url_parameters(t_rest *x, int argc, t_atom *argv) {
 				x->cookie.password = string_create(&x->cookie.password_len, strlen(temp));
 				strcpy(x->cookie.password, temp);
 			}
-			thread_execute((struct _rest_common *)x, get_cookie_auth_token);
+			ctw_thread_exec((struct _ctw *)x, get_cookie_auth_token);
 			break;
 		default:
 			MYERROR("Wrong number of parameters.");
@@ -225,7 +225,7 @@ void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 							freebytes(cleaned_parameters, memsize);
 						}
 					}
-					thread_execute((struct _rest_common *)x, execute_request);
+					ctw_thread_exec((struct _ctw *)x, ctw_exec_req);
 				}
 				break;
 		}
@@ -252,9 +252,9 @@ void rest_timeout(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 	} else if (argc > 2){
 		MYERROR("timeout must have 0 or 1 parameter");
 	} else if (argc == 0) {
-		set_timeout((struct _rest_common *)x, 0);
+		ctw_set_timeout((struct _ctw *)x, 0);
 	} else {
-		set_timeout((struct _rest_common *)x, atom_getint(argv));
+		ctw_set_timeout((struct _ctw *)x, atom_getint(argv));
 	}
 }
 
@@ -267,7 +267,7 @@ void rest_sslcheck(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 	} else if (argc != 1){
 		MYERROR("sslcheck must have 1 parameter");
 	} else {
-		set_sslcheck((struct _rest_common *)x, atom_getint(argv));
+		ctw_set_sslcheck((struct _ctw *)x, atom_getint(argv));
 	}
 }
 
@@ -276,8 +276,8 @@ void *rest_new(t_symbol *sel, int argc, t_atom *argv) {
 
 	(void) sel;
 
-	init_common((struct _rest_common *)x);
-	set_timeout((struct _rest_common *)x, 0);
+	ctw_init((struct _ctw *)x);
+	ctw_set_timeout((struct _ctw *)x, 0);
 
 	set_url_parameters(x, 0, argv); 
 	set_url_parameters(x, argc, argv); 

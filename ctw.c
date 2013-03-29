@@ -3,7 +3,7 @@ struct _memory_struct {
 	size_t size;
 };
 
-struct _rest_common {
+struct _ctw {
 	t_object x_ob;
 	t_outlet *stat_out;
 	t_atom *out;
@@ -21,7 +21,7 @@ struct _rest_common {
 	unsigned char sslcheck;
 };
 
-static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
+static size_t ctw_write_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
 	struct _memory_struct *mem = data;
 
@@ -39,7 +39,7 @@ static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *
 	return realsize;
 }
 
-static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
+static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
 	struct _memory_struct *mem = data;
 	size_t to_copy = (mem->size < realsize) ? mem->size : realsize;
@@ -50,8 +50,8 @@ static size_t read_memory_callback(void *ptr, size_t size, size_t nmemb, void *d
 	return to_copy;
 }
 
-static void *execute_request(void *thread_args) {
-	struct _rest_common *common = thread_args; 
+static void *ctw_exec_req(void *thread_args) {
+	struct _ctw *common = thread_args; 
 	CURL *curl_handle;
 	CURLcode result;
 	struct _memory_struct in_memory;
@@ -71,7 +71,7 @@ static void *execute_request(void *thread_args) {
 		}
 		if (strcmp(common->req_type, "PUT") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
-			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, read_memory_callback);
+			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
 			/* Prepare data for reading */
 			if (common->parameters_len) {
 				in_memory.memory = getbytes(strlen(common->parameters) + 1);
@@ -93,7 +93,7 @@ static void *execute_request(void *thread_args) {
 		}
 		out_memory.memory = getbytes(1);
 		out_memory.size = 0;
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
 		result = curl_easy_perform(curl_handle);
 
@@ -130,7 +130,7 @@ static void *execute_request(void *thread_args) {
 	return NULL;
 }
 
-static void thread_execute(struct _rest_common *x, void *(*func) (void *)) {
+static void ctw_thread_exec(struct _ctw *x, void *(*func) (void *)) {
 	int rc;
 	pthread_t thread;
 	pthread_attr_t thread_attributes;
@@ -147,7 +147,7 @@ static void thread_execute(struct _rest_common *x, void *(*func) (void *)) {
 	}
 }
 
-static void set_sslcheck(struct _rest_common *x, int val) {
+static void ctw_set_sslcheck(struct _ctw *x, int val) {
 	if (val != 0) {
 		x->sslcheck = 1;
 	} else {
@@ -155,21 +155,21 @@ static void set_sslcheck(struct _rest_common *x, int val) {
 	}
 }
 
-static void set_timeout(struct _rest_common *x, int val) {
+static void ctw_set_timeout(struct _ctw *x, int val) {
 	x->timeout = (long) val;
 }
 
-static void init_common(struct _rest_common *x) {
+static void ctw_init(struct _ctw *x) {
 	x->base_url_len = 0;
 	x->parameters_len = 0;
 	x->complete_url_len = 0;
 	x->auth_token_len = 0;
 
-	set_timeout(x, 0);
-	set_sslcheck(x, 1);
+	ctw_set_timeout(x, 0);
+	ctw_set_sslcheck(x, 1);
 }
 
-static void rest_common_free(struct _rest_common *x) {
+static void ctw_free(struct _ctw *x) {
 	string_free(x->base_url, &x->base_url_len);
 	string_free(x->parameters, &x->parameters_len);
 	string_free(x->complete_url, &x->complete_url_len);

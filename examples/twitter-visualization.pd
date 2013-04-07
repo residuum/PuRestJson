@@ -1,5 +1,5 @@
-#N canvas 432 51 756 544 10;
-#X declare -lib gem -lib purest_json;
+#N canvas 430 51 756 544 10;
+#X declare -lib Gem -lib purest_json;
 #X obj 12 148 print original-data;
 #X obj 156 126 list trim;
 #X msg 156 51 GET http://search.twitter.com/search.json?q=%23puredata
@@ -37,11 +37,11 @@
 #X text -36 12 Simple Twitter visualization with GEM and list-abstractions
 ;
 #X obj 343 367 t b a;
-#X obj 528 46 import gem purest_json;
 #X obj 156 78 rest;
 #X obj 156 102 json-decode;
+#X obj 528 46 import Gem purest_json;
 #X connect 1 0 3 0;
-#X connect 2 0 34 0;
+#X connect 2 0 33 0;
 #X connect 3 0 4 0;
 #X connect 4 0 5 0;
 #X connect 5 0 6 0;
@@ -70,6 +70,6 @@
 #X connect 27 0 18 0;
 #X connect 32 0 26 0;
 #X connect 32 1 18 0;
-#X connect 34 0 0 0;
-#X connect 34 0 35 0;
-#X connect 35 0 1 0;
+#X connect 33 0 0 0;
+#X connect 33 0 34 0;
+#X connect 34 0 1 0;

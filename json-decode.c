@@ -6,14 +6,6 @@
 
 #include "string.c"
 
-#ifndef JSON_C_MAJOR_VERSION
-#define JSON_C_MAJOR_VERSION 0
-#endif
-
-#ifndef JSON_C_MINOR_VERSION
-#define JSON_C_MINOR_VERSION 9
-#endif
-
 static t_class *json_decode_class;
 
 struct _json_decode {
@@ -35,7 +27,7 @@ static int str_ccmp(const char *s1, const char *s2) {
 	return toupper(*p2) > toupper(*p1) ? -1 : 1;
 }
 
-#if JSON_C_MAJOR_VERSION < 1 && JSON_C_MINOR_VERSION < 10
+#if JSON_C_FIX
 static char *lowercase_unicode(char *orig, size_t *memsize) {
 	char *unicode_intro = "\\";
 	char *segment; 
@@ -196,7 +188,7 @@ static void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done
 
 static void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done_outlet) {
 	json_object *jobj;
-#if JSON_C_MAJOR_VERSION < 1 && JSON_C_MINOR_VERSION < 10
+#if JSON_C_FIX
 	size_t memsize = 0;
 	/* Needed because of bug in json-c 0.9 */
 	char* corrected_json_string = lowercase_unicode(json_string, &memsize);
@@ -213,7 +205,7 @@ static void output_json_string(char *json_string, t_outlet *data_outlet, t_outle
 	} else {
 		MYERROR("Not a JSON object");
 	}
-#if JSON_C_MAJOR_VERSION < 1 && JSON_C_MINOR_VERSION < 10
+#if JSON_C_FIX
 	if (corrected_json_string != NULL){
 		string_free(corrected_json_string, &memsize);
 	}

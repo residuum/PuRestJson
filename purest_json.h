@@ -34,6 +34,7 @@ THE SOFTWARE.
 	#define APIEXPORT __declspec(dllexport)
 	#define APICALL __cdecl
 	#define MYERROR(...) post(__VA_ARGS__)
+	#define NEEDS_CERT_PATH 1
 #else 
 	#define APIEXPORT
 	#define APICALL

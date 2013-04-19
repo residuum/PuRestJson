@@ -1,3 +1,6 @@
+#ifdef NEEDS_CERT_PATH
+	#include "m_imp.h"
+#endif
 struct _memory_struct {
 	char *memory;
 	size_t size;
@@ -19,6 +22,9 @@ struct _ctw {
 	unsigned char locked;
 	long timeout;
 	unsigned char sslcheck;
+#ifdef NEEDS_CERT_PATH
+	char cert_path[2048];
+#endif
 };
 
 static size_t ctw_write_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) {
@@ -66,6 +72,9 @@ static void *ctw_exec_req(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, common->timeout);
 		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck);
+#ifdef NEEDS_CERT_PATH
+		curl_easy_setopt(curl_handle, CURLOPT_SSLCERT, common->cert_path);
+#endif
 		if (common->auth_token_len) {
 			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, common->auth_token);
 		}

@@ -342,6 +342,17 @@ void *oauth_new(t_symbol *sel, int argc, t_atom *argv) {
 	x->common.stat_out = outlet_new(&x->common.x_ob, NULL);
 	x->common.locked = 0;
 
+#ifdef NEEDS_CERT_PATH
+	strcpy(x->common.cert_path, oauth_class->c_externdir->s_name);
+	size_t i;
+	for(i = 0; i < sizeof(x->common.cert_path); i++) {
+		if (x->common.cert_path[i] == '/') {
+			x->common.cert_path[i] = '\\';
+		}
+	}
+	strcat(x->common.cert_path, "\\cacert.pem");
+#endif
+
 	return (void *)x;
 }
 

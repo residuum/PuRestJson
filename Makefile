@@ -40,11 +40,9 @@ ALL_CFLAGS = -I"$(PD_INCLUDE)" -std=c99
 ALL_LDFLAGS =  
 SHARED_LDFLAGS =
 ALL_LIBS = -lcurl -ljson -loauth
-# Run pkg-config --libs libcurl liboauth json pthreads (or the equivalent for
-# cross compilation, e.g. i686-pc-mingw32-pkg-config)
 LIBS_windows = -lpthread -lm -lidn -lintl -lwldap32 -lgnutls -lhogweed -lgmp \
-			   -liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lssl -lcrypto \
-			   -lws2_32 -lgdi32 -lcrypt32 -lz
+			   -liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto \
+			   -lws2_32 -lgdi32 -lcrypt32 -lz  
 CFLAGS_windows = -mthreads -DCURL_STATICLIB
 
 

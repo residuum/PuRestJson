@@ -73,7 +73,9 @@ static void *ctw_exec_req(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, common->timeout);
 		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck);
 #ifdef NEEDS_CERT_PATH
-		curl_easy_setopt(curl_handle, CURLOPT_SSLCERT, common->cert_path);
+		if (common->sslcheck){
+			curl_easy_setopt(curl_handle, CURLOPT_SSLCERT, common->cert_path);
+		}
 #endif
 		if (common->auth_token_len) {
 			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, common->auth_token);

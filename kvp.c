@@ -75,7 +75,6 @@ static void kvp_store_free_memory(struct _kvp_store *x) {
 	data_to_free = x->first_data;
 	while(data_to_free != NULL) {
 		next_data = data_to_free->next;
-		/* TODO: Investigate the reason for segfault */
 		string_free(data_to_free->key, &data_to_free->key_len);
 		string_free(data_to_free->value, &data_to_free->value_len);
 		freebytes(data_to_free, sizeof(struct _kvp));

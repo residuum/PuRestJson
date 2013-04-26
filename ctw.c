@@ -31,7 +31,7 @@ static size_t ctw_write_mem_cb(void *ptr, size_t size, size_t nmemb, void *data)
 	size_t realsize = size * nmemb;
 	struct _memory_struct *mem = data;
 
-	mem->memory = (char *) resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
+	mem->memory = resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
 		MYERROR("not enough memory");
 	}
@@ -121,9 +121,9 @@ static void *ctw_exec_req(void *thread_args) {
 				free((void *)result);
 			} else {
 				SETFLOAT(&http_status_data[1], (float)http_status);
-				SETFLOAT(&http_status_data[2], (float)result);
-				outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
+				SETSYMBOL(&http_status_data[2], gensym(curl_easy_strerror(result)));
 				MYERROR("Error while performing request: %s", curl_easy_strerror(result));
+				outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
 			}
 		} else {
 			SETFLOAT(&http_status_data[1], (float)http_status);

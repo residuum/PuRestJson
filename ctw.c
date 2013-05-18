@@ -23,7 +23,8 @@ struct _ctw {
 	long timeout;
 	unsigned char sslcheck;
 #ifdef NEEDS_CERT_PATH
-	char cert_path[2048];
+	size_t cert_path_len;
+	char *cert_path;
 #endif
 };
 
@@ -64,6 +65,7 @@ static void *ctw_exec_req(void *thread_args) {
 	struct _memory_struct out_memory;
 	long http_status;
 	t_atom http_status_data[3];
+	FILE *fp = NULL;
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
@@ -74,7 +76,7 @@ static void *ctw_exec_req(void *thread_args) {
 		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck);
 #ifdef NEEDS_CERT_PATH
 		if (common->sslcheck){
-			curl_easy_setopt(curl_handle, CURLOPT_SSLCERT, common->cert_path);
+			curl_easy_setopt(curl_handle, CURLOPT_CAINFO, common->cert_path);
 		}
 #endif
 		if (common->auth_token_len) {
@@ -138,6 +140,9 @@ static void *ctw_exec_req(void *thread_args) {
 	string_free(common->complete_url, &common->complete_url_len);
 	string_free(common->parameters, &common->parameters_len);
 	common->locked = 0;
+	if (fp) {
+		fclose(fp);
+	}
 	return NULL;
 }
 
@@ -185,4 +190,21 @@ static void ctw_free(struct _ctw *x) {
 	string_free(x->parameters, &x->parameters_len);
 	string_free(x->complete_url, &x->complete_url_len);
 	string_free(x->auth_token, &x->auth_token_len);
+#ifdef NEEDS_CERT_PATH
+	string_free(x->cert_path, &x->cert_path_len);
+#endif 
 }
+
+#ifdef NEEDS_CERT_PATH
+static void ctw_set_cert_path(struct _ctw *x, char *directory) {
+	x->cert_path = string_create(&x->cert_path_len, strlen(directory) + 11);
+	strcpy(x->cert_path, directory);
+	size_t i;
+	for(i = 0; i < strlen(x->cert_path); i++) {
+		if (x->cert_path[i] == '/') {
+			x->cert_path[i] = '\\';
+		}
+	}
+	strcat(x->cert_path, "\\cacert.pem");
+}
+#endif 

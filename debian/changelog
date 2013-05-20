@@ -1,3 +1,17 @@
+pd-purest-json (0.12) UNRELEASED; urgency=low
+
+  * Disabling checking peer for SSL requests in [rest] and [oauth] possible
+
+  * [urlparams] does now overwrite previously set parameters 
+
+  * RSA-SHA1 signature possible, otherwise info message is posted to
+    Pd console
+
+  * Bugfixes:
+    - regression for PUT requests fixed
+
+ -- Thomas Mayer <thomas@residuum.org>  Mon, 20 May 2013 22:00:00 +0200
+
 pd-purest-json (0.11) UNRELEASED; urgency=low
 
   * symbols can be longer than MAXPDLENGTH (1024 characters)

@@ -1,5 +1,14 @@
 Changelog
 ---------
+0.12:
+- Disabling checking peer for SSL requests in [rest] and [oauth] possible
+- [urlparams] does now overwrite previously set parameters 
+- RSA-SHA1 signature possible, otherwise info message is posted to Pd console
+
+- Bugfixes:
+	-- SSL requests on Windows possible
+	-- regression fixed for PUT requests
+
 0.11:
 - symbols can be longer than MAXPDLENGTH (1024 characters)
 - [json-decode] works with lists and any other data type as well

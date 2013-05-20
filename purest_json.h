@@ -1,6 +1,8 @@
 #include "m_pd.h"
 
-#define LIBRARY_VERSION "0.11"
+#define PUREST_JSON_VERSION "0.12"
+#define PUREST_JSON_VERSION_MAJOR 0
+#define PUREST_JSON_VERSION_MINOR 12
 
 #define REQUEST_TYPE_LEN 7
 

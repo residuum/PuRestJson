@@ -104,8 +104,8 @@ static void *ctw_exec_req(void *thread_args) {
 		} else if (strcmp(common->req_type, "DELETE") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 		}
-		out_memory.memory = getbytes(1);
-		out_memory.size = 0;
+		out_memory.memory = string_create(&out_memory.size, 0);
+		out_memory.memory = 0;
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
 		result = curl_easy_perform(curl_handle);

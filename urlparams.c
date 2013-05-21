@@ -76,34 +76,36 @@ void urlparams_bang(t_urlparams *x) {
 	size_t encoded_len;
 	char *encoded_string = NULL;
 
-	if (x->storage.data_count > 0) {
-		data_member = x->storage.first_data;
-		for (i=0; i < x->storage.data_count; i++) {
-			encoded_string = urlencode(data_member->value, &encoded_len);
-			output_len += data_member->key_len + encoded_len + 2;
-			string_free(encoded_string, &encoded_len);
-			data_member = data_member->next;
-		}
-		output = getbytes(output_len * sizeof(char));
-
-		data_member = x->storage.first_data;
-		for (i = 0; i < x->storage.data_count; i++) {
-			strcat(output, data_member->key);
-			strcat(output, "=");
-			encoded_string = urlencode(data_member->value, &encoded_len);
-			strcat(output, encoded_string);
-			if (encoded_string) {
-				string_free(encoded_string, &encoded_len);
-			}
-			if (i < x->storage.data_count - 1) {
-				strcat(output, "&");
-			}
-			data_member = data_member->next;
-		}
-
-		outlet_symbol(x->storage.x_ob.ob_outlet, gensym(output));
-		string_free(output, &output_len);
+	if (x->storage.data_count == 0) {
+		return;
 	}
+
+	data_member = x->storage.first_data;
+	for (i=0; i < x->storage.data_count; i++) {
+		encoded_string = urlencode(data_member->value, &encoded_len);
+		output_len += data_member->key_len + encoded_len + 2;
+		string_free(encoded_string, &encoded_len);
+		data_member = data_member->next;
+	}
+	output = getbytes(output_len * sizeof(char));
+
+	data_member = x->storage.first_data;
+	for (i = 0; i < x->storage.data_count; i++) {
+		strcat(output, data_member->key);
+		strcat(output, "=");
+		encoded_string = urlencode(data_member->value, &encoded_len);
+		strcat(output, encoded_string);
+		if (encoded_string) {
+			string_free(encoded_string, &encoded_len);
+		}
+		if (i < x->storage.data_count - 1) {
+			strcat(output, "&");
+		}
+		data_member = data_member->next;
+	}
+
+	outlet_symbol(x->storage.x_ob.ob_outlet, gensym(output));
+	string_free(output, &output_len);
 }
 
 void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
@@ -117,23 +119,24 @@ void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 
 	if (argc < 2) {
 		MYERROR("For method 'add' You need to specify a value.");
-	} else {
-		atom_string(argv, key, MAXPDSTRING);
-
-		for (i = 1; i < argc; i++) {
-			atom_string(argv + i, temp_value, MAXPDSTRING);
-			value_len += strlen(temp_value) + 1;
-		}
-		value = getbytes(value_len * sizeof(char));
-		atom_string(argv + 1, value, MAXPDSTRING);
-		for(i = 2; i < argc; i++) {
-			atom_string(argv + i, temp_value, MAXPDSTRING);
-			strcat(value, " ");
-			strcat(value, temp_value);
-		}
-		kvp_add((struct _kvp_store *)x, key, value, 0);
-		string_free(value, &value_len);
+		return;
 	}
+
+	atom_string(argv, key, MAXPDSTRING);
+
+	for (i = 1; i < argc; i++) {
+		atom_string(argv + i, temp_value, MAXPDSTRING);
+		value_len += strlen(temp_value) + 1;
+	}
+	value = getbytes(value_len * sizeof(char));
+	atom_string(argv + 1, value, MAXPDSTRING);
+	for(i = 2; i < argc; i++) {
+		atom_string(argv + i, temp_value, MAXPDSTRING);
+		strcat(value, " ");
+		strcat(value, temp_value);
+	}
+	kvp_add((struct _kvp_store *)x, key, value, 0);
+	string_free(value, &value_len);
 }
 
 void urlparams_clear(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {

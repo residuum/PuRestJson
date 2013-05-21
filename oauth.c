@@ -132,85 +132,85 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 
 	if(x->common.locked) {
 		post("oauth object is performing request and locked");
-	} else {
-		memset(x->common.req_type, 0x00, REQUEST_TYPE_LEN);
-		switch (argc) {
-			case 0:
-				break;
-			default:
-				x->common.locked = 1;
-				req_type = sel->s_name;
-				strcpy(x->common.req_type, req_type);
-				if ((strcmp(x->common.req_type, "GET") && 
-							strcmp(x->common.req_type, "POST"))) {
-					SETSYMBOL(&auth_status_data[0], gensym("oauth"));
-					SETSYMBOL(&auth_status_data[1], gensym("Request Method not supported"));
-					MYERROR("Request method %s not supported.", x->common.req_type);
-					outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
-					x->common.locked = 0;
-				} else {
-					atom_string(argv, path, MAXPDSTRING);
-					if (argc > 1) {
-						atom_string(argv + 1, parameters, MAXPDSTRING);
-						if (strlen(parameters)) {
-							cleaned_parameters = string_remove_backslashes(parameters, &memsize);
-						}
-					}
-					req_path = string_create(&req_path_len, 
-							x->common.base_url_len + strlen(path) + memsize + 1);
-					if (x->common.base_url != NULL) {
-						strcpy(req_path, x->common.base_url);
-					}
-					strcat(req_path, path);
-					if (memsize) {
-						if (strchr(req_path, '?')) {
-							strcat(req_path, "&");
-						} else {
-							strcat(req_path, "?");
-						}
-						strcat(req_path, cleaned_parameters);
-						freebytes(cleaned_parameters, memsize);
-					}
-					if (strcmp(x->common.req_type, "POST") == 0) {
-						if (x->oauth.method == OA_RSA) {
-							req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, x->common.req_type, 
-									x->oauth.client_key, x->oauth.rsa_key, 
-									x->oauth.token_key, NULL);
-						} else {
-							req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, x->common.req_type, 
-									x->oauth.client_key, x->oauth.client_secret, 
-									x->oauth.token_key, x->oauth.token_secret);
-						}
-					} else {
-						if (x->oauth.method == OA_RSA) {
-							req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->common.req_type, 
-									x->oauth.client_key, x->oauth.rsa_key, 
-									x->oauth.token_key, NULL);
-						} else {
-							req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->common.req_type, 
-									x->oauth.client_key, x->oauth.client_secret, 
-									x->oauth.token_key, x->oauth.token_secret);
-						}
-					}
-					x->common.complete_url = string_create(&x->common.complete_url_len, strlen(req_url));
-					strcpy(x->common.complete_url, req_url);
-					if (strcmp(x->common.req_type, "POST") == 0) {
-						x->common.parameters = string_create(&x->common.parameters_len, strlen(postargs));
-						strcpy(x->common.parameters, postargs);
-					} else {
-						x->common.parameters = string_create(&x->common.parameters_len, 0);
-					}
-					if (postargs) {
-						free(postargs);
-					}
-					if (req_url) {
-						free(req_url);
-					}
-					ctw_thread_exec((struct _ctw *)x, ctw_exec_req);
-				}
-				break;
+		return;
+	}
+
+	memset(x->common.req_type, 0x00, REQUEST_TYPE_LEN);
+	if (argc == 0) {
+		return;
+	}
+
+	x->common.locked = 1;
+	req_type = sel->s_name;
+	strcpy(x->common.req_type, req_type);
+	if ((strcmp(x->common.req_type, "GET") && 
+				strcmp(x->common.req_type, "POST"))) {
+		SETSYMBOL(&auth_status_data[0], gensym("oauth"));
+		SETSYMBOL(&auth_status_data[1], gensym("Request Method not supported"));
+		MYERROR("Request method %s not supported.", x->common.req_type);
+		outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
+		x->common.locked = 0;
+		return;
+	}
+
+	atom_string(argv, path, MAXPDSTRING);
+	if (argc > 1) {
+		atom_string(argv + 1, parameters, MAXPDSTRING);
+		if (strlen(parameters)) {
+			cleaned_parameters = string_remove_backslashes(parameters, &memsize);
 		}
 	}
+	req_path = string_create(&req_path_len, 
+			x->common.base_url_len + strlen(path) + memsize + 1);
+	if (x->common.base_url != NULL) {
+		strcpy(req_path, x->common.base_url);
+	}
+	strcat(req_path, path);
+	if (memsize) {
+		if (strchr(req_path, '?')) {
+			strcat(req_path, "&");
+		} else {
+			strcat(req_path, "?");
+		}
+		strcat(req_path, cleaned_parameters);
+		freebytes(cleaned_parameters, memsize);
+	}
+	if (strcmp(x->common.req_type, "POST") == 0) {
+		if (x->oauth.method == OA_RSA) {
+			req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, x->common.req_type, 
+					x->oauth.client_key, x->oauth.rsa_key, 
+					x->oauth.token_key, NULL);
+		} else {
+			req_url= oauth_sign_url2(req_path, &postargs, x->oauth.method, x->common.req_type, 
+					x->oauth.client_key, x->oauth.client_secret, 
+					x->oauth.token_key, x->oauth.token_secret);
+		}
+	} else {
+		if (x->oauth.method == OA_RSA) {
+			req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->common.req_type, 
+					x->oauth.client_key, x->oauth.rsa_key, 
+					x->oauth.token_key, NULL);
+		} else {
+			req_url= oauth_sign_url2(req_path, NULL, x->oauth.method, x->common.req_type, 
+					x->oauth.client_key, x->oauth.client_secret, 
+					x->oauth.token_key, x->oauth.token_secret);
+		}
+	}
+	x->common.complete_url = string_create(&x->common.complete_url_len, strlen(req_url));
+	strcpy(x->common.complete_url, req_url);
+	if (strcmp(x->common.req_type, "POST") == 0) {
+		x->common.parameters = string_create(&x->common.parameters_len, strlen(postargs));
+		strcpy(x->common.parameters, postargs);
+	} else {
+		x->common.parameters = string_create(&x->common.parameters_len, 0);
+	}
+	if (postargs) {
+		free(postargs);
+	}
+	if (req_url) {
+		free(req_url);
+	}
+	ctw_thread_exec((struct _ctw *)x, ctw_exec_req);
 }
 
 void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
@@ -224,65 +224,64 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 
 	string_free(x->oauth.rsa_key, &x->oauth.rsa_key_len);
 
-	if (argc > 0) {
-		if (argv[0].a_type == A_SYMBOL) {
-			atom_string(argv, method_name, 11);
-			if (strcmp(method_name, "HMAC") == 0) {
-				x->oauth.method = OA_HMAC;
-				if (argc > 1)  {
-					post("Additional data is ignored");
-				}
-			} else if (strcmp(method_name, "PLAINTEXT") == 0) {
-				x->oauth.method = OA_PLAINTEXT;
-				post("Warning: You are using plaintext now");
-				if (argc > 1)  {
-					post("Additional data is ignored");
-				}
-			} else if (strcmp(method_name, "RSA") == 0) {
-				if (LIBOAUTH_VERSION_MAJOR < 1
-						|| (LIBOAUTH_VERSION_MAJOR == 1 
-							&& LIBOAUTH_VERSION_MINOR == 0 
-							&& LIBOAUTH_VERSION_MICRO == 0)) {
-					MYERROR("RSA-SHA1 is not supported by liboauth version < 1.0.1");
-				}
-				if (argc > 1) {
-					x->oauth.method = OA_RSA;
-					for (i = 1; i < argc; i++) {
-						atom_string(argv + i, temp, MAXPDSTRING);
-						rsa_key_len +=strlen(temp) + 1;
-					}
-					x->oauth.rsa_key = string_create(&x->oauth.rsa_key_len, rsa_key_len);
-					for (i = 1; i < argc; i++) {
-						atom_string(argv + i, temp, MAXPDSTRING);
-						if (strncmp(temp, "-----", 5) == 0 && strlen(x->oauth.rsa_key) > 1)  {
-							memset(x->oauth.rsa_key + strlen(x->oauth.rsa_key) - 1, 0x00, 1);
-							strcat(x->oauth.rsa_key, "\n");
-							use_newline = 0;
-						}
-						if (strlen(temp) >= 5 && strncmp(temp + strlen(temp) - 5, "-----", 5) == 0) {
-							use_newline = 1;
-						}
-						strcat(x->oauth.rsa_key, temp);
-						if (i < argc -1) {
-							if (use_newline == 1)  {
-								strcat(x->oauth.rsa_key, "\n");
-							} else {
-								strcat(x->oauth.rsa_key, " ");
-							}
-						}
-					}
-				} else {
-					MYERROR("RSA needs the RSA private key as additional data");
-				}
-			} else {
-				MYERROR("Only HMAC, RSA, and PLAINTEXT allowed");
-			}
-
-		} else {
-			MYERROR("'method' only takes a symbol argument. See help for more");
-		}
-	} else  {
+	if (argc == 0) {
 		MYERROR("'method' needs at least one argument. See help for more");
+		return;
+	}
+
+	if (argv[0].a_type != A_SYMBOL) {
+		MYERROR("'method' only takes a symbol argument. See help for more");
+	}
+	atom_string(argv, method_name, 11);
+	if (strcmp(method_name, "HMAC") == 0) {
+		x->oauth.method = OA_HMAC;
+		if (argc > 1)  {
+			post("Additional data is ignored");
+		}
+	} else if (strcmp(method_name, "PLAINTEXT") == 0) {
+		x->oauth.method = OA_PLAINTEXT;
+		post("Warning: You are using plaintext now");
+		if (argc > 1)  {
+			post("Additional data is ignored");
+		}
+	} else if (strcmp(method_name, "RSA") == 0) {
+		if (LIBOAUTH_VERSION_MAJOR < 1
+				|| (LIBOAUTH_VERSION_MAJOR == 1 
+					&& LIBOAUTH_VERSION_MINOR == 0 
+					&& LIBOAUTH_VERSION_MICRO == 0)) {
+			MYERROR("RSA-SHA1 is not supported by liboauth version < 1.0.1");
+		}
+		if (argc > 1) {
+			x->oauth.method = OA_RSA;
+			for (i = 1; i < argc; i++) {
+				atom_string(argv + i, temp, MAXPDSTRING);
+				rsa_key_len +=strlen(temp) + 1;
+			}
+			x->oauth.rsa_key = string_create(&x->oauth.rsa_key_len, rsa_key_len);
+			for (i = 1; i < argc; i++) {
+				atom_string(argv + i, temp, MAXPDSTRING);
+				if (strncmp(temp, "-----", 5) == 0 && strlen(x->oauth.rsa_key) > 1)  {
+					memset(x->oauth.rsa_key + strlen(x->oauth.rsa_key) - 1, 0x00, 1);
+					strcat(x->oauth.rsa_key, "\n");
+					use_newline = 0;
+				}
+				if (strlen(temp) >= 5 && strncmp(temp + strlen(temp) - 5, "-----", 5) == 0) {
+					use_newline = 1;
+				}
+				strcat(x->oauth.rsa_key, temp);
+				if (i < argc -1) {
+					if (use_newline == 1)  {
+						strcat(x->oauth.rsa_key, "\n");
+					} else {
+						strcat(x->oauth.rsa_key, " ");
+					}
+				}
+			}
+		} else {
+			MYERROR("RSA needs the RSA private key as additional data");
+		}
+	} else {
+		MYERROR("Only HMAC, RSA, and PLAINTEXT allowed");
 	}
 }
 

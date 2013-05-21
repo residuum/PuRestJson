@@ -85,10 +85,8 @@ static void load_json_data(t_json_encode *x, json_object *jobj) {
 								value = string_create(&value_len, 
 										snprintf(NULL, 0, "%s", json_object_get_string(array_member)));
 								sprintf(value, "%s", json_object_get_string(array_member));
-								kvp_add((struct _kvp_store *)x,
-									       key, value, 1);
+								kvp_add((struct _kvp_store *)x, key, value, 1);
 								string_free(value, &value_len);
-								json_object_put(array_member);
 							}
 						}
 						break;
@@ -116,49 +114,50 @@ static t_symbol *get_json_symbol(t_json_encode *x) {
 	json_object *array_members[x->storage.data_count];
 	t_symbol *json_symbol = NULL;
 
-	if (x->storage.data_count > 0) {
-		data_member = x->storage.first_data;
-		for (i = 0; i < x->storage.data_count; i++) {
-			already_added = 0;
-			/* Is it an array member? */
-			if (data_member->is_array == 1) {
-				value = json_object_new_array();
-				data_member_compare = data_member;
-				for (j = i; j < x->storage.data_count; j++) {
-					if (strcmp(data_member_compare->key, data_member->key) == 0) {
-						for (k = 0; k < array_member_count; k++) {
-							/* If already inserted, continue i loop */
-							if (array_member_numbers[k] == j) {
-								already_added = 1;
-								break;
-							}
-						}
-						if (already_added == 0) {
-							json_object *array_member = create_object(data_member_compare->value);
-							json_object_array_add(value, array_member);
-							array_member_numbers[array_member_count] = j;
-							array_members[array_member_count] = array_member;
-							array_member_count++;
+	if (x->storage.data_count == 0) {
+		json_symbol = gensym("");
+		return json_symbol;
+	}
+
+	data_member = x->storage.first_data;
+	for (i = 0; i < x->storage.data_count; i++) {
+		already_added = 0;
+		/* Is it an array member? */
+		if (data_member->is_array == 1) {
+			value = json_object_new_array();
+			data_member_compare = data_member;
+			for (j = i; j < x->storage.data_count; j++) {
+				if (strcmp(data_member_compare->key, data_member->key) == 0) {
+					for (k = 0; k < array_member_count; k++) {
+						/* If already inserted, continue i loop */
+						if (array_member_numbers[k] == j) {
+							already_added = 1;
+							break;
 						}
 					}
-					data_member_compare = data_member_compare->next;
+					if (already_added == 0) {
+						json_object *array_member = create_object(data_member_compare->value);
+						json_object_array_add(value, array_member);
+						array_member_numbers[array_member_count] = j;
+						array_members[array_member_count] = array_member;
+						array_member_count++;
+					}
 				}
-			} else {
-				value = create_object(data_member->value);
+				data_member_compare = data_member_compare->next;
 			}
-			if (already_added == 0) {
-				json_object_object_add(jobj, data_member->key, value); 
-			}
-			data_member = data_member->next;
+		} else {
+			value = create_object(data_member->value);
 		}
-		json_symbol = gensym(json_object_to_json_string(jobj));
-		for (i = 0; i < array_member_count; i++) {
-			json_object_put(array_members[i]);
+		if (already_added == 0) {
+			json_object_object_add(jobj, data_member->key, value); 
 		}
-		json_object_put(jobj);
-	} else {
-		json_symbol = gensym("");
+		data_member = data_member->next;
 	}
+	json_symbol = gensym(json_object_to_json_string(jobj));
+	for (i = 0; i < array_member_count; i++) {
+		json_object_put(array_members[i]);
+	}
+	json_object_put(jobj);
 	return json_symbol;
 }
 
@@ -213,23 +212,24 @@ void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
 
 	if (argc < 2) {
 		MYERROR("For method '%s' You need to specify a value.", is_array ? "array": "add");
-	} else {
-		atom_string(argv, key, MAXPDSTRING);
-
-		for (i = 1; i < argc; i++) {
-			atom_string(argv + i, temp_value, MAXPDSTRING);
-			value_len += strlen(temp_value) + 1;
-		}
-		value = getbytes(value_len * sizeof(char));
-		atom_string(argv + 1, value, MAXPDSTRING);
-		for(i = 2; i < argc; i++) {
-			atom_string(argv + i, temp_value, MAXPDSTRING);
-			strcat(value, " ");
-			strcat(value, temp_value);
-		}
-		kvp_add((struct _kvp_store *)x, key, value, is_array);
-		string_free(value, &value_len);
+		return;
 	}
+
+	atom_string(argv, key, MAXPDSTRING);
+
+	for (i = 1; i < argc; i++) {
+		atom_string(argv + i, temp_value, MAXPDSTRING);
+		value_len += strlen(temp_value) + 1;
+	}
+	value = getbytes(value_len * sizeof(char));
+	atom_string(argv + 1, value, MAXPDSTRING);
+	for(i = 2; i < argc; i++) {
+		atom_string(argv + i, temp_value, MAXPDSTRING);
+		strcat(value, " ");
+		strcat(value, temp_value);
+	}
+	kvp_add((struct _kvp_store *)x, key, value, is_array);
+	string_free(value, &value_len);
 }
 
 void json_encode_read(t_json_encode *x, t_symbol *filename) {
@@ -240,24 +240,24 @@ void json_encode_read(t_json_encode *x, t_symbol *filename) {
 	json_object *jobj;
 
 	canvas_makefilename(x->x_canvas, filename->s_name, buf, MAXPDSTRING);
-	if ((file = fopen(buf, "r"))) {
-		stat(buf, &st);
-		json_string = getbytes((st.st_size + 1) * sizeof(char));
-		json_string[st.st_size] = 0x00;
-		fread(json_string, sizeof(char), st.st_size, file);
-		fclose(file);
-		jobj = json_tokener_parse(json_string);
-		freebytes(json_string, (st.st_size + 1) * sizeof(char));
-		if (!is_error(jobj)) {
-			load_json_data(x, jobj);
-			json_object_put(jobj);
-		} else {
-			post("File does not contain valid JSON.");
-		}
-
-
-	} else {
+	file = fopen(buf, "r");
+	if (!file) {
 		post("Cannot open file %s for reading", filename->s_name);
+		return;
+	}
+	
+	stat(buf, &st);
+	json_string = getbytes((st.st_size + 1) * sizeof(char));
+	json_string[st.st_size] = 0x00;
+	fread(json_string, sizeof(char), st.st_size, file);
+	fclose(file);
+	jobj = json_tokener_parse(json_string);
+	freebytes(json_string, (st.st_size + 1) * sizeof(char));
+	if (!is_error(jobj)) {
+		load_json_data(x, jobj);
+		json_object_put(jobj);
+	} else {
+		post("File does not contain valid JSON.");
 	}
 }
 
@@ -267,16 +267,17 @@ void json_encode_write(t_json_encode *x, t_symbol *filename) {
 	t_symbol *json_symbol = get_json_symbol(x);
 	char *json_string = json_symbol->s_name;
 
-	if (json_string) {
-		canvas_makefilename(x->x_canvas, filename->s_name, buf, MAXPDSTRING);
-		if ((file = fopen(buf, "w"))) {
-			fprintf(file, json_string);
-			fclose(file);
-		} else {
-			post("Cannot open %s for writing", filename->s_name);
-		}
-	} else {
+	if (!json_string) {
 		post("No JSON data for writing available.");
+		return;
+	}
+
+	canvas_makefilename(x->x_canvas, filename->s_name, buf, MAXPDSTRING);
+	if ((file = fopen(buf, "w"))) {
+		fprintf(file, json_string);
+		fclose(file);
+	} else {
+		post("Cannot open %s for writing", filename->s_name);
 	}
 }
 

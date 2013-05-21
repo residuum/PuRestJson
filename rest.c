@@ -44,74 +44,77 @@ static void *get_cookie_auth_token(void *thread_args) {
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
-	if (curl_handle) {
-		/* length + name=&password=*/
-		post_data = string_create(&post_data_len, x->cookie.username_len + x->cookie.password_len + 17);
-		if (post_data == NULL) {
-			MYERROR("not enough memory");
-		} else {
-			strcpy(post_data, "name=");
-			strcat(post_data, x->cookie.username);
-			strcat(post_data, "&password=");
-			strcat(post_data, x->cookie.password);
-		}
-		x->common.complete_url = string_create(&x->common.complete_url_len, 
-				x->common.base_url_len + x->cookie.login_path_len);
-		strcpy(x->common.complete_url, x->common.base_url);
-		strcat(x->common.complete_url, x->cookie.login_path);
-		curl_easy_setopt(curl_handle, CURLOPT_URL, x->common.complete_url);
-		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
-		curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
-		curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, post_data);
-		out_content.memory = string_create(&out_content.size, 0);
-		out_content.memory = 0;
-		out_header.memory = string_create(&out_header.size, 0);
-		out_header.memory = 0;
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_content);
-		curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEHEADER, (void *)&out_header);
-		result = curl_easy_perform(curl_handle);
-
-		/* output the status code at second outlet */
-		curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
-		SETSYMBOL(&auth_status_data[0], gensym("cookie"));
-		if (http_code == 200 && result == CURLE_OK) {
-			SETSYMBOL(&auth_status_data[1], gensym("bang"));
-			outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
-		} else {
-			SETFLOAT(&auth_status_data[1], (float)http_code);
-			SETFLOAT(&auth_status_data[2], (float)result);
-			outlet_list(x->common.stat_out, &s_list, 3, &auth_status_data[0]);
-		}
-
-		string_free(x->common.auth_token, &x->common.auth_token_len);
-		if (result == CURLE_OK) {
-			if (out_header.memory) {
-				header_line = strtok(out_header.memory, "\n");
-				while (header_line != NULL) {
-					if (strncmp(header_line, "Set-Cookie:", 11) == 0) {
-						cookie_params = strtok(header_line, ": ");
-						/*remove "Set-Cookie:" */
-						cookie_params = strtok(NULL, "; ");
-						while (cookie_params != NULL) {
-							if (strlen(cookie_params)) {
-								x->common.auth_token = string_create(&x->common.auth_token_len, strlen(cookie_params));
-								strcpy(x->common.auth_token, cookie_params);
-								break;
-							}
-							cookie_params = strtok(NULL, "; ");
-						}
-						break;
-					}
-					header_line = strtok(NULL, "\n");
-				}
-				string_free(out_header.memory, &out_header.size);
-			}
-			string_free(out_content.memory, &out_content.size);
-		}
-		string_free(post_data, &post_data_len);
+	if (!curl_handle) {
+		x->common.locked = 0;
+		return NULL;
 	}
+
+	/* length + name=&password=*/
+	post_data = string_create(&post_data_len, x->cookie.username_len + x->cookie.password_len + 17);
+	if (post_data == NULL) {
+		MYERROR("not enough memory");
+	} else {
+		strcpy(post_data, "name=");
+		strcat(post_data, x->cookie.username);
+		strcat(post_data, "&password=");
+		strcat(post_data, x->cookie.password);
+	}
+	x->common.complete_url = string_create(&x->common.complete_url_len, 
+			x->common.base_url_len + x->cookie.login_path_len);
+	strcpy(x->common.complete_url, x->common.base_url);
+	strcat(x->common.complete_url, x->cookie.login_path);
+	curl_easy_setopt(curl_handle, CURLOPT_URL, x->common.complete_url);
+	curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
+	curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
+	curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, post_data);
+	out_content.memory = string_create(&out_content.size, 0);
+	out_content.memory = 0;
+	out_header.memory = string_create(&out_header.size, 0);
+	out_header.memory = 0;
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_content);
+	curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEHEADER, (void *)&out_header);
+	result = curl_easy_perform(curl_handle);
+
+	/* output the status code at second outlet */
+	curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+	SETSYMBOL(&auth_status_data[0], gensym("cookie"));
+	if (http_code == 200 && result == CURLE_OK) {
+		SETSYMBOL(&auth_status_data[1], gensym("bang"));
+		outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
+	} else {
+		SETFLOAT(&auth_status_data[1], (float)http_code);
+		SETFLOAT(&auth_status_data[2], (float)result);
+		outlet_list(x->common.stat_out, &s_list, 3, &auth_status_data[0]);
+	}
+
+	string_free(x->common.auth_token, &x->common.auth_token_len);
+	if (result == CURLE_OK) {
+		if (out_header.memory) {
+			header_line = strtok(out_header.memory, "\n");
+			while (header_line != NULL) {
+				if (strncmp(header_line, "Set-Cookie:", 11) == 0) {
+					cookie_params = strtok(header_line, ": ");
+					/*remove "Set-Cookie:" */
+					cookie_params = strtok(NULL, "; ");
+					while (cookie_params != NULL) {
+						if (strlen(cookie_params)) {
+							x->common.auth_token = string_create(&x->common.auth_token_len, strlen(cookie_params));
+							strcpy(x->common.auth_token, cookie_params);
+							break;
+						}
+						cookie_params = strtok(NULL, "; ");
+					}
+					break;
+				}
+				header_line = strtok(NULL, "\n");
+			}
+			string_free(out_header.memory, &out_header.size);
+		}
+		string_free(out_content.memory, &out_content.size);
+	}
+	string_free(post_data, &post_data_len);
 	x->common.locked = 0;
 	return NULL;
 }
@@ -192,46 +195,46 @@ void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 
 	if(x->common.locked) {
 		post("rest object is performing request and locked");
-	} else {
-		memset(x->common.req_type, 0x00, REQUEST_TYPE_LEN);
-		switch (argc) {
-			case 0:
-				break;
-			default:
-				x->common.locked = 1;
-				req_type = sel->s_name;
-				strcpy(x->common.req_type, req_type);
-				if ((strcmp(x->common.req_type, "GET") && 
-							strcmp(x->common.req_type, "POST") && 
-							strcmp(x->common.req_type, "PUT") &&
-							strcmp(x->common.req_type, "DELETE"))) {
-					SETSYMBOL(&auth_status_data[0], gensym("request"));
-					SETSYMBOL(&auth_status_data[1], gensym("Request method not supported"));
-					MYERROR("Request method %s not supported.", x->common.req_type);
-					outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
-					x->common.locked = 0;
-				} else {
-					atom_string(argv, path, MAXPDSTRING);
-					x->common.complete_url = string_create(&x->common.complete_url_len,
-							x->common.base_url_len + strlen(path) + 1);
-					if (x->common.base_url != NULL) {
-						strcpy(x->common.complete_url, x->common.base_url);
-					}
-					strcat(x->common.complete_url, path);
-					if (argc > 1) {
-						atom_string(argv + 1, parameters, MAXPDSTRING);
-						if (strlen(parameters)) {
-							cleaned_parameters = string_remove_backslashes(parameters, &memsize);
-							x->common.parameters = string_create(&x->common.parameters_len, memsize + 1);
-							strcpy(x->common.parameters, cleaned_parameters);
-							freebytes(cleaned_parameters, memsize);
-						}
-					}
-					ctw_thread_exec((struct _ctw *)x, ctw_exec_req);
-				}
-				break;
+		return;
+	}
+
+	memset(x->common.req_type, 0x00, REQUEST_TYPE_LEN);
+	if (argc == 0) {
+		return;
+	}
+
+	x->common.locked = 1;
+	req_type = sel->s_name;
+	strcpy(x->common.req_type, req_type);
+	if ((strcmp(x->common.req_type, "GET") && 
+				strcmp(x->common.req_type, "POST") && 
+				strcmp(x->common.req_type, "PUT") &&
+				strcmp(x->common.req_type, "DELETE"))) {
+		SETSYMBOL(&auth_status_data[0], gensym("request"));
+		SETSYMBOL(&auth_status_data[1], gensym("Request method not supported"));
+		MYERROR("Request method %s not supported.", x->common.req_type);
+		outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
+		x->common.locked = 0;
+		return;
+	} 
+
+	atom_string(argv, path, MAXPDSTRING);
+	x->common.complete_url = string_create(&x->common.complete_url_len,
+			x->common.base_url_len + strlen(path) + 1);
+	if (x->common.base_url != NULL) {
+		strcpy(x->common.complete_url, x->common.base_url);
+	}
+	strcat(x->common.complete_url, path);
+	if (argc > 1) {
+		atom_string(argv + 1, parameters, MAXPDSTRING);
+		if (strlen(parameters)) {
+			cleaned_parameters = string_remove_backslashes(parameters, &memsize);
+			x->common.parameters = string_create(&x->common.parameters_len, memsize + 1);
+			strcpy(x->common.parameters, cleaned_parameters);
+			freebytes(cleaned_parameters, memsize);
 		}
 	}
+	ctw_thread_exec((struct _ctw *)x, ctw_exec_req);
 }
 
 void rest_url(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {

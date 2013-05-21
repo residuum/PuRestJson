@@ -42,7 +42,6 @@ static size_t ctw_write_mem_cb(void *ptr, size_t size, size_t nmemb, void *data)
 	}
 	mem->size += realsize;
 	mem->memory[mem->size] = '\0';
-
 	return realsize;
 }
 
@@ -69,80 +68,82 @@ static void *ctw_exec_req(void *thread_args) {
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
-	if (curl_handle) {
-		curl_easy_setopt(curl_handle, CURLOPT_URL, common->complete_url);
-		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
-		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, common->timeout);
-		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck);
-#ifdef NEEDS_CERT_PATH
-		if (common->sslcheck){
-			curl_easy_setopt(curl_handle, CURLOPT_CAINFO, common->cert_path);
-		}
-#endif
-		if (common->auth_token_len) {
-			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, common->auth_token);
-		}
-		if (strcmp(common->req_type, "PUT") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
-			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
-			/* Prepare data for reading */
-			if (common->parameters_len) {
-				in_memory.memory = getbytes(strlen(common->parameters) + 1);
-				in_memory.size = strlen(common->parameters);
-				if (in_memory.memory == NULL) {
-					MYERROR("not enough memory");
-				}
-				memcpy(in_memory.memory, common->parameters, strlen(common->parameters));
-			} else {
-				in_memory.memory = NULL;
-				in_memory.size = 0;
-			}
-			curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
-		} else if (strcmp(common->req_type, "POST") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
-			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, common->parameters);
-		} else if (strcmp(common->req_type, "DELETE") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
-		}
-		out_memory.memory = string_create(&out_memory.size, 0);
-		out_memory.memory = 0;
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
-		result = curl_easy_perform(curl_handle);
+	if (!curl_handle) {
+		MYERROR("Cannot init curl.");
+		common->locked = 0;
+		return NULL;
+	}
 
-		/* output status */
-		curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_status);
-		SETSYMBOL(&http_status_data[0], gensym(common->req_type));
-		if (http_status >= 200 && http_status < 300) {
-			SETSYMBOL(&http_status_data[1], gensym("bang"));
-			outlet_list(common->stat_out, &s_list, 2, &http_status_data[0]);
-			if (result == CURLE_OK) {
-				outlet_symbol(common->x_ob.ob_outlet, gensym(out_memory.memory));
-				/* Free memory */
-				string_free(out_memory.memory, &out_memory.size);
-				free((void *)result);
-			} else {
-				SETFLOAT(&http_status_data[1], (float)http_status);
-				SETSYMBOL(&http_status_data[2], gensym(curl_easy_strerror(result)));
-				MYERROR("Error while performing request: %s", curl_easy_strerror(result));
-				outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
+	curl_easy_setopt(curl_handle, CURLOPT_URL, common->complete_url);
+	curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
+	curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, common->timeout);
+	curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck);
+#ifdef NEEDS_CERT_PATH
+	if (common->sslcheck){
+		curl_easy_setopt(curl_handle, CURLOPT_CAINFO, common->cert_path);
+	}
+#endif
+	if (common->auth_token_len) {
+		curl_easy_setopt(curl_handle, CURLOPT_COOKIE, common->auth_token);
+	}
+	if (strcmp(common->req_type, "PUT") == 0) {
+		curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
+		curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
+		/* Prepare data for reading */
+		if (common->parameters_len) {
+			in_memory.memory = getbytes(strlen(common->parameters) + 1);
+			in_memory.size = strlen(common->parameters);
+			if (in_memory.memory == NULL) {
+				MYERROR("not enough memory");
 			}
+			memcpy(in_memory.memory, common->parameters, strlen(common->parameters));
+		} else {
+			in_memory.memory = NULL;
+			in_memory.size = 0;
+		}
+		curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
+	} else if (strcmp(common->req_type, "POST") == 0) {
+		curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
+		curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, common->parameters);
+	} else if (strcmp(common->req_type, "DELETE") == 0) {
+		curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+	}
+	out_memory.memory = getbytes(1);
+	out_memory.size = 0;
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
+	result = curl_easy_perform(curl_handle);
+
+	/* output status */
+	curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_status);
+	SETSYMBOL(&http_status_data[0], gensym(common->req_type));
+	if (http_status >= 200 && http_status < 300) {
+		SETSYMBOL(&http_status_data[1], gensym("bang"));
+		outlet_list(common->stat_out, &s_list, 2, &http_status_data[0]);
+		if (result == CURLE_OK) {
+			outlet_symbol(common->x_ob.ob_outlet, gensym(out_memory.memory));
+			/* Free memory */
+			string_free(out_memory.memory, &out_memory.size);
+			free((void *)result);
 		} else {
 			SETFLOAT(&http_status_data[1], (float)http_status);
-			SETFLOAT(&http_status_data[2], (float)result);
-			MYERROR("HTTP error while performing request: %li", http_status);
+			SETSYMBOL(&http_status_data[2], gensym(curl_easy_strerror(result)));
+			MYERROR("Error while performing request: %s", curl_easy_strerror(result));
 			outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
 		}
-		curl_easy_cleanup(curl_handle);
 	} else {
-		MYERROR("Cannot init curl.");
+		SETFLOAT(&http_status_data[1], (float)http_status);
+		SETFLOAT(&http_status_data[2], (float)result);
+		MYERROR("HTTP error while performing request: %li", http_status);
+		outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
 	}
+	curl_easy_cleanup(curl_handle);
 	string_free(common->complete_url, &common->complete_url_len);
 	string_free(common->parameters, &common->parameters_len);
-	common->locked = 0;
 	if (fp) {
 		fclose(fp);
 	}
+	common->locked = 0;
 	return NULL;
 }
 

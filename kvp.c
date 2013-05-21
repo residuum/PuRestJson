@@ -24,6 +24,7 @@ static struct _kvp *kvp_create(char *key, char *value, unsigned char is_array){
 		MYERROR("Could not get data");
 		return NULL;
 	}
+
 	strcpy(created_data->key, key);
 	strcpy(created_data->value, value);
 	created_data->next = NULL;
@@ -33,25 +34,27 @@ static struct _kvp *kvp_create(char *key, char *value, unsigned char is_array){
 }
 
 static void kvp_store_add(struct _kvp_store *x, struct _kvp *new_pair) {
-	if (new_pair) {
-		x->data_count++;
-		if (!x->first_data) {
-			x->first_data = new_pair;
-		} else {
-			x->last_data->next = new_pair;
-		}
-		x->last_data = new_pair;
+	if (!new_pair) {
+		return;
 	}
+
+	x->data_count++;
+	if (!x->first_data) {
+		x->first_data = new_pair;
+	} else {
+		x->last_data->next = new_pair;
+	}
+	x->last_data = new_pair;
 }
 
 static void kvp_add(struct _kvp_store *x, char *key, char *value, unsigned char is_array) {
 	struct _kvp *compare = x->first_data;
 	struct _kvp *existing = NULL;
-	struct _kvp *new= NULL;
+	struct _kvp *new = NULL;
 	if (!is_array) {
-		while(compare!= NULL) {
+		while (compare != NULL) {
 			if (strcmp(compare->key, key) == 0) {
-				existing= compare;
+				existing = compare;
 				break;
 			}
 			compare = compare->next;
@@ -64,7 +67,6 @@ static void kvp_add(struct _kvp_store *x, char *key, char *value, unsigned char 
 	} else {
 		new = kvp_create(key, value, is_array);
 		kvp_store_add(x, new);
-
 	}
 }
 

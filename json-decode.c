@@ -36,46 +36,49 @@ static char *lowercase_unicode(char *orig, size_t *memsize) {
 	short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
 
 	cleaned_string = string_create(memsize, strlen(orig));
+	if (cleaned_string == NULL)
 	if (cleaned_string != NULL) {
-		if (strlen(orig) > 0) {
-			segment = strtok(orig, unicode_intro);
-			memset(cleaned_string, 0x00, strlen(orig) + 1);
-			strcpy(cleaned_string, segment);
-			segment = strtok(NULL, unicode_intro);
-
-			while(segment != NULL) {
-				strcat(cleaned_string, unicode_intro);
-				if (segment[0] == 'u') {
-					for (i = 1; i < 1 + uni_len; i++) {
-						switch (segment[i]) {
-							case 'A':
-								segment[i] = 'a';
-								break;
-							case 'B':
-								segment[i] = 'b';
-								break;
-							case 'C':
-								segment[i] = 'c';
-								break;
-							case 'D':
-								segment[i] = 'd';
-								break;
-							case 'E':
-								segment[i] = 'e';
-								break;
-							case 'F':
-								segment[i] = 'f';
-								break;
-						}
-					}
-				}
-				strcat(cleaned_string, segment);
-				segment = strtok(NULL, unicode_intro);
-			}
-
-		}
-	} else {
 		MYERROR("Could not allocate memory");
+		return NULL;
+	}
+
+	if (strlen(orig) <= 0) {
+		return cleaned_string;
+	}
+
+	segment = strtok(orig, unicode_intro);
+	memset(cleaned_string, 0x00, strlen(orig) + 1);
+	strcpy(cleaned_string, segment);
+	segment = strtok(NULL, unicode_intro);
+
+	while(segment != NULL) {
+		strcat(cleaned_string, unicode_intro);
+		if (segment[0] == 'u') {
+			for (i = 1; i < 1 + uni_len; i++) {
+				switch (segment[i]) {
+					case 'A':
+						segment[i] = 'a';
+						break;
+					case 'B':
+						segment[i] = 'b';
+						break;
+					case 'C':
+						segment[i] = 'c';
+						break;
+					case 'D':
+						segment[i] = 'd';
+						break;
+					case 'E':
+						segment[i] = 'e';
+						break;
+					case 'F':
+						segment[i] = 'f';
+						break;
+				}
+			}
+		}
+		strcat(cleaned_string, segment);
+		segment = strtok(NULL, unicode_intro);
 	}
 	return cleaned_string;
 }
@@ -266,29 +269,31 @@ void json_decode_list(t_json_decode *x, t_symbol *sel, int argc, t_atom *argv) {
 	}
 	original = getbytes(original_len * sizeof(char));
 
-	if (original) {
-		if (use_sel) {
-			strcpy(original, sel->s_name);
-		} else {
-			memset(original, 0x00, MAXPDSTRING);
-		}
-
-		if (argc > 0) {
-			for (i = 0; i < argc; i++) {
-				atom_string(argv + i, value, MAXPDSTRING);
-				if (strlen(original)) {
-					strcat(original, " ");
-				}
-				strcat(original, value);
-			}
-		}
-		if (strlen(original)) {
-			json_string = string_remove_backslashes(original, &json_len);
-			if (json_string != NULL) {
-				output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
-				string_free(json_string, &json_len);
-			}
-		}
-		string_free(original, &original_len);
+	if (!original) {
+		return;
 	}
+
+	if (use_sel) {
+		strcpy(original, sel->s_name);
+	} else {
+		memset(original, 0x00, MAXPDSTRING);
+	}
+
+	if (argc > 0) {
+		for (i = 0; i < argc; i++) {
+			atom_string(argv + i, value, MAXPDSTRING);
+			if (strlen(original)) {
+				strcat(original, " ");
+			}
+			strcat(original, value);
+		}
+	}
+	if (strlen(original)) {
+		json_string = string_remove_backslashes(original, &json_len);
+		if (json_string != NULL) {
+			output_json_string(json_string, x->x_ob.ob_outlet, x->done_outlet);
+			string_free(json_string, &json_len);
+		}
+	}
+	string_free(original, &original_len);
 }

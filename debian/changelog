@@ -1,5 +1,9 @@
-pd-purest-json (0.12) UNRELEASED; urgency=low
+pd-purest-json (0.12.1) UNRELEASED; urgency=low
+  * Bugfix: cookie authentication working again
+ 
+ -- Thomas Mayer <thomas@residuum.org>  Tue, 21 May 2013 23:40:00 +0200
 
+pd-purest-json (0.12) UNRELEASED; urgency=low
   * Disabling checking peer for SSL requests in [rest] and [oauth] possible
 
   * [urlparams] does now overwrite previously set parameters 

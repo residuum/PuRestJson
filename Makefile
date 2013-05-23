@@ -39,7 +39,7 @@ HELPPATCHES = json-help.pd rest-json-help.pd urlparams-help.pd oauth-help.pd res
 ALL_CFLAGS = -I"$(PD_INCLUDE)" -std=c99
 ALL_LDFLAGS =  
 SHARED_LDFLAGS =
-ALL_LIBS = -lcurl -ljson -loauth
+ALL_LIBS = -lcurl -ljson-c -loauth
 LIBS_windows = -lpthread -lm -lidn -lintl -lwldap32 -lgnutls -lhogweed -lgmp -lssl \
 			   -liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto \
 			   -lws2_32 -lgdi32 -lcrypt32 -lz  

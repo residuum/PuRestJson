@@ -26,7 +26,7 @@ THE SOFTWARE.
 
 #include <ctype.h>
 #include <string.h>
-#include <json/json.h>
+#include <json-c/json.h>
 #include "purest_json.h"
 
 #ifndef JSON_C_MAJOR_VERSION

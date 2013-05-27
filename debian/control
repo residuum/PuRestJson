@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Thomas Mayer <thomas@residuum.org>
 Build-Depends: debhelper (>= 7.0.50~),
                puredata-dev | puredata,
-               libjson0-dev,
+               libjson-c-dev,
                libcurl4-gnutls-dev | libcurl4-openssl-dev,
                liboauth-dev
 Standards-Version: 3.9.2
@@ -19,5 +19,4 @@ Recommends: pd-libdir
 Suggests: couchdb
 Description: pd library for working with JSON data and RESTful webservices
  PuREST JSON is a library for Pure Data for decoding and encoding JSON
- data as well as communication with RESTful webservices, that return
- JSON data.
+ data as well as communication with RESTful webservices.

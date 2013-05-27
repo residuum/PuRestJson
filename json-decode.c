@@ -27,63 +27,6 @@ static int str_ccmp(const char *s1, const char *s2) {
 	return toupper(*p2) > toupper(*p1) ? -1 : 1;
 }
 
-#if JSON_C_FIX
-static char *lowercase_unicode(char *orig, size_t *memsize) {
-	char *unicode_intro = "\\";
-	char *segment; 
-	char *cleaned_string;
-	short i;
-	short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
-
-	cleaned_string = string_create(memsize, strlen(orig));
-	if (cleaned_string == NULL)
-	if (cleaned_string != NULL) {
-		MYERROR("Could not allocate memory");
-		return NULL;
-	}
-
-	if (strlen(orig) <= 0) {
-		return cleaned_string;
-	}
-
-	segment = strtok(orig, unicode_intro);
-	memset(cleaned_string, 0x00, strlen(orig) + 1);
-	strcpy(cleaned_string, segment);
-	segment = strtok(NULL, unicode_intro);
-
-	while(segment != NULL) {
-		strcat(cleaned_string, unicode_intro);
-		if (segment[0] == 'u') {
-			for (i = 1; i < 1 + uni_len; i++) {
-				switch (segment[i]) {
-					case 'A':
-						segment[i] = 'a';
-						break;
-					case 'B':
-						segment[i] = 'b';
-						break;
-					case 'C':
-						segment[i] = 'c';
-						break;
-					case 'D':
-						segment[i] = 'd';
-						break;
-					case 'E':
-						segment[i] = 'e';
-						break;
-					case 'F':
-						segment[i] = 'f';
-						break;
-				}
-			}
-		}
-		strcat(cleaned_string, segment);
-		segment = strtok(NULL, unicode_intro);
-	}
-	return cleaned_string;
-}
-#endif
-
 static void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	enum json_type outer_type;
 	enum json_type inner_type;
@@ -191,15 +134,7 @@ static void output_json(json_object *jobj, t_outlet *data_outlet, t_outlet *done
 
 static void output_json_string(char *json_string, t_outlet *data_outlet, t_outlet *done_outlet) {
 	json_object *jobj;
-#if JSON_C_FIX
-	size_t memsize = 0;
-	/* Needed because of bug in json-c 0.9 */
-	char* corrected_json_string = lowercase_unicode(json_string, &memsize);
-	/* Parse JSON */
-	jobj = json_tokener_parse(corrected_json_string);
-#else
 	jobj = json_tokener_parse(json_string);
-#endif
 
 	if (!is_error(jobj)) {
 		output_json(jobj, data_outlet, done_outlet);
@@ -208,11 +143,6 @@ static void output_json_string(char *json_string, t_outlet *data_outlet, t_outle
 	} else {
 		MYERROR("Not a JSON object");
 	}
-#if JSON_C_FIX
-	if (corrected_json_string != NULL){
-		string_free(corrected_json_string, &memsize);
-	}
-#endif
 }
 
 void setup_json0x2ddecode(void) {

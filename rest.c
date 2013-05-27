@@ -5,6 +5,7 @@
 #include "rest.h"
 
 #include "string.c"
+#include "strlist.c"
 #include "ctw.c"
 
 struct _rest {
@@ -183,6 +184,8 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_command, gensym("POST"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_timeout, gensym("timeout"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_sslcheck, gensym("sslcheck"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_header, gensym("header"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_clear_headers, gensym("header_clear"), A_GIMME, 0);
 }
 
 void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
@@ -274,6 +277,22 @@ void rest_sslcheck(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 	} else {
 		ctw_set_sslcheck((struct _ctw *)x, atom_getint(argv));
 	}
+}
+
+void rest_header(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
+
+	(void) sel;
+
+	ctw_add_header((struct _ctw *)x, argc, argv);
+}
+
+void rest_clear_headers(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
+
+	(void) sel;
+	(void) argc;
+	(void) argv;
+
+	ctw_clear_headers((struct _ctw *)x);
 }
 
 void *rest_new(t_symbol *sel, int argc, t_atom *argv) {

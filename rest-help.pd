@@ -1,5 +1,145 @@
-#N canvas 347 60 952 532 10;
+#N canvas 345 58 1005 658 10;
 #X declare -lib purest_json;
+#X msg 474 42 GET http://search.twitter.com/search.json?q=%23puredata
+;
+#X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
+;
+#X text 55 -59 - object for HTTP communication with REST webservices
+;
+#X text 20 190 All requests are issued with [REQUEST_METHOD URL DATA(
+where REQUEST_METHOD is the uppercase verb of the method \, URL is
+the request URL \, or the relative server path \, if [url( or initialization
+is used \, and DATA is the upload data for PUT or post data for POST.
+;
+#X obj 450 553 print data;
+#X obj 532 553 print status;
+#X msg 476 106 GET http://search.twitter.com/wrongsearch.json?q=%23puredata
+;
+#X obj 450 -52 import purest_json;
+#X obj 19 -60 rest;
+#X text 19 23 [rest] is an object for communication with REST services.
+Request methods GET \, POST \, PUT and DELETE are available.;
+#X text 19 249 HTTP requests are asynchronous. Do not expect a request
+to return data immediately. While one request is processed \, the object
+id blocked.;
+#X obj 450 521 rest;
+#X text 474 88 This will give you an error message on the second outlet
+;
+#X text 494 135 By default \, requests do not timeout. To set a maximal
+time in milliseconds \, set a value with [timeout( message. To clear
+the value and return to the default \, use an empty [timeout( message.
+;
+#X msg 606 483 GET https://api.github.com/repos/residuum/PuRestJson/contents/Makefile
+;
+#X msg 497 189 timeout 2000;
+#X msg 586 186 timeout;
+#X msg 574 260 sslcheck 0;
+#X msg 649 260 sslcheck 1;
+#X obj 19 -36 oauth;
+#X text 57 -37 - object for HTTP communication with OAuth webservices
+;
+#X text 19 50 [oauth] is an object for communication with OAUTH enbabled
+webservices that return JSON data. Request methods GET and POST are
+available.;
+#N canvas 156 118 814 342 oauth-specific 0;
+#X text 27 7 Set the base url \, consumer key and secret (client credentials)
+\, and optionally access token and secret (token credentials) at creation
+or use [url( message.;
+#X obj 29 53 oauth http://example.com/ CLIENTKEY CLIENTSECRET ACCESSTOKEN
+ACCESSSECRET;
+#X msg 31 205 method PLAINTEXT;
+#X obj 31 304 oauth;
+#X msg 82 234 method HMAC;
+#X msg 91 262 method RSA privatekey;
+#N canvas 79 81 913 619 RSA 0;
+#X msg -89 318 GET /echo_api.php?method=foo&bar=baz;
+#X msg -92 361 POST /echo_api.php?method=foo&bar=baz;
+#X obj -128 409 oauth;
+#X obj -166 448 print data-rsa;
+#X obj -46 445 print status-rsa;
+#X msg -106 -47 method RSA -----BEGIN PRIVATE KEY----- MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
+A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d 7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ
+hI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H X9u2AC2ry8vD/l7cqedtwMPp9k7TubgNFo+NGvKsl2ynyprOZR1xjQ7WgrgVB+mm
+uScOM/5HVceFuGRDhYTCObE+y1kxRloNYXnx3ei1zbeYLPCHdhxRYW7T0qcynNmw rn05/KO2RLjgQNalsQJBANeA3Q4Nugqy4QBUCEC09SqylT2K9FrrItqL2QKc9v0Z
+zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn qkMsDmzt0EfNaAOwHOmVJ2RVBspPcxt5iN4HI7HNeG6U5YsFBb+/GZbgfBT3kpNG
+WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
+3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8 AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
+Lw03eHTNQghS0A== -----END PRIVATE KEY-----;
+#X msg -142 -95 url http://term.ie/oauth/example key this_is_ignored
+accesskey this_is_ignored;
+#X text 191 -98 You need to set client secret and access secret with
+the [url( message or as arguments for [oauth] \, but these will be
+ignored with the RSA key;
+#X connect 0 0 2 0;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X connect 2 1 4 0;
+#X connect 5 0 2 0;
+#X connect 6 0 2 0;
+#X restore 333 190 pd RSA;
+#X text 29 135 The method message will set the OAUTH signature method.
+Default is HMAC (HMAC-SHA1). For RSA (RSA-SHA1) you have to submit
+your private key. If your version of liboauth does not support RSA-SHA1
+signatures \, you will receive an error message.;
+#X text 439 12 The second output of [oauth] will output status data
+of the request.;
+#X msg 470 95 GET /echo_api.php?method=foo&bar=baz;
+#X msg 488 140 POST /echo_api.php?method=foo&bar=baz;
+#X obj 444 182 oauth;
+#X obj 495 226 print status;
+#X obj 406 221 print data;
+#X msg 436 49 url http://term.ie/oauth/example key secret accesskey
+accesssecret;
+#X connect 2 0 3 0;
+#X connect 4 0 3 0;
+#X connect 5 0 3 0;
+#X connect 9 0 11 0;
+#X connect 10 0 11 0;
+#X connect 11 0 13 0;
+#X connect 11 1 12 0;
+#X connect 14 0 11 0;
+#X restore 195 320 pd oauth-specific;
+#X msg 635 352 header Accept: application/json;
+#X msg 635 390 header User-Agent: My User Agent;
+#X text 19 -2 Most methods work the same for [rest] and [oauth] \,
+only some methods differ. The differences are outlined below.;
+#X text 20 100 All requests are issued with [REQUEST_METHOD URL DATA(
+where REQUEST_METHOD is the uppercase verb of the method \, URL is
+the relative server path \, and DATA are url parameters to add to the
+url. For creating the data \, see;
+#X obj 23 154 urlparams;
+#N canvas 153 66 441 365 rest-specific 1;
+#N canvas 498 76 443 465 cookie-auth 0;
+#X text 35 12 Basic cookie authentication is possible with [rest-json]
+\, as long as the service uses some guidelines \, that are adopted
+from CouchDB.;
+#X text 34 91 This will try to log you in on creation. It will call
+the url http://example.com/login-page and post username=myusername&password=mypass
+to the page.;
+#X text 34 128 When this returns a cookie \, the cookie will be saved
+and included in every request \, as long as the base url does not change.
+;
+#X text 35 168 Please keep in mind \, that passwords in Pd patches
+are stored in plain text \, especially when you use code hosting services.
+Better store your passwords in a seperate file or application and use
+[textfile] or OSC for getting the data.;
+#X msg 40 313 url http://example.com/ login-page myusername mypass
+;
+#X text 39 254 This;
+#X text 39 293 is the same as this after clicking the [url( message
+;
+#X text 38 374 To clear your stored authentication cookie \, send a
+[url( message with no additional parameters \, or with only one parameter.
+The latter will send only the base url \, but will not try to log you
+in.;
+#X obj 37 66 rest http://example.com/ login-page myusername mypass
+;
+#X obj 40 273 rest http://example.com/ login-page myusername mypass
+;
+#X obj 40 347 rest;
+#X connect 4 0 10 0;
+#X restore 38 293 pd cookie-auth;
+#X text 37 275 Using cookie authentication with [rest];
 #N canvas 256 52 853 470 CouchDB-basics 0;
 #X text 416 71 CRUD documents:;
 #X text 15 10 Basic CRUD methods for databases and individual documents
@@ -47,7 +187,7 @@ with a key of "ok" or "error" and information as value.;
 with [rest-json] \, you can even issue POST requests to a CouchDB server.
 If you want to do complex data operations on a CouchDB \, please refer
 to the manual: http://guide.couchdb.org/;
-#X restore 20 236 pd CouchDB-basics;
+#X restore 39 167 pd CouchDB-basics;
 #N canvas 192 51 932 709 couchdb 0;
 #X msg 603 26 bang;
 #X msg 59 19 url http://localhost:5984/;
@@ -168,94 +308,40 @@ to be used by a simple sequencer.;
 #X connect 43 1 5 0;
 #X connect 44 0 22 0;
 #X connect 44 0 43 0;
-#X restore 19 310 pd couchdb;
-#X msg 497 124 GET http://search.twitter.com/search.json?q=%23puredata
-;
-#X msg 474 64 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
-;
-#X text 55 -59 - object for HTTP communication with REST webservices
-;
-#X text 19 217 An example for a RESTful interface is CouchDB:;
-#X text 17 -3 All requests are issued with [REQUEST_METHOD URL DATA(
-where REQUEST_METHOD is the uppercase verb of the method \, URL is
-the request URL \, or the relative server path \, if [url( or initialization
-is used \, and DATA is the upload data for PUT or post data for POST.
-;
-#X text 17 261 Here is a complex example for using [rest-json] to communicate
+#X restore 38 241 pd couchdb;
+#X text 38 148 An example for a RESTful interface is CouchDB:;
+#X text 36 192 Here is a complex example for using [rest-json] to communicate
 with CouchDB. It uses GET \, POST and DELETE request methods. You will
 need to have a local installation of CouchDB.;
-#X obj 457 436 print data;
-#X text 18 99 Set the base url at creation or use [url( message. An
-empty url message will clean a previous set base url. You can also
-use four parameters for the [url( message to use basic cookie authentication
-\, see below.;
-#X text 18 344 Using cookie authentication with rest-json;
-#N canvas 498 76 443 465 cookie-auth 0;
-#X text 35 12 Basic cookie authentication is possible with [rest-json]
-\, as long as the service uses some guidelines \, that are adopted
-from CouchDB.;
-#X text 34 91 This will try to log you in on creation. It will call
-the url http://example.com/login-page and post username=myusername&password=mypass
-to the page.;
-#X text 34 128 When this returns a cookie \, the cookie will be saved
-and included in every request \, as long as the base url does not change.
-;
-#X text 35 168 Please keep in mind \, that passwords in Pd patches
-are stored in plain text \, especially when you use code hosting services.
-Better store your passwords in a seperate file or application and use
-[textfile] or OSC for getting the data.;
-#X msg 40 313 url http://example.com/ login-page myusername mypass
-;
-#X text 39 254 This;
-#X text 39 293 is the same as this after clicking the [url( message
-;
-#X text 38 374 To clear your stored authentication cookie \, send a
-[url( message with no additional parameters \, or with only one parameter.
-The latter will send only the base url \, but will not try to log you
-in.;
-#X obj 37 66 rest http://example.com/ login-page myusername mypass
-;
-#X obj 40 273 rest http://example.com/ login-page myusername mypass
-;
-#X obj 40 347 rest;
-#X connect 4 0 10 0;
-#X restore 19 362 pd cookie-auth;
-#X obj 539 436 print status;
-#X msg 499 188 GET http://search.twitter.com/wrongsearch.json?q=%23puredata
-;
-#X obj 457 -40 import purest_json;
-#X obj 19 -60 rest;
-#X text 17 -33 [rest] is an object for communication with REST services.
-Request methods GET \, POST \, PUT and DELETE are available.;
-#X text 18 61 HTTP requests are asynchronous. Do not expect a request
-to return data immediately. While one request is processed \, the object
-id blocked.;
-#X obj 20 158 rest http://localhost:5984/;
-#X obj 457 404 rest;
-#X text 497 170 This will give you an error message on the second outlet
-;
-#X text 517 217 By default \, requests do not timeout. To set a maximal
-time in milliseconds \, set a value with [timeout( message. To clear
-the value and return to the default \, use an empty [timeout( message.
-;
-#X msg 457 10 GET https://api.github.com/repos/residuum/PuRestJson/contents/Makefile
-;
-#X msg 520 271 timeout 2000;
-#X msg 536 303 timeout;
-#X text 18 189 The second outlet will output status information of
+#X obj 39 101 rest http://localhost:5984/;
+#X text 37 120 The second outlet will output status information of
 the request.;
-#X msg 607 342 sslcheck 0;
-#X msg 638 371 sslcheck 1;
-#X text 605 304 By default correct SSL host is checked. Disbale check
-by sending sslcheck with a value to 0 \, enable the check by setting
+#X text 37 30 Set the base url at creation or use [url( message. An
+empty url message will clean a previous set base url. The number of
+possible parameters for [rest] and [oauth] differ. You can also use
+four parameters for the [url( message to use basic cookie authentication
+\, see below.;
+#X restore 21 319 pd rest-specific;
+#X text 632 322 Some webservices return different data for different
+values of Accept: headers;
+#X text 632 300 You can set arbitrary HTTP headers with the [header(
+message.;
+#X text 634 370 Github requires User-Agent header;
+#X text 639 420 To clear HTTP headers \, issue [header_clear(;
+#X text 582 222 By default correct SSL host is checked. Disbale check
+by sending sslcheck with a value to 0 \, reenable checking by setting
 the value to 1;
-#X connect 2 0 19 0;
-#X connect 3 0 19 0;
-#X connect 13 0 19 0;
-#X connect 19 0 8 0;
-#X connect 19 1 12 0;
-#X connect 22 0 19 0;
-#X connect 23 0 19 0;
-#X connect 24 0 19 0;
-#X connect 26 0 19 0;
-#X connect 27 0 19 0;
+#X msg 637 442 header_clear;
+#X connect 0 0 11 0;
+#X connect 1 0 11 0;
+#X connect 6 0 11 0;
+#X connect 11 0 4 0;
+#X connect 11 1 5 0;
+#X connect 14 0 11 0;
+#X connect 15 0 11 0;
+#X connect 16 0 11 0;
+#X connect 17 0 11 0;
+#X connect 18 0 11 0;
+#X connect 23 0 11 0;
+#X connect 24 0 11 0;
+#X connect 34 0 11 0;

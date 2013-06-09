@@ -10,6 +10,7 @@ struct _ctw {
 	t_object x_ob;
 	t_outlet *stat_out;
 	t_atom *out;
+	struct _strlist *http_headers;
 	char req_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST; DELETE*/
 	size_t base_url_len;
 	char *base_url;
@@ -60,6 +61,7 @@ static void *ctw_exec_req(void *thread_args) {
 	struct _ctw *common = thread_args; 
 	CURL *curl_handle;
 	CURLcode result;
+	struct curl_slist *slist = NULL;
 	struct _memory_struct in_memory;
 	struct _memory_struct out_memory;
 	long http_status;
@@ -72,6 +74,14 @@ static void *ctw_exec_req(void *thread_args) {
 		MYERROR("Cannot init curl.");
 		common->locked = 0;
 		return NULL;
+	}
+	if (common->http_headers != NULL) {
+		struct _strlist *header = common->http_headers;
+		while(header != NULL) {
+			slist = curl_slist_append(slist, header->str);
+			header = header->next;
+		}
+		curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, slist);
 	}
 
 	curl_easy_setopt(curl_handle, CURLOPT_URL, common->complete_url);
@@ -143,6 +153,9 @@ static void *ctw_exec_req(void *thread_args) {
 	if (fp) {
 		fclose(fp);
 	}
+	if (slist != NULL) {
+		curl_slist_free_all(slist);
+	}
 	common->locked = 0;
 	return NULL;
 }
@@ -172,6 +185,36 @@ static void ctw_set_sslcheck(struct _ctw *x, int val) {
 	}
 }
 
+static void ctw_add_header(struct _ctw *x, int argc, t_atom *argv){
+	char *val;
+	char temp[MAXPDSTRING];
+	int i;
+	size_t header_len = 0;
+	size_t val_len;
+	if (argc < 1) {
+		MYERROR("You need to add some data to set headers");
+		return;
+	}
+	for (i = 0; i < argc; i++) {
+		atom_string(argv + i, temp, MAXPDSTRING);
+		header_len +=strlen(temp) + 1;
+	}
+	val = string_create(&(val_len), header_len);
+	for (i = 0; i < argc; i++) {
+		atom_string(argv + i, temp, MAXPDSTRING);
+		strcat(val, temp);
+		if (i < argc -1) {
+			strcat(val, " ");
+		}
+	}
+	x->http_headers = strlist_add(x->http_headers, val, val_len);
+}
+
+static void ctw_clear_headers(struct _ctw *x) {
+	strlist_free(x->http_headers);
+	x->http_headers = NULL;
+}
+
 static void ctw_set_timeout(struct _ctw *x, int val) {
 	x->timeout = (long) val;
 }
@@ -181,6 +224,7 @@ static void ctw_init(struct _ctw *x) {
 	x->parameters_len = 0;
 	x->complete_url_len = 0;
 	x->auth_token_len = 0;
+	x->http_headers = NULL;
 
 	ctw_set_timeout(x, 0);
 	ctw_set_sslcheck(x, 1);
@@ -191,6 +235,7 @@ static void ctw_free(struct _ctw *x) {
 	string_free(x->parameters, &x->parameters_len);
 	string_free(x->complete_url, &x->complete_url_len);
 	string_free(x->auth_token, &x->auth_token_len);
+	ctw_clear_headers(x);
 #ifdef NEEDS_CERT_PATH
 	string_free(x->cert_path, &x->cert_path_len);
 #endif 

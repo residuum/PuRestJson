@@ -5,6 +5,7 @@
 #include "oauth.h"
 
 #include "string.c"
+#include "strlist.c"
 #include "ctw.c"
 
 static t_class *oauth_class;
@@ -116,6 +117,9 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_method, gensym("method"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_timeout, gensym("timeout"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_sslcheck, gensym("sslcheck"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_header, gensym("header"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_clear_headers, gensym("header_clear"), A_GIMME, 0);
+	class_sethelpsymbol(oauth_class, gensym("rest"));
 }
 
 void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
@@ -231,6 +235,7 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 
 	if (argv[0].a_type != A_SYMBOL) {
 		MYERROR("'method' only takes a symbol argument. See help for more");
+		return;
 	}
 	atom_string(argv, method_name, 11);
 	if (strcmp(method_name, "HMAC") == 0) {
@@ -250,6 +255,7 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 					&& LIBOAUTH_VERSION_MINOR == 0 
 					&& LIBOAUTH_VERSION_MICRO == 0)) {
 			MYERROR("RSA-SHA1 is not supported by liboauth version < 1.0.1");
+			return;
 		}
 		if (argc > 1) {
 			x->oauth.method = OA_RSA;
@@ -322,6 +328,22 @@ void oauth_sslcheck(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	} else {
 		ctw_set_sslcheck((struct _ctw *)x, atom_getint(argv));
 	}
+}
+
+void oauth_header(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
+
+	(void) sel;
+
+	ctw_add_header((struct _ctw *)x, argc, argv);
+}
+
+void oauth_clear_headers(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
+
+	(void) sel;
+	(void) argc;
+	(void) argv;
+
+	ctw_clear_headers((struct _ctw *)x);
 }
 
 void *oauth_new(t_symbol *sel, int argc, t_atom *argv) {

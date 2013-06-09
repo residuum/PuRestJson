@@ -119,6 +119,7 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_sslcheck, gensym("sslcheck"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_clear_headers, gensym("header_clear"), A_GIMME, 0);
+	class_sethelpsymbol(oauth_class, gensym("rest"));
 }
 
 void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {

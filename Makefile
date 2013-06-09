@@ -27,7 +27,7 @@ EXTRA_DIST = Changelog.txt test.json
 # unit tests and related files here, in the 'unittests' subfolder
 UNITTESTS = 
 
-HELPPATCHES = json-help.pd rest-json-help.pd urlparams-help.pd oauth-help.pd rest-help.pd
+HELPPATCHES = json-help.pd rest-json-help.pd urlparams-help.pd rest-help.pd
 
 
 #------------------------------------------------------------------------------#

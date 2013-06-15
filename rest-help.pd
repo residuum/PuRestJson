@@ -1,7 +1,5 @@
-#N canvas 345 58 1005 658 10;
+#N canvas 343 56 1005 658 10;
 #X declare -lib purest_json;
-#X msg 474 42 GET http://search.twitter.com/search.json?q=%23puredata
-;
 #X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
 #X text 55 -59 - object for HTTP communication with REST webservices
@@ -11,10 +9,8 @@ where REQUEST_METHOD is the uppercase verb of the method \, URL is
 the request URL \, or the relative server path \, if [url( or initialization
 is used \, and DATA is the upload data for PUT or post data for POST.
 ;
-#X obj 450 553 print data;
-#X obj 532 553 print status;
-#X msg 476 106 GET http://search.twitter.com/wrongsearch.json?q=%23puredata
-;
+#X obj 450 422 print data;
+#X obj 532 422 print status;
 #X obj 450 -52 import purest_json;
 #X obj 19 -60 rest;
 #X text 19 23 [rest] is an object for communication with REST services.
@@ -22,19 +18,15 @@ Request methods GET \, POST \, PUT and DELETE are available.;
 #X text 19 249 HTTP requests are asynchronous. Do not expect a request
 to return data immediately. While one request is processed \, the object
 id blocked.;
-#X obj 450 521 rest;
-#X text 474 88 This will give you an error message on the second outlet
-;
-#X text 494 135 By default \, requests do not timeout. To set a maximal
+#X obj 450 390 rest;
+#X text 481 38 By default \, requests do not timeout. To set a maximal
 time in milliseconds \, set a value with [timeout( message. To clear
 the value and return to the default \, use an empty [timeout( message.
 ;
-#X msg 606 483 GET https://api.github.com/repos/residuum/PuRestJson/contents/Makefile
-;
-#X msg 497 189 timeout 2000;
-#X msg 586 186 timeout;
-#X msg 574 260 sslcheck 0;
-#X msg 649 260 sslcheck 1;
+#X msg 484 92 timeout 2000;
+#X msg 573 91 timeout;
+#X msg 600 285 sslcheck 0;
+#X msg 675 285 sslcheck 1;
 #X obj 19 -36 oauth;
 #X text 57 -37 - object for HTTP communication with OAuth webservices
 ;
@@ -99,8 +91,6 @@ accesssecret;
 #X connect 11 1 12 0;
 #X connect 14 0 11 0;
 #X restore 195 320 pd oauth-specific;
-#X msg 635 352 header Accept: application/json;
-#X msg 635 390 header User-Agent: My User Agent;
 #X text 19 -2 Most methods work the same for [rest] and [oauth] \,
 only some methods differ. The differences are outlined below.;
 #X text 20 100 All requests are issued with [REQUEST_METHOD URL DATA(
@@ -108,7 +98,7 @@ where REQUEST_METHOD is the uppercase verb of the method \, URL is
 the relative server path \, and DATA are url parameters to add to the
 url. For creating the data \, see;
 #X obj 23 154 urlparams;
-#N canvas 153 66 441 365 rest-specific 1;
+#N canvas 151 64 441 365 rest-specific 0;
 #N canvas 498 76 443 465 cookie-auth 0;
 #X text 35 12 Basic cookie authentication is possible with [rest-json]
 \, as long as the service uses some guidelines \, that are adopted
@@ -322,26 +312,41 @@ possible parameters for [rest] and [oauth] differ. You can also use
 four parameters for the [url( message to use basic cookie authentication
 \, see below.;
 #X restore 21 319 pd rest-specific;
-#X text 632 322 Some webservices return different data for different
-values of Accept: headers;
-#X text 632 300 You can set arbitrary HTTP headers with the [header(
-message.;
-#X text 634 370 Github requires User-Agent header;
-#X text 639 420 To clear HTTP headers \, issue [header_clear(;
-#X text 582 222 By default correct SSL host is checked. Disbale check
+#X text 594 242 By default correct SSL host is checked. Disable check
 by sending sslcheck with a value to 0 \, reenable checking by setting
 the value to 1;
-#X msg 637 442 header_clear;
-#X connect 0 0 11 0;
-#X connect 1 0 11 0;
-#X connect 6 0 11 0;
-#X connect 11 0 4 0;
-#X connect 11 1 5 0;
-#X connect 14 0 11 0;
-#X connect 15 0 11 0;
-#X connect 16 0 11 0;
-#X connect 17 0 11 0;
-#X connect 18 0 11 0;
-#X connect 23 0 11 0;
-#X connect 24 0 11 0;
-#X connect 34 0 11 0;
+#N canvas 116 151 628 451 headers 0;
+#X obj 76 359 print data;
+#X obj 158 359 print status;
+#X obj 76 327 rest;
+#X msg 191 226 GET https://api.github.com/repos/residuum/PuRestJson/contents/Makefile
+;
+#X msg 74 52 header Accept: application/json;
+#X msg 126 100 header User-Agent: My User Agent;
+#X text 71 0 You can set arbitrary HTTP headers with the [header( message.
+;
+#X text 125 80 Github requires User-Agent header;
+#X text 184 150 To clear HTTP headers \, issue [header_clear(;
+#X msg 182 172 header_clear;
+#X text 71 22 Some webservices return different data types for different
+values of Accept: headers;
+#X connect 2 0 0 0;
+#X connect 2 1 1 0;
+#X connect 3 0 2 0;
+#X connect 4 0 2 0;
+#X connect 5 0 2 0;
+#X connect 9 0 2 0;
+#X restore 21 293 pd headers;
+#X msg 620 186 cancel;
+#X text 618 136 You can cancel a currently executed request by issuing
+[cancel(. If data has been returned already \, but is not output \,
+or output only partially \, outputting the data will still be completed.
+;
+#X connect 0 0 9 0;
+#X connect 9 0 3 0;
+#X connect 9 1 4 0;
+#X connect 11 0 9 0;
+#X connect 12 0 9 0;
+#X connect 13 0 9 0;
+#X connect 14 0 9 0;
+#X connect 25 0 9 0;

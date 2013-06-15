@@ -184,6 +184,7 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_command, gensym("POST"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_timeout, gensym("timeout"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_sslcheck, gensym("sslcheck"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_cancel, gensym("cancel"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_clear_headers, gensym("header_clear"), A_GIMME, 0);
 }
@@ -277,6 +278,15 @@ void rest_sslcheck(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 	} else {
 		ctw_set_sslcheck((struct _ctw *)x, atom_getint(argv));
 	}
+}
+
+void rest_cancel(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
+
+	(void) sel;
+	(void) argc;
+	(void) argv;
+
+	ctw_cancel((struct _ctw *)x);
 }
 
 void rest_header(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {

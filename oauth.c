@@ -117,6 +117,7 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_method, gensym("method"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_timeout, gensym("timeout"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_sslcheck, gensym("sslcheck"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_cancel, gensym("cancel"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_clear_headers, gensym("header_clear"), A_GIMME, 0);
 	class_sethelpsymbol(oauth_class, gensym("rest"));
@@ -328,6 +329,15 @@ void oauth_sslcheck(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	} else {
 		ctw_set_sslcheck((struct _ctw *)x, atom_getint(argv));
 	}
+}
+
+void oauth_cancel(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
+
+	(void) sel;
+	(void) argc;
+	(void) argv;
+
+	ctw_cancel((struct _ctw *)x);
 }
 
 void oauth_header(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {

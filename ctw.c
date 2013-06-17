@@ -60,7 +60,6 @@ static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) 
 
 static void cleanup_thread(void *args) {
 	struct _ctw *common = args; 
-	post("cleanup called");
 	common->locked = 0;
 }
 

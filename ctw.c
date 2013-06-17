@@ -58,6 +58,20 @@ static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) 
 	return to_copy;
 }
 
+/* This callback will be used to cancel an ongoing request, 
+ * see http://curl.haxx.se/docs/faq.html#How_do_I_stop_an_ongoing_transfe */
+static int ctw_curl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow){
+	(void) dltotal;
+	(void) dlnow;
+	(void) ultotal;
+	(void) ulnow;
+	
+	struct _ctw *common = clientp; 
+
+	return (common->locked == 0);
+
+}
+
 static void cleanup_thread(void *args) {
 	struct _ctw *common = args; 
 	common->locked = 0;
@@ -127,6 +141,8 @@ static void *ctw_exec_req(void *thread_args) {
 		out_memory.size = 0;
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
+		curl_easy_setopt(curl_handle, CURLOPT_PROGRESSFUNCTION, ctw_curl_progress);
+		curl_easy_setopt(curl_handle, CURLOPT_PROGRESSDATA, (void *)&common);
 		result = curl_easy_perform(curl_handle);
 
 		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, PTHREAD_CANCEL_ENABLE);

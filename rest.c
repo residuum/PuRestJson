@@ -129,7 +129,7 @@ static void set_url_parameters(t_rest *x, int argc, t_atom *argv) {
 			break;
 		case 1:
 			if (argv[0].a_type != A_SYMBOL) {
-				MYERROR("Base URL cannot be set.");
+				pd_error(x, "Base URL cannot be set.");
 			} else {
 				atom_string(argv, temp, MAXPDSTRING);
 				x->common.base_url = string_create(&x->common.base_url_len, strlen(temp));
@@ -139,37 +139,37 @@ static void set_url_parameters(t_rest *x, int argc, t_atom *argv) {
 		case 4:
 			x->common.locked = 1;
 			if (argv[0].a_type != A_SYMBOL) {
-				MYERROR("Base URL cannot be set.");
+				pd_error(x, "Base URL cannot be set.");
 			} else {
 				atom_string(argv, temp, MAXPDSTRING);
 				x->common.base_url = string_create(&x->common.base_url_len, strlen(temp));
 				strcpy(x->common.base_url, temp);
 			}
 			if (argv[1].a_type != A_SYMBOL) {
-				MYERROR("Cookie path cannot be set.");
+				pd_error(x, "Cookie path cannot be set.");
 			} else {
 				atom_string(argv + 1, temp, MAXPDSTRING);
 				x->cookie.login_path = string_create(&x->cookie.login_path_len, strlen(temp));
 				strcpy(x->cookie.login_path, temp);
 			}
 			if (argv[2].a_type != A_SYMBOL) {
-				MYERROR("Username cannot be set.");
+				pd_error(x, "Username cannot be set.");
 			} else {
 				atom_string(argv + 2, temp, MAXPDSTRING);
 				x->cookie.username = string_create(&x->cookie.username_len, strlen(temp));
 				strcpy(x->cookie.username, temp);
 			}
 			if (argv[3].a_type != A_SYMBOL) {
-				MYERROR("Password cannot be set.");
+				pd_error(x, "Password cannot be set.");
 			} else {
 				atom_string(argv + 3, temp, MAXPDSTRING);
 				x->cookie.password = string_create(&x->cookie.password_len, strlen(temp));
 				strcpy(x->cookie.password, temp);
 			}
-			ctw_thread_exec((struct _ctw *)x, get_cookie_auth_token);
+			ctw_thread_exec((void *)x, get_cookie_auth_token);
 			break;
 		default:
-			MYERROR("Wrong number of parameters.");
+			pd_error(x, "Wrong number of parameters.");
 			break;
 	}
 }
@@ -216,7 +216,7 @@ void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 				strcmp(x->common.req_type, "DELETE"))) {
 		SETSYMBOL(&auth_status_data[0], gensym("request"));
 		SETSYMBOL(&auth_status_data[1], gensym("Request method not supported"));
-		MYERROR("Request method %s not supported.", x->common.req_type);
+		pd_error(x, "Request method %s not supported.", x->common.req_type);
 		outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
 		x->common.locked = 0;
 		return;
@@ -238,7 +238,7 @@ void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 			freebytes(cleaned_parameters, memsize);
 		}
 	}
-	ctw_thread_exec((struct _ctw *)x, ctw_exec_req);
+	ctw_thread_exec((void *)x, ctw_exec_req);
 }
 
 void rest_url(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
@@ -259,7 +259,7 @@ void rest_timeout(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 	if(x->common.locked) {
 		post("rest object is performing request and locked");
 	} else if (argc > 2){
-		MYERROR("timeout must have 0 or 1 parameter");
+		pd_error(x, "timeout must have 0 or 1 parameter");
 	} else if (argc == 0) {
 		ctw_set_timeout((struct _ctw *)x, 0);
 	} else {
@@ -274,7 +274,7 @@ void rest_sslcheck(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 	if(x->common.locked) {
 		post("rest object is performing request and locked");
 	} else if (argc != 1){
-		MYERROR("sslcheck must have 1 parameter");
+		pd_error(x, "sslcheck must have 1 parameter");
 	} else {
 		ctw_set_sslcheck((struct _ctw *)x, atom_getint(argv));
 	}
@@ -293,7 +293,7 @@ void rest_header(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 
 	(void) sel;
 
-	ctw_add_header((struct _ctw *)x, argc, argv);
+	ctw_add_header((void *)x, argc, argv);
 }
 
 void rest_clear_headers(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {

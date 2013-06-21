@@ -1,4 +1,4 @@
-#N canvas 341 54 1005 658 10;
+#N canvas 337 51 1005 658 10;
 #X declare -lib purest_json;
 #X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
@@ -337,14 +337,44 @@ values of Accept: headers;
 #X connect 5 0 2 0;
 #X connect 9 0 2 0;
 #X restore 21 293 pd headers;
-#X msg 632 145 cancel;
-#X text 630 95 You can cancel a currently executed request by issuing
-[cancel(. If data has been returned already \, but is not output \,
-or output only partially \, outputting the data will still be completed.
-;
-#X text 614 201 Use this request to test cancelling and timeout: it
+#X msg 634 169 cancel;
+#X text 637 202 Use this request to test cancelling and timeout: it
 will wait for 10 seconds before returning data.;
-#X msg 618 231 GET http://ix.residuum.org/pd/sleep_example.php;
+#X msg 641 232 GET http://ix.residuum.org/pd/sleep_example.php;
+#N canvas 389 256 641 345 cancel 0;
+#X obj 105 -51 print data;
+#X obj 187 -51 print status;
+#X obj 105 -83 rest;
+#X msg 159 -165 cancel;
+#X obj 303 -213 t b b;
+#X obj 303 -242 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X msg 105 -130 GET http://ix.residuum.org/pd/sleep_example.php;
+#X obj 105 -220 t b b;
+#X obj 105 -249 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X text 79 -311 This won't always work \, as another thread will have
+to be signalled and must clean up.;
+#X text 277 -277 By experimentation \, I have found out that a delay
+of 10ms is sufficient on my system (TM).;
+#X obj 277 -168 del 10;
+#X connect 2 0 0 0;
+#X connect 2 1 1 0;
+#X connect 3 0 2 0;
+#X connect 4 0 11 0;
+#X connect 4 1 3 0;
+#X connect 5 0 4 0;
+#X connect 6 0 2 0;
+#X connect 7 0 6 0;
+#X connect 7 1 3 0;
+#X connect 8 0 7 0;
+#X connect 11 0 6 0;
+#X restore 718 168 pd cancel;
+#X text 630 95 Experimental: You can cancel a currently executed request
+by issuing [cancel(. If data has been returned already \, but is not
+output \, or output only partially \, outputting the data will still
+be completed. Note \, that cancelling the call may take some time \,
+so do not try to issue a new request immediately. See;
 #X connect 0 0 9 0;
 #X connect 9 0 3 0;
 #X connect 9 1 4 0;
@@ -353,4 +383,4 @@ will wait for 10 seconds before returning data.;
 #X connect 13 0 9 0;
 #X connect 14 0 9 0;
 #X connect 25 0 9 0;
-#X connect 28 0 9 0;
+#X connect 27 0 9 0;

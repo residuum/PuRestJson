@@ -1,4 +1,4 @@
-## Pd library template version 1.0.12
+## Pd library template version 1.0.14
 # For instructions on how to use this template, see:
 #  http://puredata.info/docs/developer/MakefileTemplate
 LIBRARY_NAME = purest_json
@@ -13,7 +13,7 @@ SOURCES = rest.c oauth.c json-decode.c json-encode.c urlparams.c
 PDOBJECTS = rest-json.pd
 
 # example patches and related files, in the 'examples' subfolder
-EXAMPLES = purest-json-test.pd the-sound-of-money.pd twitter-visualization.pd statistics.pd twitter-client.pd
+EXAMPLES = purest-json-test.pd the-sound-of-money.pd statistics.pd twitter-client.pd
 
 # manuals and related files, in the 'manual' subfolder
 MANUAL = index.html couchdb-example.png webservice-example.png twitter.html twitter-documentation.png
@@ -78,7 +78,7 @@ INSTALL_DIR     = $(INSTALL) -p -m 755 -d
 
 ALLSOURCES := $(SOURCES) $(SOURCES_android) $(SOURCES_cygwin) $(SOURCES_macosx) \
 	         $(SOURCES_iphoneos) $(SOURCES_linux) $(SOURCES_windows) \
-			 ctw.c kvp.c string.c
+			 ctw.c kvp.c string.c strlist.c
 
 DISTDIR=$(LIBRARY_NAME)-$(LIBRARY_VERSION)
 ORIGDIR=pd-`echo $(LIBRARY_NAME:~=)|tr '_' '-'`_$(LIBRARY_VERSION)
@@ -114,15 +114,21 @@ ifeq ($(UNAME),Darwin)
     OPT_CFLAGS = -ftree-vectorize -ftree-vectorizer-verbose=2 -fast
 # build universal 32-bit on 10.4 and 32/64 on newer
     ifeq ($(shell uname -r | sed 's|\([0-9][0-9]*\)\.[0-9][0-9]*\.[0-9][0-9]*|\1|'), 8)
-      #FAT_FLAGS = -arch ppc -arch i386 -mmacosx-version-min=10.4
+      FAT_FLAGS = -arch ppc -arch i386 -mmacosx-version-min=10.4
     else
-      #FAT_FLAGS = -arch ppc -arch i386 -arch x86_64 -mmacosx-version-min=10.4
       SOURCES += $(SOURCES_iphoneos)
+# Starting with Xcode 4.0, the PowerPC compiler is not installed by default
+      ifeq ($(wildcard /usr/llvm-gcc-4.2/libexec/gcc/powerpc*), )
+        FAT_FLAGS = -arch i386 -arch x86_64 -mmacosx-version-min=10.5
+      else
+        FAT_FLAGS = -arch ppc -arch i386 -arch x86_64 -mmacosx-version-min=10.4
+      endif
     endif
     ALL_CFLAGS += $(FAT_FLAGS) -fPIC -I/sw/include
     # if the 'pd' binary exists, check the linking against it to aid with stripping
     BUNDLE_LOADER = $(shell test ! -e $(PD_PATH)/bin/pd || echo -bundle_loader $(PD_PATH)/bin/pd)
-    ALL_LDFLAGS += $(FAT_FLAGS) -bundle $(BUNDLE_LOADER) -undefined dynamic_lookup -L/sw/lib
+    ALL_LDFLAGS += $(FAT_FLAGS) -headerpad_max_install_names -bundle $(BUNDLE_LOADER) \
+	-undefined dynamic_lookup -L/sw/lib
     SHARED_LDFLAGS += $(FAT_FLAGS) -dynamiclib -undefined dynamic_lookup \
 	-install_name @loader_path/$(SHARED_LIB) -compatibility_version 1 -current_version 1.0
     ALL_LIBS += -lc $(LIBS_macosx)
@@ -137,22 +143,25 @@ endif
 ifeq ($(UNAME),ANDROID)
   CPU := arm
   SOURCES += $(SOURCES_android)
-  EXTENSION = pd_linux
+  EXTENSION = so
   SHARED_EXTENSION = so
   OS = android
   PD_PATH = /usr
   NDK_BASE := /usr/local/android-ndk
-  NDK_PLATFORM_VERSION := 5
-  NDK_SYSROOT=$(NDK_BASE)/platforms/android-$(NDK_PLATFORM_VERSION)/arch-arm
+  NDK_PLATFORM_LEVEL ?= 5
+  NDK_ABI=arm
+  NDK_SYSROOT=$(NDK_BASE)/platforms/android-$(NDK_PLATFORM_LEVEL)/arch-$(NDK_ABI)
   NDK_UNAME := $(shell uname -s | tr '[A-Z]' '[a-z]')
-  NDK_TOOLCHAIN_BASE=$(NDK_BASE)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/$(NDK_UNAME)-x86
-  CC := $(NDK_TOOLCHAIN_BASE)/bin/arm-linux-androideabi-gcc --sysroot=$(NDK_SYSROOT)
+  NDK_COMPILER_VERSION=4.6
+  NDK_TOOLCHAIN=$(wildcard \
+	$(NDK_BASE)/toolchains/$(NDK_ABI)*-$(NDK_COMPILER_VERSION)/prebuilt/$(NDK_UNAME)-x86)
+  CC := $(wildcard $(NDK_TOOLCHAIN)/bin/*-linux-android*-gcc) --sysroot=$(NDK_SYSROOT)
   OPT_CFLAGS = -O6 -funroll-loops -fomit-frame-pointer
   CFLAGS += 
   LDFLAGS += -rdynamic -shared
   SHARED_LDFLAGS += -Wl,-soname,$(SHARED_LIB) -shared
   LIBS += -lc $(LIBS_android)
-  STRIP := $(NDK_TOOLCHAIN_BASE)/bin/arm-linux-androideabi-strip \
+  STRIP := $(wildcard $(NDK_TOOLCHAIN)/bin/$(NDK_ABI)-linux-android*-strip) \
 	--strip-unneeded -R .note -R .comment
   DISTBINDIR=$(DISTDIR)-$(OS)-$(shell uname -m)
 endif
@@ -255,7 +264,7 @@ ALL_LIBS := $(LIBS) $(ALL_LIBS)
 
 SHARED_SOURCE ?= $(wildcard lib$(LIBRARY_NAME).c)
 SHARED_HEADER ?= $(shell test ! -e $(LIBRARY_NAME).h || echo $(LIBRARY_NAME).h)
-SHARED_LIB = $(SHARED_SOURCE:.c=.$(SHARED_EXTENSION))
+SHARED_LIB ?= $(SHARED_SOURCE:.c=.$(SHARED_EXTENSION))
 SHARED_TCL_LIB = $(wildcard lib$(LIBRARY_NAME).tcl)
 
 .PHONY = install libdir_install single_install install-doc install-examples install-manual install-unittests clean distclean dist etags $(LIBRARY_NAME)
@@ -276,9 +285,7 @@ $(LIBRARY_NAME): $(SOURCES:.c=.o) $(LIBRARY_NAME).o lib$(LIBRARY_NAME).o
 	chmod a-x $(LIBRARY_NAME).$(EXTENSION)
 
 $(SHARED_LIB): $(SHARED_SOURCE:.c=.o)
-  ifneq ($(strip $(SHARED_LIB)),)
-    $(CC) $(SHARED_LDFLAGS) -o $(SHARED_LIB) $(SHARED_SOURCE:.c=.o) $(ALL_LIBS)
-  endif 
+	$(CC) $(SHARED_LDFLAGS) -o $(SHARED_LIB) $(SHARED_SOURCE:.c=.o) $(ALL_LIBS)
 
 install: libdir_install
 
@@ -454,10 +461,12 @@ showsetup:
 	@echo "SHARED_TCL_LIB: $(SHARED_TCL_LIB)"
 	@echo "PDOBJECTS: $(PDOBJECTS)"
 	@echo "ALLSOURCES: $(ALLSOURCES)"
-	@echo "ALLSOURCES HEADERS: $(wildcard $(ALLSOURCES:.c=.h))"
 	@echo "ALLSOURCES TCL: $(wildcard $(ALLSOURCES:.c=.tcl))"
 	@echo "UNAME: $(UNAME)"
 	@echo "CPU: $(CPU)"
 	@echo "pkglibdir: $(pkglibdir)"
 	@echo "DISTDIR: $(DISTDIR)"
 	@echo "ORIGDIR: $(ORIGDIR)"
+	@echo "NDK_TOOLCHAIN: $(NDK_TOOLCHAIN)"
+	@echo "NDK_BASE: $(NDK_BASE)"
+	@echo "NDK_SYSROOT: $(NDK_SYSROOT)"

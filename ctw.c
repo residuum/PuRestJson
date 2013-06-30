@@ -149,8 +149,6 @@ static void *ctw_exec_req(void *thread_args) {
 		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
 		pthread_cleanup_pop(0);
 
-		post("starting cleanup");
-
 		/* output status */
 		curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_status);
 		SETSYMBOL(&http_status_data[0], gensym(common->req_type));

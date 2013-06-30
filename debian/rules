@@ -1,5 +1,6 @@
 #!/usr/bin/make -f
 
+DEB_CONFIGURE_EXTRA_FLAGS += --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
 LIBRARY_NAME = purest_json
 PACKAGE = pd-purest-json
 pkglibdir = /usr/lib/pd/extra

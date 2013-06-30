@@ -44,5 +44,6 @@ APIEXPORT void APICALL oauth_timeout(t_oauth *x, t_symbol *sel, int argc, t_atom
 APIEXPORT void APICALL oauth_url(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
 APIEXPORT void APICALL oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
 APIEXPORT void APICALL oauth_sslcheck(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_cancel(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
 APIEXPORT void APICALL oauth_header(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
 APIEXPORT void APICALL oauth_clear_headers(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);

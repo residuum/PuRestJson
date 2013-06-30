@@ -44,21 +44,21 @@ static void set_url_parameters(t_oauth *x, int argc, t_atom *argv) {
 			break;
 		case 3:
 			if (argv[0].a_type != A_SYMBOL) {
-				MYERROR("Base URL cannot be set.");
+				pd_error(x, "Base URL cannot be set.");
 			} else {
 				atom_string(argv, temp, MAXPDSTRING);
 				x->common.base_url = string_create(&x->common.base_url_len, strlen(temp));
 				strcpy(x->common.base_url, temp);
 			}
 			if (argv[1].a_type != A_SYMBOL) {
-				MYERROR("Client key cannot be set.");
+				pd_error(x, "Client key cannot be set.");
 			} else {
 				atom_string(argv + 1, temp, MAXPDSTRING);
 				x->oauth.client_key = string_create(&x->oauth.client_key_len, strlen(temp));
 				strcpy(x->oauth.client_key, temp);
 			}
 			if (argv[2].a_type != A_SYMBOL) {
-				MYERROR("Client secret cannot be set.");
+				pd_error(x, "Client secret cannot be set.");
 			} else {
 				atom_string(argv + 2, temp, MAXPDSTRING);
 				x->oauth.client_secret = string_create(&x->oauth.client_secret_len, strlen(temp));
@@ -67,35 +67,35 @@ static void set_url_parameters(t_oauth *x, int argc, t_atom *argv) {
 			break;
 		case 5:
 			if (argv[0].a_type != A_SYMBOL) {
-				MYERROR("Base URL cannot be set.");
+				pd_error(x, "Base URL cannot be set.");
 			} else {
 				atom_string(argv, temp, MAXPDSTRING);
 				x->common.base_url = string_create(&x->common.base_url_len, strlen(temp));
 				strcpy(x->common.base_url, temp);
 			}
 			if (argv[1].a_type != A_SYMBOL) {
-				MYERROR("Client key cannot be set.");
+				pd_error(x, "Client key cannot be set.");
 			} else {
 				atom_string(argv + 1, temp, MAXPDSTRING);
 				x->oauth.client_key = string_create(&x->oauth.client_key_len, strlen(temp));
 				strcpy(x->oauth.client_key, temp);
 			}
 			if (argv[2].a_type != A_SYMBOL) {
-				MYERROR("Client secret cannot be set.");
+				pd_error(x, "Client secret cannot be set.");
 			} else {
 				atom_string(argv + 2, temp, MAXPDSTRING);
 				x->oauth.client_secret = string_create(&x->oauth.client_secret_len, strlen(temp));
 				strcpy(x->oauth.client_secret, temp);
 			}
 			if (argv[3].a_type != A_SYMBOL) {
-				MYERROR("Client key cannot be set.");
+				pd_error(x, "Client key cannot be set.");
 			} else {
 				atom_string(argv + 3, temp, MAXPDSTRING);
 				x->oauth.token_key = string_create(&x->oauth.token_key_len, strlen(temp));
 				strcpy(x->oauth.token_key, temp);
 			}
 			if (argv[4].a_type != A_SYMBOL) {
-				MYERROR("Client secret cannot be set.");
+				pd_error(x, "Client secret cannot be set.");
 			} else {
 				atom_string(argv + 4, temp, MAXPDSTRING);
 				x->oauth.token_secret = string_create(&x->oauth.token_secret_len, strlen(temp));
@@ -103,7 +103,7 @@ static void set_url_parameters(t_oauth *x, int argc, t_atom *argv) {
 			}
 			break;
 		default:
-			MYERROR("Wrong number of parameters.");
+			pd_error(x, "Wrong number of parameters.");
 			break;
 	}
 }
@@ -117,6 +117,7 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_method, gensym("method"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_timeout, gensym("timeout"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_sslcheck, gensym("sslcheck"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_cancel, gensym("cancel"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_clear_headers, gensym("header_clear"), A_GIMME, 0);
 	class_sethelpsymbol(oauth_class, gensym("rest"));
@@ -151,7 +152,7 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 				strcmp(x->common.req_type, "POST"))) {
 		SETSYMBOL(&auth_status_data[0], gensym("oauth"));
 		SETSYMBOL(&auth_status_data[1], gensym("Request Method not supported"));
-		MYERROR("Request method %s not supported.", x->common.req_type);
+		pd_error(x, "Request method %s not supported.", x->common.req_type);
 		outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
 		x->common.locked = 0;
 		return;
@@ -214,7 +215,7 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	if (req_url) {
 		free(req_url);
 	}
-	ctw_thread_exec((struct _ctw *)x, ctw_exec_req);
+	ctw_thread_exec((void *)x, ctw_exec_req);
 }
 
 void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
@@ -229,12 +230,12 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	string_free(x->oauth.rsa_key, &x->oauth.rsa_key_len);
 
 	if (argc == 0) {
-		MYERROR("'method' needs at least one argument. See help for more");
+		pd_error(x, "'method' needs at least one argument. See help for more");
 		return;
 	}
 
 	if (argv[0].a_type != A_SYMBOL) {
-		MYERROR("'method' only takes a symbol argument. See help for more");
+		pd_error(x, "'method' only takes a symbol argument. See help for more");
 		return;
 	}
 	atom_string(argv, method_name, 11);
@@ -254,7 +255,7 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 				|| (LIBOAUTH_VERSION_MAJOR == 1 
 					&& LIBOAUTH_VERSION_MINOR == 0 
 					&& LIBOAUTH_VERSION_MICRO == 0)) {
-			MYERROR("RSA-SHA1 is not supported by liboauth version < 1.0.1");
+			pd_error(x, "RSA-SHA1 is not supported by liboauth version < 1.0.1");
 			return;
 		}
 		if (argc > 1) {
@@ -284,10 +285,10 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 				}
 			}
 		} else {
-			MYERROR("RSA needs the RSA private key as additional data");
+			pd_error(x, "RSA needs the RSA private key as additional data");
 		}
 	} else {
-		MYERROR("Only HMAC, RSA, and PLAINTEXT allowed");
+		pd_error(x, "Only HMAC, RSA, and PLAINTEXT allowed");
 	}
 }
 
@@ -309,7 +310,7 @@ void oauth_timeout(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	if(x->common.locked) {
 		post("oauth object is performing request and locked");
 	} else if (argc > 2){
-		MYERROR("timeout must have 0 or 1 parameter");
+		pd_error(x, "timeout must have 0 or 1 parameter");
 	} else if (argc == 0) {
 		ctw_set_timeout((struct _ctw *)x, 0);
 	} else {
@@ -324,17 +325,26 @@ void oauth_sslcheck(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	if(x->common.locked) {
 		post("oauth object is performing request and locked");
 	} else if (argc != 1){
-		MYERROR("sslcheck must have 1 parameter");
+		pd_error(x, "sslcheck must have 1 parameter");
 	} else {
 		ctw_set_sslcheck((struct _ctw *)x, atom_getint(argv));
 	}
+}
+
+void oauth_cancel(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
+
+	(void) sel;
+	(void) argc;
+	(void) argv;
+
+	ctw_cancel((struct _ctw *)x);
 }
 
 void oauth_header(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 
 	(void) sel;
 
-	ctw_add_header((struct _ctw *)x, argc, argv);
+	ctw_add_header((void *)x, argc, argv);
 }
 
 void oauth_clear_headers(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {

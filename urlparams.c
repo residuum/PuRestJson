@@ -118,7 +118,7 @@ void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 	(void) sel;
 
 	if (argc < 2) {
-		MYERROR("For method 'add' You need to specify a value.");
+		pd_error(x, "For method 'add' You need to specify a value.");
 		return;
 	}
 

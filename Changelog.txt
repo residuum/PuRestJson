@@ -1,5 +1,11 @@
 Changelog
 ---------
+0.13.0:
+- Setting HTTP headers possible
+- Cancelling of requests possible while waiting (experimental)
+- Switched Makefile to libary template 1.0.14
+- Semantic versioning
+
 0.12.1:
 - Bugfix: Cookie authentication is working again.
 

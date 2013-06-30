@@ -2,7 +2,7 @@ Source: pd-purest-json
 Section: sound
 Priority: optional
 Maintainer: Thomas Mayer <thomas@residuum.org>
-Build-Depends: debhelper (>= 7.0.50~),
+Build-Depends: debhelper (>= 8.1.3),
                puredata-dev | puredata,
                libjson-c-dev,
                libcurl4-gnutls-dev | libcurl4-openssl-dev,
@@ -13,8 +13,7 @@ Homepage: https://github.com/residuum/PuRestJson
 Package: pd-purest-json
 Architecture: any
 Depends: ${shlibs:Depends},
-         puredata-core | pd,
-         ${misc:Depends}
+         puredata-core | pd
 Recommends: pd-libdir
 Suggests: couchdb
 Description: pd library for working with JSON data and RESTful webservices

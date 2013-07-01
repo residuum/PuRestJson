@@ -68,10 +68,10 @@ static void *get_cookie_auth_token(void *thread_args) {
 	curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
 	curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, post_data);
-	out_content.memory = string_create(&out_content.size, 0);
-	out_content.memory = 0;
-	out_header.memory = string_create(&out_header.size, 0);
-	out_header.memory = 0;
+	out_content.memory = getbytes(1);
+	out_content.size = 0;
+	out_header.memory = getbytes(1);
+	out_header.size = 0;
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_content);
 	curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb);

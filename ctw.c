@@ -109,6 +109,7 @@ static void *ctw_exec_req(void *thread_args) {
 #ifdef NEEDS_CERT_PATH
 		if (common->sslcheck){
 			curl_easy_setopt(curl_handle, CURLOPT_CAINFO, common->cert_path);
+			curl_easy_setopt(curl_handle, CURLOPT_CAPATH, common->cert_path);
 		}
 #endif
 		if (common->auth_token_len) {

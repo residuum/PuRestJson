@@ -93,6 +93,11 @@ static void *ctw_exec_req(void *thread_args) {
 	if (!curl_handle) {
 		MYERROR("Cannot init curl.");
 	} else {
+		/* enable redirection */
+		curl_easy_setopt (curl_handle, CURLOPT_FOLLOWLOCATION, 1);
+		curl_easy_setopt (curl_handle, CURLOPT_AUTOREFERER, 1);
+		curl_easy_setopt (curl_handle, CURLOPT_MAXREDIRS, 30);
+		
 		if (common->http_headers != NULL) {
 			struct _strlist *header = common->http_headers;
 			while(header != NULL) {

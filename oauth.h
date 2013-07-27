@@ -27,8 +27,6 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <pthread.h>
 #include <oauth.h>
 

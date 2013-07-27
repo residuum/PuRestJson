@@ -1,4 +1,4 @@
-#N canvas 335 51 1005 658 10;
+#N canvas 333 51 1005 658 10;
 #X declare -lib purest_json;
 #X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
@@ -375,16 +375,23 @@ by issuing [cancel(. If data has been returned already \, but is not
 output \, or output only partially \, outputting the data will still
 be completed. Note \, that cancelling the call may take some time \,
 so do not try to issue a new request immediately. See;
-#N canvas 370 186 631 378 binary-downloads 1;
+#N canvas 366 182 631 378 download-to-file 0;
 #X obj 77 247 rest;
-#X msg 39 -2 folder /tmp;
-#X msg 134 100 folder;
-#X msg 77 32 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
+#X msg 119 106 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
+#X msg 77 39 write /tmp/test.json;
+#X msg 172 192 write;
+#X obj 48 297 print data;
+#X obj 133 297 print done;
+#X text 74 20 Set the location \, where the file should be saved;
+#X text 117 86 Downloaded data will write it to the file;
+#X text 170 172 Clear the location;
+#X connect 0 0 4 0;
+#X connect 0 1 5 0;
 #X connect 1 0 0 0;
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;
-#X restore 20 352 pd binary-downloads;
+#X restore 21 360 pd download-to-file;
 #X connect 0 0 9 0;
 #X connect 9 0 3 0;
 #X connect 9 1 4 0;

@@ -26,8 +26,9 @@ THE SOFTWARE.
 
 #include <stdlib.h>
 #include <string.h>
-#include <json/json.h>
 #include <curl/curl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <oauth.h>
 
@@ -47,3 +48,4 @@ APIEXPORT void APICALL oauth_sslcheck(t_oauth *x, t_symbol *sel, int argc, t_ato
 APIEXPORT void APICALL oauth_cancel(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
 APIEXPORT void APICALL oauth_header(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
 APIEXPORT void APICALL oauth_clear_headers(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_write(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);

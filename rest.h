@@ -27,7 +27,8 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
-#include <json/json.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <oauth.h>
 #include "purest_json.h"
@@ -45,3 +46,4 @@ APIEXPORT void APICALL rest_sslcheck(t_rest *x, t_symbol *sel, int argc, t_atom 
 APIEXPORT void APICALL rest_cancel(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
 APIEXPORT void APICALL rest_header(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
 APIEXPORT void APICALL rest_clear_headers(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL rest_write(t_rest *x, t_symbol *sel, int argc, t_atom *argv);

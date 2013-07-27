@@ -242,7 +242,7 @@ void json_encode_read(t_json_encode *x, t_symbol *filename) {
 	canvas_makefilename(x->x_canvas, filename->s_name, buf, MAXPDSTRING);
 	file = fopen(buf, "r");
 	if (!file) {
-		post("Cannot open file %s for reading", filename->s_name);
+		pd_error(x, "%s: read failed", filename->s_name);
 		return;
 	}
 	
@@ -277,7 +277,7 @@ void json_encode_write(t_json_encode *x, t_symbol *filename) {
 		fprintf(file, json_string);
 		fclose(file);
 	} else {
-		post("Cannot open %s for writing", filename->s_name);
+		pd_error(x, "%s: write failed", filename->s_name);
 	}
 }
 

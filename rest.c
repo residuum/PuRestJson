@@ -66,7 +66,7 @@ static void *get_cookie_auth_token(void *thread_args) {
 	strcat(x->common.complete_url, x->cookie.login_path);
 	curl_easy_setopt(curl_handle, CURLOPT_URL, x->common.complete_url);
 	curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
-	curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
+	curl_easy_setopt(curl_handle, CURLOPT_POST, 1);
 	curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, post_data);
 	out_content.memory = getbytes(1);
 	out_content.size = 0;
@@ -83,11 +83,11 @@ static void *get_cookie_auth_token(void *thread_args) {
 	SETSYMBOL(&auth_status_data[0], gensym("cookie"));
 	if (http_code == 200 && result == CURLE_OK) {
 		SETSYMBOL(&auth_status_data[1], gensym("bang"));
-		outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
+		outlet_list(x->common.status_out, &s_list, 2, &auth_status_data[0]);
 	} else {
 		SETFLOAT(&auth_status_data[1], (float)http_code);
 		SETFLOAT(&auth_status_data[2], (float)result);
-		outlet_list(x->common.stat_out, &s_list, 3, &auth_status_data[0]);
+		outlet_list(x->common.status_out, &s_list, 3, &auth_status_data[0]);
 	}
 
 	string_free(x->common.auth_token, &x->common.auth_token_len);
@@ -187,6 +187,7 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_cancel, gensym("cancel"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_clear_headers, gensym("header_clear"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_write, gensym("write"), A_GIMME, 0);
 }
 
 void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
@@ -217,7 +218,7 @@ void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 		SETSYMBOL(&auth_status_data[0], gensym("request"));
 		SETSYMBOL(&auth_status_data[1], gensym("Request method not supported"));
 		pd_error(x, "Request method %s not supported.", x->common.req_type);
-		outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
+		outlet_list(x->common.status_out, &s_list, 2, &auth_status_data[0]);
 		x->common.locked = 0;
 		return;
 	} 
@@ -305,6 +306,13 @@ void rest_clear_headers(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 	ctw_clear_headers((struct _ctw *)x);
 }
 
+void rest_write(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
+	
+	(void) sel;
+
+	ctw_set_file((void *)x, argc, argv);
+}
+
 void *rest_new(t_symbol *sel, int argc, t_atom *argv) {
 	t_rest *x = (t_rest *)pd_new(rest_class);
 
@@ -317,7 +325,7 @@ void *rest_new(t_symbol *sel, int argc, t_atom *argv) {
 	set_url_parameters(x, argc, argv); 
 
 	outlet_new(&x->common.x_ob, NULL);
-	x->common.stat_out = outlet_new(&x->common.x_ob, NULL);
+	x->common.status_out = outlet_new(&x->common.x_ob, NULL);
 	x->common.locked = 0;
 #ifdef NEEDS_CERT_PATH
 	ctw_set_cert_path((struct _ctw *)x, rest_class->c_externdir->s_name);

@@ -8,11 +8,12 @@ struct _memory_struct {
 
 struct _ctw {
 	t_object x_ob;
-	t_outlet *stat_out;
+	t_outlet *status_out;
 	t_atom *out;
+	t_canvas *x_canvas;
 	pthread_t thread;
 	struct _strlist *http_headers;
-	char req_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST; DELETE*/
+	char req_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST, DELETE*/
 	size_t base_url_len;
 	char *base_url;
 	size_t parameters_len;
@@ -24,6 +25,8 @@ struct _ctw {
 	unsigned char locked;
 	long timeout;
 	unsigned char sslcheck;
+	char *out_file;
+	size_t out_file_len;
 #ifdef NEEDS_CERT_PATH
 	size_t cert_path_len;
 	char *cert_path;
@@ -87,12 +90,18 @@ static void *ctw_exec_req(void *thread_args) {
 	struct _memory_struct out_memory;
 	long http_status;
 	t_atom http_status_data[3];
+	FILE *fp = NULL; 
 
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
 	curl_handle = curl_easy_init();
 	if (!curl_handle) {
 		MYERROR("Cannot init curl.");
 	} else {
+		/* enable redirection */
+		curl_easy_setopt (curl_handle, CURLOPT_FOLLOWLOCATION, 1);
+		curl_easy_setopt (curl_handle, CURLOPT_AUTOREFERER, 1);
+		curl_easy_setopt (curl_handle, CURLOPT_MAXREDIRS, 30);
+		
 		if (common->http_headers != NULL) {
 			struct _strlist *header = common->http_headers;
 			while(header != NULL) {
@@ -116,7 +125,7 @@ static void *ctw_exec_req(void *thread_args) {
 			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, common->auth_token);
 		}
 		if (strcmp(common->req_type, "PUT") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, TRUE);
+			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, 1);
 			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
 			/* Prepare data for reading */
 			if (common->parameters_len) {
@@ -132,15 +141,24 @@ static void *ctw_exec_req(void *thread_args) {
 			}
 			curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
 		} else if (strcmp(common->req_type, "POST") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_POST, TRUE);
+			curl_easy_setopt(curl_handle, CURLOPT_POST, 1);
 			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, common->parameters);
 		} else if (strcmp(common->req_type, "DELETE") == 0) {
 			curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 		}
 		out_memory.memory = getbytes(1);
 		out_memory.size = 0;
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
+		if (common->out_file_len) {
+			if ((fp = fopen(common->out_file, "w"))) {
+				curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)fp);
+			} else {
+				pd_error(thread_args, "%s: writing not possible. Will output on left outlet instead", common->out_file);
+			}
+		}
+		if (!fp) {
+			curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
+			curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
+		}
 		curl_easy_setopt(curl_handle, CURLOPT_PROGRESSFUNCTION, ctw_progress_cb);
 		curl_easy_setopt(curl_handle, CURLOPT_PROGRESSDATA, (void *)&common);
 
@@ -155,9 +173,11 @@ static void *ctw_exec_req(void *thread_args) {
 		SETSYMBOL(&http_status_data[0], gensym(common->req_type));
 		if (http_status >= 200 && http_status < 300) {
 			SETSYMBOL(&http_status_data[1], gensym("bang"));
-			outlet_list(common->stat_out, &s_list, 2, &http_status_data[0]);
+			outlet_list(common->status_out, &s_list, 2, &http_status_data[0]);
 			if (result == CURLE_OK) {
-				outlet_symbol(common->x_ob.ob_outlet, gensym(out_memory.memory));
+				if (!fp) {
+					outlet_symbol(common->x_ob.ob_outlet, gensym(out_memory.memory));
+				}
 				/* Free memory */
 				string_free(out_memory.memory, &out_memory.size);
 				free((void *)result);
@@ -166,19 +186,22 @@ static void *ctw_exec_req(void *thread_args) {
 				SETFLOAT(&http_status_data[1], (float)http_status);
 				SETSYMBOL(&http_status_data[2], gensym(curl_easy_strerror(result)));
 				pd_error(thread_args, "Error while performing request: %s", curl_easy_strerror(result));
-				outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
+				outlet_list(common->status_out, &s_list, 3, &http_status_data[0]);
 			}
 		} else {
 			SETFLOAT(&http_status_data[1], (float)http_status);
 			SETFLOAT(&http_status_data[2], (float)result);
 			pd_error(thread_args, "HTTP error while performing request: %li", http_status);
-			outlet_list(common->stat_out, &s_list, 3, &http_status_data[0]);
+			outlet_list(common->status_out, &s_list, 3, &http_status_data[0]);
 		}
 		curl_easy_cleanup(curl_handle);
 		string_free(common->complete_url, &common->complete_url_len);
 		string_free(common->parameters, &common->parameters_len);
 		if (slist != NULL) {
 			curl_slist_free_all(slist);
+		}
+		if (fp) {
+			fclose(fp);
 		}
 	}
 	common->locked = 0;
@@ -214,7 +237,7 @@ static void ctw_cancel(struct _ctw *x) {
 	pthread_cancel(x->thread);
 }
 
-static void ctw_add_header(void *x, int argc, t_atom *argv){
+static void ctw_add_header(void *x, int argc, t_atom *argv) {
 	struct _ctw *common = x;
 	char *val;
 	char temp[MAXPDSTRING];
@@ -227,13 +250,13 @@ static void ctw_add_header(void *x, int argc, t_atom *argv){
 	}
 	for (i = 0; i < argc; i++) {
 		atom_string(argv + i, temp, MAXPDSTRING);
-		header_len +=strlen(temp) + 1;
+		header_len += strlen(temp) + 1;
 	}
 	val = string_create(&(val_len), header_len);
 	for (i = 0; i < argc; i++) {
 		atom_string(argv + i, temp, MAXPDSTRING);
 		strcat(val, temp);
-		if (i < argc -1) {
+		if (i < argc - 1) {
 			strcat(val, " ");
 		}
 	}
@@ -243,6 +266,25 @@ static void ctw_add_header(void *x, int argc, t_atom *argv){
 static void ctw_clear_headers(struct _ctw *x) {
 	strlist_free(x->http_headers);
 	x->http_headers = NULL;
+}
+
+static void ctw_set_file(void *x, int argc, t_atom *argv) {
+	struct _ctw *common = x;
+	t_symbol *filename;
+	char buf[MAXPDSTRING];
+
+	string_free(common->out_file, &common->out_file_len);
+	if (argc == 0) {
+		return;
+	}
+	filename = atom_getsymbol(argv);
+	if (filename == 0) {
+		pd_error(x, "not a filename");
+		return;
+	}
+	canvas_makefilename(common->x_canvas, filename->s_name, buf, MAXPDSTRING);
+	common->out_file = string_create(&(common->out_file_len), strlen(buf));
+	strcpy(common->out_file, buf);
 }
 
 static void ctw_set_timeout(struct _ctw *x, int val) {
@@ -256,6 +298,8 @@ static void ctw_init(struct _ctw *x) {
 	x->complete_url_len = 0;
 	x->auth_token_len = 0;
 	x->http_headers = NULL;
+	x->out_file_len = 0;
+	x->x_canvas = canvas_getcurrent();
 
 	ctw_set_timeout(x, 0);
 	ctw_set_sslcheck(x, 1);
@@ -266,6 +310,7 @@ static void ctw_free(struct _ctw *x) {
 	string_free(x->parameters, &x->parameters_len);
 	string_free(x->complete_url, &x->complete_url_len);
 	string_free(x->auth_token, &x->auth_token_len);
+	string_free(x->out_file, &x->out_file_len);
 	ctw_clear_headers(x);
 	curl_global_cleanup();
 #ifdef NEEDS_CERT_PATH

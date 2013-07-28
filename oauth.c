@@ -120,6 +120,7 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_cancel, gensym("cancel"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_clear_headers, gensym("header_clear"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_write, gensym("write"), A_GIMME, 0);
 	class_sethelpsymbol(oauth_class, gensym("rest"));
 }
 
@@ -153,7 +154,7 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 		SETSYMBOL(&auth_status_data[0], gensym("oauth"));
 		SETSYMBOL(&auth_status_data[1], gensym("Request Method not supported"));
 		pd_error(x, "Request method %s not supported.", x->common.req_type);
-		outlet_list(x->common.stat_out, &s_list, 2, &auth_status_data[0]);
+		outlet_list(x->common.status_out, &s_list, 2, &auth_status_data[0]);
 		x->common.locked = 0;
 		return;
 	}
@@ -356,6 +357,13 @@ void oauth_clear_headers(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	ctw_clear_headers((struct _ctw *)x);
 }
 
+void oauth_write(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
+	
+	(void) sel;
+
+	ctw_set_file((void *)x, argc, argv);
+}
+
 void *oauth_new(t_symbol *sel, int argc, t_atom *argv) {
 	t_oauth *x = (t_oauth *)pd_new(oauth_class);
 
@@ -370,7 +378,7 @@ void *oauth_new(t_symbol *sel, int argc, t_atom *argv) {
 	x->oauth.rsa_key_len = 0;
 
 	outlet_new(&x->common.x_ob, NULL);
-	x->common.stat_out = outlet_new(&x->common.x_ob, NULL);
+	x->common.status_out = outlet_new(&x->common.x_ob, NULL);
 	x->common.locked = 0;
 #ifdef NEEDS_CERT_PATH
 	ctw_set_cert_path((struct _ctw *)x, oauth_class->c_externdir->s_name);

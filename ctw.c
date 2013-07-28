@@ -175,7 +175,9 @@ static void *ctw_exec_req(void *thread_args) {
 			SETSYMBOL(&http_status_data[1], gensym("bang"));
 			outlet_list(common->status_out, &s_list, 2, &http_status_data[0]);
 			if (result == CURLE_OK) {
-				outlet_symbol(common->x_ob.ob_outlet, gensym(out_memory.memory));
+				if (!fp) {
+					outlet_symbol(common->x_ob.ob_outlet, gensym(out_memory.memory));
+				}
 				/* Free memory */
 				string_free(out_memory.memory, &out_memory.size);
 				free((void *)result);

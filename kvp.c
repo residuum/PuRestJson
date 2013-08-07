@@ -51,7 +51,7 @@ static void kvp_add(struct _kvp_store *x, char *key, char *value, unsigned char 
 	struct _kvp *compare = x->first_data;
 	struct _kvp *existing = NULL;
 	struct _kvp *new = NULL;
-	if (!is_array) {
+	if (is_array == 0) {
 		while (compare != NULL) {
 			if (strcmp(compare->key, key) == 0) {
 				existing = compare;

@@ -149,7 +149,7 @@ static void *ctw_exec_req(void *thread_args) {
 		out_memory.memory = getbytes(1);
 		out_memory.size = 0;
 		if (common->out_file_len) {
-			if ((fp = fopen(common->out_file, "w"))) {
+			if ((fp = fopen(common->out_file, "wb"))) {
 				curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)fp);
 			} else {
 				pd_error(thread_args, "%s: writing not possible. Will output on left outlet instead", common->out_file);

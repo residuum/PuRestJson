@@ -27,6 +27,8 @@ struct _ctw {
 	unsigned char sslcheck;
 	char *out_file;
 	size_t out_file_len;
+	CURLM *multi_handle;
+	CURL *easy_handle;
 #ifdef NEEDS_CERT_PATH
 	size_t cert_path_len;
 	char *cert_path;
@@ -61,140 +63,213 @@ static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) 
 	return to_copy;
 }
 
-/* This callback will be used to cancel an ongoing request, 
- * see http://curl.haxx.se/docs/faq.html#How_do_I_stop_an_ongoing_transfe */
-static int ctw_progress_cb(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow){
-	(void) dltotal;
-	(void) dlnow;
-	(void) ultotal;
-	(void) ulnow;
-
-	struct _ctw *common = clientp; 
-
-	return (common->locked == 0);
-
+static void ctw_cancel_request(void *args) {
+	struct _ctw *common = args; 
+	curl_multi_remove_handle(common->multi_handle, common->easy_handle);
+	common->locked = 0;
+	post("request cancelled.");
 }
 
-static void cleanup_thread(void *args) {
-	struct _ctw *common = args; 
-	common->locked = 0;
-	post("Cancellation requested.");
+static FILE *ctw_setup(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory) {
+	struct _memory_struct in_memory;
+	FILE *fp = NULL; 
+	
+	/* enable redirection */
+	curl_easy_setopt (common->easy_handle, CURLOPT_FOLLOWLOCATION, 1);
+	curl_easy_setopt (common->easy_handle, CURLOPT_AUTOREFERER, 1);
+	curl_easy_setopt (common->easy_handle, CURLOPT_MAXREDIRS, 30);
+
+	if (common->http_headers != NULL) {
+		struct _strlist *header = common->http_headers;
+		while(header != NULL) {
+			slist = curl_slist_append(slist, header->str);
+			header = header->next;
+		}
+		curl_easy_setopt(common->easy_handle, CURLOPT_HTTPHEADER, slist);
+	}
+
+	curl_easy_setopt(common->easy_handle, CURLOPT_URL, common->complete_url);
+	curl_easy_setopt(common->easy_handle, CURLOPT_NOSIGNAL, 1);
+	curl_easy_setopt(common->easy_handle, CURLOPT_TIMEOUT_MS, common->timeout);
+	curl_easy_setopt(common->easy_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck);
+#ifdef NEEDS_CERT_PATH
+	if (common->sslcheck){
+		curl_easy_setopt(common->easy_handle, CURLOPT_CAINFO, common->cert_path);
+		curl_easy_setopt(common->easy_handle, CURLOPT_CAPATH, common->cert_path);
+	}
+#endif
+	if (common->auth_token_len) {
+		curl_easy_setopt(common->easy_handle, CURLOPT_COOKIE, common->auth_token);
+	}
+	if (strcmp(common->req_type, "PUT") == 0) {
+		curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1);
+		curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
+		/* Prepare data for reading */
+		if (common->parameters_len) {
+			in_memory.memory = getbytes(strlen(common->parameters) + 1);
+			in_memory.size = strlen(common->parameters);
+			if (in_memory.memory == NULL) {
+				MYERROR("not enough memory");
+			}
+			memcpy(in_memory.memory, common->parameters, strlen(common->parameters));
+		} else {
+			in_memory.memory = NULL;
+			in_memory.size = 0;
+		}
+		curl_easy_setopt(common->easy_handle, CURLOPT_READDATA, (void *)&in_memory);
+	} else if (strcmp(common->req_type, "POST") == 0) {
+		curl_easy_setopt(common->easy_handle, CURLOPT_POST, 1);
+		curl_easy_setopt(common->easy_handle, CURLOPT_POSTFIELDS, common->parameters);
+	} else if (strcmp(common->req_type, "DELETE") == 0) {
+		curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+	}
+	(*out_memory).memory = getbytes(1);
+	(*out_memory).size = 0;
+	if (common->out_file_len) {
+		if ((fp = fopen(common->out_file, "wb"))) {
+			curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)fp);
+		} else {
+			pd_error(common, "%s: writing not possible. Will output on left outlet instead", common->out_file);
+		}
+	}
+	if (!fp) {
+		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
+		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)out_memory);
+	}
+	curl_multi_add_handle(common->multi_handle, common->easy_handle);
+	return fp;
+}
+
+static void ctw_perform_req(struct _ctw *common) {
+	CURLMcode code;
+	int running;
+
+	code = curl_multi_perform(common->multi_handle, &running);
+	if (code != CURLM_OK) {
+		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
+	}
+	do {
+		struct timeval timeout;
+		int rc; /* select() return code */ 
+
+		fd_set fdread;
+		fd_set fdwrite;
+		fd_set fdexcep;
+		int maxfd = -1;
+
+		long curl_timeo = -1;
+
+		FD_ZERO(&fdread);
+		FD_ZERO(&fdwrite);
+		FD_ZERO(&fdexcep);
+
+		/* set a suitable timeout to play around with */ 
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
+
+		code = curl_multi_timeout(common->multi_handle, &curl_timeo);
+		if (code != CURLM_OK) {
+			pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
+		}
+		if(curl_timeo >= 0) {
+			timeout.tv_sec = curl_timeo / 1000;
+			if(timeout.tv_sec > 1) {
+				timeout.tv_sec = 1;
+			} else {
+				timeout.tv_usec = (curl_timeo % 1000) * 1000;
+			}
+		}
+
+		/* get file descriptors from the transfers */ 
+		code = curl_multi_fdset(common->multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+		if (code != CURLM_OK) {
+			pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
+		}
+
+		/* In a real-world program you OF COURSE check the return code of the
+		   function calls.  On success, the value of maxfd is guaranteed to be
+		   greater or equal than -1.  We call select(maxfd + 1, ...), specially in
+		   case of (maxfd == -1), we call select(0, ...), which is basically equal
+		   to sleep. */ 
+
+		rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+
+		switch(rc) {
+			case -1:
+				/* select error */ 
+				break;
+			case 0: /* timeout */ 
+			default: /* action */ 
+				code = curl_multi_perform(common->multi_handle, &running);
+				if (code != CURLM_OK) {
+					pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
+				}
+				break;
+		}
+	} while (running);
+}
+
+static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp) {
+	CURLMsg *msg;
+	int msgs_left;
+	long http_status;
+	t_atom http_status_data[3];
+
+	while ((msg = curl_multi_info_read(common->multi_handle, &msgs_left))) {
+		if (msg->msg == CURLMSG_DONE) {
+			/* output status */
+			curl_easy_getinfo(common->easy_handle, CURLINFO_RESPONSE_CODE, &http_status);
+			SETSYMBOL(&http_status_data[0], gensym(common->req_type));
+			if (http_status >= 200 && http_status < 300) {
+				SETSYMBOL(&http_status_data[1], gensym("bang"));
+				outlet_list(common->status_out, &s_list, 2, &http_status_data[0]);
+				if (msg->data.result == CURLE_OK) {
+					if (!fp) {
+						outlet_symbol(common->x_ob.ob_outlet, gensym((*out_memory).memory));
+					}
+					/* Free memory */
+					string_free((*out_memory).memory, &(*out_memory).size);
+				} else {
+					SETFLOAT(&http_status_data[1], (float)http_status);
+					SETSYMBOL(&http_status_data[2], gensym(curl_easy_strerror(msg->data.result)));
+					pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
+					outlet_list(common->status_out, &s_list, 3, &http_status_data[0]);
+				}
+			} else {
+				post("curl result: %d", result);
+				SETFLOAT(&http_status_data[1], (float)http_status);
+				SETFLOAT(&http_status_data[2], (float)msg->data.result);
+				pd_error(common, "HTTP error while performing request: %li", http_status);
+				outlet_list(common->status_out, &s_list, 3, &http_status_data[0]);
+			}
+			curl_easy_cleanup(common->easy_handle);
+			curl_multi_cleanup(common->multi_handle);
+		}
+	}
 }
 
 static void *ctw_exec_req(void *thread_args) {
 	struct _ctw *common = thread_args; 
-	CURL *curl_handle;
-	CURLcode result;
 	struct curl_slist *slist = NULL;
-	struct _memory_struct in_memory;
 	struct _memory_struct out_memory;
-	long http_status;
-	t_atom http_status_data[3];
-	FILE *fp = NULL; 
+	FILE *fp; 
 
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
-	curl_handle = curl_easy_init();
-	if (!curl_handle) {
+	common->easy_handle = curl_easy_init();
+	common->multi_handle = curl_multi_init();
+	if (!common->easy_handle) {
 		MYERROR("Cannot init curl.");
 	} else {
-		/* enable redirection */
-		curl_easy_setopt (curl_handle, CURLOPT_FOLLOWLOCATION, 1);
-		curl_easy_setopt (curl_handle, CURLOPT_AUTOREFERER, 1);
-		curl_easy_setopt (curl_handle, CURLOPT_MAXREDIRS, 30);
-		
-		if (common->http_headers != NULL) {
-			struct _strlist *header = common->http_headers;
-			while(header != NULL) {
-				slist = curl_slist_append(slist, header->str);
-				header = header->next;
-			}
-			curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, slist);
-		}
+		fp = ctw_setup(common, slist, &out_memory);
 
-		curl_easy_setopt(curl_handle, CURLOPT_URL, common->complete_url);
-		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
-		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, common->timeout);
-		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck);
-#ifdef NEEDS_CERT_PATH
-		if (common->sslcheck){
-			curl_easy_setopt(curl_handle, CURLOPT_CAINFO, common->cert_path);
-			curl_easy_setopt(curl_handle, CURLOPT_CAPATH, common->cert_path);
-		}
-#endif
-		if (common->auth_token_len) {
-			curl_easy_setopt(curl_handle, CURLOPT_COOKIE, common->auth_token);
-		}
-		if (strcmp(common->req_type, "PUT") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, 1);
-			curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
-			/* Prepare data for reading */
-			if (common->parameters_len) {
-				in_memory.memory = getbytes(strlen(common->parameters) + 1);
-				in_memory.size = strlen(common->parameters);
-				if (in_memory.memory == NULL) {
-					MYERROR("not enough memory");
-				}
-				memcpy(in_memory.memory, common->parameters, strlen(common->parameters));
-			} else {
-				in_memory.memory = NULL;
-				in_memory.size = 0;
-			}
-			curl_easy_setopt(curl_handle, CURLOPT_READDATA, (void *)&in_memory);
-		} else if (strcmp(common->req_type, "POST") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_POST, 1);
-			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, common->parameters);
-		} else if (strcmp(common->req_type, "DELETE") == 0) {
-			curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
-		}
-		out_memory.memory = getbytes(1);
-		out_memory.size = 0;
-		if (common->out_file_len) {
-			if ((fp = fopen(common->out_file, "w"))) {
-				curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)fp);
-			} else {
-				pd_error(thread_args, "%s: writing not possible. Will output on left outlet instead", common->out_file);
-			}
-		}
-		if (!fp) {
-			curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
-			curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&out_memory);
-		}
-		curl_easy_setopt(curl_handle, CURLOPT_PROGRESSFUNCTION, ctw_progress_cb);
-		curl_easy_setopt(curl_handle, CURLOPT_PROGRESSDATA, (void *)&common);
-
-		pthread_cleanup_push(cleanup_thread, (void *)common);
+		pthread_cleanup_push(ctw_cancel_request, (void *)common);
 		pthread_setcancelstate(PTHREAD_CANCEL_DEFERRED, 0);
-		result = curl_easy_perform(curl_handle);
+
+		ctw_perform_req(common);
+
 		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
 		pthread_cleanup_pop(0);
-
-		/* output status */
-		curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_status);
-		SETSYMBOL(&http_status_data[0], gensym(common->req_type));
-		if (http_status >= 200 && http_status < 300) {
-			SETSYMBOL(&http_status_data[1], gensym("bang"));
-			outlet_list(common->status_out, &s_list, 2, &http_status_data[0]);
-			if (result == CURLE_OK) {
-				if (!fp) {
-					outlet_symbol(common->x_ob.ob_outlet, gensym(out_memory.memory));
-				}
-				/* Free memory */
-				string_free(out_memory.memory, &out_memory.size);
-				free((void *)result);
-			} else {
-				post("curl result: %d", result);
-				SETFLOAT(&http_status_data[1], (float)http_status);
-				SETSYMBOL(&http_status_data[2], gensym(curl_easy_strerror(result)));
-				pd_error(thread_args, "Error while performing request: %s", curl_easy_strerror(result));
-				outlet_list(common->status_out, &s_list, 3, &http_status_data[0]);
-			}
-		} else {
-			SETFLOAT(&http_status_data[1], (float)http_status);
-			SETFLOAT(&http_status_data[2], (float)result);
-			pd_error(thread_args, "HTTP error while performing request: %li", http_status);
-			outlet_list(common->status_out, &s_list, 3, &http_status_data[0]);
-		}
-		curl_easy_cleanup(curl_handle);
+		ctw_output(common, &out_memory, fp);
 		string_free(common->complete_url, &common->complete_url_len);
 		string_free(common->parameters, &common->parameters_len);
 		if (slist != NULL) {
@@ -203,6 +278,7 @@ static void *ctw_exec_req(void *thread_args) {
 		if (fp) {
 			fclose(fp);
 		}
+
 	}
 	common->locked = 0;
 	return NULL;
@@ -292,7 +368,7 @@ static void ctw_set_timeout(struct _ctw *x, int val) {
 }
 
 static void ctw_init(struct _ctw *x) {
-	curl_global_init(CURL_GLOBAL_ALL);
+	curl_global_init(CURL_GLOBAL_DEFAULT);
 	x->base_url_len = 0;
 	x->parameters_len = 0;
 	x->complete_url_len = 0;

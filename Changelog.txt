@@ -1,5 +1,10 @@
 Changelog
 ---------
+0.14.0:
+- Downloading to file
+- Cancelling requests
+- Switch to libcurl multi interface
+
 0.13.0:
 - Setting HTTP headers possible
 - Cancelling of requests possible while waiting (experimental)

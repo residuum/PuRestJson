@@ -1,3 +1,10 @@
+pd-purest-json (0.14.0) UNRELEASED; urgency=low
+  * Downloading to file
+  * Cancelling requests
+  * Switch to libcurl multi interface
+ 
+ -- Thomas Mayer <thomas@residuum.org>  Tue, 24 Sep 2013 11:00:00 +0200
+
 pd-purest-json (0.13.0) UNRELEASED; urgency=low
   * Setting HTTP headers possible
   * Cancelling of requests possible while waiting (experimental)

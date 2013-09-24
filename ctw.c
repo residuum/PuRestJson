@@ -236,7 +236,7 @@ static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, F
 					outlet_list(common->status_out, &s_list, 3, &http_status_data[0]);
 				}
 			} else {
-				post("curl result: %d", result);
+				post("curl result: %d", msg->data.result);
 				SETFLOAT(&http_status_data[1], (float)http_status);
 				SETFLOAT(&http_status_data[2], (float)msg->data.result);
 				pd_error(common, "HTTP error while performing request: %li", http_status);

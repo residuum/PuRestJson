@@ -262,7 +262,8 @@ static void *ctw_exec_req(void *thread_args) {
 		fp = ctw_setup(common, slist, &out_memory);
 
 		pthread_cleanup_push(ctw_cancel_request, (void *)common);
-		pthread_setcancelstate(PTHREAD_CANCEL_DEFERRED, 0);
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
+		pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
 		ctw_perform_req(common);
 

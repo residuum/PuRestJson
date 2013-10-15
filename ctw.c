@@ -70,10 +70,10 @@ static void ctw_cancel_request(void *args) {
 	post("request cancelled.");
 }
 
-static FILE *ctw_setup(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory) {
+static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory) {
 	struct _memory_struct in_memory;
 	FILE *fp = NULL; 
-	
+
 	/* enable redirection */
 	curl_easy_setopt (common->easy_handle, CURLOPT_FOLLOWLOCATION, 1);
 	curl_easy_setopt (common->easy_handle, CURLOPT_AUTOREFERER, 1);
@@ -140,7 +140,7 @@ static FILE *ctw_setup(struct _ctw *common, struct curl_slist *slist, struct _me
 	return fp;
 }
 
-static void ctw_perform_req(struct _ctw *common) {
+static void ctw_perform(struct _ctw *common) {
 	CURLMcode code;
 	int running;
 
@@ -209,6 +209,15 @@ static void ctw_perform_req(struct _ctw *common) {
 	} while (running);
 }
 
+static void ctw_thread_perform(struct _ctw *common) {
+	pthread_cleanup_push(ctw_cancel_request, (void *)common);
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, 0);
+	ctw_perform(common);
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
+	pthread_cleanup_pop(0);
+}
+
 static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp) {
 	CURLMsg *msg;
 	int msgs_left;
@@ -247,7 +256,7 @@ static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, F
 	}
 }
 
-static void *ctw_exec_req(void *thread_args) {
+static void *ctw_exec(void *thread_args) {
 	struct _ctw *common = thread_args; 
 	struct curl_slist *slist = NULL;
 	struct _memory_struct out_memory;
@@ -259,16 +268,8 @@ static void *ctw_exec_req(void *thread_args) {
 	if (!common->easy_handle) {
 		MYERROR("Cannot init curl.");
 	} else {
-		fp = ctw_setup(common, slist, &out_memory);
-
-		pthread_cleanup_push(ctw_cancel_request, (void *)common);
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
-		pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, 0);
-
-		ctw_perform_req(common);
-
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
-		pthread_cleanup_pop(0);
+		fp = ctw_prepare(common, slist, &out_memory);
+		ctw_thread_perform(common);
 		ctw_output(common, &out_memory, fp);
 		string_free(common->complete_url, &common->complete_url_len);
 		string_free(common->parameters, &common->parameters_len);

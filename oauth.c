@@ -35,72 +35,42 @@ static void oauth_free_inner(t_oauth *x, short free_rsa) {
 	}
 }
 
-static void set_url_parameters(t_oauth *x, int argc, t_atom *argv) {
+static char *oauth_set_param(t_oauth *x, t_atom *arg, size_t *string_len, char *error_msg) {
 	char temp[MAXPDSTRING];
+	char *string;
 
+	if (arg[0].a_type != A_SYMBOL) {
+		pd_error(x, "%s", error_msg);
+		return NULL;
+	} 
+	atom_string(arg, temp, MAXPDSTRING);
+	string = string_create(string_len, strlen(temp));
+	if (string == NULL) {
+		return NULL;
+	}
+	strcpy(string, temp);
+	return string;
+}
+
+static void oauth_set_url_params(t_oauth *x, int argc, t_atom *argv) {
 	oauth_free_inner(x, 0);
+
 	switch (argc) {
 		case 0:
 			break;
 		case 3:
-			if (argv[0].a_type != A_SYMBOL) {
-				pd_error(x, "Base URL cannot be set.");
-			} else {
-				atom_string(argv, temp, MAXPDSTRING);
-				x->common.base_url = string_create(&x->common.base_url_len, strlen(temp));
-				strcpy(x->common.base_url, temp);
-			}
-			if (argv[1].a_type != A_SYMBOL) {
-				pd_error(x, "Client key cannot be set.");
-			} else {
-				atom_string(argv + 1, temp, MAXPDSTRING);
-				x->oauth.client_key = string_create(&x->oauth.client_key_len, strlen(temp));
-				strcpy(x->oauth.client_key, temp);
-			}
-			if (argv[2].a_type != A_SYMBOL) {
-				pd_error(x, "Client secret cannot be set.");
-			} else {
-				atom_string(argv + 2, temp, MAXPDSTRING);
-				x->oauth.client_secret = string_create(&x->oauth.client_secret_len, strlen(temp));
-				strcpy(x->oauth.client_secret, temp);
-			}
+			x->common.base_url = oauth_set_param(x, argv, &x->common.base_url_len, "Base URL cannot be set.");
+			x->oauth.client_key = oauth_set_param(x, argv + 1, &x->oauth.client_key_len, "Client key cannot be set.");
+			x->oauth.client_secret = oauth_set_param(x, argv + 2, &x->oauth.client_secret_len, "Client secret cannot be set.");
 			break;
 		case 5:
-			if (argv[0].a_type != A_SYMBOL) {
-				pd_error(x, "Base URL cannot be set.");
-			} else {
-				atom_string(argv, temp, MAXPDSTRING);
-				x->common.base_url = string_create(&x->common.base_url_len, strlen(temp));
-				strcpy(x->common.base_url, temp);
-			}
-			if (argv[1].a_type != A_SYMBOL) {
-				pd_error(x, "Client key cannot be set.");
-			} else {
-				atom_string(argv + 1, temp, MAXPDSTRING);
-				x->oauth.client_key = string_create(&x->oauth.client_key_len, strlen(temp));
-				strcpy(x->oauth.client_key, temp);
-			}
-			if (argv[2].a_type != A_SYMBOL) {
-				pd_error(x, "Client secret cannot be set.");
-			} else {
-				atom_string(argv + 2, temp, MAXPDSTRING);
-				x->oauth.client_secret = string_create(&x->oauth.client_secret_len, strlen(temp));
-				strcpy(x->oauth.client_secret, temp);
-			}
-			if (argv[3].a_type != A_SYMBOL) {
-				pd_error(x, "Client key cannot be set.");
-			} else {
-				atom_string(argv + 3, temp, MAXPDSTRING);
-				x->oauth.token_key = string_create(&x->oauth.token_key_len, strlen(temp));
-				strcpy(x->oauth.token_key, temp);
-			}
-			if (argv[4].a_type != A_SYMBOL) {
-				pd_error(x, "Client secret cannot be set.");
-			} else {
-				atom_string(argv + 4, temp, MAXPDSTRING);
-				x->oauth.token_secret = string_create(&x->oauth.token_secret_len, strlen(temp));
-				strcpy(x->oauth.token_secret, temp);
-			}
+			x->common.base_url = oauth_set_param(x, argv, &x->common.base_url_len, "Base URL cannot be set.");
+			x->oauth.client_key = oauth_set_param(x, argv + 1, &x->oauth.client_key_len, "Client key cannot be set.");
+			x->oauth.client_secret = oauth_set_param(x, argv + 2, &x->oauth.client_secret_len, "Client secret cannot be set.");
+			x->oauth.token_key = oauth_set_param(x, argv + 3, &x->oauth.token_key_len, "Token key cannot be set.");
+			x->oauth.token_secret = oauth_set_param(x, argv + 4, &x->oauth.token_secret_len, "Token secret cannot be set.");
+			post("%s", x->oauth.token_secret);
+			post("%d", x->oauth.token_secret_len);
 			break;
 		default:
 			pd_error(x, "Wrong number of parameters.");
@@ -216,15 +186,43 @@ void oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	if (req_url) {
 		free(req_url);
 	}
-	ctw_thread_exec((void *)x, ctw_exec_req);
+	ctw_thread_exec((void *)x, ctw_exec);
+}
+
+static void oauth_set_rsa_key(t_oauth *x, int argc, t_atom *argv) {
+	char temp[MAXPDSTRING];
+	int i;
+	size_t rsa_key_len = 1;
+	short use_newline = 0;
+
+	for (i = 1; i < argc; i++) {
+		atom_string(argv + i, temp, MAXPDSTRING);
+		rsa_key_len +=strlen(temp) + 1;
+	}
+	x->oauth.rsa_key = string_create(&x->oauth.rsa_key_len, rsa_key_len);
+	for (i = 1; i < argc; i++) {
+		atom_string(argv + i, temp, MAXPDSTRING);
+		if (strncmp(temp, "-----", 5) == 0 && strlen(x->oauth.rsa_key) > 1)  {
+			memset(x->oauth.rsa_key + strlen(x->oauth.rsa_key) - 1, 0x00, 1);
+			strcat(x->oauth.rsa_key, "\n");
+			use_newline = 0;
+		}
+		if (strlen(temp) >= 5 && strncmp(temp + strlen(temp) - 5, "-----", 5) == 0) {
+			use_newline = 1;
+		}
+		strcat(x->oauth.rsa_key, temp);
+		if (i < argc -1) {
+			if (use_newline == 1)  {
+				strcat(x->oauth.rsa_key, "\n");
+			} else {
+				strcat(x->oauth.rsa_key, " ");
+			}
+		}
+	}
 }
 
 void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	char method_name[11];
-	char temp[MAXPDSTRING];
-	size_t rsa_key_len = 1;
-	int i;
-	short use_newline = 0;
 
 	(void) sel;
 
@@ -261,30 +259,7 @@ void oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 		}
 		if (argc > 1) {
 			x->oauth.method = OA_RSA;
-			for (i = 1; i < argc; i++) {
-				atom_string(argv + i, temp, MAXPDSTRING);
-				rsa_key_len +=strlen(temp) + 1;
-			}
-			x->oauth.rsa_key = string_create(&x->oauth.rsa_key_len, rsa_key_len);
-			for (i = 1; i < argc; i++) {
-				atom_string(argv + i, temp, MAXPDSTRING);
-				if (strncmp(temp, "-----", 5) == 0 && strlen(x->oauth.rsa_key) > 1)  {
-					memset(x->oauth.rsa_key + strlen(x->oauth.rsa_key) - 1, 0x00, 1);
-					strcat(x->oauth.rsa_key, "\n");
-					use_newline = 0;
-				}
-				if (strlen(temp) >= 5 && strncmp(temp + strlen(temp) - 5, "-----", 5) == 0) {
-					use_newline = 1;
-				}
-				strcat(x->oauth.rsa_key, temp);
-				if (i < argc -1) {
-					if (use_newline == 1)  {
-						strcat(x->oauth.rsa_key, "\n");
-					} else {
-						strcat(x->oauth.rsa_key, " ");
-					}
-				}
-			}
+			oauth_set_rsa_key(x, argc, argv);
 		} else {
 			pd_error(x, "RSA needs the RSA private key as additional data");
 		}
@@ -300,7 +275,7 @@ void oauth_url(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 	if(x->common.locked) {
 		post("oauth object is performing request and locked");
 	} else {
-		set_url_parameters(x, argc, argv); 
+		oauth_set_url_params(x, argc, argv); 
 	}
 }
 
@@ -358,7 +333,7 @@ void oauth_clear_headers(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
 }
 
 void oauth_write(t_oauth *x, t_symbol *sel, int argc, t_atom *argv) {
-	
+
 	(void) sel;
 
 	ctw_set_file((void *)x, argc, argv);
@@ -372,8 +347,8 @@ void *oauth_new(t_symbol *sel, int argc, t_atom *argv) {
 	ctw_init((struct _ctw *)x);
 	ctw_set_timeout((struct _ctw *)x, 0);
 
-	set_url_parameters(x, 0, argv); 
-	set_url_parameters(x, argc, argv); 
+	oauth_set_url_params(x, 0, argv); 
+	oauth_set_url_params(x, argc, argv); 
 	x->oauth.method = OA_HMAC;
 	x->oauth.rsa_key_len = 0;
 

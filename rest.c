@@ -120,52 +120,38 @@ static void *get_cookie_auth_token(void *thread_args) {
 	return NULL;
 }
 
-static void set_url_parameters(t_rest *x, int argc, t_atom *argv) {
+static char *rest_set_param(t_rest *x, t_atom *arg, size_t *string_len, char *error_msg) {
 	char temp[MAXPDSTRING];
+	char *string;
 
+	if (arg[0].a_type != A_SYMBOL) {
+		pd_error(x, "%s", error_msg);
+		return NULL;
+	} 
+	atom_string(arg, temp, MAXPDSTRING);
+	string = string_create(string_len, strlen(temp));
+	if (string == NULL) {
+		return NULL;
+	}
+	strcpy(string, temp);
+	return string;
+}
+
+static void rest_set_url_params(t_rest *x, int argc, t_atom *argv) {
 	rest_free_inner(x);
+	
 	switch (argc) {
 		case 0:
 			break;
 		case 1:
-			if (argv[0].a_type != A_SYMBOL) {
-				pd_error(x, "Base URL cannot be set.");
-			} else {
-				atom_string(argv, temp, MAXPDSTRING);
-				x->common.base_url = string_create(&x->common.base_url_len, strlen(temp));
-				strcpy(x->common.base_url, temp);
-			}
+			x->common.base_url = rest_set_param(x, argv, &x->common.base_url_len, "Base URL cannot be set.");
 			break;
 		case 4:
 			x->common.locked = 1;
-			if (argv[0].a_type != A_SYMBOL) {
-				pd_error(x, "Base URL cannot be set.");
-			} else {
-				atom_string(argv, temp, MAXPDSTRING);
-				x->common.base_url = string_create(&x->common.base_url_len, strlen(temp));
-				strcpy(x->common.base_url, temp);
-			}
-			if (argv[1].a_type != A_SYMBOL) {
-				pd_error(x, "Cookie path cannot be set.");
-			} else {
-				atom_string(argv + 1, temp, MAXPDSTRING);
-				x->cookie.login_path = string_create(&x->cookie.login_path_len, strlen(temp));
-				strcpy(x->cookie.login_path, temp);
-			}
-			if (argv[2].a_type != A_SYMBOL) {
-				pd_error(x, "Username cannot be set.");
-			} else {
-				atom_string(argv + 2, temp, MAXPDSTRING);
-				x->cookie.username = string_create(&x->cookie.username_len, strlen(temp));
-				strcpy(x->cookie.username, temp);
-			}
-			if (argv[3].a_type != A_SYMBOL) {
-				pd_error(x, "Password cannot be set.");
-			} else {
-				atom_string(argv + 3, temp, MAXPDSTRING);
-				x->cookie.password = string_create(&x->cookie.password_len, strlen(temp));
-				strcpy(x->cookie.password, temp);
-			}
+			x->common.base_url = rest_set_param(x, argv, &x->common.base_url_len, "Base URL cannot be set.");
+			x->cookie.login_path = rest_set_param(x, argv + 1, &x->cookie.login_path_len, "Cookie path cannot be set.");
+			x->cookie.username = rest_set_param(x, argv + 2, &x->cookie.username_len, "Username cannot be set.");
+			x->cookie.password = rest_set_param(x, argv + 3, &x->cookie.password_len, "Password cannot be set.");
 			ctw_thread_exec((void *)x, get_cookie_auth_token);
 			break;
 		default:
@@ -239,7 +225,7 @@ void rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 			freebytes(cleaned_parameters, memsize);
 		}
 	}
-	ctw_thread_exec((void *)x, ctw_exec_req);
+	ctw_thread_exec((void *)x, ctw_exec);
 }
 
 void rest_url(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
@@ -249,7 +235,7 @@ void rest_url(t_rest *x, t_symbol *sel, int argc, t_atom *argv) {
 	if(x->common.locked) {
 		post("rest object is performing request and locked");
 	} else {
-		set_url_parameters(x, argc, argv); 
+		rest_set_url_params(x, argc, argv); 
 	}
 }
 
@@ -321,8 +307,8 @@ void *rest_new(t_symbol *sel, int argc, t_atom *argv) {
 	ctw_init((struct _ctw *)x);
 	ctw_set_timeout((struct _ctw *)x, 0);
 
-	set_url_parameters(x, 0, argv); 
-	set_url_parameters(x, argc, argv); 
+	rest_set_url_params(x, 0, argv); 
+	rest_set_url_params(x, argc, argv); 
 
 	outlet_new(&x->common.x_ob, NULL);
 	x->common.status_out = outlet_new(&x->common.x_ob, NULL);

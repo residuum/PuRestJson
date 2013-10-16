@@ -63,6 +63,23 @@ static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) 
 	return to_copy;
 }
 
+static char *ctw_set_param(void *x, t_atom *arg, size_t *string_len, char *error_msg) {
+	char temp[MAXPDSTRING];
+	char *string;
+
+	if (arg[0].a_type != A_SYMBOL) {
+		pd_error(x, "%s", error_msg);
+		return NULL;
+	} 
+	atom_string(arg, temp, MAXPDSTRING);
+	string = string_create(string_len, strlen(temp));
+	if (string == NULL) {
+		return NULL;
+	}
+	strcpy(string, temp);
+	return string;
+}
+
 static void ctw_cancel_request(void *args) {
 	struct _ctw *common = args; 
 	curl_multi_remove_handle(common->multi_handle, common->easy_handle);
@@ -70,10 +87,7 @@ static void ctw_cancel_request(void *args) {
 	post("request cancelled.");
 }
 
-static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory) {
-	struct _memory_struct in_memory;
-	FILE *fp = NULL; 
-
+static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist) {
 	/* enable redirection */
 	curl_easy_setopt (common->easy_handle, CURLOPT_FOLLOWLOCATION, 1);
 	curl_easy_setopt (common->easy_handle, CURLOPT_AUTOREFERER, 1);
@@ -101,6 +115,14 @@ static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _
 	if (common->auth_token_len) {
 		curl_easy_setopt(common->easy_handle, CURLOPT_COOKIE, common->auth_token);
 	}
+}
+
+static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory) {
+	struct _memory_struct in_memory;
+	FILE *fp = NULL; 
+
+	ctw_prepare_basic(common, slist);
+
 	if (strcmp(common->req_type, "PUT") == 0) {
 		curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1);
 		curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);

@@ -324,16 +324,16 @@ static void ctw_thread_exec(void *x, void *(*func) (void *)) {
 	}
 }
 
-static void ctw_set_sslcheck(struct _ctw *x, int val) {
+static void ctw_set_sslcheck(struct _ctw *common, int val) {
 	if (val != 0) {
-		x->sslcheck = 1;
+		common->sslcheck = 1;
 	} else {
-		x->sslcheck = 0;
+		common->sslcheck = 0;
 	}
 }
 
-static void ctw_cancel(struct _ctw *x) {
-	pthread_cancel(x->thread);
+static void ctw_cancel(struct _ctw *common) {
+	pthread_cancel(common->thread);
 }
 
 static void ctw_add_header(void *x, int argc, t_atom *argv) {
@@ -362,9 +362,9 @@ static void ctw_add_header(void *x, int argc, t_atom *argv) {
 	common->http_headers = strlist_add(common->http_headers, val, val_len);
 }
 
-static void ctw_clear_headers(struct _ctw *x) {
-	strlist_free(x->http_headers);
-	x->http_headers = NULL;
+static void ctw_clear_headers(struct _ctw *common) {
+	strlist_free(common->http_headers);
+	common->http_headers = NULL;
 }
 
 static void ctw_set_file(void *x, int argc, t_atom *argv) {
@@ -386,47 +386,47 @@ static void ctw_set_file(void *x, int argc, t_atom *argv) {
 	strcpy(common->out_file, buf);
 }
 
-static void ctw_set_timeout(struct _ctw *x, int val) {
-	x->timeout = (long) val;
+static void ctw_set_timeout(struct _ctw *common, int val) {
+	common->timeout = (long) val;
 }
 
-static void ctw_init(struct _ctw *x) {
+static void ctw_init(struct _ctw *common) {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
-	x->base_url_len = 0;
-	x->parameters_len = 0;
-	x->complete_url_len = 0;
-	x->auth_token_len = 0;
-	x->http_headers = NULL;
-	x->out_file_len = 0;
-	x->x_canvas = canvas_getcurrent();
+	common->base_url_len = 0;
+	common->parameters_len = 0;
+	common->complete_url_len = 0;
+	common->auth_token_len = 0;
+	common->http_headers = NULL;
+	common->out_file_len = 0;
+	common->x_canvas = canvas_getcurrent();
 
-	ctw_set_timeout(x, 0);
-	ctw_set_sslcheck(x, 1);
+	ctw_set_timeout(common, 0);
+	ctw_set_sslcheck(common, 1);
 }
 
-static void ctw_free(struct _ctw *x) {
-	string_free(x->base_url, &x->base_url_len);
-	string_free(x->parameters, &x->parameters_len);
-	string_free(x->complete_url, &x->complete_url_len);
-	string_free(x->auth_token, &x->auth_token_len);
-	string_free(x->out_file, &x->out_file_len);
-	ctw_clear_headers(x);
+static void ctw_free(struct _ctw *common) {
+	string_free(common->base_url, &common->base_url_len);
+	string_free(common->parameters, &common->parameters_len);
+	string_free(common->complete_url, &common->complete_url_len);
+	string_free(common->auth_token, &common->auth_token_len);
+	string_free(common->out_file, &common->out_file_len);
+	ctw_clear_headers(common);
 	curl_global_cleanup();
 #ifdef NEEDS_CERT_PATH
-	string_free(x->cert_path, &x->cert_path_len);
+	string_free(common->cert_path, &common->cert_path_len);
 #endif 
 }
 
 #ifdef NEEDS_CERT_PATH
-static void ctw_set_cert_path(struct _ctw *x, char *directory) {
-	x->cert_path = string_create(&x->cert_path_len, strlen(directory) + 11);
-	strcpy(x->cert_path, directory);
+static void ctw_set_cert_path(struct _ctw *common, char *directory) {
+	common->cert_path = string_create(&common->cert_path_len, strlen(directory) + 11);
+	strcpy(common->cert_path, directory);
 	size_t i;
-	for(i = 0; i < strlen(x->cert_path); i++) {
-		if (x->cert_path[i] == '/') {
-			x->cert_path[i] = '\\';
+	for(i = 0; i < strlen(common->cert_path); i++) {
+		if (common->cert_path[i] == '/') {
+			common->cert_path[i] = '\\';
 		}
 	}
-	strcat(x->cert_path, "\\cacert.pem");
+	strcat(common->cert_path, "\\cacert.pem");
 }
 #endif 

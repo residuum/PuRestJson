@@ -35,13 +35,13 @@ struct _rest;
 typedef struct _rest t_rest;
 
 APIEXPORT void APICALL *rest_new(t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL rest_free(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL rest_free(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);
 
-APIEXPORT void APICALL rest_command(t_rest *x, t_symbol *sel, int argc, t_atom *argv); 
-APIEXPORT void APICALL rest_timeout(t_rest *x, t_symbol *sel, int argc, t_atom *argv); 
-APIEXPORT void APICALL rest_url(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL rest_sslcheck(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL rest_cancel(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL rest_header(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL rest_clear_headers(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL rest_write(t_rest *x, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL rest_command(t_rest *rest, t_symbol *sel, int argc, t_atom *argv); 
+APIEXPORT void APICALL rest_timeout(t_rest *rest, t_symbol *sel, int argc, t_atom *argv); 
+APIEXPORT void APICALL rest_url(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL rest_sslcheck(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL rest_cancel(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL rest_header(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL rest_clear_headers(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL rest_write(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);

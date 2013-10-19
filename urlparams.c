@@ -14,13 +14,13 @@ struct _urlparams {
 };
 
 /* from http://www.geekhideout.com/urlcode.shtml */
-static char to_hex(char code) {
+static char urlp_tohex(char code) {
 	static char hex[] = "0123456789abcdef";
 	return hex[code & 15];
 }
 
 /* from http://www.geekhideout.com/urlcode.shtml */
-static char *urlencode(char *str, size_t *str_len) {
+static char *urlp_encode(char *str, size_t *str_len) {
 	char *pstr = str;
 	char *buf;
 	char *pbuf;
@@ -32,7 +32,7 @@ static char *urlencode(char *str, size_t *str_len) {
 		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~') {
 			*pbuf++ = *pstr;
 		} else {
-			*pbuf++ = '%', *pbuf++ = to_hex(*pstr >> 4), *pbuf++ = to_hex(*pstr & 15);
+			*pbuf++ = '%', *pbuf++ = urlp_tohex(*pstr >> 4), *pbuf++ = urlp_tohex(*pstr & 15);
 		}
 		pstr++;
 	}
@@ -49,26 +49,26 @@ void urlparams_setup(void) {
 }
 
 void *urlparams_new(t_symbol *sel, int argc, t_atom *argv) {
-	t_urlparams *x = (t_urlparams *)pd_new(urlparams_class);
+	t_urlparams *urlp = (t_urlparams *)pd_new(urlparams_class);
 
 	(void) sel;
 	(void) argc;
 	(void) argv;
 
-	x->storage.data_count = 0;
-	outlet_new(&x->storage.x_ob, NULL);
-	return (void *)x;
+	urlp->storage.data_count = 0;
+	outlet_new(&urlp->storage.x_ob, NULL);
+	return (void *)urlp;
 }
 
-void urlparams_free (t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
+void urlparams_free (t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
 	(void) sel;
 	(void) argc;
 	(void) argv;
 
-	kvp_store_free_memory((struct _kvp_store *)x);
+	kvp_store_free_memory((struct _kvp_store *)urlp);
 }
 
-void urlparams_bang(t_urlparams *x) {
+void urlparams_bang(t_urlparams *urlp) {
 	size_t i;
 	struct _kvp *data_member;
 	size_t output_len = 0;
@@ -76,39 +76,39 @@ void urlparams_bang(t_urlparams *x) {
 	size_t encoded_len;
 	char *encoded_string = NULL;
 
-	if (x->storage.data_count == 0) {
+	if (urlp->storage.data_count == 0) {
 		return;
 	}
 
-	data_member = x->storage.first_data;
-	for (i=0; i < x->storage.data_count; i++) {
-		encoded_string = urlencode(data_member->value, &encoded_len);
+	data_member = urlp->storage.first_data;
+	for (i = 0; i < urlp->storage.data_count; i++) {
+		encoded_string = urlp_encode(data_member->value, &encoded_len);
 		output_len += data_member->key_len + encoded_len + 2;
 		string_free(encoded_string, &encoded_len);
 		data_member = data_member->next;
 	}
 	output = getbytes(output_len * sizeof(char));
 
-	data_member = x->storage.first_data;
-	for (i = 0; i < x->storage.data_count; i++) {
+	data_member = urlp->storage.first_data;
+	for (i = 0; i < urlp->storage.data_count; i++) {
 		strcat(output, data_member->key);
 		strcat(output, "=");
-		encoded_string = urlencode(data_member->value, &encoded_len);
+		encoded_string = urlp_encode(data_member->value, &encoded_len);
 		strcat(output, encoded_string);
 		if (encoded_string) {
 			string_free(encoded_string, &encoded_len);
 		}
-		if (i < x->storage.data_count - 1) {
+		if (i < urlp->storage.data_count - 1) {
 			strcat(output, "&");
 		}
 		data_member = data_member->next;
 	}
 
-	outlet_symbol(x->storage.x_ob.ob_outlet, gensym(output));
+	outlet_symbol(urlp->storage.x_ob.ob_outlet, gensym(output));
 	string_free(output, &output_len);
 }
 
-void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
+void urlparams_add(t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
 	char key[MAXPDSTRING];
 	size_t value_len = 0;
 	char *value;
@@ -118,7 +118,7 @@ void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 	(void) sel;
 
 	if (argc < 2) {
-		pd_error(x, "For method 'add' You need to specify a value.");
+		pd_error(urlp, "For method 'add' You need to specify a value.");
 		return;
 	}
 
@@ -135,14 +135,14 @@ void urlparams_add(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
 		strcat(value, " ");
 		strcat(value, temp_value);
 	}
-	kvp_add((struct _kvp_store *)x, key, value, 0);
+	kvp_add((struct _kvp_store *)urlp, key, value, 0);
 	string_free(value, &value_len);
 }
 
-void urlparams_clear(t_urlparams *x, t_symbol *sel, int argc, t_atom *argv) {
+void urlparams_clear(t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
 	(void) sel;
 	(void) argc;
 	(void) argv;
 
-	kvp_store_free_memory((struct _kvp_store *)x);
+	kvp_store_free_memory((struct _kvp_store *)urlp);
 }

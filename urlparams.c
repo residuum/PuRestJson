@@ -16,6 +16,7 @@ struct _urlparams {
 /* from http://www.geekhideout.com/urlcode.shtml */
 static char urlp_tohex(char code) {
 	static char hex[] = "0123456789abcdef";
+
 	return hex[code & 15];
 }
 

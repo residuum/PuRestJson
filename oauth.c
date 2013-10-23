@@ -100,7 +100,7 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_cancel, gensym("cancel"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_clear_headers, gensym("header_clear"), A_GIMME, 0);
-	class_addmethod(oauth_class, (t_method)oauth_write, gensym("write"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_file, gensym("file"), A_GIMME, 0);
 	class_sethelpsymbol(oauth_class, gensym("rest"));
 }
 
@@ -306,7 +306,7 @@ void oauth_clear_headers(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) 
 	ctw_clear_headers((struct _ctw *)oauth);
 }
 
-void oauth_write(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_file(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 
 	(void) sel;
 

@@ -44,4 +44,4 @@ APIEXPORT void APICALL rest_sslcheck(t_rest *rest, t_symbol *sel, int argc, t_at
 APIEXPORT void APICALL rest_cancel(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);
 APIEXPORT void APICALL rest_header(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);
 APIEXPORT void APICALL rest_clear_headers(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL rest_write(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL rest_file(t_rest *rest, t_symbol *sel, int argc, t_atom *argv);

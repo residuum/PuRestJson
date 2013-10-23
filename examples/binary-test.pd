@@ -1,10 +1,10 @@
-#N canvas 760 282 510 363 10;
+#N canvas 758 280 510 363 10;
 #X obj 48 283 rest;
 #X msg 87 39 GET http://ix.residuum.org/pd/abstractions/sample-looper.png
 ;
 #X obj 49 323 print;
-#X msg 49 8 write /tmp/test.png;
-#X msg 139 77 write;
+#X msg 49 7 file /tmp/test.png;
+#X msg 139 77 file;
 #X connect 0 0 2 0;
 #X connect 1 0 0 0;
 #X connect 3 0 0 0;

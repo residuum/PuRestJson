@@ -173,22 +173,17 @@ static void ctw_perform(struct _ctw *common) {
 	do {
 		struct timeval timeout;
 		int rc; /* select() return code */ 
-
 		fd_set fdread;
 		fd_set fdwrite;
 		fd_set fdexcep;
 		int maxfd = -1;
-
 		long curl_timeo = -1;
-
 		FD_ZERO(&fdread);
 		FD_ZERO(&fdwrite);
 		FD_ZERO(&fdexcep);
-
 		/* set a suitable timeout to play around with */ 
 		timeout.tv_sec = 1;
 		timeout.tv_usec = 0;
-
 		code = curl_multi_timeout(common->multi_handle, &curl_timeo);
 		if (code != CURLM_OK) {
 			pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
@@ -201,21 +196,12 @@ static void ctw_perform(struct _ctw *common) {
 				timeout.tv_usec = (curl_timeo % 1000) * 1000;
 			}
 		}
-
 		/* get file descriptors from the transfers */ 
 		code = curl_multi_fdset(common->multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 		if (code != CURLM_OK) {
 			pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 		}
-
-		/* In a real-world program you OF COURSE check the return code of the
-		   function calls.  On success, the value of maxfd is guaranteed to be
-		   greater or equal than -1.  We call select(maxfd + 1, ...), specially in
-		   case of (maxfd == -1), we call select(0, ...), which is basically equal
-		   to sleep. */ 
-
 		rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
-
 		switch(rc) {
 			case -1:
 				/* select error */ 

@@ -171,7 +171,7 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_cancel, gensym("cancel"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_clear_headers, gensym("header_clear"), A_GIMME, 0);
-	class_addmethod(rest_class, (t_method)rest_write, gensym("write"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_file, gensym("write"), A_GIMME, 0);
 }
 
 void rest_command(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
@@ -286,7 +286,7 @@ void rest_clear_headers(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	ctw_clear_headers((struct _ctw *)rest);
 }
 
-void rest_write(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_file(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 
 	(void) sel;
 

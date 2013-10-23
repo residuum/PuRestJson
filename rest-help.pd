@@ -1,4 +1,4 @@
-#N canvas 329 51 1005 658 10;
+#N canvas 327 51 1005 658 10;
 #X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
 #X text 55 -59 - object for HTTP communication with REST webservices
@@ -25,7 +25,7 @@ the value and return to the default \, use an empty [timeout( message.
 #X msg 484 92 timeout 2000;
 #X msg 573 91 timeout;
 #X msg 600 332 sslcheck 0;
-#X msg 675 332 sslcheck 1;
+#X msg 692 332 sslcheck 1;
 #X obj 19 -36 oauth;
 #X text 57 -37 - object for HTTP communication with OAuth webservices
 ;
@@ -333,7 +333,7 @@ values of Accept: headers;
 #X connect 5 0 2 0;
 #X connect 9 0 2 0;
 #X restore 21 304 pd headers;
-#X msg 634 169 cancel;
+#X msg 634 173 cancel;
 #X text 637 202 Use this request to test cancelling and timeout: it
 will wait for 10 seconds before returning data.;
 #X msg 641 232 GET http://ix.residuum.org/pd/sleep_example.php;
@@ -365,28 +365,28 @@ of 10ms is sufficient on my system (TM).;
 #X connect 7 1 3 0;
 #X connect 8 0 7 0;
 #X connect 11 0 6 0;
-#X restore 718 168 pd cancel;
+#X restore 716 176 pd cancel;
 #X text 630 95 Experimental: You can cancel a currently executed request
 by issuing [cancel(. If data has been returned already \, but is not
 output \, or output only partially \, outputting the data will still
 be completed. Note \, that cancelling the call may take some time \,
 so do not try to issue a new request immediately. See;
-#N canvas 366 182 631 378 download-to-file 0;
+#N canvas 364 180 631 378 download-to-file 0;
 #X obj 77 247 rest;
 #X msg 119 106 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
-#X msg 77 39 write /tmp/test.json;
-#X msg 172 192 write;
 #X obj 48 297 print data;
 #X obj 133 297 print done;
 #X text 74 20 Set the location \, where the file should be saved;
 #X text 117 86 Downloaded data will write it to the file;
 #X text 170 172 Clear the location;
-#X connect 0 0 4 0;
-#X connect 0 1 5 0;
+#X msg 77 38 file /tmp/test.json;
+#X msg 172 192 file;
+#X connect 0 0 2 0;
+#X connect 0 1 3 0;
 #X connect 1 0 0 0;
-#X connect 2 0 0 0;
-#X connect 3 0 0 0;
+#X connect 7 0 0 0;
+#X connect 8 0 0 0;
 #X restore 21 371 pd download-to-file;
 #X text 19 60 [oauth] is an object for communication with OAUTH enbabled
 webservices. Request methods GET and POST are available.;

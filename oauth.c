@@ -35,7 +35,7 @@ static void oauth_free_inner(t_oauth *oauth, short free_rsa) {
 	}
 }
 
-static void oauth_set_url_params(t_oauth *oauth, int argc, t_atom *argv) {
+static void oauth_set_init(t_oauth *oauth, int argc, t_atom *argv) {
 	oauth_free_inner(oauth, 0);
 
 	switch (argc) {
@@ -91,7 +91,7 @@ static void oauth_set_rsa_key(t_oauth *oauth, int argc, t_atom *argv) {
 void oauth_setup(void) {
 	oauth_class = class_new(gensym("oauth"), (t_newmethod)oauth_new,
 			(t_method)oauth_free, sizeof(t_oauth), 0, A_GIMME, 0);
-	class_addmethod(oauth_class, (t_method)oauth_url, gensym("url"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_init, gensym("init"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("GET"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("POST"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_method, gensym("method"), A_GIMME, 0);
@@ -242,14 +242,14 @@ void oauth_method(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 	}
 }
 
-void oauth_url(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_init(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 
 	(void) sel;
 
 	if(oauth->common.locked) {
 		post("oauth object is performing request and locked");
 	} else {
-		oauth_set_url_params(oauth, argc, argv); 
+		oauth_set_init(oauth, argc, argv); 
 	}
 }
 
@@ -321,8 +321,8 @@ void *oauth_new(t_symbol *sel, int argc, t_atom *argv) {
 	ctw_init((struct _ctw *)oauth);
 	ctw_set_timeout((struct _ctw *)oauth, 0);
 
-	oauth_set_url_params(oauth, 0, argv); 
-	oauth_set_url_params(oauth, argc, argv); 
+	oauth_set_init(oauth, 0, argv); 
+	oauth_set_init(oauth, argc, argv); 
 	oauth->oauth.method = OA_HMAC;
 	oauth->oauth.rsa_key_len = 0;
 

@@ -134,7 +134,7 @@ static void *rest_get_auth_token(void *thread_args) {
 	return NULL;
 }
 
-static void rest_set_url_params(t_rest *rest, int argc, t_atom *argv) {
+static void rest_set_init(t_rest *rest, int argc, t_atom *argv) {
 	rest_free_inner(rest);
 
 	switch (argc) {
@@ -161,7 +161,7 @@ static void rest_set_url_params(t_rest *rest, int argc, t_atom *argv) {
 void rest_setup(void) {
 	rest_class = class_new(gensym("rest"), (t_newmethod)rest_new,
 			(t_method)rest_free, sizeof(t_rest), 0, A_GIMME, 0);
-	class_addmethod(rest_class, (t_method)rest_url, gensym("url"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_init, gensym("init"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("PUT"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("GET"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("DELETE"), A_GIMME, 0);
@@ -222,14 +222,14 @@ void rest_command(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	ctw_thread_exec((void *)rest, ctw_exec);
 }
 
-void rest_url(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_init(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 
 	(void) sel;
 
 	if(rest->common.locked) {
 		post("rest object is performing request and locked");
 	} else {
-		rest_set_url_params(rest, argc, argv); 
+		rest_set_init(rest, argc, argv); 
 	}
 }
 
@@ -301,8 +301,8 @@ void *rest_new(t_symbol *sel, int argc, t_atom *argv) {
 	ctw_init((struct _ctw *)rest);
 	ctw_set_timeout((struct _ctw *)rest, 0);
 
-	rest_set_url_params(rest, 0, argv); 
-	rest_set_url_params(rest, argc, argv); 
+	rest_set_init(rest, 0, argv); 
+	rest_set_init(rest, argc, argv); 
 
 	outlet_new(&rest->common.x_ob, NULL);
 	rest->common.status_out = outlet_new(&rest->common.x_ob, NULL);

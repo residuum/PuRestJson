@@ -1,5 +1,4 @@
-#N canvas 393 51 964 694 10;
-#X declare -lib purest_json;
+#N canvas 391 51 1182 689 10;
 #X obj 143 145 version;
 #X obj 104 94 bng 15 250 50 0 empty empty Warning:_Clicking_here_will_send_data_about_your_Pd_version_to_an_open_databas*
 17 7 0 10 -262144 -1 -1;
@@ -26,14 +25,14 @@
 #X text 27 9 This is a simple example for using cookie authentication.
 The example sends data to a BigCouch instance hosted by http://cloudant.com/.
 ;
-#X text 26 43 The data will only include information from the output
+#X text 26 53 The data will only include information from the output
 of [version] \, and nothing else.;
 #X obj 449 555 print status-information;
 #X obj 104 119 t b b;
 #X text 240 445 We store the data;
 #X msg 104 424 PUT statistics.php \$1;
 #X text 682 55 Different possibilities for authentication:;
-#N canvas 44 51 511 356 init 0;
+#N canvas 42 51 511 356 init 1;
 #X obj 32 281 print;
 #X text 31 51 Set base url \, login path \, username and password on
 initialization;
@@ -47,21 +46,6 @@ dBukE2WR07A7PtE8FIXECl8c;
 #X connect 3 0 4 0;
 #X connect 4 0 0 0;
 #X restore 684 74 pd init with parameters;
-#N canvas 567 61 493 359 use 0;
-#X obj 41 280 print;
-#X text 21 42 Use the url method to set the parameters;
-#X msg 22 66 url https://residuum.cloudant.com/ _session nownestortedidirevinesti
-dBukE2WR07A7PtE8FIXECl8c;
-#X msg 88 162 GET purest-json-stat/_design/statistics/_view/usage_by_distribution?group=true
-;
-#X msg 63 110 GET purest-json-stat/_design/statistics/_view/usage_by_version?group=true
-;
-#X obj 41 227 rest;
-#X connect 2 0 5 0;
-#X connect 3 0 5 0;
-#X connect 4 0 5 0;
-#X connect 5 0 0 0;
-#X restore 685 99 pd use url method;
 #N canvas 229 399 538 332 basic 0;
 #X obj 43 294 print;
 #X msg 43 89 GET https://nownestortedidirevinesti:dBukE2WR07A7PtE8FIXECl8c@residuum.cloudant.com/purest-json-stat/_design/statistics/_view/usage_by_version?group=true
@@ -92,6 +76,21 @@ of the protocol \, followed by an at sign (@) and the url.;
 ;
 #X obj 159 531 json-decode;
 #X obj 159 577 print json-data;
+#N canvas 565 59 493 359 use 0;
+#X obj 41 280 print;
+#X msg 88 162 GET purest-json-stat/_design/statistics/_view/usage_by_distribution?group=true
+;
+#X msg 63 110 GET purest-json-stat/_design/statistics/_view/usage_by_version?group=true
+;
+#X obj 41 227 rest;
+#X msg 22 66 init https://residuum.cloudant.com/ _session nownestortedidirevinesti
+dBukE2WR07A7PtE8FIXECl8c;
+#X text 21 42 Use the init method to set the parameters;
+#X connect 1 0 3 0;
+#X connect 2 0 3 0;
+#X connect 3 0 0 0;
+#X connect 4 0 3 0;
+#X restore 685 99 pd use init method;
 #X connect 0 0 2 0;
 #X connect 1 0 23 0;
 #X connect 2 0 3 0;
@@ -111,8 +110,8 @@ of the protocol \, followed by an at sign (@) and the url.;
 #X connect 23 0 6 0;
 #X connect 23 1 0 0;
 #X connect 25 0 12 0;
-#X connect 25 0 32 0;
-#X connect 32 0 11 0;
+#X connect 25 0 31 0;
+#X connect 31 0 11 0;
+#X connect 31 0 32 0;
+#X connect 31 1 22 0;
 #X connect 32 0 33 0;
-#X connect 32 1 22 0;
-#X connect 33 0 34 0;

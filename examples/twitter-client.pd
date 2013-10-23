@@ -1,9 +1,8 @@
-#N canvas 339 135 974 536 10;
-#X declare -lib purest_json;
+#N canvas 337 133 974 536 10;
 #X msg 494 235 GET /1.1/statuses/home_timeline.json;
 #X msg 574 367 POST /1.1/statuses/update.json \$1;
 #X obj 574 333 urlparams;
-#X obj 594 31 import purest_json;
+#X obj 793 25 import purest_json;
 #X obj 814 364 print urlparams;
 #X obj 488 408 oauth;
 #X msg 24 36 POST /oauth/request_token;
@@ -18,10 +17,11 @@ FEHGi9k8jF3zTPrBLbnBonF94gbUGZLrGKMgl4Td5bc;
 #X obj 488 497 print data2;
 #X obj 539 453 print status2;
 #X msg 296 109 POST /oauth/access_token oauth_identifier=YOUR_PIN;
-#X msg 426 161 url https://api.twitter.com SEJpJksCRpcgyoP4nk73Ng FEHGi9k8jF3zTPrBLbnBonF94gbUGZLrGKMgl4Td5bc
-YOUR_ACCESS_TOKEN YOUR_ACCESS_TOKEN_SECRET;
-#X msg 207 40 url https://api.twitter.com SEJpJksCRpcgyoP4nk73Ng FEHGi9k8jF3zTPrBLbnBonF94gbUGZLrGKMgl4Td5bc
+#X msg 207 40 init https://api.twitter.com SEJpJksCRpcgyoP4nk73Ng FEHGi9k8jF3zTPrBLbnBonF94gbUGZLrGKMgl4Td5bc
 YOUR_TEMP_TOKEN YOUR_TEMP_TOKEN_SECRET;
+#X msg 426 161 init https://api.twitter.com SEJpJksCRpcgyoP4nk73Ng
+FEHGi9k8jF3zTPrBLbnBonF94gbUGZLrGKMgl4Td5bc YOUR_ACCESS_TOKEN YOUR_ACCESS_TOKEN_SECRET
+;
 #X connect 0 0 5 0;
 #X connect 1 0 5 0;
 #X connect 2 0 1 0;
@@ -33,5 +33,5 @@ YOUR_TEMP_TOKEN YOUR_TEMP_TOKEN_SECRET;
 #X connect 7 1 9 0;
 #X connect 11 0 2 0;
 #X connect 15 0 7 0;
-#X connect 16 0 5 0;
-#X connect 17 0 7 0;
+#X connect 16 0 7 0;
+#X connect 17 0 5 0;

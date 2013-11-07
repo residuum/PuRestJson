@@ -230,33 +230,30 @@ static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, F
 	CURLMsg *msg;
 	int msgs_left;
 	long http_status;
-	t_atom http_status_data[3];
+	t_atom http_status_data[2];
 
 	while ((msg = curl_multi_info_read(common->multi_handle, &msgs_left))) {
 		if (msg->msg == CURLMSG_DONE) {
 			/* output status */
 			curl_easy_getinfo(common->easy_handle, CURLINFO_RESPONSE_CODE, &http_status);
-			SETSYMBOL(&http_status_data[0], gensym(common->req_type));
 			if (http_status >= 200 && http_status < 300) {
-				SETSYMBOL(&http_status_data[1], gensym("bang"));
-				outlet_list(common->status_out, &s_list, 2, &http_status_data[0]);
 				if (msg->data.result == CURLE_OK) {
 					if (!fp) {
 						outlet_symbol(common->x_ob.ob_outlet, gensym((*out_memory).memory));
 					}
 					/* Free memory */
 					string_free((*out_memory).memory, &(*out_memory).size);
+					outlet_bang(common->status_out);
 				} else {
-					SETFLOAT(&http_status_data[1], (float)http_status);
-					SETSYMBOL(&http_status_data[2], gensym(curl_easy_strerror(msg->data.result)));
+					SETFLOAT(&http_status_data[0], (float)http_status);
+					SETSYMBOL(&http_status_data[1], gensym(curl_easy_strerror(msg->data.result)));
 					pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
 					outlet_list(common->status_out, &s_list, 3, &http_status_data[0]);
 				}
 			} else {
-				SETFLOAT(&http_status_data[1], (float)http_status);
-				SETFLOAT(&http_status_data[2], (float)msg->data.result);
+				SETFLOAT(&http_status_data[0], (float)http_status);
 				pd_error(common, "HTTP error while performing request: %li", http_status);
-				outlet_list(common->status_out, &s_list, 3, &http_status_data[0]);
+				outlet_float(common->status_out, atom_getfloat(&http_status_data[0]));
 			}
 			curl_easy_cleanup(common->easy_handle);
 			curl_multi_cleanup(common->multi_handle);

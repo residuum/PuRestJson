@@ -1,3 +1,22 @@
+pd-purest-json (0.15.0) UNRELEASED; urgency=low
+  * Cancellation is now faster
+  * Switch to json-c 0.11
+  * Refactoring of code
+  * Breaking changes:
+    - [oauth] and [rest]:
+      -- [write( method is now called [file(
+      -- [url( method is now called [init(
+      -- init errors only output to console
+      -- changes to status outlet:
+          --- on success output bang
+          --- on HTTP error output numerical HTTP status
+          --- on cURL error output list: error code and message
+    - [rest-json] has been removed
+    - [json-decode]:
+      -- string values will not be checked for numbers or boolean
+ 
+ -- Thomas Mayer <thomas@residuum.org>  Mon, 18 Nov 2013 23:00:00 +0100
+
 pd-purest-json (0.14.0) UNRELEASED; urgency=low
   * Downloading to file
   * Cancelling requests

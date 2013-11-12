@@ -1,4 +1,4 @@
-#N canvas 327 51 1005 658 10;
+#N canvas 323 51 1137 655 10;
 #X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
 #X text 55 -59 - object for HTTP communication with REST webservices
@@ -29,14 +29,14 @@ the value and return to the default \, use an empty [timeout( message.
 #X obj 19 -36 oauth;
 #X text 57 -37 - object for HTTP communication with OAuth webservices
 ;
-#N canvas 154 116 1044 412 oauth-specific 0;
+#N canvas 152 114 1044 412 oauth-specific 0;
 #X obj 29 53 oauth http://example.com/ CLIENTKEY CLIENTSECRET ACCESSTOKEN
 ACCESSSECRET;
 #X msg 31 205 method PLAINTEXT;
 #X obj 31 304 oauth;
 #X msg 82 234 method HMAC;
 #X msg 91 262 method RSA privatekey;
-#N canvas 79 81 913 619 RSA 0;
+#N canvas 77 79 913 619 RSA 0;
 #X msg -89 318 GET /echo_api.php?method=foo&bar=baz;
 #X msg -92 361 POST /echo_api.php?method=foo&bar=baz;
 #X obj -128 409 oauth;
@@ -50,17 +50,17 @@ zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn qkMsDmzt0EfNaAO
 WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
 3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8 AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A== -----END PRIVATE KEY-----;
-#X msg -142 -95 url http://term.ie/oauth/example key this_is_ignored
-accesskey this_is_ignored;
-#X text 191 -98 You need to set client secret and access secret with
+#X text 261 -97 You need to set client secret and access secret with
 the [url( message or as arguments for [oauth] \, but these will be
 ignored with the RSA key;
+#X msg -142 -95 init http://term.ie/oauth/example key this_is_ignored
+accesskey this_is_ignored;
 #X connect 0 0 2 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
 #X connect 2 1 4 0;
 #X connect 5 0 2 0;
-#X connect 6 0 2 0;
+#X connect 7 0 2 0;
 #X restore 333 190 pd RSA;
 #X text 29 135 The method message will set the OAUTH signature method.
 Default is HMAC (HMAC-SHA1). For RSA (RSA-SHA1) you have to submit
@@ -94,7 +94,7 @@ where REQUEST_METHOD is the uppercase verb of the method \, URL is
 the relative server path \, and DATA are url parameters to add to the
 url. For creating the data \, see;
 #X obj 23 151 urlparams;
-#N canvas 147 60 544 367 rest-specific 0;
+#N canvas 145 58 544 367 rest-specific 0;
 #N canvas 494 72 517 474 cookie-auth 0;
 #X text 34 91 This will try to log you in on creation. It will call
 the url http://example.com/login-page and post username=myusername&password=mypass
@@ -333,7 +333,7 @@ values of Accept: headers;
 #X connect 5 0 2 0;
 #X connect 9 0 2 0;
 #X restore 21 304 pd headers;
-#X msg 634 173 cancel;
+#X msg 647 171 cancel;
 #X text 637 202 Use this request to test cancelling and timeout: it
 will wait for 10 seconds before returning data.;
 #X msg 641 232 GET http://ix.residuum.org/pd/sleep_example.php;
@@ -365,13 +365,8 @@ of 10ms is sufficient on my system (TM).;
 #X connect 7 1 3 0;
 #X connect 8 0 7 0;
 #X connect 11 0 6 0;
-#X restore 716 176 pd cancel;
-#X text 630 95 Experimental: You can cancel a currently executed request
-by issuing [cancel(. If data has been returned already \, but is not
-output \, or output only partially \, outputting the data will still
-be completed. Note \, that cancelling the call may take some time \,
-so do not try to issue a new request immediately. See;
-#N canvas 364 180 631 378 download-to-file 0;
+#X restore 710 162 pd cancel;
+#N canvas 362 178 631 378 download-to-file 0;
 #X obj 77 247 rest;
 #X msg 119 106 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
@@ -390,6 +385,11 @@ so do not try to issue a new request immediately. See;
 #X restore 21 371 pd download-to-file;
 #X text 19 60 [oauth] is an object for communication with OAUTH enbabled
 webservices. Request methods GET and POST are available.;
+#X text 643 93 You can cancel a currently executed request by issuing
+[cancel(. If data has been returned already \, but is not output \,
+or output only partially \, outputting the data will still be completed.
+Note \, that cancelling the call may take some time \, so do not try
+to issue a new request immediately. See;
 #X connect 0 0 9 0;
 #X connect 9 0 3 0;
 #X connect 9 1 4 0;

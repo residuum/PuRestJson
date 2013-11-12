@@ -10,10 +10,10 @@ SOURCES = rest.c oauth.c json-decode.c json-encode.c urlparams.c
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically
-PDOBJECTS = rest-json.pd
+PDOBJECTS = 
 
 # example patches and related files, in the 'examples' subfolder
-EXAMPLES = purest-json-test.pd the-sound-of-money.pd statistics.pd twitter-client.pd
+EXAMPLES = purest-json-test.pd the-sound-of-money.pd statistics.pd twitter-client.pd binary-test.pd
 
 # manuals and related files, in the 'manual' subfolder
 MANUAL = index.html couchdb-example.png webservice-example.png twitter.html twitter-documentation.png
@@ -27,7 +27,7 @@ EXTRA_DIST = Changelog.txt test.json
 # unit tests and related files here, in the 'unittests' subfolder
 UNITTESTS = 
 
-HELPPATCHES = json-help.pd rest-json-help.pd urlparams-help.pd rest-help.pd
+HELPPATCHES = json-help.pd urlparams-help.pd rest-help.pd
 
 
 #------------------------------------------------------------------------------#

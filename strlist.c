@@ -22,10 +22,11 @@ static struct _strlist *strlist_create(char *val, size_t val_len){
 
 static struct _strlist *strlist_add(struct _strlist *list, char *val, size_t val_len) {
 	struct _strlist *new = strlist_create(val, val_len);
+	struct _strlist *existing = list;
+	
 	if (list == NULL) {
 		return new;
 	}
-	struct _strlist *existing = list;
 	while (existing != NULL) {
 		if (existing->next != NULL) {
 			existing = existing->next;

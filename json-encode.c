@@ -16,7 +16,13 @@ struct _json_encode {
 	t_canvas *x_canvas;
 };
 
-static json_object *create_object(char *value) {
+struct _jenc_json_array {
+	size_t *numbers;
+	size_t count;
+	json_object **members;
+};
+
+static json_object *jenc_create_object(char *value) {
 	json_object *object;
 	char *parsed_string;
 	size_t memsize = 0;
@@ -32,121 +38,158 @@ static json_object *create_object(char *value) {
 	return object;
 }
 
-static void load_json_data(t_json_encode *x, json_object *jobj) {
-	enum json_type outer_type;
+static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj) {
 	enum json_type inner_type;
 	char *value;
 	size_t value_len = 0;
 	int array_len;
 	int i;
 
-	kvp_store_free_memory((struct _kvp_store *)x);
+	json_object_object_foreach(jobj, key, val) {
+		inner_type = json_object_get_type(val);
+		switch (inner_type) {
+			case json_type_boolean:
+				kvp_add((struct _kvp_store *)jenc, key, json_object_get_boolean(val) ? "1" : "0", 0);
+				break;
+			case json_type_double:
+				value = string_create(&value_len, snprintf(NULL, 0, "%f", json_object_get_double(val)));
+				sprintf(value, "%f", json_object_get_double(val));
+				kvp_add((struct _kvp_store *)jenc, key, value, 0);
+				string_free(value, &value_len);
+				break;
+			case json_type_int:
+				value = string_create(&value_len, snprintf(NULL, 0, "%d", json_object_get_int(val)));
+				sprintf(value, "%d", json_object_get_int(val));
+				kvp_add((struct _kvp_store *)jenc, key, value, 0);
+				string_free(value, &value_len);
+				break;
+			case json_type_string:
+				value = string_create(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
+				sprintf(value, "%s", json_object_get_string(val));
+				kvp_add((struct _kvp_store *)jenc, key, value, 0);
+				string_free(value, &value_len);
+				break;
+			case json_type_object:
+				value = string_create(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
+				sprintf(value, "%s", json_object_get_string(val));
+				kvp_add((struct _kvp_store *)jenc, key, value, 0);
+				string_free(value, &value_len);
+				json_object_put(val);
+				break;
+			case json_type_array:
+				array_len = json_object_array_length(val);
+				for (i = 0; i < array_len; i++) {
+					json_object *array_member = json_object_array_get_idx(val, i);
+					if (!is_error(array_member)) {
+						value = string_create(&value_len, 
+								snprintf(NULL, 0, "%s", json_object_get_string(array_member)));
+						sprintf(value, "%s", json_object_get_string(array_member));
+						kvp_add((struct _kvp_store *)jenc, key, value, 1);
+						string_free(value, &value_len);
+					}
+				}
+				break;
+			case json_type_null:
+				kvp_add((struct _kvp_store *)jenc, key, "", 0);
+				break;
+		}
+	}
+}
+
+static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj) {
+	enum json_type outer_type;
+
+	kvp_store_free_memory((struct _kvp_store *)jenc);
 	outer_type = json_object_get_type(jobj);
 
 	switch (outer_type) {
 		case json_type_object:
-			;
-			json_object_object_foreach(jobj, key, val) {
-				inner_type = json_object_get_type(val);
-				switch (inner_type) {
-					case json_type_boolean:
-						kvp_add((struct _kvp_store *)x, key, json_object_get_boolean(val) ? "1" : "0", 0);
-						break;
-					case json_type_double:
-						value = string_create(&value_len, snprintf(NULL, 0, "%f", json_object_get_double(val)));
-						sprintf(value, "%f", json_object_get_double(val));
-						kvp_add((struct _kvp_store *)x, key, value, 0);
-						string_free(value, &value_len);
-						break;
-					case json_type_int:
-						value = string_create(&value_len, snprintf(NULL, 0, "%d", json_object_get_int(val)));
-						sprintf(value, "%d", json_object_get_int(val));
-						kvp_add((struct _kvp_store *)x, key, value, 0);
-						string_free(value, &value_len);
-						break;
-					case json_type_string:
-						value = string_create(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
-						sprintf(value, "%s", json_object_get_string(val));
-						kvp_add((struct _kvp_store *)x, key, value, 0);
-						string_free(value, &value_len);
-						break;
-					case json_type_object:
-						value = string_create(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
-						sprintf(value, "%s", json_object_get_string(val));
-						kvp_add((struct _kvp_store *)x, key, value, 0);
-						string_free(value, &value_len);
-						json_object_put(val);
-						break;
-					case json_type_array:
-						array_len = json_object_array_length(val);
-						for (i = 0; i < array_len; i++) {
-							json_object *array_member = json_object_array_get_idx(val, i);
-							if (!is_error(array_member)) {
-								value = string_create(&value_len, 
-										snprintf(NULL, 0, "%s", json_object_get_string(array_member)));
-								sprintf(value, "%s", json_object_get_string(array_member));
-								kvp_add((struct _kvp_store *)x, key, value, 1);
-								string_free(value, &value_len);
-							}
-						}
-						break;
-					case json_type_null:
-						kvp_add((struct _kvp_store *)x, key, "", 0);
-						break;
-				}
-			}
+			jenc_load_json_object(jenc, jobj);
 			break;
 		default: 
-			pd_error(x, "This JSON data cannot be represented internally, sorry");
+			pd_error(jenc, "This JSON data cannot be represented internally, sorry");
 			break;
 	}
 }
 
-static t_symbol *get_json_symbol(t_json_encode *x) {
-	size_t i, j, k; 
-	size_t array_member_numbers[x->storage.data_count];
-	size_t array_member_count = 0;
+static unsigned char jenc_is_already_added(size_t current, struct _jenc_json_array *arr) {
+	size_t i;
+
+	for (i = 0; i < arr->count; i++) {
+		if (arr->numbers[i] == current) {
+			post("found");
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static json_object *jenc_get_array_value(struct _kvp *data_member, size_t current, size_t max, 
+		struct _jenc_json_array *arr) {
+	size_t i;
+	struct _kvp *data_member_compare;
+	json_object *value = json_object_new_array();
+	
+	data_member_compare = data_member;
+	for (i = current; i < max; i++) {
+		if (strcmp(data_member_compare->key, data_member->key) == 0) {
+			json_object *array_member = jenc_create_object(data_member_compare->value);
+			json_object_array_add(value, array_member);
+			arr->numbers[arr->count] = i;
+			arr->members[arr->count] = array_member;
+			arr->count++;
+		}
+		data_member_compare = data_member_compare->next;
+	}
+	return value;
+}
+
+static struct _jenc_json_array *jenc_create_array(size_t count) {
+	struct _jenc_json_array *arr = getbytes(sizeof(struct _jenc_json_array));
+	if (arr == NULL) {
+		MYERROR("not enough memory");
+		return arr;
+	}
+	arr->numbers = getbytes(count * sizeof(size_t));
+	arr->members = getbytes(count * sizeof(json_object *));
+	return arr;
+}
+
+static void jenc_free_array(struct _jenc_json_array *arr, size_t count) {
+	size_t i;
+
+	for (i = 0; i < arr->count; i++) {
+		json_object_put(arr->members[i]);
+	}
+	freebytes(arr->numbers, count * sizeof(size_t));
+	freebytes(arr->members, count * sizeof(json_object *));
+	freebytes(arr, sizeof(struct _jenc_json_array));
+}
+
+static t_symbol *jenc_get_json_symbol(t_json_encode *jenc) {
+	size_t i;
+	struct _jenc_json_array *arr_members = jenc_create_array(jenc->storage.data_count);
 	unsigned char already_added = 0;
 	struct _kvp *data_member;
-	struct _kvp *data_member_compare;
 	json_object *jobj = json_object_new_object();
 	json_object *value;
-	json_object *array_members[x->storage.data_count];
 	t_symbol *json_symbol = NULL;
 
-	if (x->storage.data_count == 0) {
+	if (jenc->storage.data_count == 0) {
 		json_symbol = gensym("");
 		return json_symbol;
 	}
 
-	data_member = x->storage.first_data;
-	for (i = 0; i < x->storage.data_count; i++) {
+	data_member = jenc->storage.first_data;
+	for (i = 0; i < jenc->storage.data_count; i++) {
 		already_added = 0;
-		/* Is it an array member? */
 		if (data_member->is_array == 1) {
-			value = json_object_new_array();
-			data_member_compare = data_member;
-			for (j = i; j < x->storage.data_count; j++) {
-				if (strcmp(data_member_compare->key, data_member->key) == 0) {
-					for (k = 0; k < array_member_count; k++) {
-						/* If already inserted, continue i loop */
-						if (array_member_numbers[k] == j) {
-							already_added = 1;
-							break;
-						}
-					}
-					if (already_added == 0) {
-						json_object *array_member = create_object(data_member_compare->value);
-						json_object_array_add(value, array_member);
-						array_member_numbers[array_member_count] = j;
-						array_members[array_member_count] = array_member;
-						array_member_count++;
-					}
-				}
-				data_member_compare = data_member_compare->next;
+			already_added = jenc_is_already_added(i, arr_members);
+			if (already_added == 0) {
+				value = jenc_get_array_value(data_member, i, jenc->storage.data_count, arr_members);
 			}
 		} else {
-			value = create_object(data_member->value);
+			value = jenc_create_object(data_member->value);
 		}
 		if (already_added == 0) {
 			json_object_object_add(jobj, data_member->key, value); 
@@ -154,10 +197,8 @@ static t_symbol *get_json_symbol(t_json_encode *x) {
 		data_member = data_member->next;
 	}
 	json_symbol = gensym(json_object_to_json_string(jobj));
-	for (i = 0; i < array_member_count; i++) {
-		json_object_put(array_members[i]);
-	}
 	json_object_put(jobj);
+	jenc_free_array(arr_members, jenc->storage.data_count);
 	return json_symbol;
 }
 
@@ -174,31 +215,31 @@ void setup_json0x2dencode(void) {
 }
 
 void *json_encode_new(t_symbol *sel, int argc, t_atom *argv) {
-	t_json_encode *x = (t_json_encode *)pd_new(json_encode_class);
+	t_json_encode *jenc = (t_json_encode *)pd_new(json_encode_class);
 
 	(void) sel;
 	(void) argc;
 	(void) argv;
 
-	x->storage.data_count = 0;
-	outlet_new(&x->storage.x_ob, NULL);
-	x->x_canvas = canvas_getcurrent();
-	return (void *)x;
+	jenc->storage.data_count = 0;
+	outlet_new(&jenc->storage.x_ob, NULL);
+	jenc->x_canvas = canvas_getcurrent();
+	return (void *)jenc;
 }
 
-void json_encode_free (t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
+void json_encode_free (t_json_encode *jenc, t_symbol *sel, int argc, t_atom *argv) {
 	(void) sel;
 	(void) argc;
 	(void) argv;
 
-	kvp_store_free_memory((struct _kvp_store *)x);
+	kvp_store_free_memory((struct _kvp_store *)jenc);
 }
 
-void json_encode_bang(t_json_encode *x) {
-	outlet_symbol(x->storage.x_ob.ob_outlet, get_json_symbol(x));
+void json_encode_bang(t_json_encode *jenc) {
+	outlet_symbol(jenc->storage.x_ob.ob_outlet, jenc_get_json_symbol(jenc));
 }
 
-void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
+void json_encode_add(t_json_encode *jenc, t_symbol *sel, int argc, t_atom *argv) {
 	char key[MAXPDSTRING];
 	size_t value_len = 0;
 	char *value;
@@ -211,7 +252,7 @@ void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
 	}
 
 	if (argc < 2) {
-		pd_error(x, "For method '%s' You need to specify a value.", is_array ? "array": "add");
+		pd_error(jenc, "For method '%s' You need to specify a value.", is_array ? "array": "add");
 		return;
 	}
 
@@ -228,24 +269,24 @@ void json_encode_add(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
 		strcat(value, " ");
 		strcat(value, temp_value);
 	}
-	kvp_add((struct _kvp_store *)x, key, value, is_array);
+	kvp_add((struct _kvp_store *)jenc, key, value, is_array);
 	string_free(value, &value_len);
 }
 
-void json_encode_read(t_json_encode *x, t_symbol *filename) {
+void json_encode_read(t_json_encode *jenc, t_symbol *filename) {
 	char buf[MAXPDSTRING];
 	FILE *file = NULL;
 	struct stat st;
 	char *json_string;
 	json_object *jobj;
 
-	canvas_makefilename(x->x_canvas, filename->s_name, buf, MAXPDSTRING);
+	canvas_makefilename(jenc->x_canvas, filename->s_name, buf, MAXPDSTRING);
 	file = fopen(buf, "r");
 	if (!file) {
-		pd_error(x, "%s: read failed", filename->s_name);
+		pd_error(jenc, "%s: read failed", filename->s_name);
 		return;
 	}
-	
+
 	stat(buf, &st);
 	json_string = getbytes((st.st_size + 1) * sizeof(char));
 	json_string[st.st_size] = 0x00;
@@ -254,17 +295,17 @@ void json_encode_read(t_json_encode *x, t_symbol *filename) {
 	jobj = json_tokener_parse(json_string);
 	freebytes(json_string, (st.st_size + 1) * sizeof(char));
 	if (!is_error(jobj)) {
-		load_json_data(x, jobj);
+		jenc_load_json_data(jenc, jobj);
 		json_object_put(jobj);
 	} else {
 		post("File does not contain valid JSON.");
 	}
 }
 
-void json_encode_write(t_json_encode *x, t_symbol *filename) {
+void json_encode_write(t_json_encode *jenc, t_symbol *filename) {
 	char buf[MAXPDSTRING];
 	FILE *file = NULL;
-	t_symbol *json_symbol = get_json_symbol(x);
+	t_symbol *json_symbol = jenc_get_json_symbol(jenc);
 	char *json_string = json_symbol->s_name;
 
 	if (!json_string) {
@@ -272,19 +313,19 @@ void json_encode_write(t_json_encode *x, t_symbol *filename) {
 		return;
 	}
 
-	canvas_makefilename(x->x_canvas, filename->s_name, buf, MAXPDSTRING);
+	canvas_makefilename(jenc->x_canvas, filename->s_name, buf, MAXPDSTRING);
 	if ((file = fopen(buf, "w"))) {
 		fprintf(file, json_string);
 		fclose(file);
 	} else {
-		pd_error(x, "%s: write failed", filename->s_name);
+		pd_error(jenc, "%s: write failed", filename->s_name);
 	}
 }
 
-void json_encode_clear(t_json_encode *x, t_symbol *sel, int argc, t_atom *argv) {
+void json_encode_clear(t_json_encode *jenc, t_symbol *sel, int argc, t_atom *argv) {
 	(void) sel;
 	(void) argc;
 	(void) argv;
 
-	kvp_store_free_memory((struct _kvp_store *)x);
+	kvp_store_free_memory((struct _kvp_store *)jenc);
 }

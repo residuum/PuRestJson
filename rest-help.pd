@@ -1,10 +1,9 @@
-#N canvas 333 51 1005 658 10;
-#X declare -lib purest_json;
+#N canvas 323 51 1137 655 10;
 #X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
 #X text 55 -59 - object for HTTP communication with REST webservices
 ;
-#X text 20 190 All requests are issued with [REQUEST_METHOD URL DATA(
+#X text 20 183 All requests are issued with [REQUEST_METHOD URL DATA(
 where REQUEST_METHOD is the uppercase verb of the method \, URL is
 the request URL \, or the relative server path \, if [url( or initialization
 is used \, and DATA is the upload data for PUT or post data for POST.
@@ -13,9 +12,9 @@ is used \, and DATA is the upload data for PUT or post data for POST.
 #X obj 532 422 print status;
 #X obj 450 -52 import purest_json;
 #X obj 19 -60 rest;
-#X text 19 23 [rest] is an object for communication with REST services.
+#X text 19 27 [rest] is an object for communication with REST services.
 Request methods GET \, POST \, PUT and DELETE are available.;
-#X text 19 249 HTTP requests are asynchronous. Do not expect a request
+#X text 19 260 HTTP requests are asynchronous. Do not expect a request
 to return data immediately. While one request is processed \, the object
 id blocked.;
 #X obj 450 390 rest;
@@ -26,24 +25,18 @@ the value and return to the default \, use an empty [timeout( message.
 #X msg 484 92 timeout 2000;
 #X msg 573 91 timeout;
 #X msg 600 332 sslcheck 0;
-#X msg 675 332 sslcheck 1;
+#X msg 692 332 sslcheck 1;
 #X obj 19 -36 oauth;
 #X text 57 -37 - object for HTTP communication with OAuth webservices
 ;
-#X text 19 50 [oauth] is an object for communication with OAUTH enbabled
-webservices that return JSON data. Request methods GET and POST are
-available.;
-#N canvas 156 118 814 342 oauth-specific 0;
-#X text 27 7 Set the base url \, consumer key and secret (client credentials)
-\, and optionally access token and secret (token credentials) at creation
-or use [url( message.;
+#N canvas 152 114 1044 412 oauth-specific 0;
 #X obj 29 53 oauth http://example.com/ CLIENTKEY CLIENTSECRET ACCESSTOKEN
 ACCESSSECRET;
 #X msg 31 205 method PLAINTEXT;
 #X obj 31 304 oauth;
 #X msg 82 234 method HMAC;
 #X msg 91 262 method RSA privatekey;
-#N canvas 79 81 913 619 RSA 0;
+#N canvas 77 79 913 619 RSA 0;
 #X msg -89 318 GET /echo_api.php?method=foo&bar=baz;
 #X msg -92 361 POST /echo_api.php?method=foo&bar=baz;
 #X obj -128 409 oauth;
@@ -57,130 +50,132 @@ zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn qkMsDmzt0EfNaAO
 WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
 3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8 AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A== -----END PRIVATE KEY-----;
-#X msg -142 -95 url http://term.ie/oauth/example key this_is_ignored
-accesskey this_is_ignored;
-#X text 191 -98 You need to set client secret and access secret with
+#X text 261 -97 You need to set client secret and access secret with
 the [url( message or as arguments for [oauth] \, but these will be
 ignored with the RSA key;
+#X msg -142 -95 init http://term.ie/oauth/example key this_is_ignored
+accesskey this_is_ignored;
 #X connect 0 0 2 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
 #X connect 2 1 4 0;
 #X connect 5 0 2 0;
-#X connect 6 0 2 0;
+#X connect 7 0 2 0;
 #X restore 333 190 pd RSA;
 #X text 29 135 The method message will set the OAUTH signature method.
 Default is HMAC (HMAC-SHA1). For RSA (RSA-SHA1) you have to submit
 your private key. If your version of liboauth does not support RSA-SHA1
 signatures \, you will receive an error message.;
-#X text 439 12 The second output of [oauth] will output status data
+#X text 524 12 The second output of [oauth] will output status data
 of the request.;
-#X msg 470 95 GET /echo_api.php?method=foo&bar=baz;
-#X msg 488 140 POST /echo_api.php?method=foo&bar=baz;
-#X obj 444 182 oauth;
-#X obj 495 226 print status;
-#X obj 406 221 print data;
-#X msg 436 49 url http://term.ie/oauth/example key secret accesskey
+#X msg 555 95 GET /echo_api.php?method=foo&bar=baz;
+#X msg 573 140 POST /echo_api.php?method=foo&bar=baz;
+#X obj 529 182 oauth;
+#X obj 580 226 print status;
+#X obj 491 221 print data;
+#X msg 521 49 init http://term.ie/oauth/example key secret accesskey
 accesssecret;
-#X connect 2 0 3 0;
-#X connect 4 0 3 0;
-#X connect 5 0 3 0;
-#X connect 9 0 11 0;
-#X connect 10 0 11 0;
-#X connect 11 0 13 0;
-#X connect 11 1 12 0;
-#X connect 14 0 11 0;
-#X restore 195 320 pd oauth-specific;
+#X text 27 7 Set the base url \, consumer key and secret (client credentials)
+\, and optionally access token and secret (token credentials) at creation
+or use [init( message.;
+#X connect 1 0 2 0;
+#X connect 3 0 2 0;
+#X connect 4 0 2 0;
+#X connect 8 0 10 0;
+#X connect 9 0 10 0;
+#X connect 10 0 12 0;
+#X connect 10 1 11 0;
+#X connect 13 0 10 0;
+#X restore 195 331 pd oauth-specific;
 #X text 19 -2 Most methods work the same for [rest] and [oauth] \,
 only some methods differ. The differences are outlined below.;
-#X text 20 100 All requests are issued with [REQUEST_METHOD URL DATA(
+#X text 20 97 All requests are issued with [REQUEST_METHOD URL DATA(
 where REQUEST_METHOD is the uppercase verb of the method \, URL is
 the relative server path \, and DATA are url parameters to add to the
 url. For creating the data \, see;
-#X obj 23 154 urlparams;
-#N canvas 151 64 441 365 rest-specific 0;
-#N canvas 498 76 443 465 cookie-auth 0;
-#X text 35 12 Basic cookie authentication is possible with [rest-json]
-\, as long as the service uses some guidelines \, that are adopted
-from CouchDB.;
+#X obj 23 151 urlparams;
+#N canvas 145 58 544 367 rest-specific 0;
+#N canvas 494 72 517 474 cookie-auth 0;
 #X text 34 91 This will try to log you in on creation. It will call
 the url http://example.com/login-page and post username=myusername&password=mypass
 to the page.;
-#X text 34 128 When this returns a cookie \, the cookie will be saved
+#X text 33 138 When this returns a cookie \, the cookie will be saved
 and included in every request \, as long as the base url does not change.
 ;
-#X text 35 168 Please keep in mind \, that passwords in Pd patches
+#X text 32 186 Please keep in mind \, that passwords in Pd patches
 are stored in plain text \, especially when you use code hosting services.
 Better store your passwords in a seperate file or application and use
 [textfile] or OSC for getting the data.;
-#X msg 40 313 url http://example.com/ login-page myusername mypass
-;
 #X text 39 254 This;
-#X text 39 293 is the same as this after clicking the [url( message
-;
-#X text 38 374 To clear your stored authentication cookie \, send a
-[url( message with no additional parameters \, or with only one parameter.
-The latter will send only the base url \, but will not try to log you
-in.;
 #X obj 37 66 rest http://example.com/ login-page myusername mypass
 ;
 #X obj 40 273 rest http://example.com/ login-page myusername mypass
 ;
 #X obj 40 347 rest;
-#X connect 4 0 10 0;
+#X msg 40 313 init http://example.com/ login-page myusername mypass
+;
+#X text 39 293 is the same as this after clicking the [init( message
+;
+#X text 40 373 To clear your stored authentication cookie \, send a
+[init( message with no additional parameters \, or with only one parameter.
+The latter will send only the base url \, but will not try to log you
+in.;
+#X text 35 16 Basic cookie authentication is possible with [rest] \,
+as long as the service uses some guidelines \, that are adopted from
+CouchDB.;
+#X connect 7 0 6 0;
 #X restore 38 293 pd cookie-auth;
 #X text 37 275 Using cookie authentication with [rest];
-#N canvas 256 52 853 470 CouchDB-basics 0;
-#X text 416 71 CRUD documents:;
+#N canvas 252 51 1009 517 CouchDB-basics 0;
+#X text 469 71 CRUD documents:;
 #X text 15 10 Basic CRUD methods for databases and individual documents
 are done with three HTTP methods: PUT \, GET and DELETE. PUT is used
 for creating and updating data \, GET is used for retrieving data \,
 while DELETE is used for deleting data. This is best explained with
 some examples:;
-#X text 15 74 CRUD databases:;
-#X text 15 93 PUT http://localhost:5984/pd-test;
-#X text 14 105 This will create a database "pd-test" on the server
+#X text 15 90 CRUD databases:;
+#X text 15 109 PUT http://localhost:5984/pd-test;
+#X text 14 121 This will create a database "pd-test" on the server
 localhost. If the operation is successful \, CouchDB will return a
 JSON object starting with a key of "ok" and a message as value for
 that key. If creating the database is not possible \, you will get
 a key "error" and the reason for the failure as its value.;
-#X text 15 178 GET http://localhost:5984/pd-test;
-#X text 15 191 This will get some info on the database \, including
+#X text 13 205 GET http://localhost:5984/pd-test;
+#X text 13 218 This will get some info on the database \, including
 the count of stored documents as "doc_count". If getting the database
 is not possible you will receive a key "error" and the reason for the
 failure as its value.;
-#X text 15 242 DELETE http://localhost:5984/pd-test;
-#X text 15 258 This will delete the database if possible. BEWARE: You
+#X text 15 293 DELETE http://localhost:5984/pd-test;
+#X text 15 309 This will delete the database if possible. BEWARE: You
 won't get prompted for confirmation \, CouchDB will delete the database
 without any warning including all stored documents. This will return
 "ok" or "error" as a key.;
-#X text 416 116 This will create or update a document with the ID "object-name"
+#X text 468 119 This will create or update a document with the ID "object-name"
 in the database "pd-test". The database must be created first. If a
 document with the ID "object-name" already exists \, you must include
 the revision \, that you can get with the GET method (see below). On
 error CouchDB will return a key of "error" and the reason for the error
 as its value. Data for the object must be provided as JSON data in
 the request header.;
-#X text 416 208 GET http://localhost:5984/pd-test/object-name;
-#X text 417 222 This will retrieve the document "object-name" from
+#X text 470 231 GET http://localhost:5984/pd-test/object-name;
+#X text 469 249 This will retrieve the document "object-name" from
 the database "pd-test". This will return the document as a JSON object
 \, including the ID with the key "_id" and the revision code with the
 key "_rev". The latter value is needed for updating or deleting the
 object from the table to prevent concurrent updates.;
-#X text 417 292 DELETE http://localhost:5984/pd-test/object-name;
-#X text 418 311 This will delete the document if possible. You will
+#X text 471 352 DELETE http://localhost:5984/pd-test/object-name;
+#X text 470 375 This will delete the document if possible. You will
 need to provide the revision for the document. You will receive data
 with a key of "ok" or "error" and information as value.;
-#X text 416 91 PUT http://localhost:5984/pd-test/object-name data-as-json-string
+#X text 469 91 PUT http://localhost:5984/pd-test/object-name data-as-json-string
 ;
-#X text 15 362 All these request \, PUT \, GET and DELETE can be done
-with [rest-json] \, you can even issue POST requests to a CouchDB server.
+#X text 15 378 All these request \, PUT \, GET and DELETE can be done
+with [rest] \, you can even issue POST requests to a CouchDB server.
 If you want to do complex data operations on a CouchDB \, please refer
 to the manual: http://guide.couchdb.org/;
 #X restore 39 167 pd CouchDB-basics;
-#N canvas 192 51 932 709 couchdb 0;
+#N canvas 190 51 932 709 couchdb 0;
 #X msg 603 26 bang;
-#X msg 59 19 url http://localhost:5984/;
 #X obj 171 279 list trim;
 #X obj 170 310 route error ok;
 #X msg 179 377 0;
@@ -256,62 +251,63 @@ to be used by a simple sequencer.;
 #X obj 311 613 dac~;
 #X obj 171 250 json-decode;
 #X obj 171 217 rest;
-#X connect 0 0 11 0;
-#X connect 1 0 44 0;
-#X connect 2 0 3 0;
-#X connect 3 0 36 0;
-#X connect 3 1 10 0;
-#X connect 3 2 18 0;
-#X connect 4 0 32 1;
-#X connect 5 0 6 0;
-#X connect 5 1 19 0;
-#X connect 6 0 32 1;
-#X connect 11 0 27 0;
-#X connect 16 0 17 0;
-#X connect 16 0 29 0;
-#X connect 17 0 16 1;
-#X connect 18 0 19 1;
-#X connect 18 1 19 2;
-#X connect 19 0 32 0;
-#X connect 20 1 40 0;
-#X connect 20 2 21 0;
-#X connect 21 0 33 0;
-#X connect 25 0 44 0;
-#X connect 26 0 44 0;
-#X connect 27 0 35 0;
-#X connect 27 0 44 0;
-#X connect 28 0 44 0;
-#X connect 29 0 44 0;
-#X connect 31 0 16 0;
-#X connect 32 0 20 0;
-#X connect 33 0 16 0;
-#X connect 34 0 33 1;
-#X connect 34 0 41 1;
-#X connect 36 0 38 0;
-#X connect 36 1 8 0;
-#X connect 36 2 4 0;
-#X connect 38 0 33 0;
+#X msg 59 19 init http://localhost:5984/;
+#X connect 0 0 10 0;
+#X connect 1 0 2 0;
+#X connect 2 0 35 0;
+#X connect 2 1 9 0;
+#X connect 2 2 17 0;
+#X connect 3 0 31 1;
+#X connect 4 0 5 0;
+#X connect 4 1 18 0;
+#X connect 5 0 31 1;
+#X connect 10 0 26 0;
+#X connect 15 0 16 0;
+#X connect 15 0 28 0;
+#X connect 16 0 15 1;
+#X connect 17 0 18 1;
+#X connect 17 1 18 2;
+#X connect 18 0 31 0;
+#X connect 19 1 39 0;
+#X connect 19 2 20 0;
+#X connect 20 0 32 0;
+#X connect 24 0 43 0;
+#X connect 25 0 43 0;
+#X connect 26 0 34 0;
+#X connect 26 0 43 0;
+#X connect 27 0 43 0;
+#X connect 28 0 43 0;
+#X connect 30 0 15 0;
+#X connect 31 0 19 0;
+#X connect 32 0 15 0;
+#X connect 33 0 32 1;
+#X connect 33 0 40 1;
+#X connect 35 0 37 0;
+#X connect 35 1 7 0;
+#X connect 35 2 3 0;
+#X connect 37 0 32 0;
+#X connect 39 0 40 0;
 #X connect 40 0 41 0;
-#X connect 41 0 42 0;
-#X connect 41 0 42 1;
-#X connect 43 0 2 0;
-#X connect 43 1 5 0;
-#X connect 44 0 22 0;
+#X connect 40 0 41 1;
+#X connect 42 0 1 0;
+#X connect 42 1 4 0;
+#X connect 43 0 21 0;
+#X connect 43 0 42 0;
 #X connect 44 0 43 0;
-#X restore 38 241 pd couchdb;
+#X restore 39 247 pd couchdb;
 #X text 38 148 An example for a RESTful interface is CouchDB:;
-#X text 36 192 Here is a complex example for using [rest-json] to communicate
-with CouchDB. It uses GET \, POST and DELETE request methods. You will
-need to have a local installation of CouchDB.;
 #X obj 39 101 rest http://localhost:5984/;
 #X text 37 120 The second outlet will output status information of
 the request.;
-#X text 37 30 Set the base url at creation or use [url( message. An
-empty url message will clean a previous set base url. The number of
+#X text 35 192 Here is a complex example for using [rest] to communicate
+with CouchDB. It uses GET \, POST and DELETE request methods. You will
+need to have a local installation of CouchDB.;
+#X text 36 30 Set the base url at creation or use [init( message. An
+empty init message will clean a previous set base url. The number of
 possible parameters for [rest] and [oauth] differ. You can also use
-four parameters for the [url( message to use basic cookie authentication
+four parameters for the [init( message to use basic cookie authentication
 \, see below.;
-#X restore 21 319 pd rest-specific;
+#X restore 21 330 pd rest-specific;
 #X text 594 289 By default correct SSL host is checked. Disable check
 by sending sslcheck with a value to 0 \, reenable checking by setting
 the value to 1;
@@ -336,12 +332,12 @@ values of Accept: headers;
 #X connect 4 0 2 0;
 #X connect 5 0 2 0;
 #X connect 9 0 2 0;
-#X restore 21 293 pd headers;
-#X msg 634 169 cancel;
+#X restore 21 304 pd headers;
+#X msg 647 171 cancel;
 #X text 637 202 Use this request to test cancelling and timeout: it
 will wait for 10 seconds before returning data.;
 #X msg 641 232 GET http://ix.residuum.org/pd/sleep_example.php;
-#N canvas 389 256 641 345 cancel 0;
+#N canvas 387 254 807 334 cancel 0;
 #X obj 105 -51 print data;
 #X obj 187 -51 print status;
 #X obj 105 -83 rest;
@@ -369,29 +365,31 @@ of 10ms is sufficient on my system (TM).;
 #X connect 7 1 3 0;
 #X connect 8 0 7 0;
 #X connect 11 0 6 0;
-#X restore 718 168 pd cancel;
-#X text 630 95 Experimental: You can cancel a currently executed request
-by issuing [cancel(. If data has been returned already \, but is not
-output \, or output only partially \, outputting the data will still
-be completed. Note \, that cancelling the call may take some time \,
-so do not try to issue a new request immediately. See;
-#N canvas 366 182 631 378 download-to-file 0;
+#X restore 710 162 pd cancel;
+#N canvas 362 178 631 378 download-to-file 0;
 #X obj 77 247 rest;
 #X msg 119 106 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
-#X msg 77 39 write /tmp/test.json;
-#X msg 172 192 write;
 #X obj 48 297 print data;
 #X obj 133 297 print done;
 #X text 74 20 Set the location \, where the file should be saved;
 #X text 117 86 Downloaded data will write it to the file;
 #X text 170 172 Clear the location;
-#X connect 0 0 4 0;
-#X connect 0 1 5 0;
+#X msg 77 38 file /tmp/test.json;
+#X msg 172 192 file;
+#X connect 0 0 2 0;
+#X connect 0 1 3 0;
 #X connect 1 0 0 0;
-#X connect 2 0 0 0;
-#X connect 3 0 0 0;
-#X restore 21 360 pd download-to-file;
+#X connect 7 0 0 0;
+#X connect 8 0 0 0;
+#X restore 21 371 pd download-to-file;
+#X text 19 60 [oauth] is an object for communication with OAUTH enbabled
+webservices. Request methods GET and POST are available.;
+#X text 643 93 You can cancel a currently executed request by issuing
+[cancel(. If data has been returned already \, but is not output \,
+or output only partially \, outputting the data will still be completed.
+Note \, that cancelling the call may take some time \, so do not try
+to issue a new request immediately. See;
 #X connect 0 0 9 0;
 #X connect 9 0 3 0;
 #X connect 9 1 4 0;
@@ -399,5 +397,5 @@ so do not try to issue a new request immediately. See;
 #X connect 12 0 9 0;
 #X connect 13 0 9 0;
 #X connect 14 0 9 0;
-#X connect 25 0 9 0;
-#X connect 27 0 9 0;
+#X connect 24 0 9 0;
+#X connect 26 0 9 0;

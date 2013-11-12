@@ -36,14 +36,14 @@ struct _oauth;
 typedef struct _oauth t_oauth;
 
 APIEXPORT void APICALL *oauth_new(t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL oauth_free(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_free(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv);
 
-APIEXPORT void APICALL oauth_command(t_oauth *x, t_symbol *sel, int argc, t_atom *argv); 
-APIEXPORT void APICALL oauth_timeout(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL oauth_url(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL oauth_method(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL oauth_sslcheck(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL oauth_cancel(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL oauth_header(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL oauth_clear_headers(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
-APIEXPORT void APICALL oauth_write(t_oauth *x, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_command(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv); 
+APIEXPORT void APICALL oauth_timeout(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_init(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_method(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_sslcheck(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_cancel(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_header(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_clear_headers(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_file(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv);

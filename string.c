@@ -1,5 +1,6 @@
 static char *string_create(size_t *newl, size_t strl) {
 	char *gen;
+
 	(*newl) = 1 + strl;
 	gen = getbytes((*newl) * sizeof(char));
 	if (gen == NULL) {

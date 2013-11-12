@@ -1,4 +1,4 @@
-pd-purest-json (0.15.0+libjson<0.10) UNRELEASED; urgency=low
+pd-purest-json (0.15.0-libjson0.10) UNRELEASED; urgency=low
   * Cancellation is now faster
   * Refactoring of code
   * Breaking changes:

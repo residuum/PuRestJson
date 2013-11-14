@@ -51,10 +51,10 @@ APIEXPORT void APICALL rest_setup(void);
 APIEXPORT void APICALL oauth_setup(void);
 
 /* [json-encode] */
-APIEXPORT void APICALL setup_json0x2dencode(void);
+APIEXPORT void APICALL json_encode_setup(void);
 
 /* [json-decode] */
-APIEXPORT void APICALL setup_json0x2ddecode(void);
+APIEXPORT void APICALL json_decode_setup(void);
 
 /* [urlparams] */
 APIEXPORT void APICALL urlparams_setup(void);

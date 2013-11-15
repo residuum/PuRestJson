@@ -194,10 +194,10 @@ static void json_dec_output_string(char *json_string, t_json_decode *jdec) {
 #endif
 }
 
-void json_decode_setup(void) {
+void setup_json0x2ddecode(void) {
 	json_decode_class = class_new(gensym("json-decode"), (t_newmethod)json_decode_new,
 			0, sizeof(t_json_decode), 0, A_GIMME, 0);
-	class_addsymbol(json_decode_class, (t_method)json_decode_symbol);
+	class_addsymbol(json_decode_class, (t_method)json_decode_string);
 	class_addanything(json_decode_class, (t_method)json_decode_list);
 	class_sethelpsymbol(json_decode_class, gensym("json"));
 }
@@ -214,7 +214,7 @@ void *json_decode_new(t_symbol *sel, int argc, t_atom *argv) {
 	return (void *)jdec;
 }
 
-void json_decode_symbol(t_json_decode *jdec, t_symbol *data) {
+void json_decode_string(t_json_decode *jdec, t_symbol *data) {
 	size_t memsize = 0;
 	char *original_string = data->s_name;
 	char *json_string;

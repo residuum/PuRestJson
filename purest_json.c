@@ -8,7 +8,7 @@ void purest_json_setup(void) {
 	post("Report bugs to: purest-json-bugs@ix.residuum.org");
 	rest_setup();
 	oauth_setup();
-	json_encode_setup();
-	json_decode_setup();
+	setup_json0x2dencode();
+	setup_json0x2ddecode();
 	urlparams_setup();
 }

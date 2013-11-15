@@ -44,9 +44,6 @@ Object for decoding JSON data.
 [urlparams]
 Object for url encoding and contatenating url parameters.
 
-[rest-json]
-Object for issuing HTTP request. Received data is parsed as JSON data. 
-
 For the usage of the externals see the help patches for the objects.
 
 

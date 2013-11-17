@@ -35,6 +35,30 @@ struct _ctw {
 #endif
 };
 
+static size_t ctw_write_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
+static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
+static char *ctw_set_param(void *x, t_atom *arg, size_t *string_len, char *error_msg);
+static void ctw_cancel_request(void *args);
+static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist);
+static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory);
+static void ctw_perform(struct _ctw *common);
+static void ctw_thread_perform(struct _ctw *common);
+static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp);
+static void *ctw_exec(void *thread_args);
+static void ctw_thread_exec(void *x, void *(*func) (void *));
+static void ctw_set_sslcheck(struct _ctw *common, int val);
+static void ctw_cancel(struct _ctw *common);
+static void ctw_add_header(void *x, int argc, t_atom *argv);
+static void ctw_clear_headers(struct _ctw *common);
+static void ctw_set_file(void *x, int argc, t_atom *argv);
+static void ctw_set_timeout(struct _ctw *common, int val);
+static void ctw_init(struct _ctw *common);
+static void ctw_free(struct _ctw *common);
+#ifdef NEEDS_CERT_PATH
+static void ctw_set_cert_path(struct _ctw *common, char *directory);
+#endif
+
+/* begin implementations */
 static size_t ctw_write_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) {
 	size_t realsize = size * nmemb;
 	struct _memory_struct *mem = data;

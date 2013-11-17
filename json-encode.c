@@ -22,6 +22,17 @@ struct _jenc_json_array {
 	json_object **members;
 };
 
+static json_object *jenc_create_object(char *value);
+static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj);
+static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj);
+static unsigned char jenc_is_already_added(size_t current, struct _jenc_json_array *arr);
+static json_object *jenc_get_array_value(struct _kvp *data_member, size_t current, size_t max, 
+		struct _jenc_json_array *arr);
+static struct _jenc_json_array *jenc_create_array(size_t count);
+static void jenc_free_array(struct _jenc_json_array *arr, size_t count);
+static t_symbol *jenc_get_json_symbol(t_json_encode *jenc);
+
+/* begin implementations */
 static json_object *jenc_create_object(char *value) {
 	json_object *object;
 	char *parsed_string;

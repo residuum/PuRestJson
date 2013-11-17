@@ -23,6 +23,13 @@ struct _rest {
 
 static t_class *rest_class;
 
+static void rest_free_inner(t_rest *rest);
+static void rest_extract_token(t_rest *rest, struct _memory_struct *out_header);
+static void rest_process_auth_data(t_rest *rest, struct _memory_struct *out_header);
+static void *rest_get_auth_token(void *thread_args);
+static void rest_set_init(t_rest *rest, int argc, t_atom *argv);
+
+/* begin implementations */
 static void rest_free_inner(t_rest *rest) {
 	ctw_free((struct _ctw *)rest);
 	string_free(rest->cookie.login_path, &rest->cookie.login_path_len);

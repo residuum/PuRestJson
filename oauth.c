@@ -28,6 +28,11 @@ struct _oauth {
 	} oauth;
 };
 
+static void oauth_free_inner(t_oauth *oauth, short free_rsa);
+static void oauth_set_init(t_oauth *oauth, int argc, t_atom *argv);
+static void oauth_set_rsa_key(t_oauth *oauth, int argc, t_atom *argv);
+
+/* begin implementations */
 static void oauth_free_inner(t_oauth *oauth, short free_rsa) {
 	ctw_free((struct _ctw *)oauth);
 	if (free_rsa == 1) {

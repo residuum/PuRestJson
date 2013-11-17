@@ -14,7 +14,13 @@ struct _kvp_store {
 	size_t data_count;
 };
 
-static struct _kvp *kvp_create(char *key, char *value, unsigned char is_array){
+static struct _kvp *kvp_create(char *key, char *value, unsigned char is_array);
+static void kvp_store_add(struct _kvp_store *x, struct _kvp *new_pair);
+static void kvp_add(struct _kvp_store *x, char *key, char *value, unsigned char is_array);
+static void kvp_store_free_memory(struct _kvp_store *x);
+
+/* begin implementations */
+static struct _kvp *kvp_create(char *key, char *value, unsigned char is_array) {
 	struct _kvp *created_data = NULL;
 
 	created_data = getbytes(sizeof(struct _kvp));

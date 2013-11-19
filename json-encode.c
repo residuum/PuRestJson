@@ -31,6 +31,7 @@ static json_object *jenc_get_array_value(struct _kvp *data_member, size_t curren
 static struct _jenc_json_array *jenc_create_array(size_t count);
 static void jenc_free_array(struct _jenc_json_array *arr, size_t count);
 static t_symbol *jenc_get_json_symbol(t_json_encode *jenc);
+static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char is_array);
 
 /* begin implementations */
 static json_object *jenc_create_object(char *value) {
@@ -213,12 +214,47 @@ static t_symbol *jenc_get_json_symbol(t_json_encode *jenc) {
 	return json_symbol;
 }
 
+static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char is_array) {
+	char key[MAXPDSTRING];
+	size_t value_len = 0;
+	char *value;
+	char temp_value[MAXPDSTRING];
+	int i;
+
+	if (argc < 2) {
+		pd_error(jenc, "For method '%s' You need to specify a value.", is_array ? "array": "add");
+		return;
+	}
+
+	atom_string(argv, key, MAXPDSTRING);
+
+	for (i = 1; i < argc; i++) {
+		atom_string(argv + i, temp_value, MAXPDSTRING);
+		value_len += strlen(temp_value) + 1;
+	}
+	value = getbytes(value_len * sizeof(char));
+	atom_string(argv + 1, value, MAXPDSTRING);
+	for(i = 2; i < argc; i++) {
+		atom_string(argv + i, temp_value, MAXPDSTRING);
+		strcat(value, " ");
+		strcat(value, temp_value);
+	}
+	kvp_add((struct _kvp_store *)jenc, key, value, is_array);
+	string_free(value, &value_len);
+}
+
+void json_encode_add(t_json_encode *jenc, t_symbol *sel, int argc, t_atom *argv) {
+	(void) sel;
+
+	jenc_add(jenc, argc, argv, 0);
+}
+
 void setup_json0x2dencode(void) {
 	json_encode_class = class_new(gensym("json-encode"), (t_newmethod)json_encode_new,
 			(t_method)json_encode_free, sizeof(t_json_encode), 0, A_GIMME, 0);
 	class_addbang(json_encode_class, (t_method)json_encode_bang);
 	class_addmethod(json_encode_class, (t_method)json_encode_add, gensym("add"), A_GIMME, 0);
-	class_addmethod(json_encode_class, (t_method)json_encode_add, gensym("array"), A_GIMME, 0);
+	class_addmethod(json_encode_class, (t_method)json_encode_array, gensym("array"), A_GIMME, 0);
 	class_addmethod(json_encode_class, (t_method)json_encode_read, gensym("read"), A_SYMBOL, A_DEFSYM, 0);
 	class_addmethod(json_encode_class, (t_method)json_encode_write, gensym("write"), A_SYMBOL, A_DEFSYM, 0);
 	class_addmethod(json_encode_class, (t_method)json_encode_clear, gensym("clear"), A_GIMME, 0);
@@ -250,38 +286,10 @@ void json_encode_bang(t_json_encode *jenc) {
 	outlet_symbol(jenc->storage.x_ob.ob_outlet, jenc_get_json_symbol(jenc));
 }
 
-void json_encode_add(t_json_encode *jenc, t_symbol *sel, int argc, t_atom *argv) {
-	char key[MAXPDSTRING];
-	size_t value_len = 0;
-	char *value;
-	char temp_value[MAXPDSTRING];
-	int i;
-	unsigned char is_array = 0;
+void json_encode_array(t_json_encode *jenc, t_symbol *sel, int argc, t_atom *argv) {
+	(void) sel;
 
-	if (sel == gensym("array")) {
-		is_array = 1;
-	}
-
-	if (argc < 2) {
-		pd_error(jenc, "For method '%s' You need to specify a value.", is_array ? "array": "add");
-		return;
-	}
-
-	atom_string(argv, key, MAXPDSTRING);
-
-	for (i = 1; i < argc; i++) {
-		atom_string(argv + i, temp_value, MAXPDSTRING);
-		value_len += strlen(temp_value) + 1;
-	}
-	value = getbytes(value_len * sizeof(char));
-	atom_string(argv + 1, value, MAXPDSTRING);
-	for(i = 2; i < argc; i++) {
-		atom_string(argv + i, temp_value, MAXPDSTRING);
-		strcat(value, " ");
-		strcat(value, temp_value);
-	}
-	kvp_add((struct _kvp_store *)jenc, key, value, is_array);
-	string_free(value, &value_len);
+	jenc_add(jenc, argc, argv, 1);
 }
 
 void json_encode_read(t_json_encode *jenc, t_symbol *filename) {

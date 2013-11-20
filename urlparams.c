@@ -87,7 +87,7 @@ void urlparams_bang(t_urlparams *urlp) {
 
 	data_member = urlp->storage.first_data;
 	for (i = 0; i < urlp->storage.data_count; i++) {
-		encoded_string = urlp_encode(data_member->value, &encoded_len);
+		encoded_string = urlp_encode(data_member->value->val.s, &encoded_len);
 		output_len += data_member->key_len + encoded_len + 2;
 		string_free(encoded_string, &encoded_len);
 		data_member = data_member->next;
@@ -98,7 +98,7 @@ void urlparams_bang(t_urlparams *urlp) {
 	for (i = 0; i < urlp->storage.data_count; i++) {
 		strcat(output, data_member->key);
 		strcat(output, "=");
-		encoded_string = urlp_encode(data_member->value, &encoded_len);
+		encoded_string = urlp_encode(data_member->value->val.s, &encoded_len);
 		strcat(output, encoded_string);
 		if (encoded_string) {
 			string_free(encoded_string, &encoded_len);
@@ -140,7 +140,7 @@ void urlparams_add(t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
 		strcat(value, " ");
 		strcat(value, temp_value);
 	}
-	kvp_add((struct _kvp_store *)urlp, key, value, 0);
+	kvp_add((struct _kvp_store *)urlp, key, kvp_val_create(value, 0), 0);
 	string_free(value, &value_len);
 }
 

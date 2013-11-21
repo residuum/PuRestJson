@@ -19,15 +19,14 @@ static void jdec_output_string(char *json_string, t_json_decode *jdec);
 
 /* begin implementations */
 static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
-	t_atom out_data[2];
-	enum json_type inner_type;
-
 	json_object_object_foreach(jobj, key, val) { /* Passing through every json object */
+		t_atom out_data[2];
 		SETSYMBOL(&out_data[0], gensym(key));
 		/* Problem with null as value */
 		if (val == NULL) {
 			SETSYMBOL(&out_data[1], gensym(""));
 		} else {
+			enum json_type inner_type;
 			inner_type = json_object_get_type(val);
 			switch (inner_type) {
 				case json_type_boolean:
@@ -61,10 +60,9 @@ static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outle
 
 static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	int array_len;
-	int i;
 
 	array_len = json_object_array_length(jobj);
-	for (i = 0; i < array_len; i++) {
+	for (int i = 0; i < array_len; i++) {
 		json_object *array_member = json_object_array_get_idx(jobj, i);
 		if (!is_error(array_member)) {
 			jdec_output(array_member, data_outlet, done_outlet);
@@ -149,11 +147,11 @@ void *json_decode_new(t_symbol *sel, int argc, t_atom *argv) {
 }
 
 void json_decode_string(t_json_decode *jdec, t_symbol *data) {
-	size_t memsize = 0;
 	char *original_string = data->s_name;
-	char *json_string;
 
 	if (original_string && strlen(original_string)) {
+	size_t memsize = 0;
+	char *json_string;
 		json_string = string_remove_backslashes(original_string, &memsize);
 		if (json_string != NULL) {
 			jdec_output_string(json_string, jdec);
@@ -165,17 +163,14 @@ void json_decode_string(t_json_decode *jdec, t_symbol *data) {
 void json_decode_list(t_json_decode *jdec, t_symbol *sel, int argc, t_atom *argv) {
 	size_t original_len = 1;
 	char *original;
-	size_t json_len = 0;
-	char *json_string;
 	char value[MAXPDSTRING];
-	int i;
 	int use_sel = (strcmp(sel->s_name, "symbol") && strcmp(sel->s_name, "list"));
 
 	if (use_sel) {
 		original_len += strlen(sel->s_name);
 	}
 	if (argc > 0) {
-		for (i = 0; i < argc; i++) {
+		for (int i = 0; i < argc; i++) {
 			atom_string(argv + i, value, MAXPDSTRING);
 			original_len += 1 + strlen(value);
 		}
@@ -193,7 +188,7 @@ void json_decode_list(t_json_decode *jdec, t_symbol *sel, int argc, t_atom *argv
 	}
 
 	if (argc > 0) {
-		for (i = 0; i < argc; i++) {
+		for (int i = 0; i < argc; i++) {
 			atom_string(argv + i, value, MAXPDSTRING);
 			if (strlen(original)) {
 				strcat(original, " ");
@@ -202,6 +197,8 @@ void json_decode_list(t_json_decode *jdec, t_symbol *sel, int argc, t_atom *argv
 		}
 	}
 	if (strlen(original)) {
+		size_t json_len = 0;
+		char *json_string;
 		json_string = string_remove_backslashes(original, &json_len);
 		if (json_string != NULL) {
 			jdec_output_string(json_string, jdec);

@@ -146,9 +146,7 @@ static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, unsig
 		new = kvp_create(key, value, is_array);
 		kvp_insert(store, store->last_data, new);
 	} else {
-		int i;
-
-		for (i = 0; i < found - 1; i++) {
+		for (int i = 0; i < found - 1; i++) {
 			kvp_remove(store, remove[i]);
 		}
 	}
@@ -156,11 +154,10 @@ static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, unsig
 
 static void kvp_store_free_memory(struct _kvp_store *store) {
 	struct _kvp *data_to_free;
-	struct _kvp *next_data;
 
 	data_to_free = store->first_data;
 	while(data_to_free != NULL) {
-		next_data = data_to_free->next;
+		struct _kvp *next_data = data_to_free->next;
 		kvp_free(data_to_free);
 		data_to_free = next_data;
 	}

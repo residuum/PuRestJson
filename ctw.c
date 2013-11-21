@@ -142,12 +142,12 @@ static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist) {
 }
 
 static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory) {
-	struct _memory_struct in_memory;
 	FILE *fp = NULL; 
 
 	ctw_prepare_basic(common, slist);
 
 	if (strcmp(common->req_type, "PUT") == 0) {
+		struct _memory_struct in_memory;
 		curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1);
 		curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
 		/* Prepare data for reading */
@@ -253,11 +253,10 @@ static void ctw_thread_perform(struct _ctw *common) {
 static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp) {
 	CURLMsg *msg;
 	int msgs_left;
-	long http_status;
-	t_atom http_status_data[2];
 
 	while ((msg = curl_multi_info_read(common->multi_handle, &msgs_left))) {
 		if (msg->msg == CURLMSG_DONE) {
+			long http_status;
 			/* output status */
 			curl_easy_getinfo(common->easy_handle, CURLINFO_RESPONSE_CODE, &http_status);
 			if (http_status >= 200 && http_status < 300) {
@@ -269,15 +268,17 @@ static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, F
 					string_free((*out_memory).memory, &(*out_memory).size);
 					outlet_bang(common->status_out);
 				} else {
-					SETFLOAT(&http_status_data[0], (float)http_status);
-					SETSYMBOL(&http_status_data[1], gensym(curl_easy_strerror(msg->data.result)));
+					t_atom status_data[2];
+					SETFLOAT(&status_data[0], (float)http_status);
+					SETSYMBOL(&status_data[1], gensym(curl_easy_strerror(msg->data.result)));
 					pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
-					outlet_list(common->status_out, &s_list, 3, &http_status_data[0]);
+					outlet_list(common->status_out, &s_list, 2, &status_data[0]);
 				}
 			} else {
-				SETFLOAT(&http_status_data[0], (float)http_status);
+				t_atom http_status_data;
+				SETFLOAT(&http_status_data, (float)http_status);
 				pd_error(common, "HTTP error while performing request: %li", http_status);
-				outlet_float(common->status_out, atom_getfloat(&http_status_data[0]));
+				outlet_float(common->status_out, atom_getfloat(&http_status_data));
 			}
 			curl_easy_cleanup(common->easy_handle);
 			curl_multi_cleanup(common->multi_handle);
@@ -287,9 +288,6 @@ static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, F
 
 static void *ctw_exec(void *thread_args) {
 	struct _ctw *common = thread_args; 
-	struct curl_slist *slist = NULL;
-	struct _memory_struct out_memory;
-	FILE *fp; 
 
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
 	common->easy_handle = curl_easy_init();
@@ -297,6 +295,9 @@ static void *ctw_exec(void *thread_args) {
 	if (!common->easy_handle) {
 		MYERROR("Cannot init curl.");
 	} else {
+		struct curl_slist *slist = NULL;
+		struct _memory_struct out_memory;
+		FILE *fp; 
 		fp = ctw_prepare(common, slist, &out_memory);
 		ctw_thread_perform(common);
 		ctw_output(common, &out_memory, fp);
@@ -347,19 +348,18 @@ static void ctw_add_header(void *x, int argc, t_atom *argv) {
 	struct _ctw *common = x;
 	char *val;
 	char temp[MAXPDSTRING];
-	int i;
 	size_t header_len = 0;
 	size_t val_len;
 	if (argc < 1) {
 		pd_error(x, "You need to add some data to set headers");
 		return;
 	}
-	for (i = 0; i < argc; i++) {
+	for (int i = 0; i < argc; i++) {
 		atom_string(argv + i, temp, MAXPDSTRING);
 		header_len += strlen(temp) + 1;
 	}
 	val = string_create(&(val_len), header_len);
-	for (i = 0; i < argc; i++) {
+	for (int i = 0; i < argc; i++) {
 		atom_string(argv + i, temp, MAXPDSTRING);
 		strcat(val, temp);
 		if (i < argc - 1) {
@@ -426,9 +426,10 @@ static void ctw_free(struct _ctw *common) {
 
 #ifdef NEEDS_CERT_PATH
 static void ctw_set_cert_path(struct _ctw *common, char *directory) {
+	size_t i;
+
 	common->cert_path = string_create(&common->cert_path_len, strlen(directory) + 11);
 	strcpy(common->cert_path, directory);
-	size_t i;
 	for(i = 0; i < strlen(common->cert_path); i++) {
 		if (common->cert_path[i] == '/') {
 			common->cert_path[i] = '\\';

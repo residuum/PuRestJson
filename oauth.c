@@ -63,16 +63,15 @@ static void oauth_set_init(t_oauth *oauth, int argc, t_atom *argv) {
 
 static void oauth_set_rsa_key(t_oauth *oauth, int argc, t_atom *argv) {
 	char temp[MAXPDSTRING];
-	int i;
 	size_t rsa_key_len = 1;
 	short use_newline = 0;
 
-	for (i = 1; i < argc; i++) {
+	for (int i = 1; i < argc; i++) {
 		atom_string(argv + i, temp, MAXPDSTRING);
 		rsa_key_len +=strlen(temp) + 1;
 	}
 	oauth->oauth.rsa_key = string_create(&oauth->oauth.rsa_key_len, rsa_key_len);
-	for (i = 1; i < argc; i++) {
+	for (int i = 1; i < argc; i++) {
 		atom_string(argv + i, temp, MAXPDSTRING);
 		if (strncmp(temp, "-----", 5) == 0 && strlen(oauth->oauth.rsa_key) > 1)  {
 			memset(oauth->oauth.rsa_key + strlen(oauth->oauth.rsa_key) - 1, 0x00, 1);
@@ -114,7 +113,6 @@ void oauth_command(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 	char path[MAXPDSTRING];
 	size_t req_path_len;
 	char *req_path;
-	char parameters[MAXPDSTRING];
 	char *cleaned_parameters;
 	size_t memsize = 0;
 	char *postargs = NULL;
@@ -142,6 +140,7 @@ void oauth_command(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 
 	atom_string(argv, path, MAXPDSTRING);
 	if (argc > 1) {
+		char parameters[MAXPDSTRING];
 		atom_string(argv + 1, parameters, MAXPDSTRING);
 		if (strlen(parameters)) {
 			cleaned_parameters = string_remove_backslashes(parameters, &memsize);

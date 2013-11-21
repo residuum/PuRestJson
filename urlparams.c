@@ -74,7 +74,6 @@ void urlparams_free (t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
 }
 
 void urlparams_bang(t_urlparams *urlp) {
-	size_t i;
 	struct _kvp *data_member;
 	size_t output_len = 0;
 	char *output;
@@ -86,7 +85,7 @@ void urlparams_bang(t_urlparams *urlp) {
 	}
 
 	data_member = urlp->storage.first_data;
-	for (i = 0; i < urlp->storage.data_count; i++) {
+	for (size_t i = 0; i < urlp->storage.data_count; i++) {
 		encoded_string = urlp_encode(data_member->value->val.s, &encoded_len);
 		output_len += data_member->key_len + encoded_len + 2;
 		string_free(encoded_string, &encoded_len);
@@ -95,7 +94,7 @@ void urlparams_bang(t_urlparams *urlp) {
 	output = getbytes(output_len * sizeof(char));
 
 	data_member = urlp->storage.first_data;
-	for (i = 0; i < urlp->storage.data_count; i++) {
+	for (size_t i = 0; i < urlp->storage.data_count; i++) {
 		strcat(output, data_member->key);
 		strcat(output, "=");
 		encoded_string = urlp_encode(data_member->value->val.s, &encoded_len);
@@ -118,7 +117,6 @@ void urlparams_add(t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
 	size_t value_len = 0;
 	char *value;
 	char temp_value[MAXPDSTRING];
-	int i;
 
 	(void) sel;
 
@@ -129,13 +127,13 @@ void urlparams_add(t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
 
 	atom_string(argv, key, MAXPDSTRING);
 
-	for (i = 1; i < argc; i++) {
+	for (int i = 1; i < argc; i++) {
 		atom_string(argv + i, temp_value, MAXPDSTRING);
 		value_len += strlen(temp_value) + 1;
 	}
 	value = getbytes(value_len * sizeof(char));
 	atom_string(argv + 1, value, MAXPDSTRING);
-	for(i = 2; i < argc; i++) {
+	for(int i = 2; i < argc; i++) {
 		atom_string(argv + i, temp_value, MAXPDSTRING);
 		strcat(value, " ");
 		strcat(value, temp_value);

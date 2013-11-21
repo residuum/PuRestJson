@@ -25,7 +25,7 @@ struct _jenc_json_array {
 static json_object *jenc_create_object(struct _v *value);
 static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj);
 static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj);
-static json_object *jenc_get_array_value(struct _kvp **item_p);
+static json_object *jenc_get_array_value(struct _kvp **item);
 static struct _jenc_json_array *jenc_create_array(size_t count);
 static void jenc_free_array(struct _jenc_json_array *arr, size_t count);
 static t_symbol *jenc_get_json_symbol(t_json_encode *jenc);
@@ -34,14 +34,14 @@ static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char 
 /* begin implementations */
 static json_object *jenc_create_object(struct _v *value) {
 	json_object *object;
-	char *parsed_string;
-	size_t memsize = 0;
 	/* if stored value is string is starting with { and ending with }, 
 	   then create a json object from it. */
 	if (value->slen == 0){
 		object = json_object_new_double(value->val.f);
 	}
 	else if (value->val.s[0] == '{' && value->val.s[strlen(value->val.s) - 1] == '}') {
+		char *parsed_string;
+		size_t memsize = 0;
 		parsed_string = string_remove_backslashes(value->val.s, &memsize);
 		object = json_tokener_parse(parsed_string);
 		string_free(parsed_string, &memsize);
@@ -52,13 +52,12 @@ static json_object *jenc_create_object(struct _v *value) {
 }
 
 static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj) {
-	int array_len;
-	int i;
-
 	json_object_object_foreach(jobj, key, val) {
 		char *value;
 		size_t value_len = 0;
+		int array_len;
 		enum json_type inner_type = json_object_get_type(val);
+
 		switch (inner_type) {
 			case json_type_boolean:
 				kvp_add((struct _kvp_store *)jenc, key, 
@@ -87,7 +86,7 @@ static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj) {
 				break;
 			case json_type_array:
 				array_len = json_object_array_length(val);
-				for (i = 0; i < array_len; i++) {
+				for (int i = 0; i < array_len; i++) {
 					json_object *array_member = json_object_array_get_idx(val, i);
 					if (!is_error(array_member)) {
 						value = string_create(&value_len, 
@@ -106,12 +105,12 @@ static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj) {
 }
 
 static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj) {
-	enum json_type outer_type;
+	enum json_type type;
 
 	kvp_store_free_memory((struct _kvp_store *)jenc);
-	outer_type = json_object_get_type(jobj);
+	type = json_object_get_type(jobj);
 
-	switch (outer_type) {
+	switch (type) {
 		case json_type_object:
 			jenc_load_json_object(jenc, jobj);
 			break;
@@ -121,27 +120,28 @@ static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj) {
 	}
 }
 
-static json_object *jenc_get_array_value(struct _kvp **item_p) {
-	struct _kvp *item = *item_p;
-	char *key = item->key;
+static json_object *jenc_get_array_value(struct _kvp **item) {
+	struct _kvp *it = *item;
+	char *key = it->key;
 	json_object *value = json_object_new_array();
 	json_object *array_member;
 
-	array_member = jenc_create_object(item->value);
+	array_member = jenc_create_object(it->value);
 	json_object_array_add(value, array_member);
-	
-	while (item->next != NULL && strcmp(item->next->key, key) == 0) {
-		item = item->next;
-		json_object *array_member = jenc_create_object(item->value);
+
+	while (it->next != NULL && strcmp(it->next->key, key) == 0) {
+		it = it->next;
+		array_member = jenc_create_object(it->value);
 		json_object_array_add(value, array_member);
 	}	
 
-	*item_p = item;
+	*item = it;
 	return value;
 }
 
 static struct _jenc_json_array *jenc_create_array(size_t count) {
 	struct _jenc_json_array *arr = getbytes(sizeof(struct _jenc_json_array));
+
 	if (arr == NULL) {
 		MYERROR("not enough memory");
 		return arr;
@@ -194,8 +194,6 @@ static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char 
 	char key[MAXPDSTRING];
 	size_t value_len = 0;
 	char *value = NULL;
-	char temp_value[MAXPDSTRING];
-	int i;
 	t_float f = 0;
 
 	if (argc < 2) {
@@ -204,16 +202,18 @@ static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char 
 	}
 
 	atom_string(argv, key, MAXPDSTRING);
+	/* Special case: only 2 arguments, and 2nd argument is a number */
 	if (argc == 2 && (argv + 1)->a_type == A_FLOAT) {
 		f = atom_getfloat(argv + 1);
 	} else {
-		for (i = 1; i < argc; i++) {
+		char temp_value[MAXPDSTRING];
+		for (int i = 1; i < argc; i++) {
 			atom_string(argv + i, temp_value, MAXPDSTRING);
 			value_len += strlen(temp_value) + 1;
 		}
 		value = getbytes(value_len * sizeof(char));
 		atom_string(argv + 1, value, MAXPDSTRING);
-		for(i = 2; i < argc; i++) {
+		for(int i = 2; i < argc; i++) {
 			atom_string(argv + i, temp_value, MAXPDSTRING);
 			strcat(value, " ");
 			strcat(value, temp_value);

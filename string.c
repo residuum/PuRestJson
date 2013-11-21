@@ -28,15 +28,14 @@ static void string_free(char *string, size_t *strl) {
 #ifndef NO_BACKSLASHES
 static char *string_remove_backslashes(char *source_string, size_t *memsize) {
 	char *cleaned_string = NULL;
-	char *masking = "\\";
-	char *segment;
 	size_t len_src = strlen(source_string);
 
 	cleaned_string = string_create(memsize, len_src);
 	if (cleaned_string == NULL) {
 		MYERROR("Unable to allocate memory\n");
 	} else if (len_src > 0) {
-		segment = strtok(source_string, masking);
+		char *masking = "\\";
+		char *segment = strtok(source_string, masking);
 		if (segment != NULL) {
 			strcpy(cleaned_string, segment);
 		}

@@ -25,9 +25,7 @@ struct _jenc_json_array {
 static json_object *jenc_create_object(struct _v *value);
 static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj);
 static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj);
-static unsigned char jenc_is_already_added(size_t current, struct _jenc_json_array *arr);
-static json_object *jenc_get_array_value(struct _kvp *data_member, size_t current, size_t max, 
-		struct _jenc_json_array *arr);
+static json_object *jenc_get_array_value(struct _kvp **item_p);
 static struct _jenc_json_array *jenc_create_array(size_t count);
 static void jenc_free_array(struct _jenc_json_array *arr, size_t count);
 static t_symbol *jenc_get_json_symbol(t_json_encode *jenc);
@@ -123,35 +121,22 @@ static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj) {
 	}
 }
 
-static unsigned char jenc_is_already_added(size_t current, struct _jenc_json_array *arr) {
-	size_t i;
-
-	for (i = 0; i < arr->count; i++) {
-		if (arr->numbers[i] == current) {
-			post("found");
-			return 1;
-		}
-	}
-	return 0;
-}
-
-static json_object *jenc_get_array_value(struct _kvp *data_member, size_t current, size_t max, 
-		struct _jenc_json_array *arr) {
-	size_t i;
-	struct _kvp *data_member_compare;
+static json_object *jenc_get_array_value(struct _kvp **item_p) {
+	struct _kvp *item = *item_p;
+	char *key = item->key;
 	json_object *value = json_object_new_array();
+	json_object *array_member;
 
-	data_member_compare = data_member;
-	for (i = current; i < max; i++) {
-		if (strcmp(data_member_compare->key, data_member->key) == 0) {
-			json_object *array_member = jenc_create_object(data_member_compare->value);
-			json_object_array_add(value, array_member);
-			arr->numbers[arr->count] = i;
-			arr->members[arr->count] = array_member;
-			arr->count++;
-		}
-		data_member_compare = data_member_compare->next;
-	}
+	array_member = jenc_create_object(item->value);
+	json_object_array_add(value, array_member);
+	
+	while (item->next != NULL && strcmp(item->next->key, key) == 0) {
+		item = item->next;
+		json_object *array_member = jenc_create_object(item->value);
+		json_object_array_add(value, array_member);
+	}	
+
+	*item_p = item;
 	return value;
 }
 
@@ -178,10 +163,8 @@ static void jenc_free_array(struct _jenc_json_array *arr, size_t count) {
 }
 
 static t_symbol *jenc_get_json_symbol(t_json_encode *jenc) {
-	size_t i;
 	struct _jenc_json_array *arr_members = jenc_create_array(jenc->storage.data_count);
-	unsigned char already_added = 0;
-	struct _kvp *data_member;
+	struct _kvp *it;
 	json_object *jobj = json_object_new_object();
 	json_object *value;
 	t_symbol *json_symbol = NULL;
@@ -191,21 +174,15 @@ static t_symbol *jenc_get_json_symbol(t_json_encode *jenc) {
 		return json_symbol;
 	}
 
-	data_member = jenc->storage.first_data;
-	for (i = 0; i < jenc->storage.data_count; i++) {
-		already_added = 0;
-		if (data_member->is_array == 1) {
-			already_added = jenc_is_already_added(i, arr_members);
-			if (already_added == 0) {
-				value = jenc_get_array_value(data_member, i, jenc->storage.data_count, arr_members);
-			}
+	it = jenc->storage.first_data;
+	while(it) {
+		if (it->is_array == 1) {
+			value = jenc_get_array_value(&it);
 		} else {
-			value = jenc_create_object(data_member->value);
+			value = jenc_create_object(it->value);
 		}
-		if (already_added == 0) {
-			json_object_object_add(jobj, data_member->key, value); 
-		}
-		data_member = data_member->next;
+		json_object_object_add(jobj, it->key, value); 
+		it = it->next;
 	}
 	json_symbol = gensym(json_object_to_json_string(jobj));
 	json_object_put(jobj);

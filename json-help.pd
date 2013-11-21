@@ -1,4 +1,4 @@
-#N canvas 42 51 1402 726 10;
+#N canvas 40 51 1402 726 10;
 #X obj 833 431 json-encode;
 #X obj 833 500 json-decode;
 #X obj 51 -13 json-encode;
@@ -175,12 +175,11 @@ file.;
 #X text 44 253 [json-decode] will accept a JSON string at its input
 and will output the decoded object as a series of lists of key/value
 pairs. Boolean values of TRUE/FALSE will be translated to 1 or 0 \,
-float and integer values will be output as floats. [json-decode] will
-try to convert string values to floats \, and if that fails \, will
-output them as symbols \, nested objects and arrays are output as strings
-\, that can be parsed. After the object is fully parsed \, the right
-outlet will issue a bang \, so that you can differenciate between subsequent
-objects. The messages will come as list key value.;
+float and integer values will be output as floats. Nested objects and
+arrays are output as strings \, that can be parsed. After the object
+is fully parsed \, the right outlet will issue a bang \, so that you
+can differenciate between subsequent objects. The messages will come
+as list key value.;
 #X connect 0 0 19 0;
 #X connect 1 0 23 0;
 #X connect 1 1 24 0;

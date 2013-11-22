@@ -16,18 +16,10 @@ struct _json_encode {
 	t_canvas *x_canvas;
 };
 
-struct _jenc_json_array {
-	size_t *numbers;
-	size_t count;
-	json_object **members;
-};
-
 static json_object *jenc_create_object(struct _v *value);
 static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj);
 static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj);
 static json_object *jenc_get_array_value(struct _kvp **item);
-static struct _jenc_json_array *jenc_create_array(size_t count);
-static void jenc_free_array(struct _jenc_json_array *arr, size_t count);
 static t_symbol *jenc_get_json_symbol(t_json_encode *jenc);
 static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char is_array);
 
@@ -139,37 +131,13 @@ static json_object *jenc_get_array_value(struct _kvp **item) {
 	return value;
 }
 
-static struct _jenc_json_array *jenc_create_array(size_t count) {
-	struct _jenc_json_array *arr = getbytes(sizeof(struct _jenc_json_array));
-
-	if (arr == NULL) {
-		MYERROR("not enough memory");
-		return arr;
-	}
-	arr->numbers = getbytes(count * sizeof(size_t));
-	arr->members = getbytes(count * sizeof(json_object *));
-	return arr;
-}
-
-static void jenc_free_array(struct _jenc_json_array *arr, size_t count) {
-	size_t i;
-
-	for (i = 0; i < arr->count; i++) {
-		json_object_put(arr->members[i]);
-	}
-	freebytes(arr->numbers, count * sizeof(size_t));
-	freebytes(arr->members, count * sizeof(json_object *));
-	freebytes(arr, sizeof(struct _jenc_json_array));
-}
-
 static t_symbol *jenc_get_json_symbol(t_json_encode *jenc) {
-	struct _jenc_json_array *arr_members = jenc_create_array(jenc->storage.data_count);
 	struct _kvp *it;
 	json_object *jobj = json_object_new_object();
 	json_object *value;
 	t_symbol *json_symbol = NULL;
 
-	if (jenc->storage.data_count == 0) {
+	if (jenc->storage.first_data == NULL) {
 		json_symbol = gensym("");
 		return json_symbol;
 	}
@@ -186,7 +154,6 @@ static t_symbol *jenc_get_json_symbol(t_json_encode *jenc) {
 	}
 	json_symbol = gensym(json_object_to_json_string(jobj));
 	json_object_put(jobj);
-	jenc_free_array(arr_members, jenc->storage.data_count);
 	return json_symbol;
 }
 
@@ -248,7 +215,6 @@ void *json_encode_new(t_symbol *sel, int argc, t_atom *argv) {
 	(void) argc;
 	(void) argv;
 
-	jenc->storage.data_count = 0;
 	outlet_new(&jenc->storage.x_ob, NULL);
 	jenc->x_canvas = canvas_getcurrent();
 	return (void *)jenc;
@@ -281,7 +247,7 @@ void json_encode_read(t_json_encode *jenc, t_symbol *filename) {
 
 	canvas_makefilename(jenc->x_canvas, filename->s_name, buf, MAXPDSTRING);
 	file = fopen(buf, "r");
-	if (!file) {
+	if (file == NULL) {
 		pd_error(jenc, "%s: read failed", filename->s_name);
 		return;
 	}
@@ -307,7 +273,7 @@ void json_encode_write(t_json_encode *jenc, t_symbol *filename) {
 	t_symbol *json_symbol = jenc_get_json_symbol(jenc);
 	char *json_string = json_symbol->s_name;
 
-	if (!json_string) {
+	if (json_string == NULL) {
 		post("No JSON data for writing available.");
 		return;
 	}

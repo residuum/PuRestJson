@@ -14,11 +14,28 @@ struct _kvp {
 	struct _kvp *next;
 };
 
+/*
+ * Data in the linked list:
+ * 1. Sorted by addition
+ * 2. Array members are directly following 
+ *
+ * Consider the following succession:
+ * add id 0, array_add member 1, array_add member 2, id 3, add name test, array_add member 4
+ *
+ * yields after each step:
+ * id 0
+ * id 0, member 1
+ * id 0, member 1, member 2
+ * id 3, member 1, member 2
+ * id 3, member 1, member 2, name test
+ * id 3, member 1, member 2, name test
+ * id 3, member 1, member 2, member 4, name test
+ */
+
 struct _kvp_store {
 	t_object x_ob;
 	struct _kvp *first_data;
 	struct _kvp *last_data;
-	size_t data_count;
 };
 
 static struct _v *kvp_val_create(char *s, t_float f);
@@ -26,7 +43,9 @@ static void kvp_val_free(struct _v *value);
 static struct _kvp *kvp_create(char *key, struct _v *value, unsigned char is_array);
 static void kvp_free(struct _kvp *item);
 static void kvp_insert(struct _kvp_store *store, struct _kvp *after, struct _kvp *new_pair);
-static void kvp_remove(struct _kvp_store *store, struct _kvp *item);
+static void kvp_replace_single(struct _kvp *item, struct _v *value, unsigned char is_array);
+static void kvp_replace_array(struct _kvp *item, char *key, struct _v *value);
+static void kvp_add_array(struct _kvp_store *store, struct _kvp *item, char *key, struct _v *value);
 static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, unsigned char is_array);
 static void kvp_store_free_memory(struct _kvp_store *store);
 
@@ -76,69 +95,63 @@ static void kvp_free(struct _kvp *item) {
 }
 
 static void kvp_insert(struct _kvp_store *store, struct _kvp *after, struct _kvp *new_pair) {
-	if (!new_pair) {
+	if (new_pair == NULL) {
 		return;
 	}
-
-	store->data_count++;
-	if (!after) {
+	if (after == NULL) {
 		store->first_data = new_pair;
 	} else {
 		new_pair->next = after->next;
 		after->next = new_pair;
 	}
-	if (!new_pair->next){
+	if (new_pair->next == NULL) {
 		store->last_data = new_pair;
 	}
 }
 
-static void kvp_remove(struct _kvp_store *store, struct _kvp *item) {
-	struct _kvp *it = store->first_data;
+static void kvp_replace_single(struct _kvp *item, struct _v *value, unsigned char is_array) {
+	kvp_val_free(item->value);
+	item->value = value;
+	item->is_array = is_array;
+}
 
-	while(it != NULL) {
-		if (it->next == item) {
-			it->next = item->next;
-			kvp_free(item);
-			store->data_count--;
-			if (it->next == NULL) {
-				store->last_data = it;
-			}
-		}
+static void kvp_replace_array(struct _kvp *item, char *key, struct _v *value) {
+	kvp_val_free(item->value);
+	item->value = value;
+	item->is_array = 0;
+	while (item->next != NULL && strcmp(item->next->key, key) == 0) {
+		item->next = item->next->next;
+		kvp_free(item->next);
+	}	
+}
+
+static void kvp_add_array(struct _kvp_store *store, struct _kvp *item, char *key, struct _v *value) {
+	struct _kvp *it = item;
+	struct _kvp *new;
+	
+	while (it->next != NULL && strcmp(it->next->key, key) == 0) {
 		it = it->next;
 	}
+	new = kvp_create(key, value, 1);
+	kvp_insert(store, it, new);
 }
 
 static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, unsigned char is_array) {
 	struct _kvp *it = store->first_data;
 	struct _kvp *new = NULL;
 	unsigned char found = 0;
-	struct _kvp *remove[store->data_count];
 
 	while (it != NULL) {
 		if (strcmp(it->key, key) == 0) {
-			found++;
-			/* iterator not in array, only value to replace */
+			found = 1;
 			if (!it->is_array) {
-				kvp_val_free(it->value);
-				it->value = value;
-				it->is_array = is_array;
-				break;
-			/* iterator in array, replace first, remove others */
+				kvp_replace_single(it, value, is_array);
 			} else if (!is_array) {
-				if (found == 1) {
-					kvp_val_free(it->value);
-					it->value = value;
-					it->is_array = is_array;
-				} else {
-					remove[found - 2] = it;
-				}
-			/* insert after last one */
-			} else if (!it->next || strcmp(it->next->key, key) != 0) {
-				new = kvp_create(key, value, is_array);
-				kvp_insert(store, it, new);
-				found = 1;
-				break;
+				kvp_replace_array(it, key, value);
+			} else {
+				kvp_add_array(store, it, key, value);
 			}
+			break;
 		}
 		it = it->next;
 	}
@@ -146,10 +159,6 @@ static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, unsig
 	if (!found) {
 		new = kvp_create(key, value, is_array);
 		kvp_insert(store, store->last_data, new);
-	} else {
-		for (int i = 0; i < found - 1; i++) {
-			kvp_remove(store, remove[i]);
-		}
 	}
 }
 
@@ -163,7 +172,6 @@ static void kvp_store_free_memory(struct _kvp_store *store) {
 		data_to_free = next_data;
 	}
 
-	store->data_count = 0;
 	store->first_data = NULL;
 	store->last_data = NULL;
 }

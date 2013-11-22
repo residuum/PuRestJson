@@ -109,7 +109,7 @@ static void *rest_get_auth_token(void *thread_args) {
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
 	rest->common.easy_handle = curl_easy_init();
 	rest->common.multi_handle = curl_multi_init();
-	if (!rest->common.easy_handle) {
+	if (rest->common.easy_handle == NULL) {
 		MYERROR("Cannot init curl.");
 	} else {
 		struct curl_slist *slist = NULL;

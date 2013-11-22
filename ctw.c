@@ -178,7 +178,7 @@ static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _
 			pd_error(common, "%s: writing not possible. Will output on left outlet instead", common->out_file);
 		}
 	}
-	if (!fp) {
+	if (fp == NULL) {
 		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
 		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)out_memory);
 	}
@@ -261,7 +261,7 @@ static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, F
 			curl_easy_getinfo(common->easy_handle, CURLINFO_RESPONSE_CODE, &http_status);
 			if (http_status >= 200 && http_status < 300) {
 				if (msg->data.result == CURLE_OK) {
-					if (!fp) {
+					if (fp == NULL) {
 						outlet_symbol(common->x_ob.ob_outlet, gensym((*out_memory).memory));
 					}
 					/* Free memory */
@@ -292,7 +292,7 @@ static void *ctw_exec(void *thread_args) {
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
 	common->easy_handle = curl_easy_init();
 	common->multi_handle = curl_multi_init();
-	if (!common->easy_handle) {
+	if (common->easy_handle == NULL) {
 		MYERROR("Cannot init curl.");
 	} else {
 		struct curl_slist *slist = NULL;

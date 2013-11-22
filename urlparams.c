@@ -60,7 +60,6 @@ void *urlparams_new(t_symbol *sel, int argc, t_atom *argv) {
 	(void) argc;
 	(void) argv;
 
-	urlp->storage.data_count = 0;
 	outlet_new(&urlp->storage.x_ob, NULL);
 	return (void *)urlp;
 }
@@ -74,38 +73,38 @@ void urlparams_free (t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
 }
 
 void urlparams_bang(t_urlparams *urlp) {
-	struct _kvp *data_member;
+	struct _kvp *it;
 	size_t output_len = 0;
 	char *output;
 	size_t encoded_len;
 	char *encoded_string = NULL;
 
-	if (urlp->storage.data_count == 0) {
+	if (urlp->storage.first_data == NULL) {
 		return;
 	}
 
-	data_member = urlp->storage.first_data;
-	for (size_t i = 0; i < urlp->storage.data_count; i++) {
-		encoded_string = urlp_encode(data_member->value->val.s, &encoded_len);
-		output_len += data_member->key_len + encoded_len + 2;
+	it = urlp->storage.first_data;
+	while (it != NULL) {
+		encoded_string = urlp_encode(it->value->val.s, &encoded_len);
+		output_len += it->key_len + encoded_len + 2;
 		string_free(encoded_string, &encoded_len);
-		data_member = data_member->next;
+		it = it->next;
 	}
 	output = getbytes(output_len * sizeof(char));
 
-	data_member = urlp->storage.first_data;
-	for (size_t i = 0; i < urlp->storage.data_count; i++) {
-		strcat(output, data_member->key);
+	it = urlp->storage.first_data;
+	while (it != NULL) {
+		strcat(output, it->key);
 		strcat(output, "=");
-		encoded_string = urlp_encode(data_member->value->val.s, &encoded_len);
+		encoded_string = urlp_encode(it->value->val.s, &encoded_len);
 		strcat(output, encoded_string);
 		if (encoded_string) {
 			string_free(encoded_string, &encoded_len);
 		}
-		if (i < urlp->storage.data_count - 1) {
+		if (it->next != NULL) {
 			strcat(output, "&");
 		}
-		data_member = data_member->next;
+		it = it->next;
 	}
 
 	outlet_symbol(urlp->storage.x_ob.ob_outlet, gensym(output));

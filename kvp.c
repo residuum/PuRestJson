@@ -116,12 +116,15 @@ static void kvp_replace_single(struct _kvp *item, struct _v *value, unsigned cha
 }
 
 static void kvp_replace_array(struct _kvp *item, char *key, struct _v *value) {
+	struct _kvp *to_free;
+
 	kvp_val_free(item->value);
 	item->value = value;
 	item->is_array = 0;
 	while (item->next != NULL && strcmp(item->next->key, key) == 0) {
-		item->next = item->next->next;
-		kvp_free(item->next);
+		to_free = item->next;
+		item->next = to_free->next;
+		kvp_free(to_free);
 	}	
 }
 

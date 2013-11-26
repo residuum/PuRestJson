@@ -44,6 +44,18 @@ THE SOFTWARE.
 	#define MYERROR(...) error(__VA_ARGS__)
 #endif
 
+#ifndef PUREST_JSON_LIB
+	static void purest_json_lib_info(char *name) {
+		post("[%s] part of PuREST JSON version %s", name, PUREST_JSON_VERSION);
+		post("For more info see http://ix.residuum.org/pd/purest_json.html");
+	}
+#else 
+	static void purest_json_lib_info(char *name) {
+		(void) name;
+	}
+#endif
+
+
 /* [rest] */
 APIEXPORT void APICALL rest_setup(void);
 

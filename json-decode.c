@@ -143,6 +143,7 @@ void *json_decode_new(t_symbol *sel, int argc, t_atom *argv) {
 
 	outlet_new(&jdec->x_ob, NULL);
 	jdec->done_outlet = outlet_new(&jdec->x_ob, &s_bang);
+	purest_json_lib_info("json-decode");
 	return (void *)jdec;
 }
 

@@ -217,6 +217,7 @@ void *json_encode_new(t_symbol *sel, int argc, t_atom *argv) {
 
 	outlet_new(&jenc->storage.x_ob, NULL);
 	jenc->x_canvas = canvas_getcurrent();
+	purest_json_lib_info("json-encode");
 	return (void *)jenc;
 }
 

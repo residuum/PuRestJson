@@ -61,6 +61,7 @@ void *urlparams_new(t_symbol *sel, int argc, t_atom *argv) {
 	(void) argv;
 
 	outlet_new(&urlp->storage.x_ob, NULL);
+	purest_json_lib_info("urlparams");
 	return (void *)urlp;
 }
 

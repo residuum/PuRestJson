@@ -316,6 +316,7 @@ void *rest_new(t_symbol *sel, int argc, t_atom *argv) {
 #ifdef NEEDS_CERT_PATH
 	ctw_set_cert_path((struct _ctw *)rest, rest_class->c_externdir->s_name);
 #endif
+	purest_json_lib_info("rest");
 	return (void *)rest;
 }
 

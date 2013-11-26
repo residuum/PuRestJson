@@ -11,4 +11,5 @@ void purest_json_setup(void) {
 	setup_json0x2dencode();
 	setup_json0x2ddecode();
 	urlparams_setup();
+	purest_json_lib_info("");
 }

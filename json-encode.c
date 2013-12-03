@@ -281,7 +281,7 @@ void json_encode_write(t_json_encode *jenc, t_symbol *filename) {
 
 	canvas_makefilename(jenc->x_canvas, filename->s_name, buf, MAXPDSTRING);
 	if ((file = fopen(buf, "w"))) {
-		fprintf(file, json_string);
+		fprintf(file, "%s", json_string);
 		fclose(file);
 	} else {
 		pd_error(jenc, "%s: write failed", filename->s_name);

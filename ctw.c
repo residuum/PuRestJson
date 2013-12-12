@@ -40,9 +40,14 @@ static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
 static char *ctw_set_param(void *x, t_atom *arg, size_t *string_len, char *error_msg);
 static void ctw_cancel_request(void *args);
 static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist);
+static void ctw_prepare_put(struct _ctw *common);
+static void ctw_prepare_post(struct _ctw *common);
+static void ctw_prepare_delete(struct _ctw *common);
 static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory);
+static int ctw_libcurl_loop(struct _ctw *common);
 static void ctw_perform(struct _ctw *common);
 static void ctw_thread_perform(struct _ctw *common);
+static void ctw_output_curl_error(struct _ctw *common, long http_status, CURLMsg *msg);
 static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp);
 static void *ctw_exec(void *thread_args);
 static void ctw_thread_exec(void *x, void *(*func) (void *));
@@ -141,33 +146,45 @@ static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist) {
 	}
 }
 
+static void ctw_prepare_put(struct _ctw *common) {
+	struct _memory_struct in_memory;
+	curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1);
+	curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
+	/* Prepare data for reading */
+	if (common->parameters_len) {
+		in_memory.memory = getbytes(strlen(common->parameters) + 1);
+		in_memory.size = strlen(common->parameters);
+		if (in_memory.memory == NULL) {
+			MYERROR("not enough memory");
+		}
+		memcpy(in_memory.memory, common->parameters, strlen(common->parameters));
+	} else {
+		in_memory.memory = NULL;
+		in_memory.size = 0;
+	}
+	curl_easy_setopt(common->easy_handle, CURLOPT_READDATA, (void *)&in_memory);
+}
+
+static void ctw_prepare_post(struct _ctw *common) {
+	curl_easy_setopt(common->easy_handle, CURLOPT_POST, 1);
+	curl_easy_setopt(common->easy_handle, CURLOPT_POSTFIELDS, common->parameters);
+}
+
+static void ctw_prepare_delete(struct _ctw *common) {
+	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+}
+
 static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory) {
 	FILE *fp = NULL; 
 
 	ctw_prepare_basic(common, slist);
 
 	if (strcmp(common->req_type, "PUT") == 0) {
-		struct _memory_struct in_memory;
-		curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1);
-		curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
-		/* Prepare data for reading */
-		if (common->parameters_len) {
-			in_memory.memory = getbytes(strlen(common->parameters) + 1);
-			in_memory.size = strlen(common->parameters);
-			if (in_memory.memory == NULL) {
-				MYERROR("not enough memory");
-			}
-			memcpy(in_memory.memory, common->parameters, strlen(common->parameters));
-		} else {
-			in_memory.memory = NULL;
-			in_memory.size = 0;
-		}
-		curl_easy_setopt(common->easy_handle, CURLOPT_READDATA, (void *)&in_memory);
+		ctw_prepare_put(common);
 	} else if (strcmp(common->req_type, "POST") == 0) {
-		curl_easy_setopt(common->easy_handle, CURLOPT_POST, 1);
-		curl_easy_setopt(common->easy_handle, CURLOPT_POSTFIELDS, common->parameters);
+		ctw_prepare_post(common);
 	} else if (strcmp(common->req_type, "DELETE") == 0) {
-		curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+		ctw_prepare_delete(common);
 	}
 	(*out_memory).memory = getbytes(1);
 	(*out_memory).size = 0;
@@ -186,6 +203,42 @@ static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _
 	return fp;
 }
 
+static int ctw_libcurl_loop(struct _ctw *common) {
+	CURLMcode code;
+	struct timeval timeout;
+	int rc;
+	fd_set fdread;
+	fd_set fdwrite;
+	fd_set fdexcep;
+	int maxfd = -1;
+	FD_ZERO(&fdread);
+	FD_ZERO(&fdwrite);
+	FD_ZERO(&fdexcep);
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 300;
+	int running = 1;
+
+	code = curl_multi_fdset(common->multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+	if (code != CURLM_OK) {
+		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
+	}
+	rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+	switch(rc) {
+		case -1:
+			pd_error(common, "Unspecified error while performing request (network disconnect?)");
+			running = 0;
+			break;
+		case 0: /* timeout */ 
+		default: /* action */ 
+			code = curl_multi_perform(common->multi_handle, &running);
+			if (code != CURLM_OK) {
+				pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
+			}
+			break;
+	}
+	return running;
+}
+
 static void ctw_perform(struct _ctw *common) {
 	CURLMcode code;
 	int running;
@@ -195,49 +248,7 @@ static void ctw_perform(struct _ctw *common) {
 		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 	}
 	do {
-		struct timeval timeout;
-		int rc; /* select() return code */ 
-		fd_set fdread;
-		fd_set fdwrite;
-		fd_set fdexcep;
-		int maxfd = -1;
-		long curl_timeo = -1;
-		FD_ZERO(&fdread);
-		FD_ZERO(&fdwrite);
-		FD_ZERO(&fdexcep);
-		/* set a suitable timeout to play around with */ 
-		timeout.tv_sec = 1;
-		timeout.tv_usec = 0;
-		code = curl_multi_timeout(common->multi_handle, &curl_timeo);
-		if (code != CURLM_OK) {
-			pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
-		}
-		if(curl_timeo >= 0) {
-			timeout.tv_sec = curl_timeo / 1000;
-			if(timeout.tv_sec > 1) {
-				timeout.tv_sec = 1;
-			} else {
-				timeout.tv_usec = (curl_timeo % 1000) * 1000;
-			}
-		}
-		/* get file descriptors from the transfers */ 
-		code = curl_multi_fdset(common->multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
-		if (code != CURLM_OK) {
-			pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
-		}
-		rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
-		switch(rc) {
-			case -1:
-				/* select error */ 
-				break;
-			case 0: /* timeout */ 
-			default: /* action */ 
-				code = curl_multi_perform(common->multi_handle, &running);
-				if (code != CURLM_OK) {
-					pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
-				}
-				break;
-		}
+		running = ctw_libcurl_loop(common);
 	} while (running);
 }
 
@@ -248,6 +259,15 @@ static void ctw_thread_perform(struct _ctw *common) {
 	ctw_perform(common);
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
 	pthread_cleanup_pop(0);
+}
+
+static void ctw_output_curl_error(struct _ctw *common, long http_status, CURLMsg *msg) {
+	t_atom status_data[2];
+	
+	SETFLOAT(&status_data[0], (float)http_status);
+	SETSYMBOL(&status_data[1], gensym(curl_easy_strerror(msg->data.result)));
+	pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
+	outlet_list(common->status_out, &s_list, 2, &status_data[0]);
 }
 
 static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp) {
@@ -268,17 +288,17 @@ static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, F
 					string_free((*out_memory).memory, &(*out_memory).size);
 					outlet_bang(common->status_out);
 				} else {
-					t_atom status_data[2];
-					SETFLOAT(&status_data[0], (float)http_status);
-					SETSYMBOL(&status_data[1], gensym(curl_easy_strerror(msg->data.result)));
-					pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
-					outlet_list(common->status_out, &s_list, 2, &status_data[0]);
+					ctw_output_curl_error(common, http_status, msg);
 				}
 			} else {
-				t_atom http_status_data;
-				SETFLOAT(&http_status_data, (float)http_status);
-				pd_error(common, "HTTP error while performing request: %li", http_status);
-				outlet_float(common->status_out, atom_getfloat(&http_status_data));
+				if (msg->data.result == CURLE_OK){
+					t_atom http_status_data;
+					SETFLOAT(&http_status_data, (float)http_status);
+					pd_error(common, "HTTP error while performing request: %li", http_status);
+					outlet_float(common->status_out, atom_getfloat(&http_status_data));
+				} else {
+					ctw_output_curl_error(common, http_status, msg);
+				}
 			}
 			curl_easy_cleanup(common->easy_handle);
 			curl_multi_cleanup(common->multi_handle);

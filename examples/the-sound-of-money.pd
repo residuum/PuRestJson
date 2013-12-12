@@ -1,5 +1,4 @@
-#N canvas 440 51 756 644 10;
-#X declare -lib zexy -lib purest_json;
+#N canvas 438 51 756 644 10;
 #X obj 188 521 dac~;
 #X obj 193 232 fifop;
 #X msg 349 170 stop;
@@ -33,7 +32,7 @@ array outputs a bang at the right outlet of rest-json;
 #X obj 156 71 json-decode;
 #X obj 31 183 print decoded-data;
 #X obj 253 205 metro 100;
-#X msg 156 -39 GET https://free-ec2.scraperwiki.com/bpskqzy/ba1d1e4b65294f1/sql/?q=select%20%0A%09DATE%2C%0A%09USD%2C%0A%09EUR%0Afrom%20swdata%0Aorder%20by%20DATE%0A
+#X msg 156 -39 GET https://free-ec2.scraperwiki.com/bpskqzy/ba1d1e4b65294f1/sql/?q=select%20%0A%09DATE%2C%0A%09cast%28USD%20as%20real%29%20as%20USD%2C%0A%20%20%20%20cast%28EUR%20as%20real%29%20as%20EUR%0Afrom%20swdata%0Aorder%20by%20DATE
 ;
 #X connect 1 0 9 0;
 #X connect 1 1 16 0;

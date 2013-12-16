@@ -40,10 +40,11 @@ static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
 static char *ctw_set_param(void *x, t_atom *arg, size_t *string_len, char *error_msg);
 static void ctw_cancel_request(void *args);
 static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist);
-static void ctw_prepare_put(struct _ctw *common);
+static void ctw_prepare_put(struct _ctw *common, struct _memory_struct *in_memory);
 static void ctw_prepare_post(struct _ctw *common);
 static void ctw_prepare_delete(struct _ctw *common);
-static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory);
+static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, 
+		struct _memory_struct *out_memory, struct _memory_struct *in_memory);
 static int ctw_libcurl_loop(struct _ctw *common);
 static void ctw_perform(struct _ctw *common);
 static void ctw_thread_perform(struct _ctw *common);
@@ -146,23 +147,22 @@ static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist) {
 	}
 }
 
-static void ctw_prepare_put(struct _ctw *common) {
-	struct _memory_struct in_memory;
+static void ctw_prepare_put(struct _ctw *common, struct _memory_struct *in_memory) {
 	curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1);
 	curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
 	/* Prepare data for reading */
 	if (common->parameters_len) {
-		in_memory.memory = getbytes(strlen(common->parameters) + 1);
-		in_memory.size = strlen(common->parameters);
-		if (in_memory.memory == NULL) {
+		(*in_memory).memory = getbytes(strlen(common->parameters) + 1);
+		(*in_memory).size = strlen(common->parameters);
+		if ((*in_memory).memory == NULL) {
 			MYERROR("not enough memory");
 		}
-		memcpy(in_memory.memory, common->parameters, strlen(common->parameters));
+		memcpy((*in_memory).memory, common->parameters, strlen(common->parameters));
 	} else {
-		in_memory.memory = NULL;
-		in_memory.size = 0;
+		(*in_memory).memory = NULL;
+		(*in_memory).size = 0;
 	}
-	curl_easy_setopt(common->easy_handle, CURLOPT_READDATA, (void *)&in_memory);
+	curl_easy_setopt(common->easy_handle, CURLOPT_READDATA, (void *)in_memory);
 }
 
 static void ctw_prepare_post(struct _ctw *common) {
@@ -174,13 +174,14 @@ static void ctw_prepare_delete(struct _ctw *common) {
 	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 }
 
-static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, struct _memory_struct *out_memory) {
+static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, 
+		struct _memory_struct *out_memory, struct _memory_struct *in_memory) {
 	FILE *fp = NULL; 
 
 	ctw_prepare_basic(common, slist);
 
 	if (strcmp(common->req_type, "PUT") == 0) {
-		ctw_prepare_put(common);
+		ctw_prepare_put(common, in_memory);
 	} else if (strcmp(common->req_type, "POST") == 0) {
 		ctw_prepare_post(common);
 	} else if (strcmp(common->req_type, "DELETE") == 0) {
@@ -317,8 +318,9 @@ static void *ctw_exec(void *thread_args) {
 	} else {
 		struct curl_slist *slist = NULL;
 		struct _memory_struct out_memory;
+		struct _memory_struct in_memory;
 		FILE *fp; 
-		fp = ctw_prepare(common, slist, &out_memory);
+		fp = ctw_prepare(common, slist, &out_memory, &in_memory);
 		ctw_thread_perform(common);
 		ctw_output(common, &out_memory, fp);
 		string_free(common->complete_url, &common->complete_url_len);

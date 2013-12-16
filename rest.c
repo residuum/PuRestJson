@@ -110,7 +110,7 @@ static void *rest_get_auth_token(void *thread_args) {
 		struct _memory_struct out_header;
 		FILE *fp; 
 
-		fp = ctw_prepare(&rest->common, slist, &out_content);
+		fp = ctw_prepare(&rest->common, slist, &out_content, NULL);
 		out_header.memory = getbytes(1);
 		out_header.size = 0;
 		curl_easy_setopt(rest->common.easy_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb);

@@ -48,7 +48,7 @@ static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist,
 static int ctw_libcurl_loop(struct _ctw *common);
 static void ctw_perform(struct _ctw *common);
 static void ctw_thread_perform(struct _ctw *common);
-static void ctw_output_curl_error(struct _ctw *common, long http_status, CURLMsg *msg);
+static void ctw_output_curl_error(struct _ctw *common, CURLMsg *msg);
 static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp);
 static void *ctw_exec(void *thread_args);
 static void ctw_thread_exec(void *x, void *(*func) (void *));
@@ -262,10 +262,10 @@ static void ctw_thread_perform(struct _ctw *common) {
 	pthread_cleanup_pop(0);
 }
 
-static void ctw_output_curl_error(struct _ctw *common, long http_status, CURLMsg *msg) {
+static void ctw_output_curl_error(struct _ctw *common, CURLMsg *msg) {
 	t_atom status_data[2];
 	
-	SETFLOAT(&status_data[0], (float)http_status);
+	SETFLOAT(&status_data[0], msg->data.result);
 	SETSYMBOL(&status_data[1], gensym(curl_easy_strerror(msg->data.result)));
 	pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
 	outlet_list(common->status_out, &s_list, 2, &status_data[0]);
@@ -289,7 +289,7 @@ static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, F
 					string_free((*out_memory).memory, &(*out_memory).size);
 					outlet_bang(common->status_out);
 				} else {
-					ctw_output_curl_error(common, http_status, msg);
+					ctw_output_curl_error(common, msg);
 				}
 			} else {
 				if (msg->data.result == CURLE_OK){
@@ -298,7 +298,7 @@ static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, F
 					pd_error(common, "HTTP error while performing request: %li", http_status);
 					outlet_float(common->status_out, atom_getfloat(&http_status_data));
 				} else {
-					ctw_output_curl_error(common, http_status, msg);
+					ctw_output_curl_error(common, msg);
 				}
 			}
 			curl_easy_cleanup(common->easy_handle);

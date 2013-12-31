@@ -22,7 +22,7 @@ struct _jenc_json_array {
 	json_object **members;
 };
 
-static json_object *jenc_create_object(char *value);
+static json_object *jenc_create_object(struct _v *value);
 static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj);
 static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj);
 static unsigned char jenc_is_already_added(size_t current, struct _jenc_json_array *arr);
@@ -34,57 +34,56 @@ static t_symbol *jenc_get_json_symbol(t_json_encode *jenc);
 static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char is_array);
 
 /* begin implementations */
-static json_object *jenc_create_object(char *value) {
+static json_object *jenc_create_object(struct _v *value) {
 	json_object *object;
 	char *parsed_string;
 	size_t memsize = 0;
 	/* if stored value is string is starting with { and ending with }, 
 	   then create a json object from it. */
-	if (value[0] == '{' && value[strlen(value) - 1] == '}') {
-		parsed_string = string_remove_backslashes(value, &memsize);
+	if (value->slen == 0){
+		object = json_object_new_double(value->val.f);
+	}
+	else if (value->val.s[0] == '{' && value->val.s[strlen(value->val.s) - 1] == '}') {
+		parsed_string = string_remove_backslashes(value->val.s, &memsize);
 		object = json_tokener_parse(parsed_string);
 		string_free(parsed_string, &memsize);
 	} else {
-		object = json_object_new_string(value);
+		object = json_object_new_string(value->val.s);
 	}
 	return object;
 }
 
 static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj) {
-	enum json_type inner_type;
-	char *value;
-	size_t value_len = 0;
 	int array_len;
 	int i;
 
 	json_object_object_foreach(jobj, key, val) {
-		inner_type = json_object_get_type(val);
+		char *value;
+		size_t value_len = 0;
+		enum json_type inner_type = json_object_get_type(val);
 		switch (inner_type) {
 			case json_type_boolean:
-				kvp_add((struct _kvp_store *)jenc, key, json_object_get_boolean(val) ? "1" : "0", 0);
+				kvp_add((struct _kvp_store *)jenc, key, 
+						kvp_val_create(NULL, json_object_get_boolean(val) ? 1 : 0), 0);
 				break;
 			case json_type_double:
-				value = string_create(&value_len, snprintf(NULL, 0, "%f", json_object_get_double(val)));
-				sprintf(value, "%f", json_object_get_double(val));
-				kvp_add((struct _kvp_store *)jenc, key, value, 0);
-				string_free(value, &value_len);
+				kvp_add((struct _kvp_store *)jenc, key, 
+						kvp_val_create(NULL, json_object_get_double(val)), 0);
 				break;
 			case json_type_int:
-				value = string_create(&value_len, snprintf(NULL, 0, "%d", json_object_get_int(val)));
-				sprintf(value, "%d", json_object_get_int(val));
-				kvp_add((struct _kvp_store *)jenc, key, value, 0);
-				string_free(value, &value_len);
+				kvp_add((struct _kvp_store *)jenc, key, 
+						kvp_val_create(NULL, json_object_get_int(val)), 0);
 				break;
 			case json_type_string:
 				value = string_create(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
 				sprintf(value, "%s", json_object_get_string(val));
-				kvp_add((struct _kvp_store *)jenc, key, value, 0);
+				kvp_add((struct _kvp_store *)jenc, key, kvp_val_create(value, 0), 0);
 				string_free(value, &value_len);
 				break;
 			case json_type_object:
 				value = string_create(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
 				sprintf(value, "%s", json_object_get_string(val));
-				kvp_add((struct _kvp_store *)jenc, key, value, 0);
+				kvp_add((struct _kvp_store *)jenc, key, kvp_val_create(value, 0), 0);
 				string_free(value, &value_len);
 				json_object_put(val);
 				break;
@@ -96,13 +95,13 @@ static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj) {
 						value = string_create(&value_len, 
 								snprintf(NULL, 0, "%s", json_object_get_string(array_member)));
 						sprintf(value, "%s", json_object_get_string(array_member));
-						kvp_add((struct _kvp_store *)jenc, key, value, 1);
+						kvp_add((struct _kvp_store *)jenc, key, kvp_val_create(value, 0), 0);
 						string_free(value, &value_len);
 					}
 				}
 				break;
 			case json_type_null:
-				kvp_add((struct _kvp_store *)jenc, key, "", 0);
+				kvp_add((struct _kvp_store *)jenc, key, kvp_val_create("", 0), 0);
 				break;
 		}
 	}
@@ -141,7 +140,7 @@ static json_object *jenc_get_array_value(struct _kvp *data_member, size_t curren
 	size_t i;
 	struct _kvp *data_member_compare;
 	json_object *value = json_object_new_array();
-	
+
 	data_member_compare = data_member;
 	for (i = current; i < max; i++) {
 		if (strcmp(data_member_compare->key, data_member->key) == 0) {
@@ -217,9 +216,10 @@ static t_symbol *jenc_get_json_symbol(t_json_encode *jenc) {
 static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char is_array) {
 	char key[MAXPDSTRING];
 	size_t value_len = 0;
-	char *value;
+	char *value = NULL;
 	char temp_value[MAXPDSTRING];
 	int i;
+	t_float f = 0;
 
 	if (argc < 2) {
 		pd_error(jenc, "For method '%s' You need to specify a value.", is_array ? "array": "add");
@@ -227,19 +227,22 @@ static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char 
 	}
 
 	atom_string(argv, key, MAXPDSTRING);
-
-	for (i = 1; i < argc; i++) {
-		atom_string(argv + i, temp_value, MAXPDSTRING);
-		value_len += strlen(temp_value) + 1;
+	if (argc == 2 && (argv + 1)->a_type == A_FLOAT) {
+		f = atom_getfloat(argv + 1);
+	} else {
+		for (i = 1; i < argc; i++) {
+			atom_string(argv + i, temp_value, MAXPDSTRING);
+			value_len += strlen(temp_value) + 1;
+		}
+		value = getbytes(value_len * sizeof(char));
+		atom_string(argv + 1, value, MAXPDSTRING);
+		for(i = 2; i < argc; i++) {
+			atom_string(argv + i, temp_value, MAXPDSTRING);
+			strcat(value, " ");
+			strcat(value, temp_value);
+		}
 	}
-	value = getbytes(value_len * sizeof(char));
-	atom_string(argv + 1, value, MAXPDSTRING);
-	for(i = 2; i < argc; i++) {
-		atom_string(argv + i, temp_value, MAXPDSTRING);
-		strcat(value, " ");
-		strcat(value, temp_value);
-	}
-	kvp_add((struct _kvp_store *)jenc, key, value, is_array);
+	kvp_add((struct _kvp_store *)jenc, key, kvp_val_create(value, f), is_array);
 	string_free(value, &value_len);
 }
 

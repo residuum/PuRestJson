@@ -22,16 +22,16 @@ static struct _strlist *strlist_create(char *val, size_t val_len){
 
 static struct _strlist *strlist_add(struct _strlist *list, char *val, size_t val_len) {
 	struct _strlist *new = strlist_create(val, val_len);
-	struct _strlist *existing = list;
+	struct _strlist *it = list;
 	
 	if (list == NULL) {
 		return new;
 	}
-	while (existing != NULL) {
-		if (existing->next != NULL) {
-			existing = existing->next;
+	while (it != NULL) {
+		if (it->next != NULL) {
+			it = it->next;
 		} else {
-			existing->next = new;
+			it->next = new;
 			break;
 		}
 	}
@@ -40,10 +40,9 @@ static struct _strlist *strlist_add(struct _strlist *list, char *val, size_t val
 
 static void strlist_free(struct _strlist *list) {
 	struct _strlist *data_to_free = list;
-	struct _strlist *next_data;
 
 	while(data_to_free != NULL) {
-		next_data = data_to_free->next;
+		struct _strlist *next_data = data_to_free->next;
 		string_free(data_to_free->str, &data_to_free->str_len);
 		freebytes(data_to_free, sizeof(struct _strlist));
 		data_to_free = next_data;

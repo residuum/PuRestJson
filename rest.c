@@ -31,10 +31,9 @@ static void rest_free_inner(t_rest *rest) {
 }
 
 static void rest_extract_token(t_rest *rest, struct _memory_struct *out_header) {
+	if ((*out_header).memory) {
 	char *header_line;
 	char *cookie_params;
-	
-	if ((*out_header).memory) {
 		header_line = strtok((*out_header).memory, "\n");
 		while (header_line != NULL) {
 			if (strncmp(header_line, "Set-Cookie:", 11) == 0) {
@@ -59,24 +58,22 @@ static void rest_extract_token(t_rest *rest, struct _memory_struct *out_header) 
 static void rest_process_auth_data(t_rest *rest, struct _memory_struct *out_header) {
 	CURLMsg *msg;
 	int msgs_left;
-	long http_status;
-	t_atom http_status_data[3];
 
 	while ((msg = curl_multi_info_read(rest->common.multi_handle, &msgs_left))) {
 		if (msg->msg == CURLMSG_DONE) {
+			long http_status;
 			/* output status */
 			curl_easy_getinfo(rest->common.easy_handle, CURLINFO_RESPONSE_CODE, &http_status);
-			SETSYMBOL(&http_status_data[0], gensym("cookie"));
 			if (http_status >= 200 && http_status < 300) {
-				SETSYMBOL(&http_status_data[1], gensym("bang"));
-				outlet_list(rest->common.status_out, &s_list, 2, &http_status_data[0]);
+				outlet_bang(rest->common.status_out);
 				if (msg->data.result == CURLE_OK) {
 					rest_extract_token(rest, out_header);
 				} else {
-					SETFLOAT(&http_status_data[1], (float)http_status);
-					SETSYMBOL(&http_status_data[2], gensym(curl_easy_strerror(msg->data.result)));
+					t_atom http_status_data[2];
+					SETFLOAT(&http_status_data[0], (float)http_status);
+					SETSYMBOL(&http_status_data[1], gensym(curl_easy_strerror(msg->data.result)));
 					pd_error(rest, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
-					outlet_list(rest->common.status_out, &s_list, 3, &http_status_data[0]);
+					outlet_list(rest->common.status_out, &s_list, 2, &http_status_data[0]);
 				}
 			}
 			curl_easy_cleanup(rest->common.easy_handle);
@@ -87,10 +84,6 @@ static void rest_process_auth_data(t_rest *rest, struct _memory_struct *out_head
 
 static void *rest_get_auth_token(void *thread_args) {
 	t_rest *rest = thread_args; 
-	struct curl_slist *slist = NULL;
-	struct _memory_struct out_content;
-	struct _memory_struct out_header;
-	FILE *fp; 
 
 	/* length + name=&password=*/
 	rest->common.parameters = string_create(&rest->common.parameters_len, rest->cookie.username_len + rest->cookie.password_len + 17);
@@ -112,6 +105,11 @@ static void *rest_get_auth_token(void *thread_args) {
 	if (!rest->common.easy_handle) {
 		MYERROR("Cannot init curl.");
 	} else {
+		struct curl_slist *slist = NULL;
+		struct _memory_struct out_content;
+		struct _memory_struct out_header;
+		FILE *fp; 
+
 		fp = ctw_prepare(&rest->common, slist, &out_content);
 		out_header.memory = getbytes(1);
 		out_header.size = 0;
@@ -177,9 +175,6 @@ void rest_setup(void) {
 void rest_command(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	char *req_type;
 	char path[MAXPDSTRING];
-	char parameters[MAXPDSTRING];
-	char *cleaned_parameters;
-	size_t memsize = 0;
 
 	if(rest->common.locked) {
 		post("rest object is performing request and locked");
@@ -211,8 +206,12 @@ void rest_command(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	}
 	strcat(rest->common.complete_url, path);
 	if (argc > 1) {
+		char parameters[MAXPDSTRING];
 		atom_string(argv + 1, parameters, MAXPDSTRING);
 		if (strlen(parameters)) {
+			char *cleaned_parameters;
+			size_t memsize = 0;
+
 			cleaned_parameters = string_remove_backslashes(parameters, &memsize);
 			rest->common.parameters = string_create(&rest->common.parameters_len, memsize + 1);
 			strcpy(rest->common.parameters, cleaned_parameters);

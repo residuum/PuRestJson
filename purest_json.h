@@ -26,10 +26,6 @@ THE SOFTWARE.
 
 #include "m_pd.h"
 
-#define PUREST_JSON_VERSION "0.15.0"
-#define PUREST_JSON_VERSION_MAJOR 0
-#define PUREST_JSON_VERSION_MINOR 15
-#define PUREST_JSON_VERSION_PATCH 0
 
 #define REQUEST_TYPE_LEN 7
 
@@ -46,7 +42,7 @@ THE SOFTWARE.
 
 #ifndef PUREST_JSON_LIB
 	static void purest_json_lib_info(char *name) {
-		post("[%s] part of PuREST JSON version %s", name, PUREST_JSON_VERSION);
+		post("[%s] part of PuREST JSON version %s", name, VERSION);
 		post("For more info see http://ix.residuum.org/pd/purest_json.html");
 	}
 #else 

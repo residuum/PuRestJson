@@ -1,5 +1,12 @@
 Changelog
 ---------
+1.0.0:
+- Info for users while loading object
+- Bug fixes in [json-encode]:
+	-- array handling
+	-- number handling
+- Refactoring
+
 0.15.0:
 - Cancellation is now faster
 - Switch to json-c 0.11

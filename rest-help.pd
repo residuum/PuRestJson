@@ -1,4 +1,4 @@
-#N canvas 323 51 1137 655 10;
+#N canvas 321 51 1137 655 10;
 #X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
 #X text 55 -59 - object for HTTP communication with REST webservices
@@ -29,14 +29,14 @@ the value and return to the default \, use an empty [timeout( message.
 #X obj 19 -36 oauth;
 #X text 57 -37 - object for HTTP communication with OAuth webservices
 ;
-#N canvas 152 114 1044 412 oauth-specific 0;
+#N canvas 150 112 1044 412 oauth-specific 0;
 #X obj 29 53 oauth http://example.com/ CLIENTKEY CLIENTSECRET ACCESSTOKEN
 ACCESSSECRET;
 #X msg 31 205 method PLAINTEXT;
 #X obj 31 304 oauth;
 #X msg 82 234 method HMAC;
 #X msg 91 262 method RSA privatekey;
-#N canvas 77 79 913 619 RSA 0;
+#N canvas 553 131 913 619 RSA 0;
 #X msg -89 318 GET /echo_api.php?method=foo&bar=baz;
 #X msg -92 361 POST /echo_api.php?method=foo&bar=baz;
 #X obj -128 409 oauth;
@@ -50,17 +50,17 @@ zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn qkMsDmzt0EfNaAO
 WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
 3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8 AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A== -----END PRIVATE KEY-----;
-#X text 261 -97 You need to set client secret and access secret with
-the [url( message or as arguments for [oauth] \, but these will be
-ignored with the RSA key;
 #X msg -142 -95 init http://term.ie/oauth/example key this_is_ignored
 accesskey this_is_ignored;
+#X text 261 -97 You need to set client secret and access secret with
+the [init( message or as arguments for [oauth] \, but these will be
+ignored with the RSA key;
 #X connect 0 0 2 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
 #X connect 2 1 4 0;
 #X connect 5 0 2 0;
-#X connect 7 0 2 0;
+#X connect 6 0 2 0;
 #X restore 333 190 pd RSA;
 #X text 29 135 The method message will set the OAUTH signature method.
 Default is HMAC (HMAC-SHA1). For RSA (RSA-SHA1) you have to submit

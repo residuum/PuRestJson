@@ -70,7 +70,6 @@ static void kvp_val_free(struct _v *value) {
 }
 
 static struct _kvp *kvp_create(char *key, struct _v *value, unsigned char is_array) {
->>>>>>> 2a128e1... [json-encode]: Add numbers correctly, not as string.
 	struct _kvp *created_data = NULL;
 
 	created_data = getbytes(sizeof(struct _kvp));

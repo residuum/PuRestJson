@@ -59,14 +59,14 @@ static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outle
 	outlet_bang(done_outlet);
 }
 
-static void json_dec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
+static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	int array_len;
 
 	array_len = json_object_array_length(jobj);
 	for (int i = 0; i < array_len; i++) {
 		json_object *array_member = json_object_array_get_idx(jobj, i);
 		if (!is_error(array_member)) {
-			json_dec_output(array_member, data_outlet, done_outlet);
+			jdec_output(array_member, data_outlet, done_outlet);
 			/*json_object_put(array_member);*/
 		}
 	}
@@ -129,7 +129,7 @@ static char *lowercase_unicode(char *orig, size_t *memsize) {
 }
 #endif
 
-static void json_dec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
+static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
 	enum json_type outer_type;
 	t_atom out_data[2];
 	t_float out_float;
@@ -163,15 +163,15 @@ static void json_dec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *
 			outlet_bang(done_outlet);
 			break;
 		case json_type_object:
-			json_dec_output_object(jobj, data_outlet, done_outlet);
+			jdec_output_object(jobj, data_outlet, done_outlet);
 			break;
 		case json_type_array: 
-			json_dec_output_array(jobj, data_outlet, done_outlet);
+			jdec_output_array(jobj, data_outlet, done_outlet);
 			break;
 	}
 }
 
-static void json_dec_output_string(char *json_string, t_json_decode *jdec) {
+static void jdec_output_string(char *json_string, t_json_decode *jdec) {
 	json_object *jobj;
 #if JSON_C_FIX
 	size_t memsize = 0;
@@ -185,7 +185,7 @@ static void json_dec_output_string(char *json_string, t_json_decode *jdec) {
 
 	jobj = json_tokener_parse(json_string);
 	if (!is_error(jobj)) {
-		json_dec_output(jobj, jdec->x_ob.ob_outlet, jdec->done_outlet);
+		jdec_output(jobj, jdec->x_ob.ob_outlet, jdec->done_outlet);
 		/* TODO: This sometimes results in a segfault. Why? */
 		/*json_object_put(jobj);*/
 	} else {
@@ -227,7 +227,7 @@ void json_decode_string(t_json_decode *jdec, t_symbol *data) {
 	char *json_string;
 		json_string = string_remove_backslashes(original_string, &memsize);
 		if (json_string != NULL) {
-			json_dec_output_string(json_string, jdec);
+			jdec_output_string(json_string, jdec);
 			string_free(json_string, &memsize);
 		}
 	}
@@ -274,7 +274,7 @@ void json_decode_list(t_json_decode *jdec, t_symbol *sel, int argc, t_atom *argv
 		char *json_string;
 		json_string = string_remove_backslashes(original, &json_len);
 		if (json_string != NULL) {
-			json_dec_output_string(json_string, jdec);
+			jdec_output_string(json_string, jdec);
 			string_free(json_string, &json_len);
 		}
 	}

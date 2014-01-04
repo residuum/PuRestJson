@@ -171,6 +171,11 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_command, gensym("GET"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("DELETE"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("POST"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_command, gensym("HEAD"), A_GIMME, 0);
+/*	class_addmethod(rest_class, (t_method)rest_command, gensym("PATCH"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_command, gensym("OPTIONS"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_command, gensym("CONNECT"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_command, gensym("TRACE"), A_GIMME, 0);*/
 	class_addmethod(rest_class, (t_method)rest_timeout, gensym("timeout"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_sslcheck, gensym("sslcheck"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_cancel, gensym("cancel"), A_GIMME, 0);

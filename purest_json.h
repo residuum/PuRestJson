@@ -27,7 +27,7 @@ THE SOFTWARE.
 #include "m_pd.h"
 
 
-#define REQUEST_TYPE_LEN 7
+#define REQUEST_TYPE_LEN 8
 
 #ifdef _WIN32
 	#define APIEXPORT __declspec(dllexport)

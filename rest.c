@@ -204,7 +204,8 @@ void rest_command(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	if ((strcmp(rest->common.req_type, "GET") && 
 				strcmp(rest->common.req_type, "POST") && 
 				strcmp(rest->common.req_type, "PUT") &&
-				strcmp(rest->common.req_type, "DELETE"))) {
+				strcmp(rest->common.req_type, "DELETE") &&
+				strcmp(rest->common.req_type, "HEAD"))) {
 		pd_error(rest, "Request method %s not supported.", rest->common.req_type);
 		rest->common.locked = 0;
 		return;

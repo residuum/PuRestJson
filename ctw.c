@@ -13,7 +13,7 @@ struct _ctw {
 	t_canvas *x_canvas;
 	pthread_t thread;
 	struct _strlist *http_headers;
-	char req_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST, DELETE, PATCH, HEAD, OPTIONS, CONNECT, TRACE*/
+	char req_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST, DELETE, HEAD. TODO: PATCH, OPTIONS, CONNECT, TRACE*/
 	size_t base_url_len;
 	char *base_url;
 	size_t parameters_len;

@@ -13,7 +13,7 @@ struct _ctw {
 	t_canvas *x_canvas;
 	pthread_t thread;
 	struct _strlist *http_headers;
-	char req_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST, DELETE, HEAD. TODO: PATCH, OPTIONS, CONNECT, TRACE*/
+	char req_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST, DELETE, PATCH, HEAD, OPTIONS, CONNECT, TRACE*/
 	size_t base_url_len;
 	char *base_url;
 	size_t parameters_len;
@@ -42,8 +42,12 @@ static void ctw_cancel_request(void *args);
 static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist);
 static void ctw_prepare_put(struct _ctw *common, struct _memory_struct *in_memory);
 static void ctw_prepare_post(struct _ctw *common);
-static void ctw_prepare_head(struct _ctw *common);
 static void ctw_prepare_delete(struct _ctw *common);
+static void ctw_prepare_head(struct _ctw *common);
+static void ctw_prepare_patch(struct _ctw *common);
+static void ctw_prepare_options(struct _ctw *common);
+static void ctw_prepare_connect(struct _ctw *common);
+static void ctw_prepare_trace(struct _ctw *common, struct curl_slist *slist);
 static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, 
 		struct _memory_struct *out_memory, struct _memory_struct *in_memory);
 static int ctw_libcurl_loop(struct _ctw *common);
@@ -171,13 +175,33 @@ static void ctw_prepare_post(struct _ctw *common) {
 	curl_easy_setopt(common->easy_handle, CURLOPT_POSTFIELDS, common->parameters);
 }
 
+static void ctw_prepare_delete(struct _ctw *common) {
+	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+}
+
 static void ctw_prepare_head(struct _ctw *common) {
+	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "HEAD");
 	curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1);
 	curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1); 
 }
 
-static void ctw_prepare_delete(struct _ctw *common) {
-	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+static void ctw_prepare_patch(struct _ctw *common) {
+	/* TODO: Patch */
+}
+
+static void ctw_prepare_options(struct _ctw *common) {
+	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "OPTIONS");
+	curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1);
+	curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1); 
+}
+
+static void ctw_prepare_connect(struct _ctw *common) {
+	/* TODO: Connect */
+}
+
+static void ctw_prepare_trace(struct _ctw *common, struct curl_slist *slist) {
+	slist = curl_slist_append(slist, "Content-type: message/http");
+	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "TRACE");
 }
 
 static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, 
@@ -190,10 +214,18 @@ static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist,
 		ctw_prepare_put(common, in_memory);
 	} else if (strcmp(common->req_type, "POST") == 0) {
 		ctw_prepare_post(common);
-	} else if (strcmp(common->req_type, "HEAD") == 0) {
-		ctw_prepare_head(common);
 	} else if (strcmp(common->req_type, "DELETE") == 0) {
 		ctw_prepare_delete(common);
+	} else if (strcmp(common->req_type, "HEAD") == 0) {
+		ctw_prepare_head(common);
+	} else if (strcmp(common->req_type, "PATCH") == 0) {
+		ctw_prepare_patch(common);
+	} else if (strcmp(common->req_type, "OPTIONS") == 0) {
+		ctw_prepare_options(common);
+	} else if (strcmp(common->req_type, "CONNECT") == 0) {
+		ctw_prepare_connect(common);
+	} else if (strcmp(common->req_type, "TRACE") == 0) {
+		ctw_prepare_trace(common, slist);
 	}
 	(*out_memory).memory = getbytes(1);
 	(*out_memory).size = 0;

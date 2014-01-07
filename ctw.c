@@ -44,7 +44,7 @@ static void ctw_prepare_put(struct _ctw *common, struct _memory_struct *in_memor
 static void ctw_prepare_post(struct _ctw *common);
 static void ctw_prepare_delete(struct _ctw *common);
 static void ctw_prepare_head(struct _ctw *common);
-static void ctw_prepare_patch(struct _ctw *common);
+static void ctw_prepare_patch(struct _ctw *common, struct _memory_struct *in_memory);
 static void ctw_prepare_options(struct _ctw *common);
 static void ctw_prepare_connect(struct _ctw *common);
 static void ctw_prepare_trace(struct _ctw *common, struct curl_slist *slist);
@@ -185,8 +185,9 @@ static void ctw_prepare_head(struct _ctw *common) {
 	curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1); 
 }
 
-static void ctw_prepare_patch(struct _ctw *common) {
-	/* TODO: Patch */
+static void ctw_prepare_patch(struct _ctw *common, struct _memory_struct *in_memory) {
+	ctw_prepare_put(common, in_memory);
+	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "PATCH");
 }
 
 static void ctw_prepare_options(struct _ctw *common) {
@@ -219,7 +220,7 @@ static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist,
 	} else if (strcmp(common->req_type, "HEAD") == 0) {
 		ctw_prepare_head(common);
 	} else if (strcmp(common->req_type, "PATCH") == 0) {
-		ctw_prepare_patch(common);
+		ctw_prepare_patch(common, in_memory);
 	} else if (strcmp(common->req_type, "OPTIONS") == 0) {
 		ctw_prepare_options(common);
 	} else if (strcmp(common->req_type, "CONNECT") == 0) {

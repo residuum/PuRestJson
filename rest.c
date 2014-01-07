@@ -165,10 +165,10 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_command, gensym("DELETE"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("POST"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("HEAD"), A_GIMME, 0);
-/*	class_addmethod(rest_class, (t_method)rest_command, gensym("PATCH"), A_GIMME, 0);
+	/*class_addmethod(rest_class, (t_method)rest_command, gensym("PATCH"), A_GIMME, 0);*/
 	class_addmethod(rest_class, (t_method)rest_command, gensym("OPTIONS"), A_GIMME, 0);
-	class_addmethod(rest_class, (t_method)rest_command, gensym("CONNECT"), A_GIMME, 0);
-	class_addmethod(rest_class, (t_method)rest_command, gensym("TRACE"), A_GIMME, 0);*/
+	/*class_addmethod(rest_class, (t_method)rest_command, gensym("CONNECT"), A_GIMME, 0);*/
+	class_addmethod(rest_class, (t_method)rest_command, gensym("TRACE"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_timeout, gensym("timeout"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_sslcheck, gensym("sslcheck"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_cancel, gensym("cancel"), A_GIMME, 0);
@@ -198,7 +198,11 @@ void rest_command(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 				strcmp(rest->common.req_type, "POST") && 
 				strcmp(rest->common.req_type, "PUT") &&
 				strcmp(rest->common.req_type, "DELETE") &&
-				strcmp(rest->common.req_type, "HEAD"))) {
+				strcmp(rest->common.req_type, "HEAD") &&
+				strcmp(rest->common.req_type, "PATCH") &&
+				strcmp(rest->common.req_type, "OPTIONS") &&
+				strcmp(rest->common.req_type, "CONNECT") &&
+				strcmp(rest->common.req_type, "TRACE"))) {
 		pd_error(rest, "Request method %s not supported.", rest->common.req_type);
 		rest->common.locked = 0;
 		return;

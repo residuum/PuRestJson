@@ -119,7 +119,7 @@ ifeq ($(UNAME),Darwin)
       SOURCES += $(SOURCES_iphoneos)
 # Starting with Xcode 4.0, the PowerPC compiler is not installed by default
       ifeq ($(wildcard /usr/llvm-gcc-4.2/libexec/gcc/powerpc*), )
-        FAT_FLAGS = -arch i386 -arch x86_64 -mmacosx-version-min=10.5
+        FAT_FLAGS = -arch x86_64 -mmacosx-version-min=10.5
       else
         FAT_FLAGS = -arch ppc -arch i386 -arch x86_64 -mmacosx-version-min=10.4
       endif

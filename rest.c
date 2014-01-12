@@ -32,9 +32,8 @@ static void rest_free_inner(t_rest *rest) {
 
 static void rest_extract_token(t_rest *rest, struct _memory_struct *out_header) {
 	if ((*out_header).memory) {
-	char *header_line;
-	char *cookie_params;
-		header_line = strtok((*out_header).memory, "\n");
+		char *cookie_params = NULL;
+		char *header_line = strtok((*out_header).memory, "\n");
 		while (header_line != NULL) {
 			if (strncmp(header_line, "Set-Cookie:", 11) == 0) {
 				cookie_params = strtok(header_line, ": ");

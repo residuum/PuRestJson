@@ -86,12 +86,12 @@ static struct _kvp *kvp_create(char *key, struct _v *value, unsigned char is_arr
 
 	created_data = getbytes(sizeof(struct _kvp));
 	created_data->key = string_create(&created_data->key_len, strlen(key));
-	created_data->value = value;
 	if (created_data == NULL || key == NULL || value == NULL) {
 		MYERROR("Could not get data");
 		return NULL;
 	}
 
+	created_data->value = value;
 	strcpy(created_data->key, key);
 	created_data->next = NULL;
 	created_data->is_array = is_array;
@@ -152,7 +152,6 @@ static void kvp_add_array(struct _kvp_store *store, struct _kvp *item, char *key
 
 static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, unsigned char is_array) {
 	struct _kvp *it = store->first_data;
-	struct _kvp *new = NULL;
 	unsigned char found = 0;
 
 	while (it != NULL) {
@@ -171,7 +170,7 @@ static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, unsig
 	}
 
 	if (!found) {
-		new = kvp_create(key, value, is_array);
+		struct _kvp *new = kvp_create(key, value, is_array);
 		kvp_insert(store, store->last_data, new);
 	}
 }

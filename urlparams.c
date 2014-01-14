@@ -3,6 +3,7 @@
  * */
 
 #include "urlparams.h"
+#include <math.h>
 
 #include "string.c"
 #include "kvp.c"

@@ -1,8 +1,12 @@
+enum _v_type {string_val, float_val, int_val};
+
 struct _v {
 	size_t slen;
+	enum _v_type type;
 	union {
 		t_float f;
 		char *s;
+		int i;
 	} val;
 };
 
@@ -58,8 +62,16 @@ static struct _v *kvp_val_create(char *s, t_float f) {
 	if (s) {
 		created->val.s = string_create(&created->slen, strlen(s));
 		strcpy(created->val.s, s); 
+		created->type = string_val;
 	} else {
-		created->val.f = f;
+		double intpart;
+		if (modf((double)f, &intpart) == 0){
+			created->val.i = (int)intpart;
+			created->type = int_val;	
+		} else {
+			created->val.f = f;
+			created->type = float_val;
+		}
 	}
 	return created;
 }
@@ -130,7 +142,7 @@ static void kvp_replace_array(struct _kvp *item, char *key, struct _v *value) {
 static void kvp_add_array(struct _kvp_store *store, struct _kvp *item, char *key, struct _v *value) {
 	struct _kvp *it = item;
 	struct _kvp *new;
-	
+
 	while (it->next != NULL && strcmp(it->next->key, key) == 0) {
 		it = it->next;
 	}

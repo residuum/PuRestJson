@@ -5,6 +5,7 @@
 #include "json-encode.h"
 #include <sys/stat.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "string.c"
 #include "kvp.c"
@@ -26,12 +27,13 @@ static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char 
 /* begin implementations */
 static json_object *jenc_create_object(struct _v *value) {
 	json_object *object;
-	/* if stored value is string is starting with { and ending with }, 
-	   then create a json object from it. */
-	if (value->slen == 0){
+	if (value->type == float_val) {
 		object = json_object_new_double(value->val.f);
-	}
-	else if (value->val.s[0] == '{' && value->val.s[strlen(value->val.s) - 1] == '}') {
+	} else if (value->type == int_val) {
+		object = json_object_new_int(value->val.i);
+		/* if stored value is string is starting with { and ending with }, 
+		   then create a json object from it. */
+	} else if (value->val.s[0] == '{' && value->val.s[strlen(value->val.s) - 1] == '}') {
 		char *parsed_string;
 		size_t memsize = 0;
 		parsed_string = string_remove_backslashes(value->val.s, &memsize);

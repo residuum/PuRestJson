@@ -3,7 +3,7 @@
 #X obj 358 60 import purest_json;
 #X obj 143 66 loadbang;
 #X obj 175 412 stdout;
-#X obj 143 443 close-if-no-gui;
+#X obj 143 443 ../common/close-if-no-gui;
 #X obj 143 383 t b a;
 #X obj 180 195 json-encode;
 #X msg 161 313 add key \$1;

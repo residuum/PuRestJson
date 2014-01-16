@@ -1,12 +1,12 @@
-#N canvas 44 51 1002 589 10;
+#N canvas 44 51 523 412 10;
 #X obj 143 216 json-encode;
 #X obj 358 60 import purest_json;
 #X obj 143 66 loadbang;
 #X obj 175 277 stdout;
-#X obj 144 308 close-if-no-gui;
+#X obj 144 308 ../common/close-if-no-gui;
 #X obj 143 248 t b a;
 #X obj 143 102 t b b;
-#X msg 175 147 add key value;
+#X msg 175 147 add key 1.1;
 #X connect 0 0 5 0;
 #X connect 2 0 6 0;
 #X connect 5 0 4 0;

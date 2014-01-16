@@ -3,7 +3,7 @@
 #X obj 358 60 import purest_json;
 #X obj 143 66 loadbang;
 #X obj 175 277 stdout;
-#X obj 144 308 close-if-no-gui;
+#X obj 144 308 ../common/close-if-no-gui;
 #X obj 143 248 t b a;
 #X connect 0 0 5 0;
 #X connect 2 0 0 0;

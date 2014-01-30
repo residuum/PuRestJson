@@ -29,5 +29,10 @@ class UrlparamsTests(unittest.TestCase):
         self.assertEquals(out, '''list key=value%20with%20%23spaces%26other%2bst%c3%bcff%20incl.%20%c3%9cml%c3%a4ute;
 ''')
 
+    def test_escape_key(self):
+        out = runPd('urlparams/urlparams-escape-key.pd')
+        self.assertEquals(out, '''list key%23%24=value;
+''')
+
 if __name__ == '__main__': 
     unittest.main()

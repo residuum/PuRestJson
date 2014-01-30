@@ -78,8 +78,10 @@ void urlparams_bang(t_urlparams *urlp) {
 	struct _kvp *it;
 	size_t output_len = 0;
 	char *output;
-	size_t encoded_len;
-	char *encoded_string = NULL;
+	size_t encoded_key_len;
+	char *encoded_key_string = NULL;
+	size_t encoded_val_len;
+	char *encoded_val_string = NULL;
 
 	if (urlp->storage.first_data == NULL) {
 		outlet_symbol(urlp->storage.x_ob.ob_outlet, gensym(""));
@@ -88,21 +90,27 @@ void urlparams_bang(t_urlparams *urlp) {
 
 	it = urlp->storage.first_data;
 	while (it != NULL) {
-		encoded_string = urlp_encode(it->value->val.s, &encoded_len);
-		output_len += it->key_len + encoded_len + 2;
-		string_free(encoded_string, &encoded_len);
+		encoded_key_string = urlp_encode(it->key, &encoded_key_len);
+		encoded_val_string = urlp_encode(it->value->val.s, &encoded_val_len);
+		output_len += encoded_key_len + encoded_val_len + 2;
+		string_free(encoded_key_string, &encoded_key_len);
+		string_free(encoded_val_string, &encoded_val_len);
 		it = it->next;
 	}
 	output = getbytes(output_len * sizeof(char));
 
 	it = urlp->storage.first_data;
 	while (it != NULL) {
-		strcat(output, it->key);
+		encoded_key_string = urlp_encode(it->key, &encoded_key_len);
+		encoded_val_string = urlp_encode(it->value->val.s, &encoded_val_len);
+		strcat(output, encoded_key_string);
 		strcat(output, "=");
-		encoded_string = urlp_encode(it->value->val.s, &encoded_len);
-		strcat(output, encoded_string);
-		if (encoded_string) {
-			string_free(encoded_string, &encoded_len);
+		strcat(output, encoded_val_string);
+		if (encoded_key_string) {
+			string_free(encoded_key_string, &encoded_key_len);
+		}
+		if (encoded_val_string) {
+			string_free(encoded_val_string, &encoded_val_len);
 		}
 		if (it->next != NULL) {
 			strcat(output, "&");

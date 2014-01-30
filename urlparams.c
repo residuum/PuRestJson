@@ -82,6 +82,7 @@ void urlparams_bang(t_urlparams *urlp) {
 	char *encoded_string = NULL;
 
 	if (urlp->storage.first_data == NULL) {
+		outlet_symbol(urlp->storage.x_ob.ob_outlet, gensym(""));
 		return;
 	}
 

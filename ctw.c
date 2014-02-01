@@ -198,6 +198,7 @@ static void ctw_prepare_options(struct _ctw *common) {
 
 static void ctw_prepare_connect(struct _ctw *common) {
 	/* TODO: Connect */
+	(void) common;
 }
 
 static void ctw_prepare_trace(struct _ctw *common, struct curl_slist *slist) {

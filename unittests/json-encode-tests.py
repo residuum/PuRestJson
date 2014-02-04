@@ -44,6 +44,22 @@ class JsonEncodeTests(unittest.TestCase):
         out = runPd(self.basePath +'json-encode-add-int.pd')
         self.assertEquals(out, '''list { "key": 1 };
 ''')
+    
+    def test_write(self):
+        outFile = self.basePath + 'test.json'
+        runPd(self.basePath +'json-encode-write.pd')
+        fileHandle = open(outFile)
+        out = fileHandle.read();
+        try:
+            os.remove(outFile);
+        except:
+            pass
+        self.assertEquals(out, '{ "key": 1 }')
 
+    def test_read(self):
+        out = runPd(self.basePath +'json-encode-read.pd')
+        self.assertEquals(out, '''list { "key": 1 };
+''')
+    
 if __name__ == '__main__': 
     unittest.main()

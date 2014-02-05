@@ -1,37 +1,38 @@
 #! /usr/bin/python
 
 import unittest
+import os.path
 from pdStarter import runPd
 
 class UrlparamsTests(unittest.TestCase):
-    basePath = 'urlparams/'
+    basePath = 'urlparams'
     def test_add_single_value(self):
-        out = runPd(self.basePath + 'urlparams-add-single-value.pd')
+        out = runPd(os.path.join(self.basePath, 'urlparams-add-single-value.pd'))
         self.assertEquals(out, '''list key=value;
 ''')
 
     def test_add_two_values(self):
-        out = runPd(self.basePath + 'urlparams-add-two-values.pd')
+        out = runPd(os.path.join(self.basePath, 'urlparams-add-two-values.pd'))
         self.assertEquals(out, '''list key=value&key2=value2;
 ''')
 
     def test_replace_value(self):
-        out = runPd(self.basePath + 'urlparams-replace-value.pd')
+        out = runPd(os.path.join(self.basePath, 'urlparams-replace-value.pd'))
         self.assertEquals(out, '''list key=other;
 ''')
 
     def test_clear(self):
-        out = runPd(self.basePath + 'urlparams-clear.pd')
+        out = runPd(os.path.join(self.basePath, 'urlparams-clear.pd'))
         self.assertEquals(out, '''list ;
 ''')
 
     def test_escape_value(self):
-        out = runPd(self.basePath + 'urlparams-escape-value.pd')
+        out = runPd(os.path.join(self.basePath, 'urlparams-escape-value.pd'))
         self.assertEquals(out, '''list key=value%20with%20%23spaces%26other%2bst%c3%bcff%20incl.%20%c3%9cml%c3%a4ute;
 ''')
 
     def test_escape_key(self):
-        out = runPd(self.basePath + 'urlparams-escape-key.pd')
+        out = runPd(os.path.join(self.basePath, 'urlparams-escape-key.pd'))
         self.assertEquals(out, '''list key%23%24=value;
 ''')
 

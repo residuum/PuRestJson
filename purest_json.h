@@ -38,6 +38,9 @@ THE SOFTWARE.
 	#define APIEXPORT
 	#define APICALL
 	#define MYERROR(...) error(__VA_ARGS__)
+	#ifdef __APPLE__
+		#define NEEDS_CERT_PATH 1
+	#endif
 #endif
 
 #ifndef PUREST_JSON_LIB

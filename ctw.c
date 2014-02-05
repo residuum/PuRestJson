@@ -494,11 +494,6 @@ static void ctw_set_cert_path(struct _ctw *common, char *directory) {
 
 	common->cert_path = string_create(&common->cert_path_len, strlen(directory) + 11);
 	strcpy(common->cert_path, directory);
-	for(i = 0; i < strlen(common->cert_path); i++) {
-		if (common->cert_path[i] == '/') {
-			common->cert_path[i] = '\\';
-		}
-	}
 	strcat(common->cert_path, "\\cacert.pem");
 }
 #endif 

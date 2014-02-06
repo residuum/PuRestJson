@@ -17,6 +17,17 @@ bang;
         self.assertEquals(out, '''list key value;
 list key2 2;
 list key3 0.1;
+list bool 0;
+bang;
+''')
+
+    def test_array(self):
+        out = runPd(os.path.join(self.basePath, 'json-decode-array.pd'))
+        self.assertEquals(out, '''list key value;
+list id 1;
+bang;
+list key value 2;
+list id 2;
 bang;
 ''')
 

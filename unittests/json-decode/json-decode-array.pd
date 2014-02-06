@@ -1,4 +1,4 @@
-#N canvas 36 51 1002 589 10;
+#N canvas 38 51 1002 589 10;
 #X obj 143 30 loadbang;
 #X obj 143 286 stdout;
 #X obj 217 287 ../common/close-if-no-gui;
@@ -7,7 +7,7 @@
 #X obj 143 62 t b b b;
 #X msg 165 120 rewind;
 #X obj 358 60 import purest_json zexy;
-#X msg 233 120 read simple-object.txt;
+#X msg 233 120 read array.txt;
 #X connect 0 0 5 0;
 #X connect 3 0 1 0;
 #X connect 3 1 1 0;

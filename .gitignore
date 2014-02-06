@@ -7,3 +7,4 @@ libpurest_json.dylib
 libpurest_json.dll
 *-my.pd
 *.pyc
+debian/pd-purest-json/*

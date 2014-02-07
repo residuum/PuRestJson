@@ -6,7 +6,7 @@
 #X obj 143 308 ../common/close-if-no-gui;
 #X obj 143 248 t b a;
 #X obj 143 102 t b b;
-#X msg 175 153 read read-test.json;
+#X msg 175 153 read read.json;
 #X connect 0 0 5 0;
 #X connect 2 0 6 0;
 #X connect 5 0 4 0;

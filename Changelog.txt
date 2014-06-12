@@ -1,5 +1,12 @@
 Changelog
 ---------
+1.1.0:
+- [rest]: HEAD, PATCH, TRACE and OPTIONS request implemented
+- Bug fixes:
+	-- [rest] and [oauth]: Mac OS X needs cacert.pem
+	-- [json-encode]: differentiate between float and integer values
+- unit tests for [json-decode], [json-encode], [urlparams]
+
 1.0.0:
 - Info for users while loading object
 - Bug fixes in [json-encode]:

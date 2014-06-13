@@ -4,7 +4,7 @@
 ;
 #X text 55 -59 - object for HTTP communication with REST webservices
 ;
-#X text 20 195 All requests are issued with [REQUEST_METHOD URL DATA(
+#X text 20 205 All requests are issued with [REQUEST_METHOD URL DATA(
 where REQUEST_METHOD is the uppercase verb of the method \, URL is
 the request URL \, or the relative server path \, if [url( or initialization
 is used \, and DATA is the upload data for PUT or post data for POST.
@@ -13,7 +13,7 @@ is used \, and DATA is the upload data for PUT or post data for POST.
 #X obj 532 422 print status;
 #X obj 450 -52 import purest_json;
 #X obj 19 -60 rest;
-#X text 19 272 HTTP requests are asynchronous. Do not expect a request
+#X text 19 282 HTTP requests are asynchronous. Do not expect a request
 to return data immediately. While one request is processed \, the object
 id blocked.;
 #X obj 450 390 rest;
@@ -85,14 +85,14 @@ or use [init( message.;
 #X connect 10 0 12 0;
 #X connect 10 1 11 0;
 #X connect 13 0 10 0;
-#X restore 195 343 pd oauth-specific;
+#X restore 195 353 pd oauth-specific;
 #X text 19 -2 Most methods work the same for [rest] and [oauth] \,
 only some methods differ. The differences are outlined below.;
-#X text 20 109 All requests are issued with [REQUEST_METHOD URL DATA(
+#X text 20 119 All requests are issued with [REQUEST_METHOD URL DATA(
 where REQUEST_METHOD is the uppercase verb of the method \, URL is
 the relative server path \, and DATA are url parameters to add to the
 url. For creating the data \, see;
-#X obj 23 163 urlparams;
+#X obj 23 173 urlparams;
 #N canvas 143 56 544 367 rest-specific 0;
 #N canvas 494 72 517 474 cookie-auth 0;
 #X text 34 91 This will try to log you in on creation. It will call
@@ -306,7 +306,7 @@ empty init message will clean a previous set base url. The number of
 possible parameters for [rest] and [oauth] differ. You can also use
 four parameters for the [init( message to use basic cookie authentication
 \, see below.;
-#X restore 21 342 pd rest-specific;
+#X restore 21 352 pd rest-specific;
 #X text 594 289 By default correct SSL host is checked. Disable check
 by sending sslcheck with a value to 0 \, reenable checking by setting
 the value to 1;
@@ -331,7 +331,7 @@ values of Accept: headers;
 #X connect 4 0 2 0;
 #X connect 5 0 2 0;
 #X connect 9 0 2 0;
-#X restore 21 316 pd headers;
+#X restore 21 326 pd headers;
 #X msg 647 171 cancel;
 #X text 637 202 Use this request to test cancelling and timeout: it
 will wait for 10 seconds before returning data.;
@@ -381,9 +381,7 @@ of 10ms is sufficient on my system (TM).;
 #X connect 1 0 0 0;
 #X connect 7 0 0 0;
 #X connect 8 0 0 0;
-#X restore 21 383 pd download-to-file;
-#X text 19 72 [oauth] is an object for communication with OAUTH enbabled
-webservices. Request methods GET and POST are available.;
+#X restore 21 393 pd download-to-file;
 #X text 643 93 You can cancel a currently executed request by issuing
 [cancel(. If data has been returned already \, but is not output \,
 or output only partially \, outputting the data will still be completed.
@@ -392,6 +390,8 @@ to issue a new request immediately. See;
 #X text 19 27 [rest] is an object for communication with REST services.
 Request methods GET \, POST \, PUT \, DELETE \, HEAD \, OPTIONS \,
 PATCH and TRACE are available.;
+#X text 19 72 [oauth] is an object for communication with OAUTH enbabled
+webservices. Request methods GET \, POST and HEAD are available.;
 #X connect 0 0 8 0;
 #X connect 8 0 3 0;
 #X connect 8 1 4 0;

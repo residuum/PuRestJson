@@ -1,5 +1,6 @@
 pd-purest-json (1.1.0+json-c-0.10) UNRELEASED; urgency=low
   * [rest]: HEAD, PATCH, TRACE and OPTIONS request implemented
+  * [oauth]: HEAD request implemented
   * Bug fixes:
     - [rest] and [oauth]: Mac OS X needs cacert.pem
     - [json-encode]: differentiate between float and integer values

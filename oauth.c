@@ -93,6 +93,7 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_init, gensym("init"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("GET"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("POST"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_command, gensym("HEAD"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_method, gensym("method"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_timeout, gensym("timeout"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_sslcheck, gensym("sslcheck"), A_GIMME, 0);
@@ -127,7 +128,8 @@ void oauth_command(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 	req_type = sel->s_name;
 	strcpy(oauth->common.req_type, req_type);
 	if ((strcmp(oauth->common.req_type, "GET") && 
-				strcmp(oauth->common.req_type, "POST"))) {
+				strcmp(oauth->common.req_type, "POST") &&
+				strcmp(oauth->common.req_type, "HEAD"))) {
 		pd_error(oauth, "Request method %s not supported.", oauth->common.req_type);
 		oauth->common.locked = 0;
 		return;

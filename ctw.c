@@ -490,10 +490,8 @@ static void ctw_free(struct _ctw *common) {
 
 #ifdef NEEDS_CERT_PATH
 static void ctw_set_cert_path(struct _ctw *common, char *directory) {
-	size_t i;
-
 	common->cert_path = string_create(&common->cert_path_len, strlen(directory) + 11);
 	strcpy(common->cert_path, directory);
-	strcat(common->cert_path, "\\cacert.pem");
+	strcat(common->cert_path, "/cacert.pem");
 }
 #endif 

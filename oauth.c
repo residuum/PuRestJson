@@ -28,19 +28,19 @@ struct _oauth {
 	} oauth;
 };
 
-static void oauth_free_inner(t_oauth *oauth, short free_rsa);
-static void oauth_set_init(t_oauth *oauth, int argc, t_atom *argv);
-static void oauth_set_rsa_key(t_oauth *oauth, int argc, t_atom *argv);
+static void oauth_free_inner(t_oauth *oauth, short const free_rsa);
+static void oauth_set_init(t_oauth *oauth, int const argc, t_atom *argv);
+static void oauth_set_rsa_key(t_oauth *oauth, int const argc, t_atom *argv);
 
 /* begin implementations */
-static void oauth_free_inner(t_oauth *oauth, short free_rsa) {
+static void oauth_free_inner(t_oauth *const oauth, short const free_rsa) {
 	ctw_free((struct _ctw *)oauth);
 	if (free_rsa == 1) {
 		string_free(oauth->oauth.rsa_key, &oauth->oauth.rsa_key_len);
 	}
 }
 
-static void oauth_set_init(t_oauth *oauth, int argc, t_atom *argv) {
+static void oauth_set_init(t_oauth *const oauth, int const argc, t_atom *const argv) {
 	oauth_free_inner(oauth, 0);
 
 	switch (argc) {
@@ -61,7 +61,7 @@ static void oauth_set_init(t_oauth *oauth, int argc, t_atom *argv) {
 	}
 }
 
-static void oauth_set_rsa_key(t_oauth *oauth, int argc, t_atom *argv) {
+static void oauth_set_rsa_key(t_oauth *const oauth, int const argc, t_atom *const argv) {
 	char temp[MAXPDSTRING];
 	size_t rsa_key_len = 1;
 	short use_newline = 0;

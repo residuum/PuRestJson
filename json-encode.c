@@ -17,15 +17,15 @@ struct _json_encode {
 	t_canvas *x_canvas;
 };
 
-static json_object *jenc_create_object(struct _v *value);
-static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj);
+static json_object *jenc_create_object(struct _v const *value);
+static void jenc_load_json_object(t_json_encode *jenc, json_object const *jobj);
 static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj);
 static json_object *jenc_get_array_value(struct _kvp **item);
 static t_symbol *jenc_get_json_symbol(t_json_encode *jenc);
-static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char is_array);
+static void jenc_add(t_json_encode *jenc, int const argc, t_atom *argv, unsigned char const is_array);
 
 /* begin implementations */
-static json_object *jenc_create_object(struct _v *value) {
+static json_object *jenc_create_object(struct _v const *const value) {
 	json_object *object;
 	if (value->type == float_val) {
 		object = json_object_new_double(value->val.f);
@@ -45,7 +45,7 @@ static json_object *jenc_create_object(struct _v *value) {
 	return object;
 }
 
-static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj) {
+static void jenc_load_json_object(t_json_encode *const jenc, json_object const *const jobj) {
 	json_object_object_foreach(jobj, key, val) {
 		char *value;
 		size_t value_len = 0;
@@ -98,7 +98,7 @@ static void jenc_load_json_object(t_json_encode *jenc, json_object *jobj) {
 	}
 }
 
-static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj) {
+static void jenc_load_json_data(t_json_encode *const jenc, json_object *const jobj) {
 	enum json_type type;
 
 	kvp_store_free_memory((struct _kvp_store *)jenc);
@@ -133,7 +133,7 @@ static json_object *jenc_get_array_value(struct _kvp **item) {
 	return value;
 }
 
-static t_symbol *jenc_get_json_symbol(t_json_encode *jenc) {
+static t_symbol *jenc_get_json_symbol(t_json_encode *const jenc) {
 	struct _kvp *it;
 	json_object *jobj = json_object_new_object();
 	json_object *value;
@@ -159,7 +159,7 @@ static t_symbol *jenc_get_json_symbol(t_json_encode *jenc) {
 	return json_symbol;
 }
 
-static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char is_array) {
+static void jenc_add(t_json_encode *const jenc, int const argc, t_atom *const argv, unsigned char const is_array) {
 	char key[MAXPDSTRING];
 	size_t value_len = 0;
 	char *value = NULL;
@@ -192,7 +192,7 @@ static void jenc_add(t_json_encode *jenc, int argc, t_atom *argv, unsigned char 
 	string_free(value, &value_len);
 }
 
-void json_encode_add(t_json_encode *jenc, t_symbol *sel, int argc, t_atom *argv) {
+void json_encode_add(t_json_encode *const jenc, t_symbol *const sel, int argc, t_atom *const argv) {
 	(void) sel;
 
 	jenc_add(jenc, argc, argv, 0);

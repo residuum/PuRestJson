@@ -14,12 +14,12 @@ struct _urlparams {
 	struct _kvp_store storage;
 };
 
-static char urlp_tohex(char code);
+static char urlp_tohex(char const code);
 static char *urlp_encode(char *str, size_t *str_len);
 
 /* begin implementations */
 /* from http://www.geekhideout.com/urlcode.shtml */
-static char urlp_tohex(char code) {
+static char urlp_tohex(char const code) {
 	static char hex[] = "0123456789abcdef";
 
 	return hex[code & 15];

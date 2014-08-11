@@ -27,17 +27,17 @@ static void rest_free_inner(t_rest *rest);
 static void rest_extract_token(t_rest *rest, struct _memory_struct *out_header);
 static void rest_process_auth_data(t_rest *rest, struct _memory_struct *out_header);
 static void *rest_get_auth_token(void *thread_args);
-static void rest_set_init(t_rest *rest, int argc, t_atom *argv);
+static void rest_set_init(t_rest *rest, int const argc, t_atom *argv);
 
 /* begin implementations */
-static void rest_free_inner(t_rest *rest) {
+static void rest_free_inner(t_rest *const rest) {
 	ctw_free((struct _ctw *)rest);
 	string_free(rest->cookie.login_path, &rest->cookie.login_path_len);
 	string_free(rest->cookie.username, &rest->cookie.username_len);
 	string_free(rest->cookie.password, &rest->cookie.password_len);
 }
 
-static void rest_extract_token(t_rest *rest, struct _memory_struct *out_header) {
+static void rest_extract_token(t_rest *const rest, struct _memory_struct *const out_header) {
 	if ((*out_header).memory) {
 		char *cookie_params = NULL;
 		char *header_line = strtok((*out_header).memory, "\n");
@@ -61,7 +61,7 @@ static void rest_extract_token(t_rest *rest, struct _memory_struct *out_header) 
 	}
 }
 
-static void rest_process_auth_data(t_rest *rest, struct _memory_struct *out_header) {
+static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *const out_header) {
 	CURLMsg *msg;
 	int msgs_left;
 
@@ -88,7 +88,7 @@ static void rest_process_auth_data(t_rest *rest, struct _memory_struct *out_head
 	}
 }
 
-static void *rest_get_auth_token(void *thread_args) {
+static void *rest_get_auth_token(void *const thread_args) {
 	t_rest *rest = thread_args; 
 
 	/* length + name=&password=*/
@@ -138,7 +138,7 @@ static void *rest_get_auth_token(void *thread_args) {
 	return NULL;
 }
 
-static void rest_set_init(t_rest *rest, int argc, t_atom *argv) {
+static void rest_set_init(t_rest *const rest, int const argc, t_atom *const argv) {
 	rest_free_inner(rest);
 
 	switch (argc) {

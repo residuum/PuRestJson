@@ -35,7 +35,7 @@ struct _ctw {
 #endif
 };
 
-static size_t ctw_write_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
+static size_t ctw_write_mem_cb(const void *ptr, size_t size, size_t nmemb, void *data);
 static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
 static char *ctw_set_param(void *x, t_atom *arg, size_t *string_len, char *error_msg);
 static void ctw_cancel_request(void *args);
@@ -66,11 +66,11 @@ static void ctw_set_timeout(struct _ctw *common, int val);
 static void ctw_init(struct _ctw *common);
 static void ctw_free(struct _ctw *common);
 #ifdef NEEDS_CERT_PATH
-static void ctw_set_cert_path(struct _ctw *common, char *directory);
+static void ctw_set_cert_path(struct _ctw *common, const char *directory);
 #endif
 
 /* begin implementations */
-static size_t ctw_write_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) {
+static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const size_t nmemb, void *const data) {
 	size_t realsize = size * nmemb;
 	struct _memory_struct *mem = data;
 
@@ -87,7 +87,7 @@ static size_t ctw_write_mem_cb(void *ptr, size_t size, size_t nmemb, void *data)
 	return realsize;
 }
 
-static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) {
+static size_t ctw_read_mem_cb(void *const ptr, const size_t size, const size_t nmemb, void *const data) {
 	size_t realsize = size * nmemb;
 	struct _memory_struct *mem = data;
 	size_t to_copy = (mem->size < realsize) ? mem->size : realsize;
@@ -98,7 +98,7 @@ static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data) 
 	return to_copy;
 }
 
-static char *ctw_set_param(void *x, t_atom *arg, size_t *string_len, char *error_msg) {
+static char *ctw_set_param(void *const x, t_atom *const arg, size_t *const string_len, char *const error_msg) {
 	char temp[MAXPDSTRING];
 	char *string;
 
@@ -115,14 +115,14 @@ static char *ctw_set_param(void *x, t_atom *arg, size_t *string_len, char *error
 	return string;
 }
 
-static void ctw_cancel_request(void *args) {
-	struct _ctw *common = args; 
+static void ctw_cancel_request(void *const args) {
+	struct _ctw *const common = args; 
 	curl_multi_remove_handle(common->multi_handle, common->easy_handle);
 	common->locked = 0;
 	post("request cancelled.");
 }
 
-static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist) {
+static void ctw_prepare_basic(struct _ctw *const common, struct curl_slist *slist) {
 	/* enable redirection */
 	curl_easy_setopt (common->easy_handle, CURLOPT_FOLLOWLOCATION, 1);
 	curl_easy_setopt (common->easy_handle, CURLOPT_AUTOREFERER, 1);
@@ -152,7 +152,7 @@ static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist) {
 	}
 }
 
-static void ctw_prepare_put(struct _ctw *common, struct _memory_struct *in_memory) {
+static void ctw_prepare_put(struct _ctw *const common, struct _memory_struct *const in_memory) {
 	curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1);
 	curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
 	/* Prepare data for reading */
@@ -170,44 +170,44 @@ static void ctw_prepare_put(struct _ctw *common, struct _memory_struct *in_memor
 	curl_easy_setopt(common->easy_handle, CURLOPT_READDATA, (void *)in_memory);
 }
 
-static void ctw_prepare_post(struct _ctw *common) {
+static void ctw_prepare_post(struct _ctw *const common) {
 	curl_easy_setopt(common->easy_handle, CURLOPT_POST, 1);
 	curl_easy_setopt(common->easy_handle, CURLOPT_POSTFIELDS, common->parameters);
 }
 
-static void ctw_prepare_delete(struct _ctw *common) {
+static void ctw_prepare_delete(struct _ctw *const common) {
 	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 }
 
-static void ctw_prepare_head(struct _ctw *common) {
+static void ctw_prepare_head(struct _ctw *const common) {
 	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "HEAD");
 	curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1);
 	curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1); 
 }
 
-static void ctw_prepare_patch(struct _ctw *common, struct _memory_struct *in_memory) {
+static void ctw_prepare_patch(struct _ctw *const common, struct _memory_struct *const in_memory) {
 	ctw_prepare_put(common, in_memory);
 	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "PATCH");
 }
 
-static void ctw_prepare_options(struct _ctw *common) {
+static void ctw_prepare_options(struct _ctw *const common) {
 	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "OPTIONS");
 	curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1);
 	curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1); 
 }
 
-static void ctw_prepare_connect(struct _ctw *common) {
+static void ctw_prepare_connect(struct _ctw *const common) {
 	/* TODO: Connect */
 	(void) common;
 }
 
-static void ctw_prepare_trace(struct _ctw *common, struct curl_slist *slist) {
+static void ctw_prepare_trace(struct _ctw *const common, struct curl_slist *slist) {
 	slist = curl_slist_append(slist, "Content-type: message/http");
 	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "TRACE");
 }
 
-static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, 
-		struct _memory_struct *out_memory, struct _memory_struct *in_memory) {
+static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const slist, 
+		struct _memory_struct *const out_memory, struct _memory_struct *const in_memory) {
 	FILE *fp = NULL; 
 
 	ctw_prepare_basic(common, slist);
@@ -246,7 +246,7 @@ static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist,
 	return fp;
 }
 
-static int ctw_libcurl_loop(struct _ctw *common) {
+static int ctw_libcurl_loop(struct _ctw *const common) {
 	CURLMcode code;
 	struct timeval timeout;
 	int rc;
@@ -282,7 +282,7 @@ static int ctw_libcurl_loop(struct _ctw *common) {
 	return running;
 }
 
-static void ctw_perform(struct _ctw *common) {
+static void ctw_perform(struct _ctw *const common) {
 	CURLMcode code;
 	int running;
 
@@ -295,7 +295,7 @@ static void ctw_perform(struct _ctw *common) {
 	} while (running);
 }
 
-static void ctw_thread_perform(struct _ctw *common) {
+static void ctw_thread_perform(struct _ctw *const common) {
 	pthread_cleanup_push(ctw_cancel_request, (void *)common);
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, 0);
@@ -304,7 +304,7 @@ static void ctw_thread_perform(struct _ctw *common) {
 	pthread_cleanup_pop(0);
 }
 
-static void ctw_output_curl_error(struct _ctw *common, CURLMsg *msg) {
+static void ctw_output_curl_error(struct _ctw *const common, CURLMsg *const msg) {
 	t_atom status_data[2];
 
 	SETFLOAT(&status_data[0], msg->data.result);
@@ -313,7 +313,7 @@ static void ctw_output_curl_error(struct _ctw *common, CURLMsg *msg) {
 	outlet_list(common->status_out, &s_list, 2, &status_data[0]);
 }
 
-static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp) {
+static void ctw_output(struct _ctw *const common, struct _memory_struct *const out_memory, FILE *const fp) {
 	CURLMsg *msg;
 	int msgs_left;
 
@@ -349,7 +349,7 @@ static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, F
 	}
 }
 
-static void *ctw_exec(void *thread_args) {
+static void *ctw_exec(void *const thread_args) {
 	struct _ctw *common = thread_args; 
 
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
@@ -379,7 +379,7 @@ static void *ctw_exec(void *thread_args) {
 	return NULL;
 }
 
-static void ctw_thread_exec(void *x, void *(*func) (void *)) {
+static void ctw_thread_exec(void *const x, void *(*func) (void *)) {
 	int rc;
 	struct _ctw *common = x;
 	pthread_attr_t thread_attributes;
@@ -396,7 +396,7 @@ static void ctw_thread_exec(void *x, void *(*func) (void *)) {
 	}
 }
 
-static void ctw_set_sslcheck(struct _ctw *common, int val) {
+static void ctw_set_sslcheck(struct _ctw *const common, const int val) {
 	if (val != 0) {
 		common->sslcheck = 1;
 	} else {
@@ -404,11 +404,11 @@ static void ctw_set_sslcheck(struct _ctw *common, int val) {
 	}
 }
 
-static void ctw_cancel(struct _ctw *common) {
+static void ctw_cancel(struct _ctw *const common) {
 	pthread_cancel(common->thread);
 }
 
-static void ctw_add_header(void *x, int argc, t_atom *argv) {
+static void ctw_add_header(void *const x, const int argc, t_atom *const argv) {
 	struct _ctw *common = x;
 	char *val;
 	char temp[MAXPDSTRING];
@@ -433,12 +433,12 @@ static void ctw_add_header(void *x, int argc, t_atom *argv) {
 	common->http_headers = strlist_add(common->http_headers, val, val_len);
 }
 
-static void ctw_clear_headers(struct _ctw *common) {
+static void ctw_clear_headers(struct _ctw *const common) {
 	strlist_free(common->http_headers);
 	common->http_headers = NULL;
 }
 
-static void ctw_set_file(void *x, int argc, t_atom *argv) {
+static void ctw_set_file(void *x, const int argc, t_atom *const argv) {
 	struct _ctw *common = x;
 	t_symbol *filename;
 	char buf[MAXPDSTRING];
@@ -457,11 +457,11 @@ static void ctw_set_file(void *x, int argc, t_atom *argv) {
 	strcpy(common->out_file, buf);
 }
 
-static void ctw_set_timeout(struct _ctw *common, int val) {
+static void ctw_set_timeout(struct _ctw *const common, const int val) {
 	common->timeout = (long) val;
 }
 
-static void ctw_init(struct _ctw *common) {
+static void ctw_init(struct _ctw *const common) {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 	common->base_url_len = 0;
 	common->parameters_len = 0;
@@ -475,7 +475,7 @@ static void ctw_init(struct _ctw *common) {
 	ctw_set_sslcheck(common, 1);
 }
 
-static void ctw_free(struct _ctw *common) {
+static void ctw_free(struct _ctw *const common) {
 	string_free(common->base_url, &common->base_url_len);
 	string_free(common->parameters, &common->parameters_len);
 	string_free(common->complete_url, &common->complete_url_len);
@@ -489,7 +489,7 @@ static void ctw_free(struct _ctw *common) {
 }
 
 #ifdef NEEDS_CERT_PATH
-static void ctw_set_cert_path(struct _ctw *common, char *directory) {
+static void ctw_set_cert_path(struct _ctw *const common, const char *const directory) {
 	common->cert_path = string_create(&common->cert_path_len, strlen(directory) + 11);
 	strcpy(common->cert_path, directory);
 	strcat(common->cert_path, "/cacert.pem");

@@ -1,11 +1,11 @@
-static char *string_create(size_t *newl, size_t strl);
+static char *string_create(size_t *newl, size_t const strl);
 static void string_free(char *string, size_t *strl);
 #ifndef NO_BACKSLASHES
 static char *string_remove_backslashes(char *source_string, size_t *memsize);
 #endif
 
 /* begin implementations */
-static char *string_create(size_t *newl, size_t strl) {
+static char *string_create(size_t *const newl, size_t const strl) {
 	char *gen;
 
 	(*newl) = 1 + strl;
@@ -17,7 +17,7 @@ static char *string_create(size_t *newl, size_t strl) {
 	return memset(gen, 0x00, (*newl));
 }
 
-static void string_free(char *string, size_t *strl) {
+static void string_free(char *string, size_t *const strl) {
 	if ((*strl) > 0) {
 		freebytes(string, (*strl) * sizeof(char));
 		(*strl) = 0;
@@ -26,7 +26,7 @@ static void string_free(char *string, size_t *strl) {
 }
 
 #ifndef NO_BACKSLASHES
-static char *string_remove_backslashes(char *source_string, size_t *memsize) {
+static char *string_remove_backslashes(char *const source_string, size_t *const memsize) {
 	char *cleaned_string = NULL;
 	size_t len_src = strlen(source_string);
 

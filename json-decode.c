@@ -12,13 +12,13 @@ struct _json_decode {
 	t_outlet *done_outlet;
 };
 
-static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+static void jdec_output_object(const json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
-static void jdec_output_string(char *json_string, t_json_decode *jdec);
+static void jdec_output_string(const char *json_string, t_json_decode *jdec);
 
 /* begin implementations */
-static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
+static void jdec_output_object(const json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
 	json_object_object_foreach(jobj, key, val) { /* Passing through every json object */
 		t_atom out_data[2];
 		SETSYMBOL(&out_data[0], gensym(key));
@@ -58,7 +58,7 @@ static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outle
 	outlet_bang(done_outlet);
 }
 
-static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
+static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
 	int array_len;
 
 	array_len = json_object_array_length(jobj);
@@ -71,7 +71,7 @@ static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet
 	}
 }
 
-static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet) {
+static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
 	enum json_type outer_type;
 	t_atom out_data[2];
 	t_float out_float;
@@ -113,7 +113,7 @@ static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done
 	}
 }
 
-static void jdec_output_string(char *json_string, t_json_decode *jdec) {
+static void jdec_output_string(const char *const json_string, t_json_decode *const jdec) {
 	json_object *jobj;
 
 	jobj = json_tokener_parse(json_string);
@@ -134,7 +134,7 @@ void setup_json0x2ddecode(void) {
 	class_sethelpsymbol(json_decode_class, gensym("json"));
 }
 
-void *json_decode_new(t_symbol *sel, int argc, t_atom *argv) {
+void *json_decode_new(const t_symbol *const sel, const int argc, const t_atom *const argv) {
 	t_json_decode *jdec = (t_json_decode*)pd_new(json_decode_class);
 
 	(void) sel;
@@ -147,7 +147,7 @@ void *json_decode_new(t_symbol *sel, int argc, t_atom *argv) {
 	return (void *)jdec;
 }
 
-void json_decode_string(t_json_decode *jdec, t_symbol *data) {
+void json_decode_string(t_json_decode *const jdec, const t_symbol *const data) {
 	char *original_string = data->s_name;
 
 	if (original_string && strlen(original_string)) {
@@ -161,7 +161,7 @@ void json_decode_string(t_json_decode *jdec, t_symbol *data) {
 	}
 }
 
-void json_decode_list(t_json_decode *jdec, t_symbol *sel, int argc, t_atom *argv) {
+void json_decode_list(t_json_decode *const jdec, const t_symbol *const sel, const int argc, t_atom *const argv) {
 	size_t original_len = 1;
 	char *original;
 	char value[MAXPDSTRING];

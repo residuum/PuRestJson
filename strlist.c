@@ -4,12 +4,12 @@ struct _strlist {
 	struct _strlist *next;
 };
 
-static struct _strlist *strlist_create(char *val, size_t const  val_len);
-static struct _strlist *strlist_add(struct _strlist *list, char *val, size_t const val_len);
+static struct _strlist *strlist_create(char *val, const  size_t val_len);
+static struct _strlist *strlist_add(struct _strlist *list, char *val, const size_t val_len);
 static void strlist_free(struct _strlist *list);
 
 /* begin implementations */
-static struct _strlist *strlist_create(char *const val, size_t const val_len) {
+static struct _strlist *strlist_create(char *const val, const size_t val_len) {
 	struct _strlist *created_data = NULL;
 
 	created_data = getbytes(sizeof(struct _strlist));
@@ -25,7 +25,7 @@ static struct _strlist *strlist_create(char *const val, size_t const val_len) {
 	return created_data;
 }
 
-static struct _strlist *strlist_add(struct _strlist *const list, char *const val, size_t const val_len) {
+static struct _strlist *strlist_add(struct _strlist *const list, char *const val, const size_t val_len) {
 	struct _strlist *new = strlist_create(val, val_len);
 	struct _strlist *it = list;
 	

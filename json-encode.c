@@ -17,15 +17,15 @@ struct _json_encode {
 	t_canvas *x_canvas;
 };
 
-static json_object *jenc_create_object(struct _v const *value);
-static void jenc_load_json_object(t_json_encode *jenc, json_object const *jobj);
+static json_object *jenc_create_object(const struct _v *value);
+static void jenc_load_json_object(const t_json_encode *jenc, json_object *jobj);
 static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj);
 static json_object *jenc_get_array_value(struct _kvp **item);
 static t_symbol *jenc_get_json_symbol(t_json_encode *jenc);
-static void jenc_add(t_json_encode *jenc, int const argc, t_atom *argv, unsigned char const is_array);
+static void jenc_add(t_json_encode *jenc, const int argc, t_atom *argv, const unsigned char is_array);
 
 /* begin implementations */
-static json_object *jenc_create_object(struct _v const *const value) {
+static json_object *jenc_create_object(const struct _v *const value) {
 	json_object *object;
 	if (value->type == float_val) {
 		object = json_object_new_double(value->val.f);
@@ -45,7 +45,7 @@ static json_object *jenc_create_object(struct _v const *const value) {
 	return object;
 }
 
-static void jenc_load_json_object(t_json_encode *const jenc, json_object const *const jobj) {
+static void jenc_load_json_object(const t_json_encode *const jenc, json_object *const jobj) {
 	json_object_object_foreach(jobj, key, val) {
 		char *value;
 		size_t value_len = 0;
@@ -159,7 +159,7 @@ static t_symbol *jenc_get_json_symbol(t_json_encode *const jenc) {
 	return json_symbol;
 }
 
-static void jenc_add(t_json_encode *const jenc, int const argc, t_atom *const argv, unsigned char const is_array) {
+static void jenc_add(t_json_encode *const jenc, const int argc, t_atom *const argv, const unsigned char is_array) {
 	char key[MAXPDSTRING];
 	size_t value_len = 0;
 	char *value = NULL;
@@ -192,12 +192,6 @@ static void jenc_add(t_json_encode *const jenc, int const argc, t_atom *const ar
 	string_free(value, &value_len);
 }
 
-void json_encode_add(t_json_encode *const jenc, t_symbol *const sel, int argc, t_atom *const argv) {
-	(void) sel;
-
-	jenc_add(jenc, argc, argv, 0);
-}
-
 void setup_json0x2dencode(void) {
 	json_encode_class = class_new(gensym("json-encode"), (t_newmethod)json_encode_new,
 			(t_method)json_encode_free, sizeof(t_json_encode), 0, A_GIMME, 0);
@@ -210,20 +204,7 @@ void setup_json0x2dencode(void) {
 	class_sethelpsymbol(json_encode_class, gensym("json"));
 }
 
-void *json_encode_new(t_symbol *sel, int argc, t_atom *argv) {
-	t_json_encode *jenc = (t_json_encode *)pd_new(json_encode_class);
-
-	(void) sel;
-	(void) argc;
-	(void) argv;
-
-	outlet_new(&jenc->storage.x_ob, NULL);
-	jenc->x_canvas = canvas_getcurrent();
-	purest_json_lib_info("json-encode");
-	return (void *)jenc;
-}
-
-void json_encode_free (t_json_encode *jenc, t_symbol *sel, int argc, t_atom *argv) {
+void json_encode_free (t_json_encode *const jenc, const t_symbol *const sel, const int argc, const t_atom *const argv) {
 	(void) sel;
 	(void) argc;
 	(void) argv;
@@ -231,17 +212,23 @@ void json_encode_free (t_json_encode *jenc, t_symbol *sel, int argc, t_atom *arg
 	kvp_store_free_memory((struct _kvp_store *)jenc);
 }
 
-void json_encode_bang(t_json_encode *jenc) {
+void json_encode_bang(t_json_encode *const jenc) {
 	outlet_symbol(jenc->storage.x_ob.ob_outlet, jenc_get_json_symbol(jenc));
 }
 
-void json_encode_array(t_json_encode *jenc, t_symbol *sel, int argc, t_atom *argv) {
+void json_encode_add(t_json_encode *const jenc, const t_symbol *const sel, const int argc, t_atom *const argv) {
+	(void) sel;
+
+	jenc_add(jenc, argc, argv, 0);
+}
+
+void json_encode_array(t_json_encode *const jenc, const t_symbol *const sel, const int argc, t_atom *const argv) {
 	(void) sel;
 
 	jenc_add(jenc, argc, argv, 1);
 }
 
-void json_encode_read(t_json_encode *jenc, t_symbol *filename) {
+void json_encode_read(t_json_encode *const jenc, const t_symbol *const filename) {
 	char buf[MAXPDSTRING];
 	FILE *file = NULL;
 	struct stat st;
@@ -270,7 +257,7 @@ void json_encode_read(t_json_encode *jenc, t_symbol *filename) {
 	}
 }
 
-void json_encode_write(t_json_encode *jenc, t_symbol *filename) {
+void json_encode_write(t_json_encode *const jenc, const t_symbol *const filename) {
 	char buf[MAXPDSTRING];
 	FILE *file = NULL;
 	t_symbol *json_symbol = jenc_get_json_symbol(jenc);
@@ -290,7 +277,20 @@ void json_encode_write(t_json_encode *jenc, t_symbol *filename) {
 	}
 }
 
-void json_encode_clear(t_json_encode *jenc, t_symbol *sel, int argc, t_atom *argv) {
+void *json_encode_new(const t_symbol *const sel, const int argc, const t_atom *const argv) {
+	t_json_encode *jenc = (t_json_encode *)pd_new(json_encode_class);
+
+	(void) sel;
+	(void) argc;
+	(void) argv;
+
+	outlet_new(&jenc->storage.x_ob, NULL);
+	jenc->x_canvas = canvas_getcurrent();
+	purest_json_lib_info("json-encode");
+	return (void *)jenc;
+}
+
+void json_encode_clear(t_json_encode *const jenc, const t_symbol *const sel, const int argc, const t_atom *const argv) {
 	(void) sel;
 	(void) argc;
 	(void) argv;

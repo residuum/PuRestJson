@@ -14,13 +14,13 @@ struct _urlparams {
 	struct _kvp_store storage;
 };
 
-static char urlp_tohex(char const code);
+static char urlp_tohex(const char code);
 static char *urlp_encode(char *str, size_t *str_len);
 
 /* begin implementations */
 /* from http://www.geekhideout.com/urlcode.shtml */
-static char urlp_tohex(char const code) {
-	static char hex[] = "0123456789abcdef";
+static char urlp_tohex(const char code) {
+	static const char hex[] = "0123456789abcdef";
 
 	return hex[code & 15];
 }
@@ -54,7 +54,7 @@ void urlparams_setup(void) {
 	class_addmethod(urlparams_class, (t_method)urlparams_clear, gensym("clear"), A_GIMME, 0);
 }
 
-void *urlparams_new(t_symbol *sel, int argc, t_atom *argv) {
+void *urlparams_new(const t_symbol *const sel, const int argc, const t_atom *argv) {
 	t_urlparams *urlp = (t_urlparams *)pd_new(urlparams_class);
 
 	(void) sel;
@@ -66,7 +66,7 @@ void *urlparams_new(t_symbol *sel, int argc, t_atom *argv) {
 	return (void *)urlp;
 }
 
-void urlparams_free (t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
+void urlparams_free (t_urlparams *const urlp, const t_symbol *const sel, const int argc, const t_atom *const argv) {
 	(void) sel;
 	(void) argc;
 	(void) argv;
@@ -74,7 +74,7 @@ void urlparams_free (t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
 	kvp_store_free_memory((struct _kvp_store *)urlp);
 }
 
-void urlparams_bang(t_urlparams *urlp) {
+void urlparams_bang(t_urlparams *const urlp) {
 	struct _kvp *it;
 	size_t output_len = 0;
 	char *output;
@@ -122,7 +122,7 @@ void urlparams_bang(t_urlparams *urlp) {
 	string_free(output, &output_len);
 }
 
-void urlparams_add(t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
+void urlparams_add(t_urlparams *const urlp, const t_symbol *const sel, const int argc, t_atom *const argv) {
 	char key[MAXPDSTRING];
 	size_t value_len = 0;
 	char *value;
@@ -152,7 +152,7 @@ void urlparams_add(t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
 	string_free(value, &value_len);
 }
 
-void urlparams_clear(t_urlparams *urlp, t_symbol *sel, int argc, t_atom *argv) {
+void urlparams_clear(t_urlparams *const urlp, const t_symbol *const sel, const int argc, const t_atom *const argv) {
 	(void) sel;
 	(void) argc;
 	(void) argv;

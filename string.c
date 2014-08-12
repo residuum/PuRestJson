@@ -1,11 +1,11 @@
-static char *string_create(size_t *newl, size_t const strl);
+static char *string_create(size_t *newl, const size_t strl);
 static void string_free(char *string, size_t *strl);
 #ifndef NO_BACKSLASHES
 static char *string_remove_backslashes(char *source_string, size_t *memsize);
 #endif
 
 /* begin implementations */
-static char *string_create(size_t *const newl, size_t const strl) {
+static char *string_create(size_t *const newl, const size_t strl) {
 	char *gen;
 
 	(*newl) = 1 + strl;

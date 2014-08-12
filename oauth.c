@@ -28,19 +28,19 @@ struct _oauth {
 	} oauth;
 };
 
-static void oauth_free_inner(t_oauth *oauth, short const free_rsa);
-static void oauth_set_init(t_oauth *oauth, int const argc, t_atom *argv);
-static void oauth_set_rsa_key(t_oauth *oauth, int const argc, t_atom *argv);
+static void oauth_free_inner(t_oauth *oauth, const short free_rsa);
+static void oauth_set_init(t_oauth *oauth, const int argc, t_atom *argv);
+static void oauth_set_rsa_key(t_oauth *oauth, const int argc, t_atom *argv);
 
 /* begin implementations */
-static void oauth_free_inner(t_oauth *const oauth, short const free_rsa) {
+static void oauth_free_inner(t_oauth *const oauth, const short free_rsa) {
 	ctw_free((struct _ctw *)oauth);
 	if (free_rsa == 1) {
 		string_free(oauth->oauth.rsa_key, &oauth->oauth.rsa_key_len);
 	}
 }
 
-static void oauth_set_init(t_oauth *const oauth, int const argc, t_atom *const argv) {
+static void oauth_set_init(t_oauth *const oauth, const int argc, t_atom *const argv) {
 	oauth_free_inner(oauth, 0);
 
 	switch (argc) {
@@ -61,7 +61,7 @@ static void oauth_set_init(t_oauth *const oauth, int const argc, t_atom *const a
 	}
 }
 
-static void oauth_set_rsa_key(t_oauth *const oauth, int const argc, t_atom *const argv) {
+static void oauth_set_rsa_key(t_oauth *const oauth, const int argc, t_atom *const argv) {
 	char temp[MAXPDSTRING];
 	size_t rsa_key_len = 1;
 	short use_newline = 0;
@@ -109,7 +109,7 @@ void oauth_setup(void) {
 	class_sethelpsymbol(oauth_class, gensym("rest"));
 }
 
-void oauth_command(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *argv) {
 	char *req_type;
 	char path[MAXPDSTRING];
 	size_t req_path_len;
@@ -201,7 +201,7 @@ void oauth_command(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 	ctw_thread_exec((void *)oauth, ctw_exec);
 }
 
-void oauth_method(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_method(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 	char method_name[11];
 
 	(void) sel;
@@ -248,7 +248,7 @@ void oauth_method(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 	}
 }
 
-void oauth_init(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_init(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
 
@@ -259,7 +259,7 @@ void oauth_init(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 	}
 }
 
-void oauth_timeout(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_timeout(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
 
@@ -274,7 +274,7 @@ void oauth_timeout(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 	}
 }
 
-void oauth_sslcheck(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_sslcheck(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
 
@@ -287,7 +287,7 @@ void oauth_sslcheck(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 	}
 }
 
-void oauth_cancel(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_cancel(t_oauth *const oauth, const t_symbol *const sel, const int argc, const t_atom *const argv) {
 
 	(void) sel;
 	(void) argc;
@@ -296,14 +296,14 @@ void oauth_cancel(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
 	ctw_cancel((struct _ctw *)oauth);
 }
 
-void oauth_header(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_header(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
 
 	ctw_add_header((void *)oauth, argc, argv);
 }
 
-void oauth_clear_headers(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_clear_headers(t_oauth *const oauth, const t_symbol *const sel, const int argc, const t_atom *const argv) {
 
 	(void) sel;
 	(void) argc;
@@ -312,14 +312,14 @@ void oauth_clear_headers(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) 
 	ctw_clear_headers((struct _ctw *)oauth);
 }
 
-void oauth_file(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_file(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
 
 	ctw_set_file((void *)oauth, argc, argv);
 }
 
-void *oauth_new(t_symbol *sel, int argc, t_atom *argv) {
+void *oauth_new(const t_symbol *const sel, const int argc, t_atom *const argv) {
 	t_oauth *oauth = (t_oauth *)pd_new(oauth_class);
 
 	(void) sel;
@@ -342,7 +342,7 @@ void *oauth_new(t_symbol *sel, int argc, t_atom *argv) {
 	return (void *)oauth;
 }
 
-void oauth_free(t_oauth *oauth, t_symbol *sel, int argc, t_atom *argv) {
+void oauth_free(t_oauth *const oauth, const t_symbol *const sel, const int argc, const t_atom *const argv) {
 	(void) sel;
 	(void) argc;
 	(void) argv;

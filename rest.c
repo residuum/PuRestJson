@@ -27,7 +27,7 @@ static void rest_free_inner(t_rest *rest);
 static void rest_extract_token(t_rest *rest, struct _memory_struct *out_header);
 static void rest_process_auth_data(t_rest *rest, struct _memory_struct *out_header);
 static void *rest_get_auth_token(void *thread_args);
-static void rest_set_init(t_rest *rest, int const argc, t_atom *argv);
+static void rest_set_init(t_rest *rest, const int argc, t_atom *argv);
 
 /* begin implementations */
 static void rest_free_inner(t_rest *const rest) {
@@ -138,7 +138,7 @@ static void *rest_get_auth_token(void *const thread_args) {
 	return NULL;
 }
 
-static void rest_set_init(t_rest *const rest, int const argc, t_atom *const argv) {
+static void rest_set_init(t_rest *const rest, const int argc, t_atom *const argv) {
 	rest_free_inner(rest);
 
 	switch (argc) {
@@ -183,7 +183,7 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_file, gensym("file"), A_GIMME, 0);
 }
 
-void rest_command(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *argv) {
 	char *req_type;
 	char path[MAXPDSTRING];
 
@@ -237,7 +237,7 @@ void rest_command(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	ctw_thread_exec((void *)rest, ctw_exec);
 }
 
-void rest_init(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_init(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
 
@@ -248,7 +248,7 @@ void rest_init(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	}
 }
 
-void rest_timeout(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_timeout(t_rest *const rest, const t_symbol *const sel, const int const argc, t_atom *const argv) {
 
 	(void) sel;
 
@@ -263,7 +263,7 @@ void rest_timeout(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	}
 }
 
-void rest_sslcheck(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_sslcheck(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
 
@@ -276,7 +276,7 @@ void rest_sslcheck(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	}
 }
 
-void rest_cancel(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_cancel(t_rest *const rest, const t_symbol *const sel, const int argc, const t_atom *const argv) {
 
 	(void) sel;
 	(void) argc;
@@ -285,14 +285,14 @@ void rest_cancel(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	ctw_cancel((struct _ctw *)rest);
 }
 
-void rest_header(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_header(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
 
 	ctw_add_header((void *)rest, argc, argv);
 }
 
-void rest_clear_headers(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_clear_headers(t_rest *const rest, const t_symbol *const sel, const int argc, const t_atom *const argv) {
 
 	(void) sel;
 	(void) argc;
@@ -301,14 +301,14 @@ void rest_clear_headers(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
 	ctw_clear_headers((struct _ctw *)rest);
 }
 
-void rest_file(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_file(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
 
 	ctw_set_file((void *)rest, argc, argv);
 }
 
-void *rest_new(t_symbol *sel, int argc, t_atom *argv) {
+void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {
 	t_rest *rest = (t_rest *)pd_new(rest_class);
 
 	(void) sel;
@@ -329,7 +329,7 @@ void *rest_new(t_symbol *sel, int argc, t_atom *argv) {
 	return (void *)rest;
 }
 
-void rest_free(t_rest *rest, t_symbol *sel, int argc, t_atom *argv) {
+void rest_free(t_rest *const rest, const t_symbol *const sel, const int argc, const t_atom *const argv) {
 	(void) sel;
 	(void) argc;
 	(void) argv;

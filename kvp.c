@@ -42,19 +42,19 @@ struct _kvp_store {
 	struct _kvp *last_data;
 };
 
-static struct _v *kvp_val_create(char const *s, t_float const f);
+static struct _v *kvp_val_create(const char *s, const t_float f);
 static void kvp_val_free(struct _v *value);
-static struct _kvp *kvp_create(char const *key, struct _v *value, unsigned char const is_array);
+static struct _kvp *kvp_create(const char *key, struct _v *value, const unsigned char is_array);
 static void kvp_free(struct _kvp *item);
 static void kvp_insert(struct _kvp_store *store, struct _kvp *after, struct _kvp *new_pair);
-static void kvp_replace_single(struct _kvp *item, struct _v *value, unsigned char const is_array);
-static void kvp_replace_array(struct _kvp *item, char const *key, struct _v *value);
+static void kvp_replace_single(struct _kvp *item, struct _v *value, const unsigned char is_array);
+static void kvp_replace_array(struct _kvp *item, const char *key, struct _v *value);
 static void kvp_add_array(struct _kvp_store *store, struct _kvp *item, char *key, struct _v *value);
-static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, unsigned char const is_array);
+static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, const unsigned char is_array);
 static void kvp_store_free_memory(struct _kvp_store *store);
 
 /* begin implementations */
-static struct _v *kvp_val_create(char const *const s, t_float const f) {
+static struct _v *kvp_val_create(const char *const s, const t_float f) {
 	struct _v *created = NULL;
 
 	created = getbytes(sizeof(struct _v));
@@ -81,7 +81,7 @@ static void kvp_val_free(struct _v *const value) {
 	freebytes(value, sizeof(struct _v));
 }
 
-static struct _kvp *kvp_create(char const *const key, struct _v *const value, unsigned char const is_array) {
+static struct _kvp *kvp_create(const char *const key, struct _v *const value, const unsigned char is_array) {
 	struct _kvp *created_data = NULL;
 
 	created_data = getbytes(sizeof(struct _kvp));
@@ -120,13 +120,13 @@ static void kvp_insert(struct _kvp_store *const store, struct _kvp *const after,
 	}
 }
 
-static void kvp_replace_single(struct _kvp *const item, struct _v *const value, unsigned char const is_array) {
+static void kvp_replace_single(struct _kvp *const item, struct _v *const value, const unsigned char is_array) {
 	kvp_val_free(item->value);
 	item->value = value;
 	item->is_array = is_array;
 }
 
-static void kvp_replace_array(struct _kvp *const item, char const *const key, struct _v *const value) {
+static void kvp_replace_array(struct _kvp *const item, const char *const key, struct _v *const value) {
 	struct _kvp *to_free;
 
 	kvp_val_free(item->value);
@@ -150,7 +150,7 @@ static void kvp_add_array(struct _kvp_store *const store, struct _kvp *const ite
 	kvp_insert(store, it, new);
 }
 
-static void kvp_add(struct _kvp_store *const store, char *const key, struct _v *const value, unsigned char const is_array) {
+static void kvp_add(struct _kvp_store *const store, char *const key, struct _v *const value, const unsigned char is_array) {
 	struct _kvp *it = store->first_data;
 	unsigned char found = 0;
 

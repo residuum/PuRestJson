@@ -100,8 +100,8 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("POST"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("HEAD"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_method, gensym("method"), A_GIMME, 0);
-	class_addmethod(oauth_class, (t_method)oauth_timeout, gensym("timeout"), A_GIMME, 0);
-	class_addmethod(oauth_class, (t_method)oauth_sslcheck, gensym("sslcheck"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_timeout, gensym("timeout"), A_DEFFLOAT, 0);
+	class_addmethod(oauth_class, (t_method)oauth_sslcheck, gensym("sslcheck"), A_DEFFLOAT, 0);
 	class_addmethod(oauth_class, (t_method)oauth_cancel, gensym("cancel"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_clear_headers, gensym("header_clear"), A_GIMME, 0);
@@ -259,31 +259,19 @@ void oauth_init(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 	}
 }
 
-void oauth_timeout(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
-
-	(void) sel;
-
+void oauth_timeout(t_oauth *const oauth, const t_floatarg f) {
 	if(oauth->common.locked) {
 		post("oauth object is performing request and locked");
-	} else if (argc > 2){
-		pd_error(oauth, "timeout must have 0 or 1 parameter");
-	} else if (argc == 0) {
-		ctw_set_timeout((struct _ctw *)oauth, 0);
 	} else {
-		ctw_set_timeout((struct _ctw *)oauth, atom_getint(argv));
+		ctw_set_timeout((struct _ctw *)oauth, (int)f);
 	}
 }
 
-void oauth_sslcheck(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
-
-	(void) sel;
-
+void oauth_sslcheck(t_oauth *const oauth, const t_floatarg f) {
 	if(oauth->common.locked) {
 		post("oauth object is performing request and locked");
-	} else if (argc != 1){
-		pd_error(oauth, "sslcheck must have 1 parameter");
 	} else {
-		ctw_set_sslcheck((struct _ctw *)oauth, atom_getint(argv));
+		ctw_set_sslcheck((struct _ctw *)oauth, (int)f);
 	}
 }
 

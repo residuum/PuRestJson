@@ -39,10 +39,10 @@ APIEXPORT void APICALL *oauth_new(const t_symbol *sel, const int argc, t_atom *a
 APIEXPORT void APICALL oauth_free(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);
 
 APIEXPORT void APICALL oauth_command(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv); 
-APIEXPORT void APICALL oauth_timeout(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_timeout(t_oauth *oauth, const t_floatarg f);
 APIEXPORT void APICALL oauth_init(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
 APIEXPORT void APICALL oauth_method(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
-APIEXPORT void APICALL oauth_sslcheck(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_sslcheck(t_oauth *oauth, const t_floatarg f);
 APIEXPORT void APICALL oauth_cancel(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);
 APIEXPORT void APICALL oauth_header(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
 APIEXPORT void APICALL oauth_clear_headers(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);

@@ -175,8 +175,8 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_command, gensym("OPTIONS"), A_GIMME, 0);
 	/*class_addmethod(rest_class, (t_method)rest_command, gensym("CONNECT"), A_GIMME, 0);*/
 	class_addmethod(rest_class, (t_method)rest_command, gensym("TRACE"), A_GIMME, 0);
-	class_addmethod(rest_class, (t_method)rest_timeout, gensym("timeout"), A_GIMME, 0);
-	class_addmethod(rest_class, (t_method)rest_sslcheck, gensym("sslcheck"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_timeout, gensym("timeout"), A_DEFFLOAT, 0);
+	class_addmethod(rest_class, (t_method)rest_sslcheck, gensym("sslcheck"), A_DEFFLOAT, 0);
 	class_addmethod(rest_class, (t_method)rest_cancel, gensym("cancel"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_clear_headers, gensym("header_clear"), A_GIMME, 0);
@@ -248,31 +248,19 @@ void rest_init(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 	}
 }
 
-void rest_timeout(t_rest *const rest, const t_symbol *const sel, const int const argc, t_atom *const argv) {
-
-	(void) sel;
-
+void rest_timeout(t_rest *const rest, const t_floatarg f) {
 	if(rest->common.locked) {
 		post("rest object is performing request and locked");
-	} else if (argc > 2){
-		pd_error(rest, "timeout must have 0 or 1 parameter");
-	} else if (argc == 0) {
-		ctw_set_timeout((struct _ctw *)rest, 0);
 	} else {
-		ctw_set_timeout((struct _ctw *)rest, atom_getint(argv));
+		ctw_set_timeout((struct _ctw *)rest, (int)f);
 	}
 }
 
-void rest_sslcheck(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
-
-	(void) sel;
-
+void rest_sslcheck(t_rest *const rest, const t_floatarg f) {
 	if(rest->common.locked) {
 		post("rest object is performing request and locked");
-	} else if (argc != 1){
-		pd_error(rest, "sslcheck must have 1 parameter");
 	} else {
-		ctw_set_sslcheck((struct _ctw *)rest, atom_getint(argv));
+		ctw_set_sslcheck((struct _ctw *)rest, (int)f);
 	}
 }
 

@@ -59,9 +59,7 @@ static void jdec_output_object(const json_object *const jobj, t_outlet *const da
 }
 
 static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
-	int array_len;
-
-	array_len = json_object_array_length(jobj);
+	const int array_len = json_object_array_length(jobj);
 	for (int i = 0; i < array_len; i++) {
 		json_object *array_member = json_object_array_get_idx(jobj, i);
 		if (!is_error(array_member)) {
@@ -72,11 +70,10 @@ static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_
 }
 
 static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
-	enum json_type outer_type;
 	t_atom out_data[2];
 	t_float out_float;
+	const enum json_type outer_type = json_object_get_type(jobj);
 
-	outer_type = json_object_get_type(jobj);
 	switch (outer_type) {
 		case json_type_boolean:
 			SETFLOAT(&out_data[0], json_object_get_boolean(jobj) ? 1: 0);
@@ -114,9 +111,8 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
 }
 
 static void jdec_output_string(const char *const json_string, t_json_decode *const jdec) {
-	json_object *jobj;
+	json_object *const jobj = json_tokener_parse(json_string);
 
-	jobj = json_tokener_parse(json_string);
 	if (!is_error(jobj)) {
 		jdec_output(jobj, jdec->x_ob.ob_outlet, jdec->done_outlet);
 		/* TODO: This sometimes results in a segfault. Why? */
@@ -135,7 +131,7 @@ void setup_json0x2ddecode(void) {
 }
 
 void *json_decode_new(const t_symbol *const sel, const int argc, const t_atom *const argv) {
-	t_json_decode *jdec = (t_json_decode*)pd_new(json_decode_class);
+	t_json_decode *const jdec = (t_json_decode*)pd_new(json_decode_class);
 
 	(void) sel;
 	(void) argc;
@@ -148,7 +144,7 @@ void *json_decode_new(const t_symbol *const sel, const int argc, const t_atom *c
 }
 
 void json_decode_string(t_json_decode *const jdec, const t_symbol *const data) {
-	char *original_string = data->s_name;
+	char *const original_string = data->s_name;
 
 	if (original_string && strlen(original_string)) {
 	size_t memsize = 0;
@@ -165,7 +161,7 @@ void json_decode_list(t_json_decode *const jdec, const t_symbol *const sel, cons
 	size_t original_len = 1;
 	char *original;
 	char value[MAXPDSTRING];
-	int use_sel = (strcmp(sel->s_name, "symbol") && strcmp(sel->s_name, "list"));
+	const int use_sel = (strcmp(sel->s_name, "symbol") && strcmp(sel->s_name, "list"));
 
 	if (use_sel) {
 		original_len += strlen(sel->s_name);

@@ -55,7 +55,7 @@ void urlparams_setup(void) {
 }
 
 void *urlparams_new(const t_symbol *const sel, const int argc, const t_atom *argv) {
-	t_urlparams *urlp = (t_urlparams *)pd_new(urlparams_class);
+	t_urlparams *const urlp = (t_urlparams *)pd_new(urlparams_class);
 
 	(void) sel;
 	(void) argc;

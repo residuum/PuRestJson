@@ -28,7 +28,7 @@ static void string_free(char *string, size_t *const strl) {
 #ifndef NO_BACKSLASHES
 static char *string_remove_backslashes(char *const source_string, size_t *const memsize) {
 	char *cleaned_string = NULL;
-	size_t len_src = strlen(source_string);
+	const size_t len_src = strlen(source_string);
 
 	cleaned_string = string_create(memsize, len_src);
 	if (cleaned_string == NULL) {

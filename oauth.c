@@ -308,7 +308,7 @@ void oauth_file(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 }
 
 void *oauth_new(const t_symbol *const sel, const int argc, t_atom *const argv) {
-	t_oauth *oauth = (t_oauth *)pd_new(oauth_class);
+	t_oauth *const oauth = (t_oauth *)pd_new(oauth_class);
 
 	(void) sel;
 

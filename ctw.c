@@ -71,8 +71,8 @@ static void ctw_set_cert_path(struct _ctw *common, const char *directory);
 
 /* begin implementations */
 static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const size_t nmemb, void *const data) {
-	size_t realsize = size * nmemb;
-	struct _memory_struct *mem = data;
+	const size_t realsize = size * nmemb;
+	struct _memory_struct *const mem = data;
 
 	mem->memory = resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
@@ -88,9 +88,9 @@ static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const s
 }
 
 static size_t ctw_read_mem_cb(void *const ptr, const size_t size, const size_t nmemb, void *const data) {
-	size_t realsize = size * nmemb;
-	struct _memory_struct *mem = data;
-	size_t to_copy = (mem->size < realsize) ? mem->size : realsize;
+	const size_t realsize = size * nmemb;
+	struct _memory_struct *const mem = data;
+	const size_t to_copy = (mem->size < realsize) ? mem->size : realsize;
 
 	memcpy(ptr, mem->memory, to_copy);
 	mem->size -= to_copy;
@@ -283,10 +283,9 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 }
 
 static void ctw_perform(struct _ctw *const common) {
-	CURLMcode code;
 	int running;
+	const CURLMcode code = curl_multi_perform(common->multi_handle, &running);
 
-	code = curl_multi_perform(common->multi_handle, &running);
 	if (code != CURLM_OK) {
 		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 	}
@@ -350,7 +349,7 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 }
 
 static void *ctw_exec(void *const thread_args) {
-	struct _ctw *common = thread_args; 
+	struct _ctw *const common = thread_args; 
 
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
 	common->easy_handle = curl_easy_init();
@@ -381,7 +380,7 @@ static void *ctw_exec(void *const thread_args) {
 
 static void ctw_thread_exec(void *const x, void *(*func) (void *)) {
 	int rc;
-	struct _ctw *common = x;
+	struct _ctw *const common = x;
 	pthread_attr_t thread_attributes;
 
 	pthread_attr_init(&thread_attributes);
@@ -409,7 +408,7 @@ static void ctw_cancel(struct _ctw *const common) {
 }
 
 static void ctw_add_header(void *const x, const int argc, t_atom *const argv) {
-	struct _ctw *common = x;
+	struct _ctw *const common = x;
 	char *val;
 	char temp[MAXPDSTRING];
 	size_t header_len = 0;
@@ -438,8 +437,8 @@ static void ctw_clear_headers(struct _ctw *const common) {
 	common->http_headers = NULL;
 }
 
-static void ctw_set_file(void *x, const int argc, t_atom *const argv) {
-	struct _ctw *common = x;
+static void ctw_set_file(void *const x, const int argc, t_atom *const argv) {
+	struct _ctw *const common = x;
 	t_symbol *filename;
 	char buf[MAXPDSTRING];
 

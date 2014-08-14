@@ -50,7 +50,7 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 		char *value;
 		size_t value_len = 0;
 		int array_len;
-		enum json_type inner_type = json_object_get_type(val);
+		const enum json_type inner_type = json_object_get_type(val);
 
 		switch (inner_type) {
 			case json_type_boolean:
@@ -99,10 +99,9 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 }
 
 static void jenc_load_json_data(t_json_encode *const jenc, json_object *const jobj) {
-	enum json_type type;
+	const enum json_type type = json_object_get_type(jobj);
 
 	kvp_store_free_memory((struct _kvp_store *)jenc);
-	type = json_object_get_type(jobj);
 
 	switch (type) {
 		case json_type_object:
@@ -135,7 +134,7 @@ static json_object *jenc_get_array_value(struct _kvp **item) {
 
 static t_symbol *jenc_get_json_symbol(t_json_encode *const jenc) {
 	struct _kvp *it;
-	json_object *jobj = json_object_new_object();
+	json_object *const jobj = json_object_new_object();
 	json_object *value;
 	t_symbol *json_symbol = NULL;
 
@@ -260,8 +259,8 @@ void json_encode_read(t_json_encode *const jenc, const t_symbol *const filename)
 void json_encode_write(t_json_encode *const jenc, const t_symbol *const filename) {
 	char buf[MAXPDSTRING];
 	FILE *file = NULL;
-	t_symbol *json_symbol = jenc_get_json_symbol(jenc);
-	char *json_string = json_symbol->s_name;
+	const t_symbol *const json_symbol = jenc_get_json_symbol(jenc);
+	const char *const json_string = json_symbol->s_name;
 
 	if (json_string == NULL) {
 		post("No JSON data for writing available.");
@@ -278,7 +277,7 @@ void json_encode_write(t_json_encode *const jenc, const t_symbol *const filename
 }
 
 void *json_encode_new(const t_symbol *const sel, const int argc, const t_atom *const argv) {
-	t_json_encode *jenc = (t_json_encode *)pd_new(json_encode_class);
+	t_json_encode *const jenc = (t_json_encode *)pd_new(json_encode_class);
 
 	(void) sel;
 	(void) argc;

@@ -89,7 +89,7 @@ static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *co
 }
 
 static void *rest_get_auth_token(void *const thread_args) {
-	t_rest *rest = thread_args; 
+	t_rest *const rest = thread_args;
 
 	/* length + name=&password=*/
 	rest->common.parameters = string_create(&rest->common.parameters_len, rest->cookie.username_len + rest->cookie.password_len + 17);
@@ -184,7 +184,7 @@ void rest_setup(void) {
 }
 
 void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *argv) {
-	char *req_type;
+	const char *const req_type = sel->s_name;
 	char path[MAXPDSTRING];
 
 	if(rest->common.locked) {
@@ -198,7 +198,6 @@ void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc,
 	}
 
 	rest->common.locked = 1;
-	req_type = sel->s_name;
 	strcpy(rest->common.req_type, req_type);
 	if ((strcmp(rest->common.req_type, "GET") && 
 				strcmp(rest->common.req_type, "POST") && 
@@ -297,7 +296,7 @@ void rest_file(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 }
 
 void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {
-	t_rest *rest = (t_rest *)pd_new(rest_class);
+	t_rest *const rest = (t_rest *)pd_new(rest_class);
 
 	(void) sel;
 

@@ -27,7 +27,6 @@ THE SOFTWARE.
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <json/json.h>
 #include "purest_json.h"
 
 #define NO_BACKSLASHES 1

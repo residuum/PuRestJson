@@ -12,13 +12,13 @@ struct _json_decode {
 	t_outlet *done_outlet;
 };
 
-static void jdec_output_object(const json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 static void jdec_output_string(const char *json_string, t_json_decode *jdec);
 
 /* begin implementations */
-static void jdec_output_object(const json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
+static void jdec_output_object(json_object *jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
 	json_object_object_foreach(jobj, key, val) { /* Passing through every json object */
 		t_atom out_data[2];
 		SETSYMBOL(&out_data[0], gensym(key));

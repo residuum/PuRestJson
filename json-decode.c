@@ -58,7 +58,7 @@ static void jdec_output_object(json_object *const jobj, t_outlet *const data_out
 	outlet_bang(done_outlet);
 }
 
-static void jdec_output_array(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
+static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
 	const int array_len = json_object_array_length(jobj);
 	for (int i = 0; i < array_len; i++) {
 		json_object *array_member = json_object_array_get_idx(jobj, i);
@@ -147,8 +147,8 @@ void json_decode_string(t_json_decode *const jdec, const t_symbol *const data) {
 	char *const original_string = data->s_name;
 
 	if (original_string && strlen(original_string)) {
-	size_t memsize = 0;
-	char *json_string;
+		size_t memsize = 0;
+		char *json_string;
 		json_string = string_remove_backslashes(original_string, &memsize);
 		if (json_string != NULL) {
 			jdec_output_string(json_string, jdec);

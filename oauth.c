@@ -172,9 +172,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 		strcat(req_path, cleaned_parameters);
 		freebytes(cleaned_parameters, memsize);
 	}
-	if (strcmp(oauth->common.req_type, "POST") == 0
-			|| strcmp(oauth->common.req_type, "PUT") == 0
-			|| strcmp(oauth->common.req_type, "PATCH") == 0) {
+	if (ctw_needs_input(oauth->common.req_type) == 0) {
 		if (oauth->oauth.method == OA_RSA) {
 			req_url= oauth_sign_url2(req_path, &postargs, oauth->oauth.method, oauth->common.req_type,
 					oauth->oauth.client_key, oauth->oauth.rsa_key,
@@ -197,9 +195,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 	}
 	oauth->common.complete_url = string_create(&oauth->common.complete_url_len, strlen(req_url));
 	strcpy(oauth->common.complete_url, req_url);
-	if (strcmp(oauth->common.req_type, "POST") == 0
-			|| strcmp(oauth->common.req_type, "PUT") == 0
-			|| strcmp(oauth->common.req_type, "PATCH") == 0) {
+	if (ctw_needs_input(oauth->common.req_type) == 0) {
 		oauth->common.parameters = string_create(&oauth->common.parameters_len, strlen(postargs));
 		strcpy(oauth->common.parameters, postargs);
 	} else {

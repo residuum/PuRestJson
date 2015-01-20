@@ -66,13 +66,15 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 						kvp_val_create(NULL, json_object_get_int(val)), 0);
 				break;
 			case json_type_string:
-				value = string_create(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
+				value = string_create(&value_len, snprintf(NULL, 0, "%s", 
+							json_object_get_string(val)));
 				sprintf(value, "%s", json_object_get_string(val));
 				kvp_add((struct _kvp_store *)jenc, key, kvp_val_create(value, 0), 0);
 				string_free(value, &value_len);
 				break;
 			case json_type_object:
-				value = string_create(&value_len, snprintf(NULL, 0, "%s", json_object_get_string(val)));
+				value = string_create(&value_len, snprintf(NULL, 0, "%s", 
+							json_object_get_string(val)));
 				sprintf(value, "%s", json_object_get_string(val));
 				kvp_add((struct _kvp_store *)jenc, key, kvp_val_create(value, 0), 0);
 				string_free(value, &value_len);
@@ -84,9 +86,11 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 					json_object *array_member = json_object_array_get_idx(val, i);
 					if (!is_error(array_member)) {
 						value = string_create(&value_len, 
-								snprintf(NULL, 0, "%s", json_object_get_string(array_member)));
+								snprintf(NULL, 0, "%s",
+									json_object_get_string(array_member)));
 						sprintf(value, "%s", json_object_get_string(array_member));
-						kvp_add((struct _kvp_store *)jenc, key, kvp_val_create(value, 0), 0);
+						kvp_add((struct _kvp_store *)jenc, key, 
+								kvp_val_create(value, 0), 0);
 						string_free(value, &value_len);
 					}
 				}
@@ -203,7 +207,9 @@ void setup_json0x2dencode(void) {
 	class_sethelpsymbol(json_encode_class, gensym("json"));
 }
 
-void json_encode_free (t_json_encode *const jenc, const t_symbol *const sel, const int argc, const t_atom *const argv) {
+void json_encode_free (t_json_encode *const jenc, const t_symbol *const sel, const int argc, 
+		const t_atom *const argv) {
+
 	(void) sel;
 	(void) argc;
 	(void) argv;
@@ -216,12 +222,14 @@ void json_encode_bang(t_json_encode *const jenc) {
 }
 
 void json_encode_add(t_json_encode *const jenc, const t_symbol *const sel, const int argc, t_atom *const argv) {
+
 	(void) sel;
 
 	jenc_add(jenc, argc, argv, 0);
 }
 
 void json_encode_array(t_json_encode *const jenc, const t_symbol *const sel, const int argc, t_atom *const argv) {
+
 	(void) sel;
 
 	jenc_add(jenc, argc, argv, 1);
@@ -289,7 +297,9 @@ void *json_encode_new(const t_symbol *const sel, const int argc, const t_atom *c
 	return (void *)jenc;
 }
 
-void json_encode_clear(t_json_encode *const jenc, const t_symbol *const sel, const int argc, const t_atom *const argv) {
+void json_encode_clear(t_json_encode *const jenc, const t_symbol *const sel, const int argc, 
+		const t_atom *const argv) {
+
 	(void) sel;
 	(void) argc;
 	(void) argv;

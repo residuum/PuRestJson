@@ -139,7 +139,8 @@ static void kvp_replace_array(struct _kvp *const item, const char *const key, st
 	}	
 }
 
-static void kvp_add_array(struct _kvp_store *const store, struct _kvp *const item, char *const key, struct _v *const value) {
+static void kvp_add_array(struct _kvp_store *const store, struct _kvp *const item, char *const key, 
+		struct _v *const value) {
 	struct _kvp *it = item;
 	struct _kvp *new;
 
@@ -150,7 +151,8 @@ static void kvp_add_array(struct _kvp_store *const store, struct _kvp *const ite
 	kvp_insert(store, it, new);
 }
 
-static void kvp_add(struct _kvp_store *const store, char *const key, struct _v *const value, const unsigned char is_array) {
+static void kvp_add(struct _kvp_store *const store, char *const key, struct _v *const value, 
+		const unsigned char is_array) {
 	struct _kvp *it = store->first_data;
 	unsigned char found = 0;
 

@@ -28,7 +28,7 @@ static struct _strlist *strlist_create(char *const val, const size_t val_len) {
 static struct _strlist *strlist_add(struct _strlist *const list, char *const val, const size_t val_len) {
 	struct _strlist *const new = strlist_create(val, val_len);
 	struct _strlist *it = list;
-	
+
 	if (list == NULL) {
 		return new;
 	}

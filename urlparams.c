@@ -67,6 +67,7 @@ void *urlparams_new(const t_symbol *const sel, const int argc, const t_atom *arg
 }
 
 void urlparams_free (t_urlparams *const urlp, const t_symbol *const sel, const int argc, const t_atom *const argv) {
+
 	(void) sel;
 	(void) argc;
 	(void) argv;
@@ -153,6 +154,7 @@ void urlparams_add(t_urlparams *const urlp, const t_symbol *const sel, const int
 }
 
 void urlparams_clear(t_urlparams *const urlp, const t_symbol *const sel, const int argc, const t_atom *const argv) {
+
 	(void) sel;
 	(void) argc;
 	(void) argv;

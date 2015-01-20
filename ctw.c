@@ -57,7 +57,6 @@ static void ctw_output_curl_error(struct _ctw *common, CURLMsg *msg);
 static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp);
 static void *ctw_exec(void *thread_args);
 static void ctw_thread_exec(void *x, void *(*func) (void *));
-static int ctw_needs_input(const char *req_type);
 static int ctw_check_request_type(const char *req_type);
 static void ctw_set_sslcheck(struct _ctw *common, int val);
 static void ctw_cancel(struct _ctw *common);
@@ -396,12 +395,6 @@ static void ctw_thread_exec(void *const x, void *(*func) (void *)) {
 		string_free(common->parameters, &common->parameters_len);
 		common->locked = 0;
 	}
-}
-
-static int ctw_needs_input(const char *const req_type) {
-	return (strcmp(req_type, "POST")
-			&& strcmp(req_type, "PUT")
-			&& strcmp(req_type, "PATCH"));
 }
 
 static int ctw_check_request_type(const char *const req_type) {

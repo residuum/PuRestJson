@@ -31,6 +31,7 @@ struct _oauth {
 static void oauth_free_inner(t_oauth *oauth, const short free_rsa);
 static void oauth_set_init(t_oauth *oauth, const int argc, t_atom *argv);
 static void oauth_set_rsa_key(t_oauth *oauth, const int argc, t_atom *argv);
+static int oauth_needs_input(const char *req_type);
 
 /* begin implementations */
 static void oauth_free_inner(t_oauth *const oauth, const short free_rsa) {
@@ -95,6 +96,12 @@ static void oauth_set_rsa_key(t_oauth *const oauth, const int argc, t_atom *cons
 			}
 		}
 	}
+}
+
+static int oauth_needs_input(const char *const req_type) {
+	return (strcmp(req_type, "POST")
+			&& strcmp(req_type, "PUT")
+			&& strcmp(req_type, "PATCH"));
 }
 
 void oauth_setup(void) {
@@ -172,35 +179,24 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 		strcat(req_path, cleaned_parameters);
 		freebytes(cleaned_parameters, memsize);
 	}
-	if (ctw_needs_input(oauth->common.req_type) == 0) {
-		if (oauth->oauth.method == OA_RSA) {
-			req_url= oauth_sign_url2(req_path, &postargs, oauth->oauth.method, oauth->common.req_type,
-					oauth->oauth.client_key, oauth->oauth.rsa_key,
-					oauth->oauth.token_key, NULL);
-		} else {
-			req_url= oauth_sign_url2(req_path, &postargs, oauth->oauth.method, oauth->common.req_type,
-					oauth->oauth.client_key, oauth->oauth.client_secret,
-					oauth->oauth.token_key, oauth->oauth.token_secret);
-		}
-	} else {
-		if (oauth->oauth.method == OA_RSA) {
-			req_url= oauth_sign_url2(req_path, NULL, oauth->oauth.method, oauth->common.req_type,
-					oauth->oauth.client_key, oauth->oauth.rsa_key,
-					oauth->oauth.token_key, NULL);
-		} else {
-			req_url= oauth_sign_url2(req_path, NULL, oauth->oauth.method, oauth->common.req_type,
-					oauth->oauth.client_key, oauth->oauth.client_secret,
-					oauth->oauth.token_key, oauth->oauth.token_secret);
-		}
-	}
-	oauth->common.complete_url = string_create(&oauth->common.complete_url_len, strlen(req_url));
-	strcpy(oauth->common.complete_url, req_url);
-	if (ctw_needs_input(oauth->common.req_type) == 0) {
+	if (oauth_needs_input(oauth->common.req_type) == 0) {
+		req_url= oauth_sign_url2(req_path, &postargs, oauth->oauth.method, oauth->common.req_type,
+				oauth->oauth.client_key,
+				oauth->oauth.method == OA_RSA ? oauth->oauth.rsa_key : oauth->oauth.client_secret,
+				oauth->oauth.token_key, 
+				oauth->oauth.method == OA_RSA ? NULL : oauth->oauth.token_secret);
 		oauth->common.parameters = string_create(&oauth->common.parameters_len, strlen(postargs));
 		strcpy(oauth->common.parameters, postargs);
 	} else {
+		req_url= oauth_sign_url2(req_path, NULL, oauth->oauth.method, oauth->common.req_type,
+				oauth->oauth.client_key,
+				oauth->oauth.method == OA_RSA ? oauth->oauth.rsa_key : oauth->oauth.client_secret,
+				oauth->oauth.token_key, 
+				oauth->oauth.method == OA_RSA ? NULL : oauth->oauth.token_secret);
 		oauth->common.parameters = string_create(&oauth->common.parameters_len, 0);
 	}
+	oauth->common.complete_url = string_create(&oauth->common.complete_url_len, strlen(req_url));
+	strcpy(oauth->common.complete_url, req_url);
 	if (postargs) {
 		free(postargs);
 	}

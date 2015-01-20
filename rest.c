@@ -48,7 +48,9 @@ static void rest_extract_token(t_rest *const rest, struct _memory_struct *const 
 				cookie_params = strtok(NULL, "; ");
 				while (cookie_params != NULL) {
 					if (strlen(cookie_params)) {
-						rest->common.auth_token = string_create(&rest->common.auth_token_len, strlen(cookie_params));
+						rest->common.auth_token = string_create(
+								&rest->common.auth_token_len, 
+								strlen(cookie_params));
 						strcpy(rest->common.auth_token, cookie_params);
 						break;
 					}
@@ -77,8 +79,10 @@ static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *co
 				} else {
 					t_atom http_status_data[2];
 					SETFLOAT(&http_status_data[0], (float)http_status);
-					SETSYMBOL(&http_status_data[1], gensym(curl_easy_strerror(msg->data.result)));
-					pd_error(rest, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
+					SETSYMBOL(&http_status_data[1], 
+							gensym(curl_easy_strerror(msg->data.result)));
+					pd_error(rest, "Error while performing request: %s", 
+							curl_easy_strerror(msg->data.result));
 					outlet_list(rest->common.status_out, &s_list, 2, &http_status_data[0]);
 				}
 			}
@@ -92,7 +96,8 @@ static void *rest_get_auth_token(void *const thread_args) {
 	t_rest *const rest = thread_args;
 
 	/* length + name=&password=*/
-	rest->common.parameters = string_create(&rest->common.parameters_len, rest->cookie.username_len + rest->cookie.password_len + 17);
+	rest->common.parameters = string_create(&rest->common.parameters_len, 
+			rest->cookie.username_len + rest->cookie.password_len + 17);
 	if (rest->common.parameters != NULL) {
 		strcpy(rest->common.parameters, "name=");
 		strcat(rest->common.parameters, rest->cookie.username);
@@ -145,14 +150,19 @@ static void rest_set_init(t_rest *const rest, const int argc, t_atom *const argv
 		case 0:
 			break;
 		case 1:
-			rest->common.base_url = ctw_set_param((void *)rest, argv, &rest->common.base_url_len, "Base URL cannot be set.");
+			rest->common.base_url = ctw_set_param((void *)rest, argv, &rest->common.base_url_len, 
+					"Base URL cannot be set.");
 			break;
 		case 4:
 			rest->common.locked = 1;
-			rest->common.base_url = ctw_set_param((void *)rest, argv, &rest->common.base_url_len, "Base URL cannot be set.");
-			rest->cookie.login_path = ctw_set_param((void *)rest, argv + 1, &rest->cookie.login_path_len, "Cookie path cannot be set.");
-			rest->cookie.username = ctw_set_param((void *)rest, argv + 2, &rest->cookie.username_len, "Username cannot be set.");
-			rest->cookie.password = ctw_set_param((void *)rest, argv + 3, &rest->cookie.password_len, "Password cannot be set.");
+			rest->common.base_url = ctw_set_param((void *)rest, argv, &rest->common.base_url_len, 
+					"Base URL cannot be set.");
+			rest->cookie.login_path = ctw_set_param((void *)rest, argv + 1, 
+					&rest->cookie.login_path_len, "Cookie path cannot be set.");
+			rest->cookie.username = ctw_set_param((void *)rest, argv + 2, &rest->cookie.username_len,
+					"Username cannot be set.");
+			rest->cookie.password = ctw_set_param((void *)rest, argv + 3, &rest->cookie.password_len, 
+					"Password cannot be set.");
 			string_free(rest->common.auth_token, &rest->common.auth_token_len);
 			ctw_thread_exec((void *)rest, rest_get_auth_token);
 			break;
@@ -166,11 +176,11 @@ void rest_setup(void) {
 	rest_class = class_new(gensym("rest"), (t_newmethod)rest_new,
 			(t_method)rest_free, sizeof(t_rest), 0, A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_init, gensym("init"), A_GIMME, 0);
-	class_addmethod(rest_class, (t_method)rest_command, gensym("PUT"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("GET"), A_GIMME, 0);
-	class_addmethod(rest_class, (t_method)rest_command, gensym("DELETE"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("POST"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("HEAD"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_command, gensym("PUT"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_command, gensym("DELETE"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("PATCH"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_command, gensym("OPTIONS"), A_GIMME, 0);
 	/*class_addmethod(rest_class, (t_method)rest_command, gensym("CONNECT"), A_GIMME, 0);*/
@@ -199,20 +209,11 @@ void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc,
 
 	rest->common.locked = 1;
 	strcpy(rest->common.req_type, req_type);
-	if ((strcmp(rest->common.req_type, "GET") && 
-				strcmp(rest->common.req_type, "POST") && 
-				strcmp(rest->common.req_type, "PUT") &&
-				strcmp(rest->common.req_type, "DELETE") &&
-				strcmp(rest->common.req_type, "HEAD") &&
-				strcmp(rest->common.req_type, "PATCH") &&
-				strcmp(rest->common.req_type, "OPTIONS") &&
-				strcmp(rest->common.req_type, "CONNECT") &&
-				strcmp(rest->common.req_type, "TRACE"))) {
+	if (ctw_check_request_type(rest->common.req_type) != 0){
 		pd_error(rest, "Request method %s not supported.", rest->common.req_type);
 		rest->common.locked = 0;
 		return;
-	} 
-
+	}
 	atom_string(argv, path, MAXPDSTRING);
 	rest->common.complete_url = string_create(&rest->common.complete_url_len,
 			rest->common.base_url_len + strlen(path) + 1);
@@ -317,6 +318,7 @@ void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {
 }
 
 void rest_free(t_rest *const rest, const t_symbol *const sel, const int argc, const t_atom *const argv) {
+
 	(void) sel;
 	(void) argc;
 	(void) argv;

@@ -47,13 +47,18 @@ static void oauth_set_init(t_oauth *const oauth, const int argc, t_atom *const a
 		case 0:
 			break;
 		case 5:
-			oauth->oauth.token_key = ctw_set_param((void *)oauth, argv + 3, &oauth->oauth.token_key_len, "Token key cannot be set.");
-			oauth->oauth.token_secret = ctw_set_param((void *)oauth, argv + 4, &oauth->oauth.token_secret_len, "Token secret cannot be set.");
+			oauth->oauth.token_key = ctw_set_param((void *)oauth, argv + 3, 
+					&oauth->oauth.token_key_len, "Token key cannot be set.");
+			oauth->oauth.token_secret = ctw_set_param((void *)oauth, argv + 4, 
+					&oauth->oauth.token_secret_len, "Token secret cannot be set.");
 			/* fall through deliberately */
 		case 3:
-			oauth->common.base_url = ctw_set_param((void *)oauth, argv, &oauth->common.base_url_len, "Base URL cannot be set.");
-			oauth->oauth.client_key = ctw_set_param((void *)oauth, argv + 1, &oauth->oauth.client_key_len, "Client key cannot be set.");
-			oauth->oauth.client_secret = ctw_set_param((void *)oauth, argv + 2, &oauth->oauth.client_secret_len, "Client secret cannot be set.");
+			oauth->common.base_url = ctw_set_param((void *)oauth, argv, 
+					&oauth->common.base_url_len, "Base URL cannot be set.");
+			oauth->oauth.client_key = ctw_set_param((void *)oauth, argv + 1, 
+					&oauth->oauth.client_key_len, "Client key cannot be set.");
+			oauth->oauth.client_secret = ctw_set_param((void *)oauth, argv + 2, 
+					&oauth->oauth.client_secret_len, "Client secret cannot be set.");
 			break;
 		default:
 			pd_error(oauth, "Wrong number of parameters.");
@@ -99,6 +104,12 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("GET"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("POST"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_command, gensym("HEAD"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_command, gensym("PUT"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_command, gensym("DELETE"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_command, gensym("PATCH"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_command, gensym("OPTIONS"), A_GIMME, 0);
+	/*class_addmethod(oauth_class, (t_method)oauth_command, gensym("CONNECT"), A_GIMME, 0);*/
+	class_addmethod(oauth_class, (t_method)oauth_command, gensym("TRACE"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_method, gensym("method"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_timeout, gensym("timeout"), A_DEFFLOAT, 0);
 	class_addmethod(oauth_class, (t_method)oauth_sslcheck, gensym("sslcheck"), A_DEFFLOAT, 0);
@@ -132,9 +143,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 	oauth->common.locked = 1;
 	req_type = sel->s_name;
 	strcpy(oauth->common.req_type, req_type);
-	if ((strcmp(oauth->common.req_type, "GET") && 
-				strcmp(oauth->common.req_type, "POST") &&
-				strcmp(oauth->common.req_type, "HEAD"))) {
+	if (ctw_check_request_type(oauth->common.req_type) != 0){
 		pd_error(oauth, "Request method %s not supported.", oauth->common.req_type);
 		oauth->common.locked = 0;
 		return;
@@ -163,30 +172,34 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 		strcat(req_path, cleaned_parameters);
 		freebytes(cleaned_parameters, memsize);
 	}
-	if (strcmp(oauth->common.req_type, "POST") == 0) {
+	if (strcmp(oauth->common.req_type, "POST") == 0
+			|| strcmp(oauth->common.req_type, "PUT") == 0
+			|| strcmp(oauth->common.req_type, "PATCH") == 0) {
 		if (oauth->oauth.method == OA_RSA) {
-			req_url= oauth_sign_url2(req_path, &postargs, oauth->oauth.method, oauth->common.req_type, 
-					oauth->oauth.client_key, oauth->oauth.rsa_key, 
+			req_url= oauth_sign_url2(req_path, &postargs, oauth->oauth.method, oauth->common.req_type,
+					oauth->oauth.client_key, oauth->oauth.rsa_key,
 					oauth->oauth.token_key, NULL);
 		} else {
-			req_url= oauth_sign_url2(req_path, &postargs, oauth->oauth.method, oauth->common.req_type, 
-					oauth->oauth.client_key, oauth->oauth.client_secret, 
+			req_url= oauth_sign_url2(req_path, &postargs, oauth->oauth.method, oauth->common.req_type,
+					oauth->oauth.client_key, oauth->oauth.client_secret,
 					oauth->oauth.token_key, oauth->oauth.token_secret);
 		}
 	} else {
 		if (oauth->oauth.method == OA_RSA) {
-			req_url= oauth_sign_url2(req_path, NULL, oauth->oauth.method, oauth->common.req_type, 
-					oauth->oauth.client_key, oauth->oauth.rsa_key, 
+			req_url= oauth_sign_url2(req_path, NULL, oauth->oauth.method, oauth->common.req_type,
+					oauth->oauth.client_key, oauth->oauth.rsa_key,
 					oauth->oauth.token_key, NULL);
 		} else {
-			req_url= oauth_sign_url2(req_path, NULL, oauth->oauth.method, oauth->common.req_type, 
-					oauth->oauth.client_key, oauth->oauth.client_secret, 
+			req_url= oauth_sign_url2(req_path, NULL, oauth->oauth.method, oauth->common.req_type,
+					oauth->oauth.client_key, oauth->oauth.client_secret,
 					oauth->oauth.token_key, oauth->oauth.token_secret);
 		}
 	}
 	oauth->common.complete_url = string_create(&oauth->common.complete_url_len, strlen(req_url));
 	strcpy(oauth->common.complete_url, req_url);
-	if (strcmp(oauth->common.req_type, "POST") == 0) {
+	if (strcmp(oauth->common.req_type, "POST") == 0
+			|| strcmp(oauth->common.req_type, "PUT") == 0
+			|| strcmp(oauth->common.req_type, "PATCH") == 0) {
 		oauth->common.parameters = string_create(&oauth->common.parameters_len, strlen(postargs));
 		strcpy(oauth->common.parameters, postargs);
 	} else {
@@ -291,7 +304,8 @@ void oauth_header(t_oauth *const oauth, const t_symbol *const sel, const int arg
 	ctw_add_header((void *)oauth, argc, argv);
 }
 
-void oauth_clear_headers(t_oauth *const oauth, const t_symbol *const sel, const int argc, const t_atom *const argv) {
+void oauth_clear_headers(t_oauth *const oauth, const t_symbol *const sel, const int argc, 
+		const t_atom *const argv) {
 
 	(void) sel;
 	(void) argc;
@@ -331,6 +345,7 @@ void *oauth_new(const t_symbol *const sel, const int argc, t_atom *const argv) {
 }
 
 void oauth_free(t_oauth *const oauth, const t_symbol *const sel, const int argc, const t_atom *const argv) {
+
 	(void) sel;
 	(void) argc;
 	(void) argv;

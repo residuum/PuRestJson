@@ -2,7 +2,7 @@ Author:
 Thomas Mayer <thomas@residuum.org>
 
 Copyright:
-(c) 2011-2014 Thomas Mayer
+(c) 2011-2015 Thomas Mayer
 (c) 2012 Hans-Christoph Steiner
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

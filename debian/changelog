@@ -1,9 +1,9 @@
-pd-purest-json (1.2.0) UNRELEASED; urgency=low
+pd-purest-json (1.2.0+json-c-0.10) UNRELEASED; urgency=low
   * [oauth]: PATCH, TRACE and OPTIONS request implemented
  
- -- Thomas Mayer <thomas@residuum.org>  Sat, 31 Jan 2015 15:00:00 +0100
+ -- Thomas Mayer <thomas@residuum.org>  Sun, 01 Feb 2015 15:00:00 +0100
 
-pd-purest-json (1.1.0) UNRELEASED; urgency=low
+pd-purest-json (1.1.0+json-c-0.10) UNRELEASED; urgency=low
   * [rest]: HEAD, PATCH, TRACE and OPTIONS request implemented
   * [oauth]: HEAD request implemented
   * Bug fixes:
@@ -13,7 +13,7 @@ pd-purest-json (1.1.0) UNRELEASED; urgency=low
  
  -- Thomas Mayer <thomas@residuum.org>  Sat, 14 Jun 2014 23:00:00 +0200
 
-pd-purest-json (1.0.0) UNRELEASED; urgency=low
+pd-purest-json (1.0.0-libjson0.10) UNRELEASED; urgency=low
   * Info for users while loading object
   * Bug fixes in [json-encode]:
     - array handling
@@ -22,9 +22,8 @@ pd-purest-json (1.0.0) UNRELEASED; urgency=low
  
  -- Thomas Mayer <thomas@residuum.org>  Fri, 03 Jan 2014 15:00:00 +0100
 
-pd-purest-json (0.15.0) UNRELEASED; urgency=low
+pd-purest-json (0.15.0-libjson0.10) UNRELEASED; urgency=low
   * Cancellation is now faster
-  * Switch to json-c 0.11
   * Refactoring of code
   * Breaking changes:
     - [oauth] and [rest]:

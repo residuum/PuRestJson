@@ -15,7 +15,10 @@ struct _json_decode {
 static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
-static void jdec_output_string(const char *json_string, t_json_decode *jdec);
+static void jdec_output_string(char *json_string, t_json_decode *jdec);
+#if JSON_C_FIX
+static char *lowercase_unicode(char *orig, size_t *memsize);
+#endif
 
 /* begin implementations */
 static void jdec_output_object(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
@@ -69,6 +72,60 @@ static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_
 	}
 }
 
+#if JSON_C_FIX
+static char *lowercase_unicode(char *const orig, size_t *memsize) {
+	const char *const unicode_intro = "\\";
+	const short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
+
+	char *cleaned_string = string_create(memsize, strlen(orig));
+	if (cleaned_string == NULL)
+	if (cleaned_string != NULL) {
+		MYERROR("Could not allocate memory");
+		return NULL;
+	}
+
+	if (strlen(orig) <= 0) {
+		return cleaned_string;
+	}
+
+	char *segment = strtok(orig, unicode_intro);
+	memset(cleaned_string, 0x00, strlen(orig) + 1);
+	strcpy(cleaned_string, segment);
+	segment = strtok(NULL, unicode_intro);
+
+	while(segment != NULL) {
+		strcat(cleaned_string, unicode_intro);
+		if (segment[0] == 'u') {
+			for (short i = 1; i < 1 + uni_len; i++) {
+				switch (segment[i]) {
+					case 'A':
+						segment[i] = 'a';
+						break;
+					case 'B':
+						segment[i] = 'b';
+						break;
+					case 'C':
+						segment[i] = 'c';
+						break;
+					case 'D':
+						segment[i] = 'd';
+						break;
+					case 'E':
+						segment[i] = 'e';
+						break;
+					case 'F':
+						segment[i] = 'f';
+						break;
+				}
+			}
+		}
+		strcat(cleaned_string, segment);
+		segment = strtok(NULL, unicode_intro);
+	}
+	return cleaned_string;
+}
+#endif
+
 static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
 	t_atom out_data[2];
 	t_float out_float;
@@ -110,9 +167,17 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
 	}
 }
 
-static void jdec_output_string(const char *const json_string, t_json_decode *const jdec) {
-	json_object *const jobj = json_tokener_parse(json_string);
-
+static void jdec_output_string(char *const json_string, t_json_decode *const jdec) {
+	json_object *jobj;
+#if JSON_C_FIX
+	size_t memsize = 0;
+	/* Needed because of bug in json-c 0.9 */
+	char* corrected_json_string = lowercase_unicode(json_string, &memsize);
+	/* Parse JSON */
+	jobj = json_tokener_parse(corrected_json_string);
+#else
+	jobj = json_tokener_parse(json_string);
+#endif
 	if (!is_error(jobj)) {
 		jdec_output(jobj, jdec->x_ob.ob_outlet, jdec->done_outlet);
 		/* TODO: This sometimes results in a segfault. Why? */
@@ -120,6 +185,11 @@ static void jdec_output_string(const char *const json_string, t_json_decode *con
 	} else {
 		pd_error(jdec, "Not a JSON object");
 	}
+#if JSON_C_FIX
+	if (corrected_json_string != NULL){
+		string_free(corrected_json_string, &memsize);
+	}
+#endif
 }
 
 void setup_json0x2ddecode(void) {

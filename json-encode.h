@@ -28,7 +28,7 @@ THE SOFTWARE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <json-c/json.h>
+#include <json/json.h>
 #include "purest_json.h"
 
 /* [json-encode] */

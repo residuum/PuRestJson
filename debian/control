@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Thomas Mayer <thomas@residuum.org>
 Build-Depends: debhelper (>= 8.1.3),
                puredata-dev | puredata,
-               libjson-c-dev,
+               libjson0-dev,
                libcurl4-gnutls-dev | libcurl4-openssl-dev,
                liboauth-dev
 Standards-Version: 3.9.2

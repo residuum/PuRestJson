@@ -26,8 +26,16 @@ THE SOFTWARE.
 
 #include <ctype.h>
 #include <string.h>
-#include <json-c/json.h>
+#include <json/json.h>
 #include "purest_json.h"
+
+#ifndef JSON_C_MAJOR_VERSION
+#define JSON_C_FIX 1
+#elif JSON_C_MAJOR_VERSION < 1 && JSON_MINOR_VERSION <10
+#define JSON_C_FIX 1
+#else
+#define JSON_C_FIX 0
+#endif
 
 /* [json-decode] */
 struct _json_decode;

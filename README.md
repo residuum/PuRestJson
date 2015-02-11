@@ -30,7 +30,7 @@ package very much a community effort.
 Object for issuing HTTP request.
 
 ### `[oauth]`
-Object for issuing GET and POST requests with OAUTH.
+Object for issuing HTTP requests with OAUTH.
 
 ### `[json-encode]`
 Object for encoding data to JSON.

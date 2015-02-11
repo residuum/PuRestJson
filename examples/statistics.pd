@@ -1,4 +1,4 @@
-#N canvas 391 51 1182 689 10;
+#N canvas 183 51 1182 689 10;
 #X obj 143 145 version;
 #X obj 104 94 bng 15 250 50 0 empty empty Warning:_Clicking_here_will_send_data_about_your_Pd_version_to_an_open_databas*
 17 7 0 10 -262144 -1 -1;
@@ -32,7 +32,7 @@ of [version] \, and nothing else.;
 #X text 240 445 We store the data;
 #X msg 104 424 PUT statistics.php \$1;
 #X text 682 55 Different possibilities for authentication:;
-#N canvas 42 51 511 356 init 1;
+#N canvas 44 51 511 356 init 0;
 #X obj 32 281 print;
 #X text 31 51 Set base url \, login path \, username and password on
 initialization;

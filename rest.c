@@ -150,18 +150,18 @@ static void rest_set_init(t_rest *const rest, const int argc, t_atom *const argv
 		case 0:
 			break;
 		case 1:
-			rest->common.base_url = ctw_set_param((void *)rest, argv, &rest->common.base_url_len, 
+			rest->common.base_url = ctw_set_param((struct _ctw *)rest, argv, &rest->common.base_url_len, 
 					"Base URL cannot be set.");
 			break;
 		case 4:
 			rest->common.locked = 1;
-			rest->common.base_url = ctw_set_param((void *)rest, argv, &rest->common.base_url_len, 
+			rest->common.base_url = ctw_set_param((struct _ctw *)rest, argv, &rest->common.base_url_len, 
 					"Base URL cannot be set.");
-			rest->cookie.login_path = ctw_set_param((void *)rest, argv + 1, 
+			rest->cookie.login_path = ctw_set_param((struct _ctw *)rest, argv + 1, 
 					&rest->cookie.login_path_len, "Cookie path cannot be set.");
-			rest->cookie.username = ctw_set_param((void *)rest, argv + 2, &rest->cookie.username_len,
+			rest->cookie.username = ctw_set_param((struct _ctw *)rest, argv + 2, &rest->cookie.username_len,
 					"Username cannot be set.");
-			rest->cookie.password = ctw_set_param((void *)rest, argv + 3, &rest->cookie.password_len, 
+			rest->cookie.password = ctw_set_param((struct _ctw *)rest, argv + 3, &rest->cookie.password_len, 
 					"Password cannot be set.");
 			string_free(rest->common.auth_token, &rest->common.auth_token_len);
 			ctw_thread_exec((void *)rest, rest_get_auth_token);
@@ -234,7 +234,7 @@ void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc,
 			freebytes(cleaned_parameters, memsize);
 		}
 	}
-	ctw_thread_exec((void *)rest, ctw_exec);
+	ctw_thread_exec((struct _ctw *)rest, ctw_exec);
 }
 
 void rest_init(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
@@ -277,7 +277,7 @@ void rest_header(t_rest *const rest, const t_symbol *const sel, const int argc, 
 
 	(void) sel;
 
-	ctw_add_header((void *)rest, argc, argv);
+	ctw_add_header((struct _ctw *)rest, argc, argv);
 }
 
 void rest_clear_headers(t_rest *const rest, const t_symbol *const sel, const int argc, const t_atom *const argv) {
@@ -293,7 +293,7 @@ void rest_file(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 
 	(void) sel;
 
-	ctw_set_file((void *)rest, argc, argv);
+	ctw_set_file((struct _ctw *)rest, argc, argv);
 }
 
 void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {

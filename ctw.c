@@ -37,7 +37,7 @@ struct _ctw {
 
 static size_t ctw_write_mem_cb(const void *ptr, size_t size, size_t nmemb, void *data);
 static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
-static char *ctw_set_param(void *x, t_atom *arg, size_t *string_len, char *error_msg);
+static char *ctw_set_param(struct _ctw *common, t_atom *arg, size_t *string_len, char *error_msg);
 static void ctw_cancel_request(void *args);
 static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist);
 static void ctw_prepare_put(struct _ctw *common, struct _memory_struct *in_memory);
@@ -56,13 +56,13 @@ static void ctw_thread_perform(struct _ctw *common);
 static void ctw_output_curl_error(struct _ctw *common, CURLMsg *msg);
 static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp);
 static void *ctw_exec(void *thread_args);
-static void ctw_thread_exec(void *x, void *(*func) (void *));
+static void ctw_thread_exec(struct _ctw *x, void *(*func) (void *));
 static int ctw_check_request_type(const char *req_type);
 static void ctw_set_sslcheck(struct _ctw *common, int val);
 static void ctw_cancel(struct _ctw *common);
-static void ctw_add_header(void *x, int argc, t_atom *argv);
+static void ctw_add_header(struct _ctw *common, int argc, t_atom *argv);
 static void ctw_clear_headers(struct _ctw *common);
-static void ctw_set_file(void *x, int argc, t_atom *argv);
+static void ctw_set_file(struct _ctw *common, int argc, t_atom *argv);
 static void ctw_set_timeout(struct _ctw *common, int val);
 static void ctw_init(struct _ctw *common);
 static void ctw_free(struct _ctw *common);
@@ -99,12 +99,12 @@ static size_t ctw_read_mem_cb(void *const ptr, const size_t size, const size_t n
 	return to_copy;
 }
 
-static char *ctw_set_param(void *const x, t_atom *const arg, size_t *const string_len, char *const error_msg) {
+static char *ctw_set_param(struct _ctw *const common, t_atom *const arg, size_t *const string_len, char *const error_msg) {
 	char temp[MAXPDSTRING];
 	char *string;
 
 	if (arg[0].a_type != A_SYMBOL) {
-		pd_error(x, "%s", error_msg);
+		pd_error(common, "%s", error_msg);
 		return NULL;
 	} 
 	atom_string(arg, temp, MAXPDSTRING);
@@ -380,14 +380,13 @@ static void *ctw_exec(void *const thread_args) {
 	return NULL;
 }
 
-static void ctw_thread_exec(void *const x, void *(*func) (void *)) {
+static void ctw_thread_exec(struct _ctw *const common, void *(*func) (void *)) {
 	int rc;
-	struct _ctw *const common = x;
 	pthread_attr_t thread_attributes;
 
 	pthread_attr_init(&thread_attributes);
 	pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_DETACHED);
-	rc = pthread_create(&(common->thread), &thread_attributes, func, (void *)x);
+	rc = pthread_create(&(common->thread), &thread_attributes, func, (void *)common);
 	pthread_attr_destroy(&thread_attributes);
 	if (rc) {
 		MYERROR("Could not create thread with code %d", rc);
@@ -421,14 +420,13 @@ static void ctw_cancel(struct _ctw *const common) {
 	pthread_cancel(common->thread);
 }
 
-static void ctw_add_header(void *const x, const int argc, t_atom *const argv) {
-	struct _ctw *const common = x;
+static void ctw_add_header(struct _ctw *const common, const int argc, t_atom *const argv) {
 	char *val;
 	char temp[MAXPDSTRING];
 	size_t header_len = 0;
 	size_t val_len;
 	if (argc < 1) {
-		pd_error(x, "You need to add some data to set headers");
+		pd_error(common, "You need to add some data to set headers");
 		return;
 	}
 	for (int i = 0; i < argc; i++) {
@@ -451,8 +449,7 @@ static void ctw_clear_headers(struct _ctw *const common) {
 	common->http_headers = NULL;
 }
 
-static void ctw_set_file(void *const x, const int argc, t_atom *const argv) {
-	struct _ctw *const common = x;
+static void ctw_set_file(struct _ctw *const common, const int argc, t_atom *const argv) {
 	t_symbol *filename;
 	char buf[MAXPDSTRING];
 
@@ -462,7 +459,7 @@ static void ctw_set_file(void *const x, const int argc, t_atom *const argv) {
 	}
 	filename = atom_getsymbol(argv);
 	if (filename == 0) {
-		pd_error(x, "not a filename");
+		pd_error(common, "not a filename");
 		return;
 	}
 	canvas_makefilename(common->x_canvas, filename->s_name, buf, MAXPDSTRING);

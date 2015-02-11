@@ -48,17 +48,17 @@ static void oauth_set_init(t_oauth *const oauth, const int argc, t_atom *const a
 		case 0:
 			break;
 		case 5:
-			oauth->oauth.token_key = ctw_set_param((void *)oauth, argv + 3, 
+			oauth->oauth.token_key = ctw_set_param((struct _ctw *)oauth, argv + 3, 
 					&oauth->oauth.token_key_len, "Token key cannot be set.");
-			oauth->oauth.token_secret = ctw_set_param((void *)oauth, argv + 4, 
+			oauth->oauth.token_secret = ctw_set_param((struct _ctw *)oauth, argv + 4, 
 					&oauth->oauth.token_secret_len, "Token secret cannot be set.");
 			/* fall through deliberately */
 		case 3:
-			oauth->common.base_url = ctw_set_param((void *)oauth, argv, 
+			oauth->common.base_url = ctw_set_param((struct _ctw *)oauth, argv, 
 					&oauth->common.base_url_len, "Base URL cannot be set.");
-			oauth->oauth.client_key = ctw_set_param((void *)oauth, argv + 1, 
+			oauth->oauth.client_key = ctw_set_param((struct _ctw *)oauth, argv + 1, 
 					&oauth->oauth.client_key_len, "Client key cannot be set.");
-			oauth->oauth.client_secret = ctw_set_param((void *)oauth, argv + 2, 
+			oauth->oauth.client_secret = ctw_set_param((struct _ctw *)oauth, argv + 2, 
 					&oauth->oauth.client_secret_len, "Client secret cannot be set.");
 			break;
 		default:
@@ -203,7 +203,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 	if (req_url) {
 		free(req_url);
 	}
-	ctw_thread_exec((void *)oauth, ctw_exec);
+	ctw_thread_exec((struct _ctw *)oauth, ctw_exec);
 }
 
 void oauth_method(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
@@ -293,7 +293,7 @@ void oauth_header(t_oauth *const oauth, const t_symbol *const sel, const int arg
 
 	(void) sel;
 
-	ctw_add_header((void *)oauth, argc, argv);
+	ctw_add_header((struct _ctw *)oauth, argc, argv);
 }
 
 void oauth_clear_headers(t_oauth *const oauth, const t_symbol *const sel, const int argc, 
@@ -310,7 +310,7 @@ void oauth_file(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 
 	(void) sel;
 
-	ctw_set_file((void *)oauth, argc, argv);
+	ctw_set_file((struct _ctw *)oauth, argc, argv);
 }
 
 void *oauth_new(const t_symbol *const sel, const int argc, t_atom *const argv) {

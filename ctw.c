@@ -36,6 +36,12 @@ struct _ctw {
 #endif
 };
 
+struct _cb_val {
+	struct _memory_struct *mem;
+	struct _ctw *ctw;
+};
+
+
 static size_t ctw_write_mem_cb(const void *ptr, size_t size, size_t nmemb, void *data);
 static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
 static char *ctw_set_param(struct _ctw *common, t_atom *arg, size_t *string_len, char *error_msg);
@@ -74,10 +80,7 @@ static void ctw_set_cert_path(struct _ctw *common, const char *directory);
 #endif
 
 /* begin implementations */
-static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const size_t nmemb, void *const data) {
-	const size_t realsize = size * nmemb;
-	struct _memory_struct *const mem = data;
-
+static size_t ctw_write_mem(const void *const ptr, const size_t realsize, struct _memory_struct *const mem) {
 	mem->memory = resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
 		MYERROR("not enough memory");
@@ -89,6 +92,32 @@ static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const s
 	mem->size += realsize;
 	mem->memory[mem->size] = '\0';
 	return realsize;
+}
+
+static size_t ctw_write_stream(const void *const ptr, const size_t realsize, struct _ctw *const ctw) {
+	char *stream_output = getbytes(realsize + sizeof(char));
+	if (stream_output == NULL) {
+		MYERROR("not enough memory");
+	}
+	memcpy(stream_output, ptr, realsize);
+	stream_output[realsize] = '\0';
+	outlet_symbol(ctw->x_ob.ob_outlet, gensym(stream_output));
+	/* Free memory */
+	freebytes(stream_output, realsize + sizeof(char));
+	return realsize;
+}
+
+static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const size_t nmemb, void *const data) {
+	const size_t realsize = size * nmemb;
+	struct _cb_val *const cb_val = data;
+	struct _ctw *const ctw = cb_val->ctw;
+
+	if (ctw->mode == 0) {
+		return ctw_write_mem(ptr, realsize, cb_val->mem);
+	} else if (ctw->mode == 1) {
+		return ctw_write_stream(ptr, realsize, ctw);
+	}
+	return 0;
 }
 
 static size_t ctw_read_mem_cb(void *const ptr, const size_t size, const size_t nmemb, void *const data) {
@@ -244,8 +273,11 @@ static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const sli
 		}
 	}
 	if (fp == NULL) {
+		struct _cb_val *cb_val = getbytes(sizeof(struct _cb_val));
+		cb_val->mem = out_memory;
+		cb_val->ctw = common;
 		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
-		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)out_memory);
+		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)cb_val);
 	}
 	curl_multi_add_handle(common->multi_handle, common->easy_handle);
 	return fp;
@@ -281,8 +313,6 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 			code = curl_multi_perform(common->multi_handle, &running);
 			if (code != CURLM_OK) {
 				pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
-			} else if (common->mode == 1) { /* stream */
-				post("streaming");
 			}
 			break;
 	}

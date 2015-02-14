@@ -41,7 +41,8 @@ struct _cb_val {
 	struct _ctw *ctw;
 };
 
-
+static size_t ctw_write_mem(const void *ptr, const size_t realsize, struct _memory_struct *mem);
+static size_t ctw_write_stream(const void *ptr, const size_t realsize, struct _ctw *ctw);
 static size_t ctw_write_mem_cb(const void *ptr, size_t size, size_t nmemb, void *data);
 static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
 static char *ctw_set_param(struct _ctw *common, t_atom *arg, size_t *string_len, char *error_msg);

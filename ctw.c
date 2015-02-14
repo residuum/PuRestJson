@@ -29,6 +29,7 @@ struct _ctw {
 	size_t out_file_len;
 	CURLM *multi_handle;
 	CURL *easy_handle;
+	unsigned char mode;
 #ifdef NEEDS_CERT_PATH
 	size_t cert_path_len;
 	char *cert_path;
@@ -64,6 +65,8 @@ static void ctw_add_header(struct _ctw *common, int argc, t_atom *argv);
 static void ctw_clear_headers(struct _ctw *common);
 static void ctw_set_file(struct _ctw *common, int argc, t_atom *argv);
 static void ctw_set_timeout(struct _ctw *common, int val);
+static void ctw_set_mode(struct _ctw *common, int argc, t_atom *argv);
+static void ctw_set_mode_number(struct _ctw *common, int val);
 static void ctw_init(struct _ctw *common);
 static void ctw_free(struct _ctw *common);
 #ifdef NEEDS_CERT_PATH
@@ -278,6 +281,8 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 			code = curl_multi_perform(common->multi_handle, &running);
 			if (code != CURLM_OK) {
 				pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
+			} else if (common->mode == 1) { /* stream */
+				post("streaming");
 			}
 			break;
 	}
@@ -471,6 +476,27 @@ static void ctw_set_timeout(struct _ctw *const common, const int val) {
 	common->timeout = (long) val;
 }
 
+static void ctw_set_mode_number(struct _ctw *common, int val) {
+	common->mode = val;
+}
+
+static void ctw_set_mode(struct _ctw *common, int argc, t_atom *argv) {
+	t_symbol *mode;
+
+	if (argc != 1) {
+		pd_error(common, "mode needs a name");
+		return;
+	}
+	mode = atom_getsymbol(argv);
+	if (strcmp(mode->s_name, "block") == 0) {
+		ctw_set_mode_number(common, 0);
+	} else if (strcmp(mode->s_name, "stream") == 0) {
+		ctw_set_mode_number(common, 1);
+	} else {
+		pd_error(common, "not a valid mode");
+	}
+}
+
 static void ctw_init(struct _ctw *const common) {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 	common->base_url_len = 0;
@@ -482,6 +508,7 @@ static void ctw_init(struct _ctw *const common) {
 	common->x_canvas = canvas_getcurrent();
 
 	ctw_set_timeout(common, 0);
+	ctw_set_mode_number(common, 0);
 	ctw_set_sslcheck(common, 1);
 }
 

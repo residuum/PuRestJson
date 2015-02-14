@@ -513,6 +513,7 @@ static void ctw_init(struct _ctw *const common) {
 }
 
 static void ctw_free(struct _ctw *const common) {
+	curl_multi_remove_handle(common->multi_handle, common->easy_handle);
 	string_free(common->base_url, &common->base_url_len);
 	string_free(common->parameters, &common->parameters_len);
 	string_free(common->complete_url, &common->complete_url_len);

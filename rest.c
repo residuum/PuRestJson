@@ -124,8 +124,12 @@ static void *rest_get_auth_token(void *const thread_args) {
 		fp = ctw_prepare(&rest->common, slist, &out_content, NULL);
 		out_header.memory = getbytes(1);
 		out_header.size = 0;
+
+		struct _cb_val *cb_val = getbytes(sizeof(struct _cb_val));
+		cb_val->mem = &out_header;
+		cb_val->ctw = (struct _ctw *)rest;
 		curl_easy_setopt(rest->common.easy_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb);
-		curl_easy_setopt(rest->common.easy_handle, CURLOPT_WRITEHEADER, (void *)&out_header);
+		curl_easy_setopt(rest->common.easy_handle, CURLOPT_WRITEHEADER, (void *)cb_val);
 		ctw_thread_perform(&rest->common);
 		rest_process_auth_data(rest, &out_header);
 		string_free(out_header.memory, &out_header.size);

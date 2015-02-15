@@ -138,7 +138,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 	char *req_url = NULL;
 
 	if(oauth->common.locked) {
-		post("oauth object is performing request and locked");
+		post("oauth object is performing request and locked.");
 		return;
 	}
 
@@ -146,6 +146,13 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 	if (argc == 0) {
 		return;
 	}
+
+	/* check for initialisation */
+ if (oauth->common.base_url == NULL) {
+		pd_error(oauth, "oauth object is not initialised.");
+		oauth->common.locked = 0;
+		return;
+ }
 
 	oauth->common.locked = 1;
 	req_type = sel->s_name;
@@ -214,42 +221,42 @@ void oauth_method(t_oauth *const oauth, const t_symbol *const sel, const int arg
 	string_free(oauth->oauth.rsa_key, &oauth->oauth.rsa_key_len);
 
 	if (argc == 0) {
-		pd_error(oauth, "'method' needs at least one argument. See help for more");
+		pd_error(oauth, "'method' needs at least one argument. See help for more.");
 		return;
 	}
 
 	if (argv[0].a_type != A_SYMBOL) {
-		pd_error(oauth, "'method' only takes a symbol argument. See help for more");
+		pd_error(oauth, "'method' only takes a symbol argument. See help for more.");
 		return;
 	}
 	atom_string(argv, method_name, 11);
 	if (strcmp(method_name, "HMAC") == 0) {
 		oauth->oauth.method = OA_HMAC;
 		if (argc > 1)  {
-			post("Additional data is ignored");
+			post("Additional data is ignored.");
 		}
 	} else if (strcmp(method_name, "PLAINTEXT") == 0) {
 		oauth->oauth.method = OA_PLAINTEXT;
-		post("Warning: You are using plaintext now");
+		post("Warning: You are using plaintext now.");
 		if (argc > 1)  {
-			post("Additional data is ignored");
+			post("Additional data is ignored.");
 		}
 	} else if (strcmp(method_name, "RSA") == 0) {
 		if (LIBOAUTH_VERSION_MAJOR < 1
 				|| (LIBOAUTH_VERSION_MAJOR == 1 
 					&& LIBOAUTH_VERSION_MINOR == 0 
 					&& LIBOAUTH_VERSION_MICRO == 0)) {
-			pd_error(oauth, "RSA-SHA1 is not supported by liboauth version < 1.0.1");
+			pd_error(oauth, "RSA-SHA1 is not supported by liboauth version < 1.0.1.");
 			return;
 		}
 		if (argc > 1) {
 			oauth->oauth.method = OA_RSA;
 			oauth_set_rsa_key(oauth, argc, argv);
 		} else {
-			pd_error(oauth, "RSA needs the RSA private key as additional data");
+			pd_error(oauth, "RSA needs the RSA private key as additional data.");
 		}
 	} else {
-		pd_error(oauth, "Only HMAC, RSA, and PLAINTEXT allowed");
+		pd_error(oauth, "Only HMAC, RSA, and PLAINTEXT allowed.");
 	}
 }
 
@@ -258,7 +265,7 @@ void oauth_init(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 	(void) sel;
 
 	if(oauth->common.locked) {
-		post("oauth object is performing request and locked");
+		post("oauth object is performing request and locked.");
 	} else {
 		oauth_set_init(oauth, argc, argv); 
 	}
@@ -266,7 +273,7 @@ void oauth_init(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 
 void oauth_timeout(t_oauth *const oauth, const t_floatarg f) {
 	if(oauth->common.locked) {
-		post("oauth object is performing request and locked");
+		post("oauth object is performing request and locked.");
 	} else {
 		ctw_set_timeout((struct _ctw *)oauth, (int)f);
 	}
@@ -274,7 +281,7 @@ void oauth_timeout(t_oauth *const oauth, const t_floatarg f) {
 
 void oauth_sslcheck(t_oauth *const oauth, const t_floatarg f) {
 	if(oauth->common.locked) {
-		post("oauth object is performing request and locked");
+		post("oauth object is performing request and locked.");
 	} else {
 		ctw_set_sslcheck((struct _ctw *)oauth, (int)f);
 	}

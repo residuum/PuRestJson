@@ -81,7 +81,7 @@ static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *co
 					SETFLOAT(&http_status_data[0], (float)http_status);
 					SETSYMBOL(&http_status_data[1], 
 							gensym(curl_easy_strerror(msg->data.result)));
-					pd_error(rest, "Error while performing request: %s", 
+					pd_error(rest, "Error while performing request: %s.", 
 							curl_easy_strerror(msg->data.result));
 					outlet_list(rest->common.status_out, &s_list, 2, &http_status_data[0]);
 				}
@@ -198,7 +198,7 @@ void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc,
 	char path[MAXPDSTRING];
 
 	if(rest->common.locked) {
-		post("rest object is performing request and locked");
+		post("rest object is performing request and locked.");
 		return;
 	}
 
@@ -242,7 +242,7 @@ void rest_init(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 	(void) sel;
 
 	if(rest->common.locked) {
-		post("rest object is performing request and locked");
+		post("rest object is performing request and locked.");
 	} else {
 		rest_set_init(rest, argc, argv); 
 	}
@@ -250,7 +250,7 @@ void rest_init(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 
 void rest_timeout(t_rest *const rest, const t_floatarg f) {
 	if(rest->common.locked) {
-		post("rest object is performing request and locked");
+		post("rest object is performing request and locked.");
 	} else {
 		ctw_set_timeout((struct _ctw *)rest, (int)f);
 	}
@@ -258,7 +258,7 @@ void rest_timeout(t_rest *const rest, const t_floatarg f) {
 
 void rest_sslcheck(t_rest *const rest, const t_floatarg f) {
 	if(rest->common.locked) {
-		post("rest object is performing request and locked");
+		post("rest object is performing request and locked.");
 	} else {
 		ctw_set_sslcheck((struct _ctw *)rest, (int)f);
 	}

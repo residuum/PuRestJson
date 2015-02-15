@@ -118,7 +118,7 @@ static void jdec_output_string(const char *const json_string, t_json_decode *con
 		/* TODO: This sometimes results in a segfault. Why? */
 		/*json_object_put(jobj);*/
 	} else {
-		pd_error(jdec, "Not a JSON object");
+		pd_error(jdec, "Not a JSON object.");
 	}
 }
 

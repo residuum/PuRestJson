@@ -112,7 +112,7 @@ static void jenc_load_json_data(t_json_encode *const jenc, json_object *const jo
 			jenc_load_json_object(jenc, jobj);
 			break;
 		default: 
-			pd_error(jenc, "This JSON data cannot be represented internally, sorry");
+			pd_error(jenc, "This JSON data cannot be represented internally, sorry.");
 			break;
 	}
 }
@@ -245,7 +245,7 @@ void json_encode_read(t_json_encode *const jenc, const t_symbol *const filename)
 	canvas_makefilename(jenc->x_canvas, filename->s_name, buf, MAXPDSTRING);
 	file = fopen(buf, "r");
 	if (file == NULL) {
-		pd_error(jenc, "%s: read failed", filename->s_name);
+		pd_error(jenc, "%s: read failed.", filename->s_name);
 		return;
 	}
 
@@ -280,7 +280,7 @@ void json_encode_write(t_json_encode *const jenc, const t_symbol *const filename
 		fprintf(file, "%s", json_string);
 		fclose(file);
 	} else {
-		pd_error(jenc, "%s: write failed", filename->s_name);
+		pd_error(jenc, "%s: write failed.", filename->s_name);
 	}
 }
 

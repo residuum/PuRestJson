@@ -77,7 +77,7 @@ static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const s
 
 	mem->memory = resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
-		MYERROR("not enough memory");
+		MYERROR("not enough memory.");
 	}
 	memcpy(&mem->memory[mem->size], ptr, realsize);
 	if (mem->size + realsize - mem->size != realsize) {
@@ -161,7 +161,7 @@ static void ctw_prepare_put(struct _ctw *const common, struct _memory_struct *co
 		(*in_memory).memory = getbytes(strlen(common->parameters) + 1);
 		(*in_memory).size = strlen(common->parameters);
 		if ((*in_memory).memory == NULL) {
-			MYERROR("not enough memory");
+			MYERROR("not enough memory.");
 		}
 		memcpy((*in_memory).memory, common->parameters, strlen(common->parameters));
 	} else {
@@ -236,7 +236,7 @@ static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const sli
 		if ((fp = fopen(common->out_file, "wb"))) {
 			curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)fp);
 		} else {
-			pd_error(common, "%s: writing not possible. Will output on left outlet instead", 
+			pd_error(common, "%s: writing not possible. Will output on left outlet instead.", 
 					common->out_file);
 		}
 	}
@@ -270,7 +270,7 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 	rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 	switch(rc) {
 		case -1:
-			pd_error(common, "Unspecified error while performing request (network disconnect?)");
+			pd_error(common, "Unspecified error while performing request (network disconnect?).");
 			running = 0;
 			break;
 		case 0: /* timeout */ 
@@ -338,7 +338,7 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 				if (msg->data.result == CURLE_OK){
 					t_atom http_status_data;
 					SETFLOAT(&http_status_data, (float)http_status);
-					pd_error(common, "HTTP error while performing request: %li", http_status);
+					pd_error(common, "HTTP error while performing request: %li.", http_status);
 					outlet_float(common->status_out, atom_getfloat(&http_status_data));
 				} else {
 					ctw_output_curl_error(common, msg);
@@ -389,7 +389,7 @@ static void ctw_thread_exec(struct _ctw *const common, void *(*func) (void *)) {
 	rc = pthread_create(&(common->thread), &thread_attributes, func, (void *)common);
 	pthread_attr_destroy(&thread_attributes);
 	if (rc) {
-		MYERROR("Could not create thread with code %d", rc);
+		MYERROR("Could not create thread with code %d.", rc);
 		string_free(common->complete_url, &common->complete_url_len);
 		string_free(common->parameters, &common->parameters_len);
 		common->locked = 0;
@@ -426,7 +426,7 @@ static void ctw_add_header(struct _ctw *const common, const int argc, t_atom *co
 	size_t header_len = 0;
 	size_t val_len;
 	if (argc < 1) {
-		pd_error(common, "You need to add some data to set headers");
+		pd_error(common, "You need to add some data to set headers.");
 		return;
 	}
 	for (int i = 0; i < argc; i++) {
@@ -459,7 +459,7 @@ static void ctw_set_file(struct _ctw *const common, const int argc, t_atom *cons
 	}
 	filename = atom_getsymbol(argv);
 	if (filename == 0) {
-		pd_error(common, "not a filename");
+		pd_error(common, "not a filename.");
 		return;
 	}
 	canvas_makefilename(common->x_canvas, filename->s_name, buf, MAXPDSTRING);

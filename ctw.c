@@ -29,12 +29,20 @@ struct _ctw {
 	size_t out_file_len;
 	CURLM *multi_handle;
 	CURL *easy_handle;
+	unsigned char mode;
 #ifdef NEEDS_CERT_PATH
 	size_t cert_path_len;
 	char *cert_path;
 #endif
 };
 
+struct _cb_val {
+	struct _memory_struct *mem;
+	struct _ctw *ctw;
+};
+
+static size_t ctw_write_mem(const void *ptr, const size_t realsize, struct _memory_struct *mem);
+static size_t ctw_write_stream(const void *ptr, const size_t realsize, struct _ctw *ctw);
 static size_t ctw_write_mem_cb(const void *ptr, size_t size, size_t nmemb, void *data);
 static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
 static char *ctw_set_param(struct _ctw *common, t_atom *arg, size_t *string_len, char *error_msg);
@@ -64,6 +72,8 @@ static void ctw_add_header(struct _ctw *common, int argc, t_atom *argv);
 static void ctw_clear_headers(struct _ctw *common);
 static void ctw_set_file(struct _ctw *common, int argc, t_atom *argv);
 static void ctw_set_timeout(struct _ctw *common, int val);
+static void ctw_set_mode(struct _ctw *common, int argc, t_atom *argv);
+static void ctw_set_mode_number(struct _ctw *common, int val);
 static void ctw_init(struct _ctw *common);
 static void ctw_free(struct _ctw *common);
 #ifdef NEEDS_CERT_PATH
@@ -71,10 +81,7 @@ static void ctw_set_cert_path(struct _ctw *common, const char *directory);
 #endif
 
 /* begin implementations */
-static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const size_t nmemb, void *const data) {
-	const size_t realsize = size * nmemb;
-	struct _memory_struct *const mem = data;
-
+static size_t ctw_write_mem(const void *const ptr, const size_t realsize, struct _memory_struct *const mem) {
 	mem->memory = resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
 		MYERROR("not enough memory.");
@@ -86,6 +93,32 @@ static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const s
 	mem->size += realsize;
 	mem->memory[mem->size] = '\0';
 	return realsize;
+}
+
+static size_t ctw_write_stream(const void *const ptr, const size_t realsize, struct _ctw *const ctw) {
+	char *stream_output = getbytes(realsize + sizeof(char));
+	if (stream_output == NULL) {
+		MYERROR("not enough memory");
+	}
+	memcpy(stream_output, ptr, realsize);
+	stream_output[realsize] = '\0';
+	outlet_symbol(ctw->x_ob.ob_outlet, gensym(stream_output));
+	/* Free memory */
+	freebytes(stream_output, realsize + sizeof(char));
+	return realsize;
+}
+
+static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const size_t nmemb, void *const data) {
+	const size_t realsize = size * nmemb;
+	struct _cb_val *const cb_val = data;
+	struct _ctw *const ctw = cb_val->ctw;
+
+	if (ctw->mode == 0) {
+		return ctw_write_mem(ptr, realsize, cb_val->mem);
+	} else if (ctw->mode == 1) {
+		return ctw_write_stream(ptr, realsize, ctw);
+	}
+	return 0;
 }
 
 static size_t ctw_read_mem_cb(void *const ptr, const size_t size, const size_t nmemb, void *const data) {
@@ -241,8 +274,11 @@ static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const sli
 		}
 	}
 	if (fp == NULL) {
+		struct _cb_val *cb_val = getbytes(sizeof(struct _cb_val));
+		cb_val->mem = out_memory;
+		cb_val->ctw = common;
 		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
-		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)out_memory);
+		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)cb_val);
 	}
 	curl_multi_add_handle(common->multi_handle, common->easy_handle);
 	return fp;
@@ -471,6 +507,27 @@ static void ctw_set_timeout(struct _ctw *const common, const int val) {
 	common->timeout = (long) val;
 }
 
+static void ctw_set_mode_number(struct _ctw *common, int val) {
+	common->mode = val;
+}
+
+static void ctw_set_mode(struct _ctw *common, int argc, t_atom *argv) {
+	t_symbol *mode;
+
+	if (argc != 1) {
+		pd_error(common, "mode needs a name");
+		return;
+	}
+	mode = atom_getsymbol(argv);
+	if (strcmp(mode->s_name, "block") == 0) {
+		ctw_set_mode_number(common, 0);
+	} else if (strcmp(mode->s_name, "stream") == 0) {
+		ctw_set_mode_number(common, 1);
+	} else {
+		pd_error(common, "not a valid mode");
+	}
+}
+
 static void ctw_init(struct _ctw *const common) {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 	common->base_url_len = 0;
@@ -482,10 +539,12 @@ static void ctw_init(struct _ctw *const common) {
 	common->x_canvas = canvas_getcurrent();
 
 	ctw_set_timeout(common, 0);
+	ctw_set_mode_number(common, 0);
 	ctw_set_sslcheck(common, 1);
 }
 
 static void ctw_free(struct _ctw *const common) {
+	curl_multi_remove_handle(common->multi_handle, common->easy_handle);
 	string_free(common->base_url, &common->base_url_len);
 	string_free(common->parameters, &common->parameters_len);
 	string_free(common->complete_url, &common->complete_url_len);

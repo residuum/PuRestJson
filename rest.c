@@ -124,8 +124,12 @@ static void *rest_get_auth_token(void *const thread_args) {
 		fp = ctw_prepare(&rest->common, slist, &out_content, NULL);
 		out_header.memory = getbytes(1);
 		out_header.size = 0;
+
+		struct _cb_val *cb_val = getbytes(sizeof(struct _cb_val));
+		cb_val->mem = &out_header;
+		cb_val->ctw = (struct _ctw *)rest;
 		curl_easy_setopt(rest->common.easy_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb);
-		curl_easy_setopt(rest->common.easy_handle, CURLOPT_WRITEHEADER, (void *)&out_header);
+		curl_easy_setopt(rest->common.easy_handle, CURLOPT_WRITEHEADER, (void *)cb_val);
 		ctw_thread_perform(&rest->common);
 		rest_process_auth_data(rest, &out_header);
 		string_free(out_header.memory, &out_header.size);
@@ -191,6 +195,7 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_header, gensym("header"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_clear_headers, gensym("header_clear"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_file, gensym("file"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_mode, gensym("mode"), A_GIMME, 0);
 }
 
 void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *argv) {
@@ -294,6 +299,13 @@ void rest_file(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 	(void) sel;
 
 	ctw_set_file((struct _ctw *)rest, argc, argv);
+}
+
+void rest_mode(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
+
+	(void) sel;
+
+	ctw_set_mode((struct _ctw *)rest, argc, argv);
 }
 
 void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {

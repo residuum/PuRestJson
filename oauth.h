@@ -47,3 +47,4 @@ APIEXPORT void APICALL oauth_cancel(t_oauth *oauth, const t_symbol *sel, const i
 APIEXPORT void APICALL oauth_header(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
 APIEXPORT void APICALL oauth_clear_headers(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);
 APIEXPORT void APICALL oauth_file(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+APIEXPORT void APICALL oauth_mode(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);

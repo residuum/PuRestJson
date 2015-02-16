@@ -1,5 +1,4 @@
-#N canvas 226 51 1137 558 10;
-#X declare -lib purest_json;
+#N canvas 222 51 1137 558 10;
 #X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
 #X text 55 -59 - object for HTTP communication with REST webservices
@@ -20,14 +19,14 @@ the value and return to the default \, use an empty [timeout( message.
 #X obj 19 -36 oauth;
 #X text 57 -37 - object for HTTP communication with OAuth webservices
 ;
-#N canvas 150 112 1044 412 oauth-specific 0;
+#N canvas 148 110 1044 412 oauth-specific 0;
 #X obj 29 53 oauth http://example.com/ CLIENTKEY CLIENTSECRET ACCESSTOKEN
 ACCESSSECRET;
 #X msg 31 205 method PLAINTEXT;
 #X obj 31 304 oauth;
 #X msg 82 234 method HMAC;
 #X msg 91 262 method RSA privatekey;
-#N canvas 553 131 913 619 RSA 0;
+#N canvas 551 129 913 619 RSA 0;
 #X msg -89 318 GET /echo_api.php?method=foo&bar=baz;
 #X msg -92 361 POST /echo_api.php?method=foo&bar=baz;
 #X obj -128 409 oauth;
@@ -77,12 +76,12 @@ or use [init( message.;
 #X connect 10 0 12 0;
 #X connect 10 1 11 0;
 #X connect 13 0 10 0;
-#X restore 195 294 pd oauth-specific;
+#X restore 196 266 pd oauth-specific;
 #X text 19 -2 Most methods work the same for [rest] and [oauth] \,
 only some methods differ. The differences are outlined below.;
-#X obj 22 193 urlparams;
-#N canvas 141 54 544 367 rest-specific 0;
-#N canvas 494 72 517 474 cookie-auth 0;
+#X obj 22 197 urlparams;
+#N canvas 137 51 544 367 rest-specific 0;
+#N canvas 492 70 517 474 cookie-auth 0;
 #X text 34 91 This will try to log you in on creation. It will call
 the url http://example.com/login-page and post username=myusername&password=mypass
 to the page.;
@@ -294,37 +293,15 @@ empty init message will clean a previous set base url. The number of
 possible parameters for [rest] and [oauth] differ. You can also use
 four parameters for the [init( message to use basic cookie authentication
 \, see below.;
-#X restore 21 293 pd rest-specific;
+#X restore 21 266 pd rest-specific;
 #X text 594 289 By default correct SSL host is checked. Disable check
 by sending sslcheck with a value to 0 \, reenable checking by setting
 the value to 1;
-#N canvas 114 149 628 451 headers 0;
-#X obj 76 359 print data;
-#X obj 158 359 print status;
-#X obj 76 327 rest;
-#X msg 191 226 GET https://api.github.com/repos/residuum/PuRestJson/contents/Makefile
-;
-#X msg 74 52 header Accept: application/json;
-#X msg 126 100 header User-Agent: My User Agent;
-#X text 71 0 You can set arbitrary HTTP headers with the [header( message.
-;
-#X text 125 80 Github requires User-Agent header;
-#X text 184 150 To clear HTTP headers \, issue [header_clear(;
-#X msg 182 172 header_clear;
-#X text 71 22 Some webservices return different data types for different
-values of Accept: headers;
-#X connect 2 0 0 0;
-#X connect 2 1 1 0;
-#X connect 3 0 2 0;
-#X connect 4 0 2 0;
-#X connect 5 0 2 0;
-#X connect 9 0 2 0;
-#X restore 21 267 pd headers;
 #X msg 647 171 cancel;
 #X text 637 202 Use this request to test cancelling and timeout: it
 will wait for 10 seconds before returning data.;
 #X msg 641 232 GET http://ix.residuum.org/pd/sleep_example.php;
-#N canvas 387 254 807 334 cancel 0;
+#N canvas 385 252 807 334 cancel 0;
 #X obj 105 -51 print data;
 #X obj 187 -51 print status;
 #X obj 105 -83 rest;
@@ -353,23 +330,6 @@ of 10ms is sufficient on my system (TM).;
 #X connect 8 0 7 0;
 #X connect 11 0 6 0;
 #X restore 710 162 pd cancel;
-#N canvas 362 178 631 378 download-to-file 0;
-#X obj 77 247 rest;
-#X msg 119 106 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
-;
-#X obj 48 297 print data;
-#X obj 133 297 print done;
-#X text 74 20 Set the location \, where the file should be saved;
-#X text 117 86 Downloaded data will write it to the file;
-#X text 170 172 Clear the location;
-#X msg 77 38 file /tmp/test.json;
-#X msg 172 192 file;
-#X connect 0 0 2 0;
-#X connect 0 1 3 0;
-#X connect 1 0 0 0;
-#X connect 7 0 0 0;
-#X connect 8 0 0 0;
-#X restore 21 334 pd download-to-file;
 #X text 643 93 You can cancel a currently executed request by issuing
 [cancel(. If data has been returned already \, but is not output \,
 or output only partially \, outputting the data will still be completed.
@@ -389,6 +349,65 @@ For creating url encoded slists of parameters see;
 #X text 19 223 HTTP requests are asynchronous. Do not expect a request
 to return data immediately. While one request is processed \, the object
 is blocked.;
+#N canvas 358 174 631 378 download-to-file 0;
+#X obj 77 247 rest;
+#X msg 119 106 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
+;
+#X obj 48 297 print data;
+#X obj 133 297 print done;
+#X text 74 20 Set the location \, where the file should be saved;
+#X text 117 86 Downloaded data will write it to the file;
+#X text 170 172 Clear the location;
+#X msg 77 38 file /tmp/test.json;
+#X msg 172 192 file;
+#X connect 0 0 2 0;
+#X connect 0 1 3 0;
+#X connect 1 0 0 0;
+#X connect 7 0 0 0;
+#X connect 8 0 0 0;
+#X restore 21 374 pd download-to-file;
+#X text 20 333 More functions:;
+#N canvas 354 170 631 378 streaming-and-blocking 0;
+#X obj 77 247 rest;
+#X obj 48 297 print data;
+#X obj 133 297 print done;
+#X msg 77 142 mode stream;
+#X msg 130 203 mode block;
+#X text 132 182 This will reset the object to the default mode;
+#X text 74 124 Setting the mode to streaming;
+#X text 71 8 By default \, [rest] and [oauth] both output data only
+when the request has finished. Some services decide to keep an HTTP
+connection open and flush data to clients (streaming).;
+#X text 72 59 To output that data when it is done \, use the [mode(
+message and set the mode to stream. The default mode is blocking mode.
+You can set the mode even during running requests.;
+#X connect 0 0 1 0;
+#X connect 0 1 2 0;
+#X connect 3 0 0 0;
+#X connect 4 0 0 0;
+#X restore 21 396 pd streaming-and-blocking;
+#N canvas 114 149 628 451 setting-headers 0;
+#X obj 76 359 print data;
+#X obj 158 359 print status;
+#X obj 76 327 rest;
+#X msg 191 226 GET https://api.github.com/repos/residuum/PuRestJson/contents/Makefile
+;
+#X msg 74 52 header Accept: application/json;
+#X msg 126 100 header User-Agent: My User Agent;
+#X text 71 0 You can set arbitrary HTTP headers with the [header( message.
+;
+#X text 125 80 Github requires User-Agent header;
+#X text 184 150 To clear HTTP headers \, issue [header_clear(;
+#X msg 182 172 header_clear;
+#X text 71 22 Some webservices return different data types for different
+values of Accept: headers;
+#X connect 2 0 0 0;
+#X connect 2 1 1 0;
+#X connect 3 0 2 0;
+#X connect 4 0 2 0;
+#X connect 5 0 2 0;
+#X connect 9 0 2 0;
+#X restore 21 351 pd setting-headers;
 #X connect 0 0 6 0;
 #X connect 6 0 2 0;
 #X connect 6 1 3 0;
@@ -396,5 +415,5 @@ is blocked.;
 #X connect 9 0 6 0;
 #X connect 10 0 6 0;
 #X connect 11 0 6 0;
-#X connect 20 0 6 0;
-#X connect 22 0 6 0;
+#X connect 19 0 6 0;
+#X connect 21 0 6 0;

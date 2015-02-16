@@ -45,3 +45,4 @@ APIEXPORT void APICALL rest_cancel(t_rest *rest, const t_symbol *sel, const int 
 APIEXPORT void APICALL rest_header(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
 APIEXPORT void APICALL rest_clear_headers(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
 APIEXPORT void APICALL rest_file(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+APIEXPORT void APICALL rest_mode(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);

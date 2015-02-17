@@ -1,0 +1,209 @@
+diff --git a/Makefile b/Makefile
+index a5ca149..ef65c10 100644
+--- a/Makefile
++++ b/Makefile
+@@ -39,7 +39,7 @@ HELPPATCHES = json-help.pd urlparams-help.pd rest-help.pd
+ ALL_CFLAGS = -I"$(PD_INCLUDE)" -std=c99
+ ALL_LDFLAGS =  
+ SHARED_LDFLAGS =
+-ALL_LIBS = -lcurl -ljson-c -loauth
++ALL_LIBS = -lcurl -ljson -loauth
+ LIBS_windows = -lpthread -lm -lidn -lintl -lwldap32 -lgnutls -lhogweed -lgmp -lssl \
+ 			   -liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto \
+ 			   -lws2_32 -lgdi32 -lcrypt32 -lz  
+diff --git a/debian/changelog b/debian/changelog
+index 15fb989..8e747c1 100644
+--- a/debian/changelog
++++ b/debian/changelog
+@@ -1,9 +1,9 @@
+-pd-purest-json (1.2.0) UNRELEASED; urgency=low
++pd-purest-json (1.2.0+json-c-0.10) UNRELEASED; urgency=low
+   * [oauth]: PATCH, TRACE and OPTIONS request implemented
+  
+- -- Thomas Mayer <thomas@residuum.org>  Sun, 02 Feb 2015 15:00:00 +0100
++ -- Thomas Mayer <thomas@residuum.org>  Sun, 01 Feb 2015 15:00:00 +0100
+ 
+-pd-purest-json (1.1.0) UNRELEASED; urgency=low
++pd-purest-json (1.1.0+json-c-0.10) UNRELEASED; urgency=low
+   * [rest]: HEAD, PATCH, TRACE and OPTIONS request implemented
+   * [oauth]: HEAD request implemented
+   * Bug fixes:
+@@ -13,7 +13,7 @@ pd-purest-json (1.1.0) UNRELEASED; urgency=low
+  
+  -- Thomas Mayer <thomas@residuum.org>  Sat, 14 Jun 2014 23:00:00 +0200
+ 
+-pd-purest-json (1.0.0) UNRELEASED; urgency=low
++pd-purest-json (1.0.0-libjson0.10) UNRELEASED; urgency=low
+   * Info for users while loading object
+   * Bug fixes in [json-encode]:
+     - array handling
+@@ -22,9 +22,8 @@ pd-purest-json (1.0.0) UNRELEASED; urgency=low
+  
+  -- Thomas Mayer <thomas@residuum.org>  Fri, 03 Jan 2014 15:00:00 +0100
+ 
+-pd-purest-json (0.15.0) UNRELEASED; urgency=low
++pd-purest-json (0.15.0-libjson0.10) UNRELEASED; urgency=low
+   * Cancellation is now faster
+-  * Switch to json-c 0.11
+   * Refactoring of code
+   * Breaking changes:
+     - [oauth] and [rest]:
+diff --git a/debian/control b/debian/control
+index d936a8d..12be207 100644
+--- a/debian/control
++++ b/debian/control
+@@ -4,7 +4,7 @@ Priority: optional
+ Maintainer: Thomas Mayer <thomas@residuum.org>
+ Build-Depends: debhelper (>= 8.1.3),
+                puredata-dev | puredata,
+-               libjson-c-dev,
++               libjson0-dev,
+                libcurl4-gnutls-dev | libcurl4-openssl-dev,
+                liboauth-dev
+ Standards-Version: 3.9.2
+diff --git a/json-decode.c b/json-decode.c
+index 878064e..d420a66 100644
+--- a/json-decode.c
++++ b/json-decode.c
+@@ -15,7 +15,10 @@ struct _json_decode {
+ static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+ static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+ static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+-static void jdec_output_string(const char *json_string, t_json_decode *jdec);
++static void jdec_output_string(char *json_string, t_json_decode *jdec);
++#if JSON_C_FIX
++static char *lowercase_unicode(char *orig, size_t *memsize);
++#endif
+ 
+ /* begin implementations */
+ static void jdec_output_object(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
+@@ -69,6 +72,60 @@ static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_
+ 	}
+ }
+ 
++#if JSON_C_FIX
++static char *lowercase_unicode(char *const orig, size_t *memsize) {
++	const char *const unicode_intro = "\\";
++	const short uni_len = 4; /*TODO: get real length, we just assume 4 for now */
++
++	char *cleaned_string = string_create(memsize, strlen(orig));
++	if (cleaned_string == NULL)
++	if (cleaned_string != NULL) {
++		MYERROR("Could not allocate memory");
++		return NULL;
++	}
++
++	if (strlen(orig) <= 0) {
++		return cleaned_string;
++	}
++
++	char *segment = strtok(orig, unicode_intro);
++	memset(cleaned_string, 0x00, strlen(orig) + 1);
++	strcpy(cleaned_string, segment);
++	segment = strtok(NULL, unicode_intro);
++
++	while(segment != NULL) {
++		strcat(cleaned_string, unicode_intro);
++		if (segment[0] == 'u') {
++			for (short i = 1; i < 1 + uni_len; i++) {
++				switch (segment[i]) {
++					case 'A':
++						segment[i] = 'a';
++						break;
++					case 'B':
++						segment[i] = 'b';
++						break;
++					case 'C':
++						segment[i] = 'c';
++						break;
++					case 'D':
++						segment[i] = 'd';
++						break;
++					case 'E':
++						segment[i] = 'e';
++						break;
++					case 'F':
++						segment[i] = 'f';
++						break;
++				}
++			}
++		}
++		strcat(cleaned_string, segment);
++		segment = strtok(NULL, unicode_intro);
++	}
++	return cleaned_string;
++}
++#endif
++
+ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
+ 	t_atom out_data[2];
+ 	t_float out_float;
+@@ -110,9 +167,17 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
+ 	}
+ }
+ 
+-static void jdec_output_string(const char *const json_string, t_json_decode *const jdec) {
+-	json_object *const jobj = json_tokener_parse(json_string);
+-
++static void jdec_output_string(char *const json_string, t_json_decode *const jdec) {
++	json_object *jobj;
++#if JSON_C_FIX
++	size_t memsize = 0;
++	/* Needed because of bug in json-c 0.9 */
++	char* corrected_json_string = lowercase_unicode(json_string, &memsize);
++	/* Parse JSON */
++	jobj = json_tokener_parse(corrected_json_string);
++#else
++	jobj = json_tokener_parse(json_string);
++#endif
+ 	if (!is_error(jobj)) {
+ 		jdec_output(jobj, jdec->x_ob.ob_outlet, jdec->done_outlet);
+ 		/* TODO: This sometimes results in a segfault. Why? */
+@@ -120,6 +185,11 @@ static void jdec_output_string(const char *const json_string, t_json_decode *con
+ 	} else {
+ 		pd_error(jdec, "Not a JSON object");
+ 	}
++#if JSON_C_FIX
++	if (corrected_json_string != NULL){
++		string_free(corrected_json_string, &memsize);
++	}
++#endif
+ }
+ 
+ void setup_json0x2ddecode(void) {
+diff --git a/json-decode.h b/json-decode.h
+index 7d6948c..8461c34 100644
+--- a/json-decode.h
++++ b/json-decode.h
+@@ -26,9 +26,17 @@ THE SOFTWARE.
+ 
+ #include <ctype.h>
+ #include <string.h>
+-#include <json-c/json.h>
++#include <json/json.h>
+ #include "purest_json.h"
+ 
++#ifndef JSON_C_MAJOR_VERSION
++#define JSON_C_FIX 1
++#elif JSON_C_MAJOR_VERSION < 1 && JSON_MINOR_VERSION <10
++#define JSON_C_FIX 1
++#else
++#define JSON_C_FIX 0
++#endif
++
+ /* [json-decode] */
+ struct _json_decode;
+ typedef struct _json_decode t_json_decode;
+diff --git a/json-encode.h b/json-encode.h
+index 3f7f9ad..dfcbca6 100644
+--- a/json-encode.h
++++ b/json-encode.h
+@@ -28,7 +28,7 @@ THE SOFTWARE.
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <json-c/json.h>
++#include <json/json.h>
+ #include "purest_json.h"
+ 
+ /* [json-encode] */

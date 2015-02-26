@@ -5,6 +5,7 @@
 #include "urlparams.h"
 #include <math.h>
 
+#include "uthash/src/uthash.h"
 #include "string.c"
 #include "kvp.c"
 
@@ -84,24 +85,21 @@ void urlparams_bang(t_urlparams *const urlp) {
 	size_t encoded_val_len;
 	char *encoded_val_string = NULL;
 
-	if (urlp->storage.first_data == NULL) {
+	if (!HASH_COUNT(urlp->storage.data)) {
 		outlet_symbol(urlp->storage.x_ob.ob_outlet, gensym(""));
 		return;
 	}
 
-	it = urlp->storage.first_data;
-	while (it != NULL) {
+	for(it = urlp->storage.data; it != NULL; it = it->hh.next) {
 		encoded_key_string = urlp_encode(it->key, &encoded_key_len);
 		encoded_val_string = urlp_encode(it->value->val.s, &encoded_val_len);
 		output_len += encoded_key_len + encoded_val_len + 2;
 		string_free(encoded_key_string, &encoded_key_len);
 		string_free(encoded_val_string, &encoded_val_len);
-		it = it->next;
 	}
 	output = getbytes(output_len * sizeof(char));
 
-	it = urlp->storage.first_data;
-	while (it != NULL) {
+	for(it = urlp->storage.data; it != NULL; it = it->hh.next) {
 		encoded_key_string = urlp_encode(it->key, &encoded_key_len);
 		encoded_val_string = urlp_encode(it->value->val.s, &encoded_val_len);
 		strcat(output, encoded_key_string);
@@ -113,10 +111,9 @@ void urlparams_bang(t_urlparams *const urlp) {
 		if (encoded_val_string) {
 			string_free(encoded_val_string, &encoded_val_len);
 		}
-		if (it->next != NULL) {
+		if (it->hh.next != NULL) {
 			strcat(output, "&");
 		}
-		it = it->next;
 	}
 
 	outlet_symbol(urlp->storage.x_ob.ob_outlet, gensym(output));

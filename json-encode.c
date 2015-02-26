@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "uthash/src/uthash.h"
 #include "string.c"
 #include "kvp.c"
 
@@ -20,7 +21,7 @@ struct _json_encode {
 static json_object *jenc_create_object(const struct _v *value);
 static void jenc_load_json_object(const t_json_encode *jenc, json_object *jobj);
 static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj);
-static json_object *jenc_get_array_value(struct _kvp **item);
+static json_object *jenc_get_array_value(struct _kvp *item);
 static t_symbol *jenc_get_json_symbol(t_json_encode *jenc);
 static void jenc_add(t_json_encode *jenc, const int argc, t_atom *argv, const unsigned char is_array);
 
@@ -90,7 +91,7 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 									json_object_get_string(array_member)));
 						sprintf(value, "%s", json_object_get_string(array_member));
 						kvp_add((struct _kvp_store *)jenc, key, 
-								kvp_val_create(value, 0), 0);
+								kvp_val_create(value, 0), 1);
 						string_free(value, &value_len);
 					}
 				}
@@ -117,23 +118,21 @@ static void jenc_load_json_data(t_json_encode *const jenc, json_object *const jo
 	}
 }
 
-static json_object *jenc_get_array_value(struct _kvp **item) {
-	struct _kvp *it = *item;
-	char *key = it->key;
-	json_object *value = json_object_new_array();
+static json_object *jenc_get_array_value(struct _kvp *item) {
+	struct _v *value = item->value;
+	json_object *json_value = json_object_new_array();
 	json_object *array_member;
 
-	array_member = jenc_create_object(it->value);
-	json_object_array_add(value, array_member);
+	array_member = jenc_create_object(value);
+	json_object_array_add(json_value, array_member);
 
-	while (it->next != NULL && strcmp(it->next->key, key) == 0) {
-		it = it->next;
-		array_member = jenc_create_object(it->value);
-		json_object_array_add(value, array_member);
+	while (value->next != NULL) {
+		value = value->next;
+		array_member = jenc_create_object(value);
+		json_object_array_add(json_value, array_member);
 	}	
 
-	*item = it;
-	return value;
+	return json_value;
 }
 
 static t_symbol *jenc_get_json_symbol(t_json_encode *const jenc) {
@@ -142,20 +141,19 @@ static t_symbol *jenc_get_json_symbol(t_json_encode *const jenc) {
 	json_object *value;
 	t_symbol *json_symbol = NULL;
 
-	if (jenc->storage.first_data == NULL) {
+	if (!HASH_COUNT(jenc->storage.data)) {
 		json_symbol = gensym("");
 		return json_symbol;
 	}
 
-	it = jenc->storage.first_data;
-	while(it) {
+	for (it = jenc->storage.data; it != NULL; it = it->hh.next) {
+		post("%s", it->key);
 		if (it->is_array == 1) {
-			value = jenc_get_array_value(&it);
+			value = jenc_get_array_value(it);
 		} else {
 			value = jenc_create_object(it->value);
 		}
 		json_object_object_add(jobj, it->key, value); 
-		it = it->next;
 	}
 	json_symbol = gensym(json_object_to_json_string(jobj));
 	json_object_put(jobj);

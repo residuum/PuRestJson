@@ -8,6 +8,7 @@ static char *string_remove_backslashes(char *source_string, size_t *memsize);
 static char *string_create(size_t *const newl, const size_t strl) {
 	char *gen;
 
+	/* newl is not the length of the string, but the memory size */
 	(*newl) = 1 + strl;
 	gen = getbytes((*newl) * sizeof(char));
 	if (gen == NULL) {

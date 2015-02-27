@@ -51,6 +51,9 @@ static void jdec_output_object(json_object *const jobj, t_outlet *const data_out
 				case json_type_null:
 					SETSYMBOL(&out_data[1], gensym(""));
 					break;
+				default:
+					MYERROR("What other JSON type?");
+					break;
 			}
 		}
 		outlet_list(data_outlet, &s_list, 2, &out_data[0]);
@@ -106,6 +109,9 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
 			break;
 		case json_type_array: 
 			jdec_output_array(jobj, data_outlet, done_outlet);
+			break;
+		default:
+			MYERROR("What other JSON type?");
 			break;
 	}
 }

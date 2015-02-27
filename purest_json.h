@@ -54,6 +54,11 @@ THE SOFTWARE.
 	}
 #endif
 
+#define MYASSERT(cond, ...) do {	\
+	if (!(cond)) {			\
+		MYERROR(__VA_ARGS__);	\
+	}				\
+} while(0);
 
 /* [rest] */
 APIEXPORT void APICALL rest_setup(void);

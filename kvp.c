@@ -95,13 +95,18 @@ static void kvp_free(struct _kvp *const item) {
 }
 
 static void kvp_insert(struct _kvp_store *const store, struct _kvp *const new_pair) {
+	MYASSERT(new_pair != NULL, "New pair is null.");
+
 	if (new_pair == NULL) {
 		return;
 	}
+	/* new_pair->key_len = strlen(new_pair->key) + 1, see string.c */
 	HASH_ADD_KEYPTR(hh, store->data, new_pair->key, new_pair->key_len - 1, new_pair);
 }
 
 static void kvp_replace_value(struct _kvp *const kvp, struct _v *const value, const unsigned char is_array) {
+	MYASSERT(kvp->is_array != 1 || is_array != 1, "This should not be called: array values should be appended, not replaced.");
+	
 	kvp_val_free(kvp->value);
 	kvp->value = value;
 	kvp->is_array = is_array;

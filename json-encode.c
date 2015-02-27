@@ -99,6 +99,9 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 			case json_type_null:
 				kvp_add((struct _kvp_store *)jenc, key, kvp_val_create("", 0), 0);
 				break;
+			default:
+				MYERROR("What other JSON type?");
+				break;
 		}
 	}
 }

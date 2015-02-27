@@ -20,24 +20,6 @@ struct _kvp {
 	UT_hash_handle hh;
 };
 
-/*
- * Data in the linked list:
- * 1. Sorted by addition
- * 2. Array members are directly following 
- *
- * Consider the following succession:
- * add id 0, array_add member 1, array_add member 2, id 3, add name test, array_add member 4
- *
- * yields after each step:
- * id 0
- * id 0, member 1
- * id 0, member 1, member 2
- * id 3, member 1, member 2
- * id 3, member 1, member 2, name test
- * id 3, member 1, member 2, name test
- * id 3, member 1, member 2, member 4, name test
- */
-
 struct _kvp_store {
 	t_object x_ob;
 	struct _kvp *data;

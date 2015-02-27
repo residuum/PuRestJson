@@ -26,12 +26,13 @@ struct _kvp_store {
 };
 
 static struct _v *kvp_val_create(const char *s, const t_float f);
-static struct _v *kvp_val_free(struct _v *value);
+static void kvp_val_free(struct _v *value);
 static struct _kvp *kvp_create(const char *key, struct _v *value, const unsigned char is_array);
 static void kvp_free(struct _kvp *item);
 static void kvp_insert(struct _kvp_store *store, struct _kvp *new_pair);
 static void kvp_replace_value(struct _kvp *kvp, struct _v *value, const unsigned char is_array);
 static void kvp_add_simple(struct _kvp_store *store, char *key, struct _v *value);
+static void kvp_add_to_array(struct _kvp *kvp, struct _v *value);
 static void kvp_add_array(struct _kvp_store *store, char *key, struct _v *value);
 static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, const unsigned char is_array);
 static void kvp_store_free_memory(struct _kvp_store *store);
@@ -60,11 +61,13 @@ static struct _v *kvp_val_create(const char *const s, const t_float f) {
 	return created;
 }
 
-static struct _v *kvp_val_free(struct _v *const value) {
-	struct _v *next = value->next;
-	string_free(value->val.s, &value->slen);
-	freebytes(value, sizeof(struct _v));
-	return next;
+static void kvp_val_free(struct _v *value) {
+	do {
+		struct _v *next = value->next;
+		string_free(value->val.s, &value->slen);
+		freebytes(value, sizeof(struct _v));
+		value = next;
+	} while (value != NULL);
 }
 
 static struct _kvp *kvp_create(const char *const key, struct _v *const value, const unsigned char is_array) {
@@ -87,10 +90,7 @@ static struct _kvp *kvp_create(const char *const key, struct _v *const value, co
 
 static void kvp_free(struct _kvp *const item) {
 	string_free(item->key, &item->key_len);
-	struct _v *value = item->value;
-	do {
-		value = kvp_val_free(value);
-	} while (value != NULL);
+	value = kvp_val_free(value);
 	freebytes(item, sizeof(struct _kvp));
 }
 
@@ -101,46 +101,49 @@ static void kvp_insert(struct _kvp_store *const store, struct _kvp *const new_pa
 	HASH_ADD_KEYPTR(hh, store->data, new_pair->key, new_pair->key_len - 1, new_pair);
 }
 
-static void kvp_replace_value(struct _kvp *kvp, struct _v *const value, const unsigned char is_array) {
-		struct _v *existing = kvp->value;
-		do {
-			existing = kvp_val_free(existing);
-		} while(existing != NULL);
-		kvp->value = value;
-		kvp->is_array = is_array;
+static void kvp_replace_value(struct _kvp *const kvp, struct _v *const value, const unsigned char is_array) {
+	kvp_val_free(kvp->value);
+	kvp->value = value;
+	kvp->is_array = is_array;
 }
 
 static void kvp_add_simple(struct _kvp_store *const store, char *const key, struct _v *const value) {
-	struct _kvp *new;
-	HASH_FIND_STR(store->data, key, new);
-	if (new != NULL) {
-		kvp_replace_value(new, value, 0);
+	struct _kvp *kvp;
+
+	HASH_FIND_STR(store->data, key, kvp);
+	if (kvp != NULL) {
+		kvp_replace_value(kvp, value, 0);
 	} else {
-		new = kvp_create(key, value, 0);
-		kvp_insert(store, new);
+		kvp = kvp_create(key, value, 0);
+		kvp_insert(store, kvp);
 	}
 }
 
+static void kvp_add_to_array(struct _kvp *const kvp, struct _v *const value) {
+	struct _v *last = kvp->last;
+
+	last->next = value;
+	kvp->last = value;
+}
+
 static void kvp_add_array(struct _kvp_store *const store, char *const key, struct _v *const value) {
-	struct _kvp *new;
-	HASH_FIND_STR(store->data, key, new);
-	if (new != NULL) {
-		if (new->is_array) {
-			struct _v *last = new->last;
-			last->next = value;
-			new->last = value;
+	struct _kvp *kvp;
+
+	HASH_FIND_STR(store->data, key, kvp);
+	if (kvp != NULL) {
+		if (kvp->is_array) {
+			kvp_add_to_array(kvp, value);
 		} else {
-			kvp_replace_value(new, value, 1);
+			kvp_replace_value(kvp, value, 1);
 		}
 	} else {
-		new = kvp_create(key, value, 1);
-		kvp_insert(store, new);
+		kvp = kvp_create(key, value, 1);
+		kvp_insert(store, kvp);
 	}
 }
 
 static void kvp_add(struct _kvp_store *const store, char *const key, struct _v *const value, 
 		const unsigned char is_array) {
-
 	if (!is_array) {
 		kvp_add_simple(store, key, value);
 	} else {
@@ -151,6 +154,7 @@ static void kvp_add(struct _kvp_store *const store, char *const key, struct _v *
 static void kvp_store_free_memory(struct _kvp_store *const store) {
 	struct _kvp *it;
 	struct _kvp *tmp;
+
 	HASH_ITER(hh, store->data, it, tmp) {
 		HASH_DEL(store->data, it);
 		kvp_free(it);

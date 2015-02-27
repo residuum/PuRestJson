@@ -90,7 +90,7 @@ static struct _kvp *kvp_create(const char *const key, struct _v *const value, co
 
 static void kvp_free(struct _kvp *const item) {
 	string_free(item->key, &item->key_len);
-	value = kvp_val_free(value);
+	kvp_val_free(item->value);
 	freebytes(item, sizeof(struct _kvp));
 }
 

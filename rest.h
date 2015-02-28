@@ -34,15 +34,26 @@ THE SOFTWARE.
 struct _rest;
 typedef struct _rest t_rest;
 
+/* constructor */
 APIEXPORT void APICALL *rest_new(t_symbol *sel, const int argc, t_atom *argv);
+/* destructor */
 APIEXPORT void APICALL rest_free(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
 
+/* HTTP request */
 APIEXPORT void APICALL rest_command(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv); 
+/* set or clear timeout */
 APIEXPORT void APICALL rest_timeout(t_rest *rest, const t_floatarg f);
+/* inits object and sets parameters */
 APIEXPORT void APICALL rest_init(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets or clears check of SSL certificate */
 APIEXPORT void APICALL rest_sslcheck(t_rest *rest, const t_floatarg f);
+/* cancel request */
 APIEXPORT void APICALL rest_cancel(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
+/* set header */
 APIEXPORT void APICALL rest_header(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* clear header */
 APIEXPORT void APICALL rest_clear_headers(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
+/* sets output file */
 APIEXPORT void APICALL rest_file(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets mode to HTTP streaming or blocking */
 APIEXPORT void APICALL rest_mode(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);

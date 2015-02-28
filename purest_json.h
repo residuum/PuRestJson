@@ -2,7 +2,7 @@
 Author:
 Thomas Mayer <thomas@residuum.org>
 
-Copyright (c) 2011-2013 Thomas Mayer
+Copyright (c) 2011-2015 Thomas Mayer
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -54,10 +54,10 @@ THE SOFTWARE.
 	}
 #endif
 
-#define MYASSERT(cond, ...) do {	\
-	if (!(cond)) {			\
-		MYERROR(__VA_ARGS__);	\
-	}				\
+#define MYASSERT(cond, ...) do { \
+	if (!(cond)) {               \
+		MYERROR(__VA_ARGS__);    \
+	}                            \
 } while(0);
 
 /* [rest] */

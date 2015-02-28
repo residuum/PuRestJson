@@ -164,7 +164,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 	char *postargs = NULL;
 	char *req_url = NULL;
 
-	if(oauth->common.locked) {
+	if (oauth->common.locked) {
 		post("oauth object is performing request and locked.");
 		return;
 	}
@@ -175,11 +175,11 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 	}
 
 	/* check for initialisation */
- if (oauth->common.base_url == NULL) {
+	if (oauth->common.base_url == NULL) {
 		pd_error(oauth, "oauth object is not initialised.");
 		oauth->common.locked = 0;
 		return;
- }
+	}
 
 	oauth->common.locked = 1;
 	req_type = sel->s_name;
@@ -291,7 +291,7 @@ void oauth_init(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 
 	(void) sel;
 
-	if(oauth->common.locked) {
+	if (oauth->common.locked) {
 		post("oauth object is performing request and locked.");
 	} else {
 		oauth_set_init(oauth, argc, argv); 
@@ -299,7 +299,7 @@ void oauth_init(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 }
 
 void oauth_timeout(t_oauth *const oauth, const t_floatarg f) {
-	if(oauth->common.locked) {
+	if (oauth->common.locked) {
 		post("oauth object is performing request and locked.");
 	} else {
 		ctw_set_timeout((struct _ctw *)oauth, (int)f);
@@ -307,7 +307,7 @@ void oauth_timeout(t_oauth *const oauth, const t_floatarg f) {
 }
 
 void oauth_sslcheck(t_oauth *const oauth, const t_floatarg f) {
-	if(oauth->common.locked) {
+	if (oauth->common.locked) {
 		post("oauth object is performing request and locked.");
 	} else {
 		ctw_set_sslcheck((struct _ctw *)oauth, (int)f);

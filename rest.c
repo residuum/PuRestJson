@@ -228,7 +228,7 @@ void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc,
 	const char *const req_type = sel->s_name;
 	char path[MAXPDSTRING];
 
-	if(rest->common.locked) {
+	if (rest->common.locked) {
 		post("rest object is performing request and locked.");
 		return;
 	}
@@ -272,7 +272,7 @@ void rest_init(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 
 	(void) sel;
 
-	if(rest->common.locked) {
+	if (rest->common.locked) {
 		post("rest object is performing request and locked.");
 	} else {
 		rest_set_init(rest, argc, argv); 
@@ -280,7 +280,7 @@ void rest_init(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 }
 
 void rest_timeout(t_rest *const rest, const t_floatarg f) {
-	if(rest->common.locked) {
+	if (rest->common.locked) {
 		post("rest object is performing request and locked.");
 	} else {
 		ctw_set_timeout((struct _ctw *)rest, (int)f);
@@ -288,7 +288,7 @@ void rest_timeout(t_rest *const rest, const t_floatarg f) {
 }
 
 void rest_sslcheck(t_rest *const rest, const t_floatarg f) {
-	if(rest->common.locked) {
+	if (rest->common.locked) {
 		post("rest object is performing request and locked.");
 	} else {
 		ctw_set_sslcheck((struct _ctw *)rest, (int)f);

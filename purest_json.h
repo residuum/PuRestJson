@@ -55,9 +55,9 @@ THE SOFTWARE.
 #endif
 
 #define MYASSERT(cond, ...) do { \
-	if (!(cond)) {               \
-		MYERROR(__VA_ARGS__);    \
-	}                            \
+    if (!(cond)) {               \
+        MYERROR(__VA_ARGS__);    \
+    }                            \
 } while(0);
 
 /* [rest] */

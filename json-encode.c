@@ -87,29 +87,29 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 
 		switch (inner_type) {
 			case json_type_boolean:
-				kvp_add((struct _kvp_store *)jenc, key, 
-						kvp_val_create(NULL, json_object_get_boolean(val) ? 1 : 0), 0);
+				kvp_add_simple((struct _kvp_store *)jenc, key, 
+						kvp_val_create(NULL, json_object_get_boolean(val) ? 1 : 0));
 				break;
 			case json_type_double:
-				kvp_add((struct _kvp_store *)jenc, key, 
-						kvp_val_create(NULL, json_object_get_double(val)), 0);
+				kvp_add_simple((struct _kvp_store *)jenc, key, 
+						kvp_val_create(NULL, json_object_get_double(val)));
 				break;
 			case json_type_int:
-				kvp_add((struct _kvp_store *)jenc, key, 
-						kvp_val_create(NULL, json_object_get_int(val)), 0);
+				kvp_add_simple((struct _kvp_store *)jenc, key, 
+						kvp_val_create(NULL, json_object_get_int(val)));
 				break;
 			case json_type_string:
 				value = string_create(&value_len, snprintf(NULL, 0, "%s", 
 							json_object_get_string(val)));
 				sprintf(value, "%s", json_object_get_string(val));
-				kvp_add((struct _kvp_store *)jenc, key, kvp_val_create(value, 0), 0);
+				kvp_add_simple((struct _kvp_store *)jenc, key, kvp_val_create(value, 0));
 				string_free(value, &value_len);
 				break;
 			case json_type_object:
 				value = string_create(&value_len, snprintf(NULL, 0, "%s", 
 							json_object_get_string(val)));
 				sprintf(value, "%s", json_object_get_string(val));
-				kvp_add((struct _kvp_store *)jenc, key, kvp_val_create(value, 0), 0);
+				kvp_add_simple((struct _kvp_store *)jenc, key, kvp_val_create(value, 0));
 				string_free(value, &value_len);
 				json_object_put(val);
 				break;
@@ -122,14 +122,14 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 								snprintf(NULL, 0, "%s",
 									json_object_get_string(array_member)));
 						sprintf(value, "%s", json_object_get_string(array_member));
-						kvp_add((struct _kvp_store *)jenc, key, 
-								kvp_val_create(value, 0), 1);
+						kvp_add_array((struct _kvp_store *)jenc, key, 
+								kvp_val_create(value, 0));
 						string_free(value, &value_len);
 					}
 				}
 				break;
 			case json_type_null:
-				kvp_add((struct _kvp_store *)jenc, key, kvp_val_create("", 0), 0);
+				kvp_add_simple((struct _kvp_store *)jenc, key, kvp_val_create("", 0));
 				break;
 			default:
 				MYERROR("What other JSON type?");
@@ -224,7 +224,11 @@ static void jenc_add(t_json_encode *const jenc, const int argc, t_atom *const ar
 			strcat(value, temp_value);
 		}
 	}
-	kvp_add((struct _kvp_store *)jenc, key, kvp_val_create(value, f), is_array);
+	if (is_array){
+		kvp_add_array((struct _kvp_store *)jenc, key, kvp_val_create(value, f));
+	} else {
+		kvp_add_simple((struct _kvp_store *)jenc, key, kvp_val_create(value, f));
+	}
 	string_free(value, &value_len);
 }
 

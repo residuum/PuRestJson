@@ -172,7 +172,7 @@ void urlparams_add(t_urlparams *const urlp, const t_symbol *const sel, const int
 		strcat(value, " ");
 		strcat(value, temp_value);
 	}
-	kvp_add((struct _kvp_store *)urlp, key, kvp_val_create(value, 0), 0);
+	kvp_add_simple((struct _kvp_store *)urlp, key, kvp_val_create(value, 0));
 	string_free(value, &value_len);
 }
 

@@ -29,7 +29,9 @@ enum _v_type {string_val, float_val, int_val};
 struct _v {
 	size_t slen;
 	enum _v_type type;
+#ifndef NO_ARRAY
 	struct _v *next; /* makes a linked list for arrays */
+#endif
 	union {
 		t_float f;
 		char *s;
@@ -41,8 +43,10 @@ struct _kvp {
 	size_t key_len;
 	char *key;
 	struct _v *value;
+#ifndef NO_ARRAY
 	struct _v *last; /* simplifies adding to arrays */
 	unsigned char is_array; /* [json-encode] has arrays, [urlparams] not */
+#endif
 	UT_hash_handle hh;
 };
 
@@ -65,12 +69,12 @@ static void kvp_insert(struct _kvp_store *store, struct _kvp *new_pair);
 static void kvp_replace_value(struct _kvp *kvp, struct _v *value, const unsigned char is_array);
 /* adds or replaces items to / in store for simple items */
 static void kvp_add_simple(struct _kvp_store *store, char *key, struct _v *value);
+#ifndef NO_ARRAY
 /* adds value to key value pair as last, adds it to linked list */
 static void kvp_add_to_array(struct _kvp *kvp, struct _v *value);
 /* adds or replaces items to / in store for array */
 static void kvp_add_array(struct _kvp_store *store, char *key, struct _v *value);
-/* adds or replaces items to / in store */
-static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, const unsigned char is_array);
+#endif
 /* frees store */
 static void kvp_store_free_memory(struct _kvp_store *store);
 
@@ -80,7 +84,9 @@ static struct _v *kvp_val_create(const char *const s, const t_float f) {
 
 	created = getbytes(sizeof(struct _v));
 	created->slen = 0;
+#ifndef NO_ARRAY
 	created->next = NULL;
+#endif
 	if (s) {
 		created->val.s = string_create(&created->slen, strlen(s));
 		strcpy(created->val.s, s); 
@@ -99,12 +105,16 @@ static struct _v *kvp_val_create(const char *const s, const t_float f) {
 }
 
 static void kvp_val_free(struct _v *value) {
+#ifndef NO_ARRAY
 	do {
 		struct _v *next = value->next;
+#endif
 		string_free(value->val.s, &value->slen);
 		freebytes(value, sizeof(struct _v));
+#ifndef NO_ARRAY
 		value = next;
 	} while (value != NULL);
+#endif
 }
 
 static struct _kvp *kvp_create(const char *const key, struct _v *const value, const unsigned char is_array) {
@@ -118,9 +128,13 @@ static struct _kvp *kvp_create(const char *const key, struct _v *const value, co
 	}
 
 	created_data->value = value;
-	created_data->last = value;
 	strcpy(created_data->key, key);
+#ifdef NO_ARRAY
+	(void) is_array;
+#else
+	created_data->last = value;
 	created_data->is_array = is_array;
+#endif
 
 	return created_data;
 }
@@ -142,11 +156,17 @@ static void kvp_insert(struct _kvp_store *const store, struct _kvp *const new_pa
 }
 
 static void kvp_replace_value(struct _kvp *const kvp, struct _v *const value, const unsigned char is_array) {
+#ifdef NO_ARRAY
+	(void) is_array;
+#else
 	MYASSERT(kvp->is_array != 1 || is_array != 1, "This should not be called: array values should be appended, not replaced.");
-	
+#endif
+
 	kvp_val_free(kvp->value);
 	kvp->value = value;
+#ifndef NO_ARRAY
 	kvp->is_array = is_array;
+#endif
 }
 
 static void kvp_add_simple(struct _kvp_store *const store, char *const key, struct _v *const value) {
@@ -161,6 +181,7 @@ static void kvp_add_simple(struct _kvp_store *const store, char *const key, stru
 	}
 }
 
+#ifndef NO_ARRAY
 static void kvp_add_to_array(struct _kvp *const kvp, struct _v *const value) {
 	struct _v *last = kvp->last;
 
@@ -183,15 +204,7 @@ static void kvp_add_array(struct _kvp_store *const store, char *const key, struc
 		kvp_insert(store, kvp);
 	}
 }
-
-static void kvp_add(struct _kvp_store *const store, char *const key, struct _v *const value, 
-		const unsigned char is_array) {
-	if (!is_array) {
-		kvp_add_simple(store, key, value);
-	} else {
-		kvp_add_array(store, key, value);
-	}
-}
+#endif
 
 static void kvp_store_free_memory(struct _kvp_store *const store) {
 	struct _kvp *it;

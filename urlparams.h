@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include <string.h>
 #include "purest_json.h"
 
+/* suppresses warning, nothing special */
 #define NO_BACKSLASHES 1
 
 /* [urlparams] */

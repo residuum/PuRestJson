@@ -38,9 +38,13 @@ struct _json_decode {
 	t_outlet *done_outlet;
 };
 
+/* outputs json object at outlets */
 static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+/* outputs json array at outlets */
 static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+/* output json data */
 static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+/* checks for valid json string and converts to json */
 static void jdec_output_string(const char *json_string, t_json_decode *jdec);
 
 /* begin implementations */

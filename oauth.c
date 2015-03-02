@@ -54,9 +54,13 @@ struct _oauth {
 	} oauth;
 };
 
+/* frees data */
 static void oauth_free_inner(t_oauth *oauth, const short free_rsa);
+/* initialises object */
 static void oauth_set_init(t_oauth *oauth, const int argc, t_atom *argv);
+/* sets RSA key, if OAuth method is set to RSA */
 static void oauth_set_rsa_key(t_oauth *oauth, const int argc, t_atom *argv);
+/* checks, if method needs input */
 static int oauth_needs_input(const char *req_type);
 
 /* begin implementations */

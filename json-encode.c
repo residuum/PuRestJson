@@ -41,14 +41,20 @@ static t_class *json_encode_class;
 
 struct _json_encode {
 	struct _kvp_store storage;
-	t_canvas *x_canvas;
+	t_canvas *x_canvas; /* needed for getting file names */
 };
 
+/* gets json object */
 static json_object *jenc_create_object(const struct _v *value);
+/* loads json object */
 static void jenc_load_json_object(const t_json_encode *jenc, json_object *jobj);
+/* loads json data */
 static void jenc_load_json_data(t_json_encode *jenc, json_object *jobj);
+/* gets json array from key value pair */
 static json_object *jenc_get_array_value(struct _kvp *item);
+/* creates a json string from store */
 static t_symbol *jenc_get_json_symbol(t_json_encode *jenc);
+/* adds item to store */
 static void jenc_add(t_json_encode *jenc, const int argc, t_atom *argv, const unsigned char is_array);
 
 /* begin implementations */

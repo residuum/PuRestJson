@@ -1,6 +1,10 @@
+/* creates string */
 static char *string_create(size_t *newl, const size_t strl);
+/* frees string */
 static void string_free(char *string, size_t *strl);
+/* suppresses warning, nothing special */
 #ifndef NO_BACKSLASHES
+/* removes pd added backslashes from string */
 static char *string_remove_backslashes(char *source_string, size_t *memsize);
 #endif
 
@@ -26,6 +30,7 @@ static void string_free(char *string, size_t *const strl) {
 	}
 }
 
+/* suppresses warning, nothing special */
 #ifndef NO_BACKSLASHES
 static char *string_remove_backslashes(char *const source_string, size_t *const memsize) {
 	char *cleaned_string = NULL;

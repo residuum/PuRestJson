@@ -49,10 +49,15 @@ struct _rest {
 
 static t_class *rest_class;
 
+/* frees data */
 static void rest_free_inner(t_rest *rest);
+/* extracts cookie data */
 static void rest_extract_token(t_rest *rest, struct _memory_struct *out_header);
+/* processes output of login */
 static void rest_process_auth_data(t_rest *rest, struct _memory_struct *out_header);
+/* performs an HTTP POST for logging in */
 static void *rest_get_auth_token(void *thread_args);
+/* initialises object and optionally performs login */
 static void rest_set_init(t_rest *rest, const int argc, t_atom *argv);
 
 /* begin implementations */

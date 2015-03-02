@@ -67,42 +67,77 @@ struct _cb_val {
 	struct _ctw *ctw;
 };
 
+/* collecting output data */
 static size_t ctw_write_mem(const void *ptr, const size_t realsize, struct _memory_struct *mem);
+/* output as stream */
 static size_t ctw_write_stream(const void *ptr, const size_t realsize, struct _ctw *ctw);
+/* callback for writing date from libcurl */
 static size_t ctw_write_mem_cb(const void *ptr, size_t size, size_t nmemb, void *data);
+/* callback for reading data */
 static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
+/* helper for setting string data */
 static char *ctw_set_param(struct _ctw *common, t_atom *arg, size_t *string_len, char *error_msg);
+/* cancels request in thread */
 static void ctw_cancel_request(void *args);
+/* prepares for HTTP request, all verbs */
 static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist);
+/* prepares for PUT request */
 static void ctw_prepare_put(struct _ctw *common, struct _memory_struct *in_memory);
+/* prepares for POST request */
 static void ctw_prepare_post(struct _ctw *common);
+/* prepares for DELETE request */
 static void ctw_prepare_delete(struct _ctw *common);
+/* prepares for HEAD request */
 static void ctw_prepare_head(struct _ctw *common);
+/* prepares for PATCH request */
 static void ctw_prepare_patch(struct _ctw *common, struct _memory_struct *in_memory);
+/* prepares for OPTIONS request */
 static void ctw_prepare_options(struct _ctw *common);
+/* prepares for CONNECT request */
 static void ctw_prepare_connect(struct _ctw *common);
+/* prepares for TRACE request */
 static void ctw_prepare_trace(struct _ctw *common, struct curl_slist *slist);
+/* prepares for HTTP request, setting in- and output */
 static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, 
 		struct _memory_struct *out_memory, struct _memory_struct *in_memory);
+/* curl request loop */
 static int ctw_libcurl_loop(struct _ctw *common);
+/* performes the HTTP request */
 static void ctw_perform(struct _ctw *common);
+/* prepares performing HTTP request in separate thread */
 static void ctw_thread_perform(struct _ctw *common);
+/* outputs curl error */
 static void ctw_output_curl_error(struct _ctw *common, CURLMsg *msg);
+/* outputs collected data and bang */
 static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp);
+/* executes HTTP request */
 static void *ctw_exec(void *thread_args);
+/* executes HTTP request in thread */
 static void ctw_thread_exec(struct _ctw *x, void *(*func) (void *));
+/* checks for valid HTTP verb */
 static int ctw_check_request_type(const char *req_type);
+/* sets checking for SSL certificate */
 static void ctw_set_sslcheck(struct _ctw *common, int val);
+/* cancels HTTP request */
 static void ctw_cancel(struct _ctw *common);
+/* adds HTTP header */
 static void ctw_add_header(struct _ctw *common, int argc, t_atom *argv);
+/* clears HTTP header */
 static void ctw_clear_headers(struct _ctw *common);
+/* sets output file */
 static void ctw_set_file(struct _ctw *common, int argc, t_atom *argv);
+/* sets timeout for request */
 static void ctw_set_timeout(struct _ctw *common, int val);
+/* sets mode to blocking or streaming */
 static void ctw_set_mode(struct _ctw *common, int argc, t_atom *argv);
+/* sets mode to blocking or streaming as numerical value */
 static void ctw_set_mode_number(struct _ctw *common, int val);
+/* inits object */
 static void ctw_init(struct _ctw *common);
+/* frees data */
 static void ctw_free(struct _ctw *common);
 #ifdef NEEDS_CERT_PATH
+/* sets path to certificate file */
 static void ctw_set_cert_path(struct _ctw *common, const char *directory);
 #endif
 

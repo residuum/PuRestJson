@@ -29,7 +29,7 @@ enum _v_type {string_val, float_val, int_val};
 struct _v {
 	size_t slen;
 	enum _v_type type;
-	struct _v *next;
+	struct _v *next; /* makes a linked list for arrays */
 	union {
 		t_float f;
 		char *s;
@@ -41,8 +41,8 @@ struct _kvp {
 	size_t key_len;
 	char *key;
 	struct _v *value;
-	struct _v *last;
-	unsigned char is_array;
+	struct _v *last; /* simplifies adding to arrays */
+	unsigned char is_array; /* [json-encode] has arrays, [urlparams] not */
 	UT_hash_handle hh;
 };
 
@@ -51,16 +51,27 @@ struct _kvp_store {
 	struct _kvp *data;
 };
 
+/* creates new value, checks for type */
 static struct _v *kvp_val_create(const char *s, const t_float f);
+/* frees value and the whole linked list after it */
 static void kvp_val_free(struct _v *value);
+/* creates key value pair */
 static struct _kvp *kvp_create(const char *key, struct _v *value, const unsigned char is_array);
+/* frees key value pair */
 static void kvp_free(struct _kvp *item);
+/* inserts new pair to store */
 static void kvp_insert(struct _kvp_store *store, struct _kvp *new_pair);
+/* replaces value in key value pair */
 static void kvp_replace_value(struct _kvp *kvp, struct _v *value, const unsigned char is_array);
+/* adds or replaces items to / in store for simple items */
 static void kvp_add_simple(struct _kvp_store *store, char *key, struct _v *value);
+/* adds value to key value pair as last, adds it to linked list */
 static void kvp_add_to_array(struct _kvp *kvp, struct _v *value);
+/* adds or replaces items to / in store for array */
 static void kvp_add_array(struct _kvp_store *store, char *key, struct _v *value);
+/* adds or replaces items to / in store */
 static void kvp_add(struct _kvp_store *store, char *key, struct _v *value, const unsigned char is_array);
+/* frees store */
 static void kvp_store_free_memory(struct _kvp_store *store);
 
 /* begin implementations */

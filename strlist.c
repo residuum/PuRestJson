@@ -1,11 +1,14 @@
 struct _strlist {
 	char *str;
 	size_t str_len;
-	struct _strlist *next;
+	struct _strlist *next; /* linked list */
 };
 
+/* creates new item */
 static struct _strlist *strlist_create(char *val, const  size_t val_len);
+/* adds item to list */
 static struct _strlist *strlist_add(struct _strlist *list, char *val, const size_t val_len);
+/* frees list */
 static void strlist_free(struct _strlist *list);
 
 /* begin implementations */

@@ -33,7 +33,7 @@ THE SOFTWARE.
 #include <stdio.h>
 #include <math.h>
 
-#include "../uthash/src/uthash.h"
+#include "uthash/src/uthash.h"
 #include "inc/string.c"
 #include "inc/kvp.c"
 

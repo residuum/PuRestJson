@@ -31,8 +31,6 @@ THE SOFTWARE.
 
 /* suppresses warning, nothing special */
 #define NO_BACKSLASHES 1
-/* [urlparams] only has simple items, no array in store */
-#define NO_ARRAY 1
 
 /* [urlparams] */
 struct _urlparams;

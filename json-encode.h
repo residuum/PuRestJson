@@ -31,6 +31,9 @@ THE SOFTWARE.
 #include <json-c/json.h>
 #include "purest_json.h"
 
+/* [json-encode] can store arrays */
+#define ARRAY 1
+
 /* [json-encode] */
 struct _json_encode;
 typedef struct _json_encode t_json_encode;

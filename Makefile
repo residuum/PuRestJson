@@ -1,12 +1,10 @@
-## Pd library template version 1.0.14
+## based on Pd library template version 1.0.14
 # For instructions on how to use this template, see:
 #  http://puredata.info/docs/developer/MakefileTemplate
 LIBRARY_NAME = purest_json
 
-# add your .c source files, one object per file, to the SOURCES
-# variable, help files will be included automatically, and for GUI
-# objects, the matching .tcl file too
-SOURCES = rest.c oauth.c json-decode.c json-encode.c urlparams.c 
+# objects to build from .c files in src/
+OBJECTS = rest oauth json-decode json-encode urlparams 
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically
@@ -61,6 +59,8 @@ CROSS_PATH =
 # get library version from meta file
 LIBRARY_VERSION = $(shell sed -n 's|^\#X text [0-9][0-9]* [0-9][0-9]* VERSION \(.*\);|\1|p' $(LIBRARY_NAME)-meta.pd)
 
+SOURCES := $(addprefix src/,$(addsuffix .c,$(OBJECTS)))
+
 ALL_CFLAGS += -DPD -DVERSION='"$(LIBRARY_VERSION)"'
 
 PD_INCLUDE = $(PD_PATH)/include/pd
@@ -77,7 +77,7 @@ INSTALL_DIR     = $(INSTALL) -p -m 755 -d
 
 ALLSOURCES := $(SOURCES) $(SOURCES_android) $(SOURCES_cygwin) $(SOURCES_macosx) \
 	         $(SOURCES_iphoneos) $(SOURCES_linux) $(SOURCES_windows) \
-			 ctw.c kvp.c string.c strlist.c
+			 $(addprefix src/inc/,ctw.c kvp.c string.c strlist.c)
 
 DISTDIR=$(LIBRARY_NAME)-$(LIBRARY_VERSION)
 ORIGDIR=pd-`echo $(LIBRARY_NAME:~=)|tr '_' '-'`_$(LIBRARY_VERSION)
@@ -268,10 +268,11 @@ SHARED_TCL_LIB = $(wildcard lib$(LIBRARY_NAME).tcl)
 
 .PHONY = install libdir_install single_install install-doc install-examples install-manual install-unittests clean distclean dist etags $(LIBRARY_NAME)
 
-all: $(SOURCES:.c=.$(EXTENSION)) $(SHARED_LIB)
+all: $(addsuffix .$(EXTENSION),$(OBJECTS)) $(SHARED_LIB)
 
-%.o: %.c
-	$(CC) $(ALL_CFLAGS) -o "$*.o" -c "$*.c"
+%.o: src/%.c
+	echo $(ALL_CFLAGS)
+	$(CC) $(ALL_CFLAGS) -o "$*.o" -c "src/$*.c"
 
 %.$(EXTENSION): %.o $(SHARED_LIB)
 	$(CC) $(ALL_LDFLAGS) -o "$*.$(EXTENSION)" "$*.o"  $(ALL_LIBS) $(SHARED_LIB)
@@ -347,8 +348,8 @@ install-unittests:
 		done
 
 clean:
-	-rm -f -- $(SOURCES:.c=.o) $(SOURCES_LIB:.c=.o) $(SHARED_SOURCE:.c=.o)
-	-rm -f -- $(SOURCES:.c=.$(EXTENSION))
+	-rm -f -- $(addsuffix .o,$(OBJECTS)) $(SOURCES_LIB:.c=.o) $(SHARED_SOURCE:.c=.o)
+	-rm -f -- $(addsuffix .$(EXTENSION),$(OBJECTS))
 	-rm -f -- $(LIBRARY_NAME).o
 	-rm -f -- $(LIBRARY_NAME).$(EXTENSION)
 	-rm -f -- $(SHARED_LIB)

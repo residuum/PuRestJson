@@ -33,9 +33,9 @@ THE SOFTWARE.
 #include <stdio.h>
 #include <math.h>
 
-#include "uthash/src/uthash.h"
-#include "string.c"
-#include "kvp.c"
+#include "../uthash/src/uthash.h"
+#include "inc/string.c"
+#include "inc/kvp.c"
 
 static t_class *json_encode_class;
 

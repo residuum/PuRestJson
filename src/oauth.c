@@ -30,9 +30,9 @@ THE SOFTWARE.
 
 #include "oauth.h"
 
-#include "string.c"
-#include "strlist.c"
-#include "ctw.c"
+#include "inc/string.c"
+#include "inc/strlist.c"
+#include "inc/ctw.c"
 
 static t_class *oauth_class;
 

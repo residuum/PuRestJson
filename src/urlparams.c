@@ -31,9 +31,9 @@ THE SOFTWARE.
 #include "urlparams.h"
 #include <math.h>
 
-#include "uthash/src/uthash.h"
-#include "string.c"
-#include "kvp.c"
+#include "../uthash/src/uthash.h"
+#include "inc/string.c"
+#include "inc/kvp.c"
 
 static t_class *urlparams_class;
 

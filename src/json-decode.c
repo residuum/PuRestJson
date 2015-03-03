@@ -29,7 +29,7 @@ THE SOFTWARE.
  * */
 
 #include "json-decode.h"
-#include "string.c"
+#include "inc/string.c"
 
 static t_class *json_decode_class;
 

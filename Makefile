@@ -60,6 +60,8 @@ CROSS_PATH =
 LIBRARY_VERSION = $(shell sed -n 's|^\#X text [0-9][0-9]* [0-9][0-9]* VERSION \(.*\);|\1|p' $(LIBRARY_NAME)-meta.pd)
 
 SOURCES := $(addprefix src/,$(addsuffix .c,$(OBJECTS)))
+SOURCE_FOLDERS := src src/inc src/uthash/src
+OBJ_FILES := $(addsuffix .o,$(OBJECTS)))
 
 ALL_CFLAGS += -DPD -DVERSION='"$(LIBRARY_VERSION)"'
 
@@ -281,8 +283,8 @@ all: $(addsuffix .$(EXTENSION),$(OBJECTS)) $(SHARED_LIB)
 $(LIBRARY_NAME)_vars: 
 	$(eval ALL_CFLAGS += -DPUREST_JSON_LIB)
 
-$(LIBRARY_NAME): $(LIBRARY_NAME)_vars  $(addsuffix .o,$(OBJECTS)) $(LIBRARY_NAME).o 
-	$(CC) $(ALL_LDFLAGS) -o $(LIBRARY_NAME).$(EXTENSION) $(addsuffix .o,$(OBJECTS)) \
+$(LIBRARY_NAME): $(LIBRARY_NAME)_vars  $(OBJ_FILES)h $(LIBRARY_NAME).o
+	$(CC) $(ALL_LDFLAGS) -o $(LIBRARY_NAME).$(EXTENSION) $(OBJ_FILES) \
 		$(LIBRARY_NAME).o  $(ALL_LIBS)
 	chmod a-x $(LIBRARY_NAME).$(EXTENSION)
 
@@ -375,9 +377,9 @@ libdir: all $(DISTBINDIR)
 
 $(DISTDIR):
 	$(INSTALL_DIR) $(DISTDIR)
-	$(INSTALL_DIR) $(DISTDIR)/src
-	$(INSTALL_DIR) $(DISTDIR)/src/inc
-	$(INSTALL_DIR) $(DISTDIR)/src/uthash/src
+	for dir in $(SOURCE_FOLDERS); do \
+		$(INSTALL_DIR) $(DISTDIR)/$$dir; \
+	done
 
 $(ORIGDIR):
 	$(INSTALL_DIR) $(ORIGDIR)
@@ -385,10 +387,13 @@ $(ORIGDIR):
 dist: $(DISTDIR)
 	$(INSTALL_DATA) Makefile  $(DISTDIR)
 	$(INSTALL_DATA) $(LIBRARY_NAME)-meta.pd  $(DISTDIR)
-	$(INSTALL_DATA) src/*.c -t $(DISTDIR)/src/;
-	$(INSTALL_DATA) src/*.h -t $(DISTDIR)/src/;
-	$(INSTALL_DATA) src/inc/* -t $(DISTDIR)/src/inc;
-	$(INSTALL_DATA) src/uthash/src/uthash.h -t $(DISTDIR)/src/uthash/src;
+	for dir in $(SOURCE_FOLDERS); do \
+			echo $$dir; \
+		for file in `ls $$dir`; do \
+			$(INSTALL_DATA) $$dir/$$file $(DISTDIR)/$$dir/; \
+			echo $$file; \
+		done; \
+	done
 	test -z "$(strip $(PDOBJECTS))" || \
 		$(INSTALL_DATA) $(PDOBJECTS)  $(DISTDIR)
 	test -z "$(strip $(HELPPATCHES))" || \

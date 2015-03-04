@@ -281,8 +281,8 @@ all: $(addsuffix .$(EXTENSION),$(OBJECTS)) $(SHARED_LIB)
 $(LIBRARY_NAME)_vars: 
 	$(eval ALL_CFLAGS += -DPUREST_JSON_LIB)
 
-$(LIBRARY_NAME): $(LIBRARY_NAME)_vars  $(notdir $(SOURCES:.c=.o)) $(LIBRARY_NAME).o 
-	$(CC) $(ALL_LDFLAGS) -o $(LIBRARY_NAME).$(EXTENSION) $(SOURCES:.c=.o) \
+$(LIBRARY_NAME): $(LIBRARY_NAME)_vars  $(addsuffix .o,$(OBJECTS)) $(LIBRARY_NAME).o 
+	$(CC) $(ALL_LDFLAGS) -o $(LIBRARY_NAME).$(EXTENSION) $(addsuffix .o,$(OBJECTS)) \
 		$(LIBRARY_NAME).o  $(ALL_LIBS)
 	chmod a-x $(LIBRARY_NAME).$(EXTENSION)
 

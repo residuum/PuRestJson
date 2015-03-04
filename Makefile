@@ -271,7 +271,6 @@ SHARED_TCL_LIB = $(wildcard lib$(LIBRARY_NAME).tcl)
 all: $(addsuffix .$(EXTENSION),$(OBJECTS)) $(SHARED_LIB)
 
 %.o: src/%.c
-	echo $(ALL_CFLAGS)
 	$(CC) $(ALL_CFLAGS) -o "$*.o" -c "src/$*.c"
 
 %.$(EXTENSION): %.o $(SHARED_LIB)
@@ -282,7 +281,7 @@ all: $(addsuffix .$(EXTENSION),$(OBJECTS)) $(SHARED_LIB)
 $(LIBRARY_NAME)_vars: 
 	$(eval ALL_CFLAGS += -DPUREST_JSON_LIB)
 
-$(LIBRARY_NAME): $(LIBRARY_NAME)_vars  $(SOURCES:.c=.o) $(LIBRARY_NAME).o 
+$(LIBRARY_NAME): $(LIBRARY_NAME)_vars  $(notdir $(SOURCES:.c=.o)) $(LIBRARY_NAME).o 
 	$(CC) $(ALL_LDFLAGS) -o $(LIBRARY_NAME).$(EXTENSION) $(SOURCES:.c=.o) \
 		$(LIBRARY_NAME).o  $(ALL_LIBS)
 	chmod a-x $(LIBRARY_NAME).$(EXTENSION)
@@ -294,13 +293,13 @@ install: libdir_install
 
 # The meta and help files are explicitly installed to make sure they are
 # actually there.  Those files are not optional, then need to be there.
-libdir_install: $(SOURCES:.c=.$(EXTENSION)) $(SHARED_LIB) install-doc install-examples install-manual install-unittests
+libdir_install: $(addsuffix .$(EXTENSION),$(OBJECTS)) $(SHARED_LIB) install-doc install-examples install-manual install-unittests
 	$(INSTALL_DIR) $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)
 	$(INSTALL_DATA) $(LIBRARY_NAME)-meta.pd \
 		$(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)
 	test -z "$(strip $(SOURCES))" || (\
-		$(INSTALL_PROGRAM) $(SOURCES:.c=.$(EXTENSION)) $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME) && \
-		$(STRIP) $(addprefix $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/,$(SOURCES:.c=.$(EXTENSION))))
+		$(INSTALL_PROGRAM) $(addsuffix .$(EXTENSION),$(OBJECTS)) $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME) && \
+		$(STRIP) $(addprefix $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/,$(addsuffix .$(EXTENSION),$(OBJECTS))))
 	test -z "$(strip $(SHARED_LIB))" || \
 		$(INSTALL_DATA) $(SHARED_LIB) \
 			$(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)
@@ -376,6 +375,9 @@ libdir: all $(DISTBINDIR)
 
 $(DISTDIR):
 	$(INSTALL_DIR) $(DISTDIR)
+	$(INSTALL_DIR) $(DISTDIR)/src
+	$(INSTALL_DIR) $(DISTDIR)/src/inc
+	$(INSTALL_DIR) $(DISTDIR)/src/uthash/src
 
 $(ORIGDIR):
 	$(INSTALL_DIR) $(ORIGDIR)
@@ -383,20 +385,10 @@ $(ORIGDIR):
 dist: $(DISTDIR)
 	$(INSTALL_DATA) Makefile  $(DISTDIR)
 	$(INSTALL_DATA) $(LIBRARY_NAME)-meta.pd  $(DISTDIR)
-	test -z "$(strip $(ALLSOURCES))" || \
-		$(INSTALL_DATA) $(ALLSOURCES)  $(DISTDIR)
-	test -z "$(strip $(wildcard $(ALLSOURCES:.c=.tcl)))" || \
-		$(INSTALL_DATA) $(wildcard $(ALLSOURCES:.c=.tcl))  $(DISTDIR)
-	test -z "$(strip $(wildcard $(ALLSOURCES:.c=.h)))" || \
-		$(INSTALL_DATA) $(wildcard $(ALLSOURCES:.c=.h))  $(DISTDIR)
-	test -z "$(strip $(wildcard $(LIBRARY_NAME).c))" || \
-		$(INSTALL_DATA) $(LIBRARY_NAME).c  $(DISTDIR)
-	test -z "$(strip $(SHARED_HEADER))" || \
-		$(INSTALL_DATA) $(SHARED_HEADER)  $(DISTDIR)
-	test -z "$(strip $(SHARED_SOURCE))" || \
-		$(INSTALL_DATA) $(SHARED_SOURCE)  $(DISTDIR)
-	test -z "$(strip $(SHARED_TCL_LIB))" || \
-		$(INSTALL_DATA) $(SHARED_TCL_LIB)  $(DISTDIR)
+	$(INSTALL_DATA) src/*.c -t $(DISTDIR)/src/;
+	$(INSTALL_DATA) src/*.h -t $(DISTDIR)/src/;
+	$(INSTALL_DATA) src/inc/* -t $(DISTDIR)/src/inc;
+	$(INSTALL_DATA) src/uthash/src/uthash.h -t $(DISTDIR)/src/uthash/src;
 	test -z "$(strip $(PDOBJECTS))" || \
 		$(INSTALL_DATA) $(PDOBJECTS)  $(DISTDIR)
 	test -z "$(strip $(HELPPATCHES))" || \

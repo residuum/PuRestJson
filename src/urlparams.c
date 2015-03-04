@@ -41,7 +41,9 @@ struct _urlparams {
 	struct _kvp_store storage;
 };
 
+/* converts char to hex represenstation for url encoding */
 static char urlp_tohex(const char code);
+/* url encodes a string */
 static char *urlp_encode(char *str, size_t *str_len);
 
 /* begin implementations */

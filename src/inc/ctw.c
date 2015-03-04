@@ -36,32 +36,35 @@ struct _ctw {
 	t_object x_ob;
 	t_outlet *status_out;
 	t_atom *out;
-	t_canvas *x_canvas;
+	t_canvas *x_canvas; /* needed for getting file path */
 	pthread_t thread;
 	struct _strlist *http_headers;
 	char req_type[REQUEST_TYPE_LEN]; /*One of GET, PUT, POST, DELETE, PATCH, HEAD, OPTIONS, CONNECT, TRACE*/
 	size_t base_url_len;
 	char *base_url;
 	size_t parameters_len;
-	char *parameters;
+	char *parameters; /* POST, PUT, PATCH parameters */
 	size_t complete_url_len;
 	char *complete_url;
 	size_t auth_token_len;
-	char *auth_token;
-	unsigned char locked;
+	char *auth_token; /* for cookie authentication */
 	long timeout;
-	unsigned char sslcheck;
-	char *out_file;
 	size_t out_file_len;
+	char *out_file; /* filename for output, if any */
 	CURLM *multi_handle;
 	CURL *easy_handle;
-	unsigned char mode;
+	unsigned char locked; /* is object locked? */
+	unsigned char sslcheck; /* check SSL certificate with CA list? */
+	unsigned char mode; /* output when done or stream? */
 #ifdef NEEDS_CERT_PATH
 	size_t cert_path_len;
 	char *cert_path;
 #endif
 };
 
+/* used for writing data on HTTP data received:
+   if output on completely received, write to mem
+   if output in streaming mode, output at outlet of ctw */
 struct _cb_val {
 	struct _memory_struct *mem;
 	struct _ctw *ctw;

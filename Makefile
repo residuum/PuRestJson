@@ -388,10 +388,8 @@ dist: $(DISTDIR)
 	$(INSTALL_DATA) Makefile  $(DISTDIR)
 	$(INSTALL_DATA) $(LIBRARY_NAME)-meta.pd  $(DISTDIR)
 	for dir in $(SOURCE_FOLDERS); do \
-			echo $$dir; \
 		for file in `ls $$dir`; do \
 			$(INSTALL_DATA) $$dir/$$file $(DISTDIR)/$$dir/; \
-			echo $$file; \
 		done; \
 	done
 	test -z "$(strip $(PDOBJECTS))" || \

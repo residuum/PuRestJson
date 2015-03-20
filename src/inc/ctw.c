@@ -101,7 +101,7 @@ static void ctw_prepare_connect(struct _ctw *common);
 /* prepares for TRACE request */
 static void ctw_prepare_trace(struct _ctw *common, struct curl_slist *slist);
 /* prepares for HTTP request, setting in- and output */
-static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist, 
+static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist,
 		struct _memory_struct *out_memory, struct _memory_struct *in_memory);
 /* curl request loop */
 static int ctw_libcurl_loop(struct _ctw *common);
@@ -304,7 +304,7 @@ static void ctw_prepare_trace(struct _ctw *const common, struct curl_slist *slis
 	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "TRACE");
 }
 
-static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const slist, 
+static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *slist,
 		struct _memory_struct *const out_memory, struct _memory_struct *const in_memory) {
 	FILE *fp = NULL; 
 

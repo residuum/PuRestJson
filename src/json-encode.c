@@ -278,6 +278,7 @@ void json_encode_read(t_json_encode *const jenc, const t_symbol *const filename)
 	struct stat st;
 	char *json_string;
 	json_object *jobj;
+	size_t file_size;
 
 	canvas_makefilename(jenc->x_canvas, filename->s_name, buf, MAXPDSTRING);
 	file = fopen(buf, "r");
@@ -285,12 +286,19 @@ void json_encode_read(t_json_encode *const jenc, const t_symbol *const filename)
 		pd_error(jenc, "%s: read failed.", filename->s_name);
 		return;
 	}
-
-	stat(buf, &st);
+	if (stat(buf, &st) == -1) {
+		pd_error(jenc, "%s: not a regular file.", filename->s_name);
+		fclose(file);
+		return;
+	}
 	json_string = getbytes((st.st_size + 1) * sizeof(char));
 	json_string[st.st_size] = 0x00;
-	fread(json_string, sizeof(char), st.st_size, file);
+	file_size = fread(json_string, sizeof(char), st.st_size, file);
 	fclose(file);
+	if (file_size != (size_t)st.st_size) {
+		pd_error(jenc, "%s: file size could not be determined", filename->s_name);
+		return;
+	}
 	jobj = json_tokener_parse(json_string);
 	freebytes(json_string, (st.st_size + 1) * sizeof(char));
 	if (!is_error(jobj)) {

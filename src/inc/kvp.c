@@ -121,12 +121,12 @@ static struct _kvp *kvp_create(const char *const key, struct _v *const value, co
 	struct _kvp *created_data = NULL;
 
 	created_data = getbytes(sizeof(struct _kvp));
-	created_data->key = string_create(&created_data->key_len, strlen(key));
 	if (created_data == NULL || key == NULL || value == NULL) {
 		MYERROR("Could not get data.");
 		return NULL;
 	}
 
+	created_data->key = string_create(&created_data->key_len, strlen(key));
 	created_data->value = value;
 	strcpy(created_data->key, key);
 #ifdef ARRAY

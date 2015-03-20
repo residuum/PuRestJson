@@ -238,9 +238,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 	if (postargs) {
 		free(postargs);
 	}
-	if (req_url) {
-		free(req_url);
-	}
+	free(req_url);
 	ctw_thread_exec((struct _ctw *)oauth, ctw_exec);
 }
 

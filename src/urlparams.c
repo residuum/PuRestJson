@@ -133,12 +133,8 @@ void urlparams_bang(t_urlparams *const urlp) {
 		strcat(output, encoded_key_string);
 		strcat(output, "=");
 		strcat(output, encoded_val_string);
-		if (encoded_key_string) {
-			string_free(encoded_key_string, &encoded_key_len);
-		}
-		if (encoded_val_string) {
-			string_free(encoded_val_string, &encoded_val_len);
-		}
+		string_free(encoded_key_string, &encoded_key_len);
+		string_free(encoded_val_string, &encoded_val_len);
 		if (it->hh.next != NULL) {
 			strcat(output, "&");
 		}

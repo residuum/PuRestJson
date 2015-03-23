@@ -187,7 +187,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 
 	oauth->common.locked = 1;
 	req_type = sel->s_name;
-	strcpy(oauth->common.req_type, req_type);
+	strncpy(oauth->common.req_type, req_type, REQUEST_TYPE_LEN - 1);
 	if (ctw_check_request_type(oauth->common.req_type) != 0){
 		pd_error(oauth, "Request method %s not supported.", oauth->common.req_type);
 		oauth->common.locked = 0;

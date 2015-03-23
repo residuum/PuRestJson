@@ -237,7 +237,7 @@ void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc,
 	}
 
 	rest->common.locked = 1;
-	strcpy(rest->common.req_type, req_type);
+	strncpy(rest->common.req_type, req_type, REQUEST_TYPE_LEN - 1);
 	if (ctw_check_request_type(rest->common.req_type) != 0){
 		pd_error(rest, "Request method %s not supported.", rest->common.req_type);
 		rest->common.locked = 0;

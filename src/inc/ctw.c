@@ -113,6 +113,8 @@ static void ctw_thread_perform(struct _ctw *common);
 static void ctw_output_curl_error(struct _ctw *common, CURLMsg *msg);
 /* outputs collected data and bang */
 static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp);
+/* cleans up after HTTP request */
+static void ctw_cleanup_request(struct _ctw *common, FILE *fp, struct curl_slist *slist);
 /* executes HTTP request */
 static void *ctw_exec(void *thread_args);
 /* executes HTTP request in thread */
@@ -304,7 +306,7 @@ static void ctw_prepare_trace(struct _ctw *const common, struct curl_slist *slis
 	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "TRACE");
 }
 
-static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *slist,
+static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const slist,
 		struct _memory_struct *const out_memory, struct _memory_struct *const in_memory) {
 	FILE *fp = NULL; 
 
@@ -450,6 +452,18 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 	}
 }
 
+static void ctw_cleanup_request(struct _ctw *const common, FILE *const fp, struct curl_slist *const slist) {
+	string_free(common->complete_url, &common->complete_url_len);
+	string_free(common->parameters, &common->parameters_len);
+	if (slist != NULL) {
+		curl_slist_free_all(slist);
+	}
+	if (fp) {
+		fclose(fp);
+	}
+	common->locked = 0;
+}
+
 static void *ctw_exec(void *const thread_args) {
 	struct _ctw *const common = thread_args; 
 
@@ -458,6 +472,7 @@ static void *ctw_exec(void *const thread_args) {
 	common->multi_handle = curl_multi_init();
 	if (common->easy_handle == NULL) {
 		MYERROR("Cannot init curl.");
+		common->locked = 0;
 	} else {
 		struct curl_slist *slist = NULL;
 		struct _memory_struct out_memory;
@@ -466,17 +481,8 @@ static void *ctw_exec(void *const thread_args) {
 		fp = ctw_prepare(common, slist, &out_memory, &in_memory);
 		ctw_thread_perform(common);
 		ctw_output(common, &out_memory, fp);
-		string_free(common->complete_url, &common->complete_url_len);
-		string_free(common->parameters, &common->parameters_len);
-		if (slist != NULL) {
-			curl_slist_free_all(slist);
-		}
-		if (fp) {
-			fclose(fp);
-		}
-
+		ctw_cleanup_request(common, fp, slist);
 	}
-	common->locked = 0;
 	return NULL;
 }
 

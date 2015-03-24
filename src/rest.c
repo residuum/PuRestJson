@@ -146,6 +146,7 @@ static void *rest_get_auth_token(void *const thread_args) {
 	rest->common.multi_handle = curl_multi_init();
 	if (rest->common.easy_handle == NULL) {
 		MYERROR("Cannot init curl.");
+		rest->common.locked = 0;
 	} else {
 		struct curl_slist *slist = NULL;
 		struct _memory_struct out_content;
@@ -165,16 +166,8 @@ static void *rest_get_auth_token(void *const thread_args) {
 		rest_process_auth_data(rest, &out_header);
 		string_free(out_header.memory, &out_header.size);
 		string_free(out_content.memory, &out_content.size);
-		string_free(rest->common.complete_url, &rest->common.complete_url_len);
-		string_free(rest->common.parameters, &rest->common.parameters_len);
-		if (slist != NULL) {
-			curl_slist_free_all(slist);
-		}
-		if (fp) {
-			fclose(fp);
-		}
+		ctw_cleanup_request(&rest->common, fp, slist);
 	}
-	rest->common.locked = 0;
 	return NULL;
 }
 

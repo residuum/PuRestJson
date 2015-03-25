@@ -472,13 +472,12 @@ static void *ctw_exec(void *const thread_args) {
 	common->multi_handle = curl_multi_init();
 	if (common->easy_handle == NULL) {
 		MYERROR("Cannot init curl.");
-		common->locked = 0;
+		ctw_cleanup_request(common, NULL, NULL);
 	} else {
 		struct curl_slist *slist = NULL;
 		struct _memory_struct out_memory;
 		struct _memory_struct in_memory;
-		FILE *fp; 
-		fp = ctw_prepare(common, slist, &out_memory, &in_memory);
+		FILE *fp = ctw_prepare(common, slist, &out_memory, &in_memory);
 		ctw_thread_perform(common);
 		ctw_output(common, &out_memory, fp);
 		ctw_cleanup_request(common, fp, slist);

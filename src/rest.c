@@ -146,14 +146,13 @@ static void *rest_get_auth_token(void *const thread_args) {
 	rest->common.multi_handle = curl_multi_init();
 	if (rest->common.easy_handle == NULL) {
 		MYERROR("Cannot init curl.");
-		rest->common.locked = 0;
+		ctw_cleanup_request(&rest->common, NULL, NULL);
 	} else {
 		struct curl_slist *slist = NULL;
 		struct _memory_struct out_content;
 		struct _memory_struct out_header;
-		FILE *fp; 
+		FILE *fp = ctw_prepare(&rest->common, slist, &out_content, NULL);
 
-		fp = ctw_prepare(&rest->common, slist, &out_content, NULL);
 		out_header.memory = getbytes(1);
 		out_header.size = 0;
 

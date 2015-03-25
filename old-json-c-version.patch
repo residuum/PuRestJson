@@ -1,8 +1,8 @@
 diff --git a/Makefile b/Makefile
-index a5ca149..ef65c10 100644
+index e84074c..553fe2a 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -39,7 +39,7 @@ HELPPATCHES = json-help.pd urlparams-help.pd rest-help.pd
+@@ -36,7 +36,7 @@ HELPPATCHES = json-help.pd urlparams-help.pd rest-help.pd
  ALL_CFLAGS = -I"$(PD_INCLUDE)" -std=c99
  ALL_LDFLAGS =  
  SHARED_LDFLAGS =
@@ -61,23 +61,24 @@ index d936a8d..12be207 100644
                 libcurl4-gnutls-dev | libcurl4-openssl-dev,
                 liboauth-dev
  Standards-Version: 3.9.2
-diff --git a/json-decode.c b/json-decode.c
-index 878064e..d420a66 100644
---- a/json-decode.c
-+++ b/json-decode.c
-@@ -15,7 +15,10 @@ struct _json_decode {
- static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
- static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+diff --git a/src/json-decode.c b/src/json-decode.c
+index 52d582f..54d0bfd 100644
+--- a/src/json-decode.c
++++ b/src/json-decode.c
+@@ -45,7 +45,11 @@ static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet
+ /* output json data */
  static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+ /* checks for valid json string and converts to json */
 -static void jdec_output_string(const char *json_string, t_json_decode *jdec);
 +static void jdec_output_string(char *json_string, t_json_decode *jdec);
 +#if JSON_C_FIX
++/* workaround in json-c < 0.10 for https://github.com/json-c/json-c/issues/3 */
 +static char *lowercase_unicode(char *orig, size_t *memsize);
 +#endif
  
  /* begin implementations */
  static void jdec_output_object(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
-@@ -69,6 +72,60 @@ static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_
+@@ -102,6 +106,60 @@ static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_
  	}
  }
  
@@ -138,7 +139,7 @@ index 878064e..d420a66 100644
  static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
  	t_atom out_data[2];
  	t_float out_float;
-@@ -110,9 +167,17 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
+@@ -146,9 +204,17 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
  	}
  }
  
@@ -159,9 +160,9 @@ index 878064e..d420a66 100644
  	if (!is_error(jobj)) {
  		jdec_output(jobj, jdec->x_ob.ob_outlet, jdec->done_outlet);
  		/* TODO: This sometimes results in a segfault. Why? */
-@@ -120,6 +185,11 @@ static void jdec_output_string(const char *const json_string, t_json_decode *con
+@@ -156,6 +222,11 @@ static void jdec_output_string(const char *const json_string, t_json_decode *con
  	} else {
- 		pd_error(jdec, "Not a JSON object");
+ 		pd_error(jdec, "Not a JSON object.");
  	}
 +#if JSON_C_FIX
 +	if (corrected_json_string != NULL){
@@ -171,10 +172,10 @@ index 878064e..d420a66 100644
  }
  
  void setup_json0x2ddecode(void) {
-diff --git a/json-decode.h b/json-decode.h
-index 7d6948c..8461c34 100644
---- a/json-decode.h
-+++ b/json-decode.h
+diff --git a/src/json-decode.h b/src/json-decode.h
+index b34833b..e846e03 100644
+--- a/src/json-decode.h
++++ b/src/json-decode.h
 @@ -26,9 +26,17 @@ THE SOFTWARE.
  
  #include <ctype.h>
@@ -194,10 +195,10 @@ index 7d6948c..8461c34 100644
  /* [json-decode] */
  struct _json_decode;
  typedef struct _json_decode t_json_decode;
-diff --git a/json-encode.h b/json-encode.h
-index 3f7f9ad..dfcbca6 100644
---- a/json-encode.h
-+++ b/json-encode.h
+diff --git a/src/json-encode.h b/src/json-encode.h
+index 3419891..519dfa4 100644
+--- a/src/json-encode.h
++++ b/src/json-encode.h
 @@ -28,7 +28,7 @@ THE SOFTWARE.
  #include <stdio.h>
  #include <stdlib.h>
@@ -206,4 +207,4 @@ index 3f7f9ad..dfcbca6 100644
 +#include <json/json.h>
  #include "purest_json.h"
  
- /* [json-encode] */
+ /* [json-encode] can store arrays */

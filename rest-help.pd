@@ -1,4 +1,4 @@
-#N canvas 222 51 1137 558 10;
+#N canvas 220 51 1137 558 10;
 #X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
 #X text 55 -59 - object for HTTP communication with REST webservices
@@ -367,10 +367,10 @@ is blocked.;
 #X connect 8 0 0 0;
 #X restore 21 374 pd download-to-file;
 #X text 20 333 More functions:;
-#N canvas 354 170 631 378 streaming-and-blocking 0;
-#X obj 77 247 rest;
-#X obj 48 297 print data;
-#X obj 133 297 print done;
+#N canvas 170 140 678 510 streaming-and-blocking 0;
+#X obj 77 353 rest;
+#X obj 48 403 print data;
+#X obj 133 403 print done;
 #X msg 77 142 mode stream;
 #X msg 130 203 mode block;
 #X text 132 182 This will reset the object to the default mode;
@@ -381,10 +381,13 @@ connection open and flush data to clients (streaming).;
 #X text 72 59 To output that data when it is done \, use the [mode(
 message and set the mode to stream. The default mode is blocking mode.
 You can set the mode even during running requests.;
+#X msg 257 265 GET http://ix.residuum.org/pd/stream_example.php;
+#X text 255 243 Example for a streaming webservice;
 #X connect 0 0 1 0;
 #X connect 0 1 2 0;
 #X connect 3 0 0 0;
 #X connect 4 0 0 0;
+#X connect 9 0 0 0;
 #X restore 21 396 pd streaming-and-blocking;
 #N canvas 114 149 628 451 setting-headers 0;
 #X obj 76 359 print data;

@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 
 rm -f purest-json.tar.gz
 export PATH=$PATH:~/bin/cov-analysis-linux64-7.6.0/bin

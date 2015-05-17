@@ -13,9 +13,6 @@ PDOBJECTS =
 # example patches and related files, in the 'examples' subfolder
 EXAMPLES = purest-json-test.pd the-sound-of-money.pd statistics.pd twitter-client.pd binary-test.pd
 
-# manuals and related files, in the 'manual' subfolder
-MANUAL = index.html couchdb-example.png webservice-example.png twitter.html twitter-documentation.png
-
 # if you want to include any other files in the source and binary tarballs,
 # list them here.  This can be anything from header files, test patches,
 # documentation, etc. 
@@ -335,11 +332,10 @@ install-examples:
 		done
 
 install-manual:
-	test -z "$(strip $(MANUAL))" || \
-		$(INSTALL_DIR) $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/manual && \
-		for file in $(MANUAL); do \
-			$(INSTALL_DATA) manual/$$file $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/manual; \
-		done
+	$(INSTALL_DIR) $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/manual && \
+	for file in $(wildcard manual/*); do \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/manual; \
+	done
 
 install-unittests:
 	test -z "$(strip $(UNITTESTS))" || \
@@ -427,6 +423,9 @@ dpkg-source:
 
 dpkg-deb: dpkg-source
 	dpkg-buildpackage -b -us
+
+doc:
+	python create-manual.py
 
 etags: TAGS
 

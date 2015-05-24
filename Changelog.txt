@@ -1,15 +1,17 @@
 Changelog
 ---------
+1.3.0:
+- [json-encode] and [urlparams]: optimisation of logic
+- [rest] and [oauth]: HTTP streaming enabled
+- Rewrite of manual
+- Bug fix:
+	-- [oauth]: unitialised object does not request data
+- Refactoring of source code:
+	-- moved source to subfolders
+	-- static analysis of source code
+
 1.2.0:
 - [oauth]: PATCH, TRACE and OPTIONS request implemented
-
-1.1.0:
-- [rest]: HEAD, PATCH, TRACE and OPTIONS request implemented
-- [oauth]: HEAD request implemented
-- Bug fixes:
-	-- [rest] and [oauth]: Mac OS X needs cacert.pem
-	-- [json-encode]: differentiate between float and integer values
-- unit tests for [json-decode], [json-encode], [urlparams]
 
 1.1.0:
 - [rest]: HEAD, PATCH, TRACE and OPTIONS request implemented

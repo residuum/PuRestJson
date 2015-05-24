@@ -1,3 +1,15 @@
+pd-purest-json (1.3.0) UNRELEASED; urgency=low
+  * [json-encode] and [urlparams]: optimisation of logic
+  * [rest] and [oauth]: HTTP streaming enabled
+  * Rewrite of manual
+  * Bug fix:
+    - [oauth]: unitialised object does not request data
+  * Refactoring of source code:
+    - moved source to subfolders
+    - static analysis of source code
+
+ -- Thomas Mayer <thomas@residuum.org>  Mon, 25 May 2015 02:00:00 +0200
+
 pd-purest-json (1.2.0) UNRELEASED; urgency=low
   * [oauth]: PATCH, TRACE and OPTIONS request implemented
  

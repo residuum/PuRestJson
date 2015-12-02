@@ -27,7 +27,7 @@ LIBRARY_VERSION = $(shell sed -n 's|^\#X text [0-9][0-9]* [0-9][0-9]* VERSION \(
 
 datafiles = $(addprefix examples/, $(EXAMPLES)) $(EXTRA_DIST) $(HELPPATCHES)
 class.sources = $(addprefix src/, $(OBJECTS))
-cflags += -DPD -DVERSION='"$(LIBRARY_VERSION)"'
+cflags += -DPD -DVERSION='"$(lib.version)"'
 ldflags = 
 ldlibs = -lcurl -ljson-c -loauth
 

@@ -14,10 +14,12 @@ cflags += -DPD -DVERSION='"$(lib.version)"'
 ldflags = 
 ldlibs = -lcurl -ljson-c -loauth
 
-windows.ldlibs = -lpthread -lm -lidn -lintl -lwldap32 -lgnutls -lhogweed -lgmp -lssl \
-			   -liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto \
-			   -lws2_32 -lgdi32 -lcrypt32 -lz  
-windows.cflags = -mthreads -DCURL_STATICLIB
+define forWindows
+    ldlibs += -lpthread -lm -lidn -lintl -lwldap32 -lgnutls -lhogweed -lgmp -lssl \
+		-liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto \
+		-lws2_32 -lgdi32 -lcrypt32 -lz  
+    cflags += -mthreads -DCURL_STATICLIB
+endef
 
 lib.setup.sources = src/purest_json
 

@@ -275,6 +275,7 @@ all: $(addsuffix .$(EXTENSION),$(OBJECTS)) $(SHARED_LIB)
 %.$(EXTENSION): %.o $(SHARED_LIB)
 	$(CC) $(ALL_LDFLAGS) -o "$*.$(EXTENSION)" "$*.o"  $(ALL_LIBS) $(SHARED_LIB)
 	chmod a-x "$*.$(EXTENSION)"
+	rm -f "$*.o"
 
 # this links everything into a single binary file
 $(LIBRARY_NAME)_vars: 

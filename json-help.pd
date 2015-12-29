@@ -1,5 +1,4 @@
-#N canvas 79 51 1143 647 10;
-#X declare -lib purest_json;
+#N canvas 79 63 1143 647 10;
 #X obj 665 397 json-encode;
 #X obj 665 466 json-decode;
 #X obj 51 -13 json-encode;
@@ -63,12 +62,12 @@ stored one;
 #X obj 218 -159 t a a a;
 #X obj 255 -89 json-decode;
 #X obj 255 55 line;
-#X floatatom 255 88 5 0 0 0 - - -;
+#X floatatom 255 88 5 0 0 0 - - -, f 5;
 #X msg 255 35 \$1 \, \$2 \$3;
 #X obj 255 -30 route start end duration;
 #X text 264 -110 wrong;
 #X obj 94 72 line;
-#X floatatom 94 105 5 0 0 0 - - -;
+#X floatatom 94 105 5 0 0 0 - - -, f 5;
 #X obj 94 -29 route start end duration;
 #X text 105 -121 right;
 #X obj 94 -58 list trim;
@@ -153,7 +152,6 @@ the store \, with the right outlet of [json-decode] or [rest-json].
 #X obj 665 503 print decoded_values;
 #X obj 824 503 print decoding_done;
 #X obj 755 467 print JSON_string;
-#X obj 49 588 import purest_json;
 #X msg 799 309 write /tmp/test.json;
 #X msg 797 371 read test.json;
 #X text 797 290 write the content as JSON to a file;
@@ -181,6 +179,7 @@ arrays are output as strings \, that can be parsed. After the object
 is fully parsed \, the right outlet will issue a bang \, so that you
 can differenciate between subsequent objects. The messages will come
 as list key value.;
+#X obj 49 588 import purest_json;
 #X connect 0 0 19 0;
 #X connect 1 0 23 0;
 #X connect 1 1 24 0;
@@ -193,5 +192,5 @@ as list key value.;
 #X connect 17 0 0 0;
 #X connect 19 0 1 0;
 #X connect 19 1 25 0;
+#X connect 26 0 0 0;
 #X connect 27 0 0 0;
-#X connect 28 0 0 0;

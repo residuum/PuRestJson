@@ -57,3 +57,5 @@ APIEXPORT void APICALL rest_clear_headers(t_rest *rest, const t_symbol *sel, con
 APIEXPORT void APICALL rest_file(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
 /* sets mode to HTTP streaming or blocking */
 APIEXPORT void APICALL rest_mode(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets proxy */
+APIEXPORT void APICALL rest_proxy(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);

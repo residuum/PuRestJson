@@ -219,6 +219,7 @@ void rest_setup(void) {
 	class_addmethod(rest_class, (t_method)rest_clear_headers, gensym("header_clear"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_file, gensym("file"), A_GIMME, 0);
 	class_addmethod(rest_class, (t_method)rest_mode, gensym("mode"), A_GIMME, 0);
+	class_addmethod(rest_class, (t_method)rest_proxy, gensym("proxy"), A_GIMME, 0);
 }
 
 void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *argv) {
@@ -329,6 +330,13 @@ void rest_mode(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 	(void) sel;
 
 	ctw_set_mode((struct _ctw *)rest, argc, argv);
+}
+
+void rest_proxy(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
+
+	(void) sel;
+
+	ctw_set_proxy((struct _ctw *)rest, argc, argv);
 }
 
 void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {

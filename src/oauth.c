@@ -155,6 +155,7 @@ void oauth_setup(void) {
 	class_addmethod(oauth_class, (t_method)oauth_clear_headers, gensym("header_clear"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_file, gensym("file"), A_GIMME, 0);
 	class_addmethod(oauth_class, (t_method)oauth_mode, gensym("mode"), A_GIMME, 0);
+	class_addmethod(oauth_class, (t_method)oauth_proxy, gensym("proxy"), A_GIMME, 0);
 	class_sethelpsymbol(oauth_class, gensym("rest"));
 }
 
@@ -354,6 +355,13 @@ void oauth_mode(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 	(void) sel;
 
 	ctw_set_mode((struct _ctw *)oauth, argc, argv);
+}
+
+void oauth_proxy(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
+
+	(void) sel;
+
+	ctw_set_proxy((struct _ctw *)oauth, argc, argv);
 }
 
 void *oauth_new(const t_symbol *const sel, const int argc, t_atom *const argv) {

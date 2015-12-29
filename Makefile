@@ -10,7 +10,7 @@ UNITTESTS =
 datafiles = $(addprefix examples/, $(EXAMPLES)) $(EXTRA_DIST) $(HELPPATCHES)
 class.sources = $(addprefix src/, $(OBJECTS))
 
-cflags += -DPD -DVERSION='"$(lib.version)"'
+cflags += -DPD -DVERSION='"$(lib.version)"' -std=c99 
 ldflags = 
 ldlibs = -lcurl -ljson-c -loauth
 

@@ -23,41 +23,29 @@
               <div class="markdown-body entry-content">
 				  <p><a href="index.html">Home</a></p>
                 <p>This tutorial will show you, how you can get data from a simple RESTful webservice and generate sound from it.</p>
-<p>In the examples folder, you can find the patch <code>the-sound-of-money.pd</code>. You will only need to fill in your credentials, that you will get with the patch itself.</p>
 <p>In this tutorial, I will use the following notation:<br>
 <code>[my object]</code>: an object with the name "my-object".<br>
 <code>[my own message(</code>: a message with the content "my own message".</p>
 <h2>Getting the Data</h2>
-<p>This example gets the daily trading prices of Bitcoin starting from September 2011. This is made with <a href="https://scraperwiki.com/">Scraperwiki</a>, an online service that lets you scrape webpages or download data on regular intervals. In that case, it calls the API of <a href="http://bitcoincharts.com/"><a href="http://bitcoincharts.com/">http://bitcoincharts.com/</a></a> once a day for weighted Bitcoin prices in the last 24 hours in Euro and US Dollar.</p>
-<p>Data is stored in an SQLite database, and Scraperwiki offers a JSON API for querying the database.</p>
+<p>This example gets the daily trading prices of Bitcoin. In its current implementation, it takes the data from <a href="https://bitcoinaverage.com/api">Bitcoin Average</a>, and translates the data from csv to JSON.</p>
 <p><img alt="The patch" src="bitcoin-full.png" /></p>
-<p>The query in this example:</p>
-<div class="highlight"><pre>select 
-    strftime(&#39;%Y-%m-%d&#39;,
-        datetime(DATE, &#39;unixepoch&#39;)) as DAY,
-    cast(USD as real) as USD,
-    cast(EUR as real) as EUR
-from swdata
-order by DATE
-</pre></div>
-
 
 <p>After designing the data online, we query the webservice with a GET request using <code>[rest]</code>.</p>
 <p>The data then looks something like this:</p>
 <div class="highlight"><pre>[
-    {&quot;DAY&quot;: &quot;2011-09-30&quot;, &quot;USD&quot;: 4.8743, &quot;EUR&quot;: 3.7406}, 
-    {&quot;DAY&quot;: &quot;2011-10-01&quot;, &quot;USD&quot;: 5.0825, &quot;EUR&quot;: 3.8489}, 
-    {&quot;DAY&quot;: &quot;2011-10-03&quot;, &quot;USD&quot;: 4.985, &quot;EUR&quot;: 3.8434}, 
-    {&quot;DAY&quot;: &quot;2011-10-04&quot;, &quot;USD&quot;: 4.9573, &quot;EUR&quot;: 3.7857}
+    {"DAY":"2010-07-17","USD":0.05,"VOLUME":20},
+    {"DAY":"2010-07-18","USD":0.07,"VOLUME":75.01},
+    {"DAY":"2010-07-19","USD":0.09,"VOLUME":574},
+    {"DAY":"2010-07-20","USD":0.08,"VOLUME":262}
 ]
 </pre></div>
 
 
 <p>When the data is received, the returned value is fed into <code>[json-decode]</code>. As the symbol atom from <code>[rest]</code> will be a JSON array, we will get messages for each JSON object on the left outlet followed by a bang on the right outlet. </p>
 <p>A sequence of messages for an object looks like this:</p>
-<div class="highlight"><pre>list DAY 2012-01-05
-list USD 5.39
-list EUR 4.06
+<div class="highlight"><pre>list DAY 2012-09-22
+list USD 12.2
+list VOLUME 16883.95
 </pre></div>
 
 

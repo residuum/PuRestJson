@@ -41,7 +41,7 @@
 
 <p>As you can infer from the table, values of <code>true</code>, <code>false</code>, or <code>null</code> cannot be constructed by <code>[json-encode]</code>, but can be read by the objects. A value of null yields a Pd value of an empty symbol.</p>
 <h2><code>[json-decode]</code></h2>
-<p>Feeding a symbol or list to <code>[json-decode]</code> will parse the values and generate an output. If you use a list, then all elements of the list will be converted to symbols and concatenated using a space as separator, so <code>symbol my value</code> will generate the same output as <code>my value</code>.</p>
+<p>Feeding a symbol or list to <code>[json-decode]</code> will parse the values and generate an output. If you use a list, then all elements of the list will be converted to symbols and concatenated using a space as separator, so <code>symbol my value</code> will generate the same output as <code>list my value</code>.</p>
 <p>You must feed exactly one valid JSON object or array of objects as a symbol or list message to <code>[json-decode]</code>. Any other correct JSON data cannot be interpreted by the <code>[json-decode]</code>.</p>
 <h3>Output of a JSON object</h3>
 <p>JSON objects are interpreted by <code>[json-decode]</code> as key value stores. Each key/value pair outputs a list on the left outlet, where the key is always converted to a symbol, while the value is converted according to the table above. Arrays and objects are converted to their string representation again and then output as a symbol.</p>
@@ -95,7 +95,7 @@
 <ul>
 <li>Use <code>list trim</code> from list-abs for trimming the list selector off the output and then use <code>[route]</code> for the data. If you want to create new lists, feed them into <code>[pack]</code>.</li>
 <li>If you process an array of same object types, use the approach above and store the values in a FIFO buffer, e. g. <code>[fifop]</code> from zexy or <code>[list-fifo]</code> from list-abs.</li>
-<li>Do not expect JSON data to be ordered: <code>{"id": 1, "name: "my name"}</code> and <code>{"name": "my name", "id": 1}</code> are in fact the same object. Use <code>[pack]</code> and the <code>bang</code> from the right outlet to create your own lists.</li>
+<li>Do not expect JSON data to be ordered: <code>{"id": 1, "name: "my name"}</code> and <code>{"name": "my name", "id": 1}</code> are in fact the same object. Use an empty first inlet of <code>[pack]</code> and the <code>bang</code> from the right outlet to create your own lists.</li>
 </ul>
 <h2><code>[json-encode]</code></h2>
 <h3>Reading and Writing JSON files</h3>
@@ -113,7 +113,7 @@
 - <code>[add key 1(</code> will store <code>{"key":1}</code>.
 - <code>[add key first second third(</code> will store <code>{"key":"first second third"}</code>.
 - <code>[add key {"first":"second third"}(</code> will store <code>{"key":{first: "second third"}}</code>.</p>
-<p><code>[array(</code> will add data to an array with the name of the key. The members of the array will be sorted in the specified order. If a value with the same key exists, that already exists, but was stored with <code>[add(</code>, the value will be discarded. A new <code>[add(</code> message with the same key will discard the stored array.</p>
+<p><code>[array(</code> will add data to an array with the name of the key. The members of the array will be sorted in the specified order. If a value with the same key exists, but was stored with <code>[add(</code>, the value will be discarded. A new <code>[add(</code> message with the same key will discard the stored array.</p>
 <p><strong>Example:</strong></p>
 <ol>
 <li><code>[add id 1(</code> =&gt; <code>{"id": 1}</code>.</li>
@@ -122,7 +122,7 @@
 <li><code>[add id 4(</code> =&gt; <code>{"id": 4}</code>.</li>
 </ol>
 <h3>Outputting And Clearing Data</h3>
-<p>Issuing a <code>[bang(</code> message to <code>[json-encode]</code> will output the JSON object as string on its only outlet. If no data is stored, an empty symbol is sent.</p>
+<p>Issuing a <code>[bang(</code> message to <code>[json-encode]</code> will output the JSON object as a string on its only outlet. If no data is stored, an empty symbol is sent.</p>
 <p>You can clear the stored object with the <code>[clear(</code> method. </p>
               </div>
             </div>

@@ -27,7 +27,7 @@
 <p><code>[oauth]</code> is used for <a href="http://tools.ietf.org/html/rfc5849">OAuth 1.0</a> requests, and can issue <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>, <code>HEAD</code>, <code>PATCH</code>, <code>OPTIONS</code> and <code>TRACE</code>. </p>
 <h2>Common Functionality</h2>
 <p>Both <code>[rest]</code> and <code>[oauth]</code> can be initialized with a base URL and additional parameters either as creation arguments or using the <code>[init(</code> message.</p>
-<p>Both objects can issue GET, POST, PUT, DELETE, HEAD, PATCH, OPTIONS and TRACE requests.</p>
+<p>Both objects can issue GET, POST, PUT, DELETE, HEAD, PATCH, OPTIONS, and TRACE requests.</p>
 <p>After a successful HTTP request (HTTP stati with a numerical value of at least 200 and less than 300), both objects will output the message body on the left outlet, followed by a <code>bang</code> on the right outlet. HTTP redirects by stati 301 and 302 are followed by the objects.</p>
 <p>If the HTTP result is not successful as defined above, then the right outlet will output a float with the HTTP error code, and on the console the HTTP status will be output as an error message, e.g. <code>HTTP error while performing request: 404</code> on console, <code>404</code> on right outlet.</p>
 <p>If there is an error during the HTTP request (timeout, DNS problems), then the right outlet will output a list with the cURL error code and the message, while additionally outputting the message on the console, e.g. <code>Error while performing request: Timeout was reached</code> on console, <code>28 Timeout was reached</code> on right outlet.</p>
@@ -44,27 +44,32 @@
 <p>Some webservices return different values for different <code>Accept:</code> HTTP headers. In that case, you can use
 <code>[header Accept: application/json(</code> to add the line <code>Accept: application/json</code> to the HTTP request.</p>
 <p>Github requires a <code>User-Agent:</code> HTTP header to return value. You can use <code>[header User-Agent: My User Agent(</code> to set the value.</p>
+<h3>Disabling Checking TLS Certificates</h3>
+<p>If the server uses a self-signed TLS certificate or the certificate authority (CA) is not recognised by your system, an SSL secured request will fail with an error message of <code>SSL peer certificate or SSH remote key was not OK</code> and a <code>51 SSL peer certificate or SSH remote key was not OK</code> on the right outlet. To disable checking for valid certificates, use a message of <code>[sslcheck 0(</code>. You can reenable the check with <code>[sslcheck 1(</code></p>
+<p><strong>Caveat:</strong></p>
+<p>Before doing that, <a href="http://pic.dhe.ibm.com/infocenter/wmqv7/v7r1/topic/com.ibm.mq.doc/sy10670_.htm">you should be aware of the risks</a>.</p>
+<h3>Using Proxies</h3>
+<p>You can configure the usage of a proxy with <code>[proxy(</code>. This message takes 0, 1 or 3 parameters. Use one parameter to set the URL of the proxy including protocol and port number. If your proxy needs username and passwortd, then add those as second and third additional parameter. To clear the proxy settings, use an empty <code>[proxy(</code> message.</p>
+<p><strong>Examples:</strong></p>
+<p><code>[proxy http://127.0.0.1:1234(</code> will set the proxy without username and password.</p>
+<p><code>[proxy socks5://127.0.0.1:2050 me mysecret(</code> will set the proxy using username <code>me</code> and password <code>mysecret</code>.</p>
 <h3>Downloading to File</h3>
 <p>The <code>[file(</code> message with an additional parameter will set the path to a file, where the downloaded content will be stored. This will not check immediately, if the file is writable, as this property in the file system may change any time.</p>
 <p>If a file path is set, then a successful download will not be output on the left outlet, but will be written to that location. If that location is not writable to Pd, then the content will generate output on the left outlet regardless, and post a message to the console.</p>
 <p>The right outlet of <code>[rest]</code> and <code>[oauth]</code> will output the same values as with a other HTTP request.</p>
 <p>To clear the download location, use a <code>[file(</code> message without a parameter.</p>
-<h3>Disabling Checking TLS Certificates</h3>
-<p>If the server uses a self-signed TLS certificate or the certificate authority (CA) is not recognised by your setup, an SSL secured request will fail with an error message of <code>SSL peer certificate or SSH remote key was not OK</code> and a <code>51 SSL peer certificate or SSH remote key was not OK</code> on the right outlet. To disable checking for valid certificates, use a message of <code>[sslcheck 0(</code>. You can reenable the check with <code>[sslcheck 1(</code></p>
-<p><strong>Caveat:</strong></p>
-<p>Before doing that, <a href="http://pic.dhe.ibm.com/infocenter/wmqv7/v7r1/topic/com.ibm.mq.doc/sy10670_.htm">you should be aware of the risks</a>.</p>
 <h3>Consuming Streaming API</h3>
 <p>If a service returns its data with a streaming API, you can output the data whenever a chunk is received. To set the mode to streaming, send a message <code>[mode stream(</code> to the object. To return to the standard blocking mode, send <code>[mode block(</code> to the object. The mode can be set during processing of a request.</p>
 <p>This is useful for webservices that keep connections open and send data on events, e.g. Twitter streaming API.</p>
 <h2><code>[rest]</code>: HTTP Requests</h2>
-<p><code>[rest]</code> accepts the following HTTP verbs: GET, POST, PUT, DELETE, HEAD, PATCH, TRACE and OPTIONS. The messages corresponding to the requests are <code>[GET(</code>, <code>[POST(</code>, <code>[PUT(</code>, <code>[DELETE(</code>, <code>[HEAD(</code>, <code>[PATCH(</code>, <code>[TRACE(</code> and <code>[OPTIONS(</code>, and these messages need at least one additional parameter, the URL of the requests. If you have set a base URL, the URL is concatenated with the base URL.</p>
+<p><code>[rest]</code> accepts the following HTTP verbs: GET, POST, PUT, DELETE, HEAD, PATCH, TRACE, and OPTIONS. The messages corresponding to the requests are <code>[GET(</code>, <code>[POST(</code>, <code>[PUT(</code>, <code>[DELETE(</code>, <code>[HEAD(</code>, <code>[PATCH(</code>, <code>[TRACE(</code>, and <code>[OPTIONS(</code>, and these messages need at least one additional parameter, the URL of the requests. If you have set a base URL, the URL is concatenated with the base URL.</p>
 <p><strong>Examples:</strong></p>
 <ul>
 <li>If the base URL is set to <code>http://www.example.com/</code>, then <code>[GET data/1(</code> will send an HTTP GET request to <code>http://www.example.com/data/1</code>.</li>
 <li>If no base URL is set, then <code>[DELETE http://www.example.com/data/1(</code> will send an HTTP DELETE request to <code>http://www.example.com/data/1</code>.</li>
 <li>If the base URL is set to <code>http://www.example.com/</code>, then <code>[GET http://www.example.com/data/1(</code> will send an HTTP GET request to <code>http://www.example.com/http://www.example.com/data/1</code> (and probably result in a 404 error).</li>
 </ul>
-<p><code>[POST(</code>, <code>[PUT(</code> and <code>[PATCH(</code> requests usually need additional data. This data is set as additional parameters. These parameters are concatenated with a space in between.</p>
+<p><code>[POST(</code>, <code>[PUT(</code>, and <code>[PATCH(</code> requests usually need additional data. This data is set as additional parameters. These parameters are concatenated with a space in between.</p>
 <p><strong>Example:</strong></p>
 <p><code>[POST http://www.example.com/data id=1&amp;name=my%20name(</code> will send an HTTP POST request to <code>http://www.example.com/data</code> and include <code>id=1&amp;name=my%20name</code> as POST parameters.</p>
 <h3>Initialization</h3>
@@ -97,13 +102,13 @@
 </ol>
 <p>Only the first returned cookie will be used, and only one value at a time will be saved. The parameters for sending the username and password to the server cannot be renamed. This works e.g. for CouchDB logins.</p>
 <h2><code>[oauth]</code>: OAuth 1.0 Requests</h2>
-<p><code>[oauth]</code> accepts the following HTTP verbs: GET, POST, PUT, DELETE, HEAD, PATCH, TRACE and OPTIONS. The messages corresponding to the requests are <code>[GET(</code>, <code>[POST(</code>, <code>[PUT(</code>, <code>[DELETE(</code>, <code>[HEAD(</code>, <code>[PATCH(</code>, <code>[TRACE(</code> and <code>[OPTIONS(</code>, and these messages need at least one additional parameter, the URL of the requests relative to the base URL.</p>
+<p><code>[oauth]</code> accepts the following HTTP verbs: GET, POST, PUT, DELETE, HEAD, PATCH, TRACE, and OPTIONS. The messages corresponding to the requests are <code>[GET(</code>, <code>[POST(</code>, <code>[PUT(</code>, <code>[DELETE(</code>, <code>[HEAD(</code>, <code>[PATCH(</code>, <code>[TRACE(</code>, and <code>[OPTIONS(</code>, and these messages need at least one additional parameter, the URL of the requests relative to the base URL.</p>
 <p><strong>Examples:</strong></p>
 <ul>
 <li>If the base URL is set to <code>http://www.example.com/</code>, then <code>[GET data/1(</code> will send an HTTP GET request to <code>http://www.example.com/data/1</code>.</li>
 <li>If the base URL is set to <code>http://www.example.com/</code>, then <code>[GET http://www.example.com/data/1(</code> will send an HTTP GET request to <code>http://www.example.com/http://www.example.com/data/1</code> (and probably result in a 404 error).</li>
 </ul>
-<p><code>[POST(</code>, <code>[PUT(</code> and <code>[PATCH(</code> requests usually need additional data. This data is set as additional parameters. These parameters are concatenated with a space in between.</p>
+<p><code>[POST(</code>, <code>[PUT(</code>, and <code>[PATCH(</code> requests usually need additional data. This data is set as additional parameters. These parameters are concatenated with a space in between.</p>
 <p><strong>Example:</strong></p>
 <p>If the base URL is set to <code>http://www.example.com/</code>, then <code>[POST data id=1&amp;name=my%20name(</code> will send an HTTP POST request to <code>http://www.example.com/data</code> and include <code>id=1&amp;name=my%20name</code> as POST parameters.</p>
 <h3>Initialization</h3>

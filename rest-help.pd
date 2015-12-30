@@ -1,4 +1,4 @@
-#N canvas 220 63 1137 558 10;
+#N canvas 220 68 1137 558 10;
 #X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
 ;
 #X text 55 -59 - object for HTTP communication with REST webservices
@@ -411,7 +411,7 @@ values of Accept: headers;
 #X connect 5 0 2 0;
 #X connect 9 0 2 0;
 #X restore 21 351 pd setting-headers;
-#N canvas 313 160 899 593 proxy 1;
+#N canvas 313 165 899 593 proxy 0;
 #X obj 291 442 rest;
 #X obj 288 479 print;
 #X msg 433 380 proxy;

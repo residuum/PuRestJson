@@ -24,7 +24,7 @@
 				  <p><a href="index.html">Home</a></p>
                 <p>Compilation should be working on Linux, Windows with MinGW and Mac OS X. You will need header files of Puredata, as well as <a href="http://curl.haxx.se/">libcurl</a>, <a href="https://github.com/json-c/json-c">json-c</a>, and <a href="http://liboauth.sourceforge.net/">liboauth</a>.</p>
 <p>The package build script is based on the <a href="https://puredata.info/docs/developer/LibraryTemplate">Pd library template</a>.</p>
-<p>With version 0.11, json-c have changed the library path and name. If your system has an older version of json-c, please use the branch <code>json-c-0.10</code> for compiling, but this branch is only updated on new releases.</p>
+<p>With version 0.11, json-c have changed the library path and name. If your system has an older version of json-c, you have to apply the patch <code>old-json-c-version.patch</code> via <code>patch -p1 < old-json-c-version.patch</code>. </p>
 <p>When you use static versions of libcurl, i.e. on Windows and Mac OS X, you will need the file <a href="http://curl.haxx.se/docs/caextract.html">cacert.pem from the libcurl website</a>. Put the downloaded file in the directory of PuREST JSON.</p>
 <p>If you have gotten the source code from git, you will first have to init the <a href="http://troydhanson.github.io/uthash/">uthash</a> submodule by running <code>git submodule update --init</code>.</p>
 <h2>Linux</h2>

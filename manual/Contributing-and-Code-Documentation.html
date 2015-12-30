@@ -46,16 +46,18 @@
 </ol>
 <h3>Names of Setup Functions</h3>
 <p>When Pd tries to load an object, it is looking for the file with the correct platform specific suffix (.pd_linux, .pd_darwin, .dll, .pd_freebsd) and the same name, e.g. to create <code>[json-encode]</code>, Pd on Windows looks for a file <code>json-encode.dll</code>.</p>
-<p>In this library file, Pd looks for a setup function according, depending on the name of the object:
-If the name contains a special character, that cannot be used in a C symbol (<code>-</code>, <code>~</code>, <code>.</code>, etc.), then this special character is converted to a hex representation using <code>sprintf(symname+i, "0x%02x", c);</code> where <code>c</code> is the special character. This resulting name is prefixed by <code>setup_</code>. So the function for creating <code>[json-encode]</code> must be called <code>setup_json0x2dencode</code>.
-If the name can be converted to a C symbol, then the setup function must be the object name suffixed with <code>_setup</code>. So the function for creating <code>[urlparams]</code> must be called <code>urlparams_setup</code>.</p>
+<p>In this library file, Pd looks for a setup function according, depending on the name of the object:</p>
+<ul>
+	<li>If the name contains a special character, that cannot be used in a C symbol (<code>-</code>, <code>~</code>, <code>.</code>, etc.), then this special character is converted to a hex representation using <code>sprintf(symname+i, "0x%02x", c);</code> where <code>c</code> is the special character. This resulting name is prefixed by <code>setup_</code>. So the function for creating <code>[json-encode]</code> must be called <code>setup_json0x2dencode</code>.</li>
+	<li>If the name can be converted to a C symbol, then the setup function must be the object name suffixed with <code>_setup</code>. So the function for creating <code>[urlparams]</code> must be called <code>urlparams_setup</code>.</li>
+</ul>
 <h3>Names of Other Exported Functions</h3>
-<p>Throughout the code, the following conventions are used. If an object has a hyphen (<code>-</code>) in its name, then this is replaced by an underscore (<code>_</code>)</p>
+<p>If an object has a hyphen (<code>-</code>) in its name, then this is replaced by an underscore (<code>_</code>)</p>
 <ul>
 	<li>Creation functions: <code>&lt;OBJECT&gt;_new</code>, e.g. <code>rest_new</code>.</li>
 	<li>Destruction functions: <code>&lt;OBJECT&gt;_free</code>, e.g. <code>rest_free</code>. Not every object needs to clean up on destruction, do not create this function then.</li>
 	<li>Generic message functions: If the function should be called based on the type of content, then the corresponding function is <code>&lt;OBJECT&gt;_&lt;TYPE&gt;</code>, e.g. <code>json_decode_symbol</code>, <code>json_encode_bang</code>.</li>
-	<li>HTTP request messages <code>[GET(</code>, <code>[POST(</code>, <code>[PUT(</code>, and <code>[DELETE(</code>: <code>&lt;OBJECT&gt;_command</code>, e.g. <code>[GET(</code> on <code>[rest]</code> calls <code>rest_command</code>.</li>
+	<li>HTTP request messages <code>[GET(</code>, <code>[POST(</code>, <code>[PUT(</code>, <code>[DELETE(</code>, <code>[HEAD(</code>, <code>[PATCH(</code>, <code>[TRACE(</code>, and <code>[OPTIONS(</code>: <code>&lt;OBJECT&gt;_command</code>, e.g. <code>[GET(</code> on <code>[rest]</code> calls <code>rest_command</code>.</li>
 	<li>Message functions: Every <code>[MESSAGE(</code> for the object has a corresponding function <code>&lt;OBJECT&gt;_&lt;MESSAGE&gt;</code>, e.g. <code>[cancel(</code> on <code>[oauth]</code> calls the function <code>oauth_cancel</code>.</li>
 </ul>
 <h3>Names of Static Functions</h3>
@@ -68,7 +70,7 @@ If the name can be converted to a C symbol, then the setup function must be the 
 	<li><code>urlparams.c</code> =&gt; <code>urlp_</code></li>
 </ul>
 <h3>Content of Included Files</h3>
-<p>All .c files that do not have a matching .h file contain only static functions and are <code>#include</code>d in files defining the objects. They have the following properties:</p>
+<p>All .c files that do not have a matching .h file contain only static functions and are <code>#include</code>d in files defining the objects. These source files are in subfolder <code>src/inc/</code>. They have the following properties:</p>
 <h4>ctw.c</h4>
 <p>ctw is short for <strong>c</strong>url <strong>t</strong>hread <strong>w</strong>rapper. As the name suggests, it contain functions for using threading for making requests with libcurl. </p>
 <p>This file is used in <code>[oauth]</code> and <code>[rest]</code>. In both objects, a <code>struct _ctw</code> is the first member, so that casting is possible. </p>

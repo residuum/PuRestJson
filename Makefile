@@ -30,7 +30,9 @@ HELPPATCHES = json-help.pd urlparams-help.pd rest-help.pd
 #
 #------------------------------------------------------------------------------#
 
-ALL_CFLAGS = -I"$(PD_INCLUDE)" -std=c99
+UTHASH_DIR = src/uthash/src
+
+ALL_CFLAGS = -I"$(PD_INCLUDE)" -I"$(UTHASH_DIR)" -std=c99
 ALL_LDFLAGS =  
 SHARED_LDFLAGS =
 ALL_LIBS = -lcurl -ljson-c -loauth

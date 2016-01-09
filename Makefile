@@ -7,10 +7,11 @@ EXTRA_DIST = README.md LICENSE.txt Changelog.txt test.json
 HELPPATCHES = json-help.pd urlparams-help.pd rest-help.pd
 UNITTESTS = 
 
-datafiles = $(addprefix examples/, $(EXAMPLES)) $(EXTRA_DIST) $(HELPPATCHES)
+datafiles = examples/ manual/ $(EXTRA_DIST) $(HELPPATCHES)
 class.sources = $(addprefix src/, $(OBJECTS))
+uthash = src/uthash/src
 
-cflags += -DPD -DVERSION='"$(lib.version)"' -std=c99 
+cflags += -DPD -DVERSION='"$(lib.version)"' -I"$(uthash)" -std=c99 
 ldflags = 
 ldlibs = -lcurl -ljson-c -loauth
 

@@ -1,4 +1,5 @@
-#N canvas 40 51 1002 589 10;
+#N canvas 46 68 1002 589 10;
+#X declare -lib purest_json -lib zexy;
 #X obj 363 136 json-encode;
 #X msg 824 36 bang;
 #X msg 822 82 clear;
@@ -6,7 +7,7 @@
 #X obj 382 254 json-decode;
 #X msg 257 42 add value 440;
 #X obj 140 509 line;
-#X floatatom 140 536 5 0 0 0 - - -, f 5;
+#X floatatom 140 536 5 0 0 0 - - -;
 #X obj 139 456 pack f f f;
 #X msg 139 484 \$1 \, \$2 \$3;
 #X msg 372 93 add start 10;

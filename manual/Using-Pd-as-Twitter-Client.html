@@ -36,10 +36,10 @@ Most of these is done under the hood of <code>[oauth]</code>. What you will lear
 <p><strong>Caveat!</strong> This document makes some assumptions, which were true at the time of the last edit (May 2015): My client credentials are still valid, despite me giving it away in the example patch. Twitter have not changed their API, or the API is still supported.</p>
 <p>This document goes through the file <code>twitter-client.pd</code> in the examples step by step.</p>
 <h2>Setting Up Your Application</h2>
-<p>All information about the Twitter API can be found at <a href="https://dev.twitter.com/"><a href="https://dev.twitter.com/">https://dev.twitter.com/</a></a>.</p>
+<p>All information about the Twitter API can be found at <a href="https://dev.twitter.com/">https://dev.twitter.com/</a>.</p>
 <p>For this tutorial, we will use PuREST JSON as a registered application. This application has both read and write access. If you want to reliably use Pd as a Twitter client, and / or want to restrict your client to read access only, you will need to register your client.</p>
 <h3>Registering Your Client</h3>
-<p>Login at <a href="https://dev.twitter.com/"><a href="https://dev.twitter.com/">https://dev.twitter.com/</a></a> with your Twitter login. Click on the <em>create your application</em> and create your application. Leave the field <em>Callback URL</em> empty.</p>
+<p>Login at <a href="https://dev.twitter.com/">https://dev.twitter.com/</a> with your Twitter login. Click on the <em>create your application</em> and create your application. Leave the field <em>Callback URL</em> empty.</p>
 <p>After registering your application, you get your consumer key and secret. These are needed for any communication with twitter.</p>
 <p>On that page, you can also create your own access token and access token secret.</p>
 <h3>Getting Access Token and Access Token Secret</h3>
@@ -55,7 +55,7 @@ Most of these is done under the hood of <code>[oauth]</code>. What you will lear
 
 
 <p>Now we have an temporary access token / secret pair. With this pair, we need to tell our user (YOU!) to go to Twitter and get a PIN to generate the real access token / secret pair.</p>
-<p>Open a web browser and go to <a href="https://api.twitter.com/oauth/authorize?oauth_token=(YOUR_TEMP_TOKEN">https://api.twitter.com/oauth/authorize?oauth_token=(YOUR_TEMP_TOKEN</a>)&amp;oauth_token_secret=(YOUR_TEMP_TOKEN_SECRET)&amp;oauth_callback_confirmed=true. This will get you to a website, where you can authorize PuREST JSON for using the Twitter API. After authorization, you will see YOUR_PIN in large friendly letters printed on a web page. We will need these for the next step.</p>
+<p>Open a web browser and go to https://api.twitter.com/oauth/authorize?oauth_token=(YOUR_TEMP_TOKEN)&amp;oauth_token_secret=(YOUR_TEMP_TOKEN_SECRET)&amp;oauth_callback_confirmed=true. This will get you to a website, where you can authorize PuREST JSON for using the Twitter API. After authorization, you will see YOUR_PIN in large friendly letters printed on a web page. We will need these for the next step.</p>
 <p>Now you get a PIN. This PIN will enable you to create your access token and access token key.</p>
 <p>First, we have to tell <code>[oauth]</code> to use your new oauth access token and credentials. To do so, we will need to use the temporary access token / secret pair for signing the next OAuth request. We can do this either by editing the creation values of <code>[oauth]</code> or by sending a <code>[init BASE_URL CONSUMER_KEY CONSUMER_SECRET YOUR_TEMP_TOKEN YOUR_TEMP_TOKEN_SECRET(</code> to it. Use your return values from before.
 Now send the PIN to Twitter to finally generate the read access token / secret pair. Use <code>[POST access_token oauth_identifier=YOUR_PIN(</code> for <code>[oauth]</code> to do so.</p>

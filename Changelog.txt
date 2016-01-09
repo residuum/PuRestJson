@@ -1,6 +1,10 @@
 Changelog
 ---------
-1.3.0:
+1.4.0: My neighbor TOR
+- [rest] and [oauth]: proxy enabled
+- updated manual
+
+1.3.0: Trickle down theory
 - [json-encode] and [urlparams]: optimisation of logic
 - [rest] and [oauth]: HTTP streaming enabled
 - Rewrite of manual
@@ -10,10 +14,10 @@ Changelog
 	-- moved source to subfolders
 	-- static analysis of source code
 
-1.2.0:
+1.2.0: OAuth rly
 - [oauth]: PATCH, TRACE and OPTIONS request implemented
 
-1.1.0:
+1.1.0: Wow! Much request! Such test!
 - [rest]: HEAD, PATCH, TRACE and OPTIONS request implemented
 - [oauth]: HEAD request implemented
 - Bug fixes:
@@ -21,14 +25,14 @@ Changelog
 	-- [json-encode]: differentiate between float and integer values
 - unit tests for [json-decode], [json-encode], [urlparams]
 
-1.0.0:
+1.0.0: Pendulum
 - Info for users while loading object
 - Bug fixes in [json-encode]:
 	-- array handling
 	-- number handling
 - Refactoring
 
-0.15.0:
+0.15.0: The API they are a-changing
 - Cancellation is now faster
 - Switch to json-c 0.11
 - Refactoring of code
@@ -45,21 +49,21 @@ Changelog
 	-- [json-decode]:
 		* string values will not be checked for numbers or boolean
 
-0.14.0:
+0.14.0: Davo
 - Downloading to file
 - Cancelling requests
 - Switch to libcurl multi interface
 
-0.13.0:
+0.13.0: heady stuff
 - Setting HTTP headers possible
 - Cancelling of requests possible while waiting (experimental)
 - Switched Makefile to libary template 1.0.14
 - Semantic versioning
 
-0.12.1:
+0.12.1: I accidentally the whole cookie
 - Bugfix: Cookie authentication is working again.
 
-0.12:
+0.12: The multitude came together
 - Disabling checking peer for SSL requests in [rest] and [oauth] possible
 - [urlparams] does now overwrite previously set parameters 
 - RSA-SHA1 signature possible, otherwise info message is posted to Pd console
@@ -68,7 +72,7 @@ Changelog
 	-- SSL requests on Windows possible
 	-- regression fixed for PUT requests
 
-0.11:
+0.11: long string is long
 - symbols can be longer than MAXPDLENGTH (1024 characters)
 - [json-decode] works with lists and any other data type as well
 - Setting request timeout for [rest] and [oauth] possible
@@ -82,7 +86,7 @@ Changelog
 0.10:
 - no version 0.10 due to problems in Pd (cuts off trailing 0)
 
-0.9:
+0.9: sailing to Colchis
 - [json-encode] writes and reads JSON data to and from files
 - [oauth] does not use deprecated functions from liboauth 1.0
 - [oauth] and [rest] share functions
@@ -91,17 +95,17 @@ Changelog
 	-- POST sends correct parameter data
 	-- HTTP errors are displayed with error code
 
-0.8:
+0.8: I did, I did taw a putty tat
 - Added objects: [oauth] [urlparams] [rest]
 - [rest-json] is now an abstraction
 - Bugfixes
 - Better examples and help patches
 
-0.7.1:
+0.7.1: Cookie monster on the couch
 - Unlocking [rest-json] when HTTP status is not 200.
 - Fix for segfault at json_object_put().
 
-0.7:
+0.7: Cookie monster on the couch
 - Cookie authentication, useful for CouchDB login
 - [rest-json] has a third outlet
 - Refactoring

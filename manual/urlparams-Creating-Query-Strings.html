@@ -26,23 +26,23 @@
 <h2>Storing Data with <code>[add(</code></h2>
 <p>The <code>[add(</code> message needs at least two parameters: key and value. Any additional parameters are concatenated to the value with a space. A key/value pair is output with a <code>=</code> separator, while all key/value pairs are concatenated with a <code>&amp;</code>. Special characters will be URL encoded.</p>
 <p>Adding a value with an already stored key will result in overwriting the existing value.</p>
-<p><strong>Examples:</strong>
-- <code>[add key 1(</code> will store <code>key=1</code>
-- <code>[add name My Name(</code> will store <code>name=My%20Name</code>
-- <code>[add key 1(</code>, <code>[add name My Name(</code>, <code>[add key 2(</code> will store <code>key=2&amp;name=My%20Name</code>
-- <code>[add key @me with #hashtag(</code> will store <code>key=%40me%20with%20%23hashtag</code></p>
+<p><strong>Examples:</strong></p>
+<ul>
+	<li><code>[add key 1(</code> will store <code>key=1</code></li>
+	<li><code>[add name My Name(</code> will store <code>name=My%20Name</code></li>
+	<li><code>[add key 1(</code>, <code>[add name My Name(</code>, <code>[add key 2(</code> will store <code>key=2&amp;name=My%20Name</code></li>
+	<li><code>[add key @me with #hashtag(</code> will store <code>key=%40me%20with%20%23hashtag</code></li>
+</ul>
 <h2>Outputting And Clearing Data</h2>
 <p>Issuing a <code>[bang(</code> message to <code>[urlparams]</code> will output the stored key/value pairs as string on its only outlet. If no data is stored, an empty symbol is sent.</p>
 <p>You can clear the stored object with the <code>[clear(</code> method. </p>
-              </div>
-            </div>
-          </div>
-        
-
-      </div>
-    </div>
-  </div>
-  <div>&nbsp;</div>
+			  </div>
+			</div>
+		  </div>
+	  </div>
+	</div>
+	</div>
+	<div>&nbsp;</div>
   </div>
 </body>
 </html>

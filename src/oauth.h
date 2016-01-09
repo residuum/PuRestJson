@@ -60,3 +60,5 @@ APIEXPORT void APICALL oauth_clear_headers(t_oauth *oauth, const t_symbol *sel, 
 APIEXPORT void APICALL oauth_file(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
 /* sets mode to HTTP streaming or blocking */
 APIEXPORT void APICALL oauth_mode(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets proxy */
+APIEXPORT void APICALL oauth_proxy(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);

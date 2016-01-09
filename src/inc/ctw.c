@@ -51,6 +51,12 @@ struct _ctw {
 	long timeout;
 	size_t out_file_len;
 	char *out_file; /* filename for output, if any */
+	size_t proxy_len;
+	char *proxy; /* proxy url, if any*/
+	size_t proxy_user_len;
+	char *proxy_user; /* username for proxy, if any*/
+	size_t proxy_pass_len;
+	char *proxy_pass; /* password for proxy, if any */
 	CURLM *multi_handle;
 	CURL *easy_handle;
 	unsigned char locked; /* is object locked? */
@@ -137,6 +143,8 @@ static void ctw_set_timeout(struct _ctw *common, int val);
 static void ctw_set_mode(struct _ctw *common, int argc, t_atom *argv);
 /* sets mode to blocking or streaming as numerical value */
 static void ctw_set_mode_number(struct _ctw *common, int val);
+/* sets proxy */
+static void ctw_set_proxy(struct _ctw *common, int argc, t_atom *argv);
 /* inits object */
 static void ctw_init(struct _ctw *common);
 /* frees data */
@@ -241,15 +249,24 @@ static void ctw_prepare_basic(struct _ctw *const common, struct curl_slist *slis
 	curl_easy_setopt(common->easy_handle, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(common->easy_handle, CURLOPT_TIMEOUT_MS, common->timeout);
 	curl_easy_setopt(common->easy_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck);
+	if (common->auth_token_len) {
+		curl_easy_setopt(common->easy_handle, CURLOPT_COOKIE, common->auth_token);
+	}
+	if(common->proxy_len) {
+		curl_easy_setopt(common->easy_handle, CURLOPT_PROXY, common->proxy);
+	}
+	if(common->proxy_user_len) {
+		curl_easy_setopt(common->easy_handle, CURLOPT_PROXYUSERNAME, common->proxy_user);
+	}
+	if(common->proxy_pass_len) {
+		curl_easy_setopt(common->easy_handle, CURLOPT_PROXYPASSWORD, common->proxy_pass);
+	}
 #ifdef NEEDS_CERT_PATH
 	if (common->sslcheck){
 		curl_easy_setopt(common->easy_handle, CURLOPT_CAINFO, common->cert_path);
 		curl_easy_setopt(common->easy_handle, CURLOPT_CAPATH, common->cert_path);
 	}
 #endif
-	if (common->auth_token_len) {
-		curl_easy_setopt(common->easy_handle, CURLOPT_COOKIE, common->auth_token);
-	}
 }
 
 static void ctw_prepare_put(struct _ctw *const common, struct _memory_struct *const in_memory) {
@@ -597,6 +614,33 @@ static void ctw_set_mode(struct _ctw *common, int argc, t_atom *argv) {
 	}
 }
 
+static void ctw_set_proxy(struct _ctw *const common, const int argc, t_atom *const argv) {
+	char tmp[MAXPDSTRING];
+
+	string_free(common->proxy, &common->proxy_len);
+	string_free(common->proxy_user, &common->proxy_user_len);
+	string_free(common->proxy_pass, &common->proxy_pass_len);
+	switch(argc) {
+		case 3:
+			atom_string(argv + 1, tmp, MAXPDSTRING);
+			common->proxy_user = string_create(&(common->proxy_user_len), strlen(tmp));
+			strcpy(common->proxy_user, tmp);
+			atom_string(argv + 2, tmp, MAXPDSTRING);
+			common->proxy_pass = string_create(&(common->proxy_pass_len), strlen(tmp));
+			strcpy(common->proxy_pass, tmp);
+			/* fall through deliberately */
+		case 1:
+			atom_string(argv, tmp, MAXPDSTRING);
+			common->proxy = string_create(&(common->proxy_len), strlen(tmp));
+			strcpy(common->proxy, tmp);
+		case 0:
+			break;
+		default:
+			pd_error(common, "proxy must have exactly 0, 1 or 3 parameters");
+			break;
+	}
+}
+
 static void ctw_init(struct _ctw *const common) {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 	common->base_url_len = 0;
@@ -605,6 +649,9 @@ static void ctw_init(struct _ctw *const common) {
 	common->auth_token_len = 0;
 	common->http_headers = NULL;
 	common->out_file_len = 0;
+	common->proxy_len = 0;
+	common->proxy_user_len = 0;
+	common->proxy_pass_len = 0;
 	common->x_canvas = canvas_getcurrent();
 
 	ctw_set_timeout(common, 0);
@@ -619,6 +666,9 @@ static void ctw_free(struct _ctw *const common) {
 	string_free(common->complete_url, &common->complete_url_len);
 	string_free(common->auth_token, &common->auth_token_len);
 	string_free(common->out_file, &common->out_file_len);
+	string_free(common->proxy, &common->proxy_len);
+	string_free(common->proxy_user, &common->proxy_user_len);
+	string_free(common->proxy_pass, &common->proxy_pass_len);
 	ctw_clear_headers(common);
 	curl_global_cleanup();
 #ifdef NEEDS_CERT_PATH

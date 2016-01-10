@@ -11,5 +11,4 @@ debian/pd-purest-json/*
 debian/files
 debian/pd-purest-json.*
 cov-int/*
-examples/my-*
 deken-tmp

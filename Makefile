@@ -7,7 +7,8 @@ EXTRA_DIST = README.md LICENSE.txt Changelog.txt test.json
 HELPPATCHES = json-help.pd urlparams-help.pd rest-help.pd
 UNITTESTS = 
 
-datafiles = examples/ manual/ $(EXTRA_DIST) $(HELPPATCHES)
+datafiles = $(EXTRA_DIST) $(HELPPATCHES)
+examplefiles = $(addprefix examples/, $(EXAMPLES))
 class.sources = $(addprefix src/, $(OBJECTS))
 uthash = src/uthash/src
 
@@ -47,7 +48,10 @@ deken:
 	mkdir -p "$(deken.tmp)"
 	mkdir "$(deken.tmp)/$(deken.folder)"
 	cp $(executables) "$(deken.tmp)/$(deken.folder)/"
-	cp -r $(datafiles) "$(deken.tmp)/$(deken.folder)/"
+	cp $(datafiles) "$(deken.tmp)/$(deken.folder)/"
+	mkdir "$(deken.tmp)/$(deken.folder)/examples"
+	cp -r manual "$(deken.tmp)/$(deken.folder)/"
+	cp $(examplefiles) "$(deken.tmp)/$(deken.folder)/examples"
 	cd "$(deken.tmp)"; \
 	  $(deken.pack) "$(deken.file).$(deken.ext)" "$(deken.folder)"; \
 	  rm -rf "$(deken.folder)"; \

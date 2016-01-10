@@ -2,5 +2,5 @@
 #N canvas 44 51 420 300 META 0;
 #X text 10 25 AUTHOR thomas@residuum.org;
 #X text 10 41 NAME purest_json;
-#X text 10 10 VERSION 1.4.0;
+#X text 10 10 VERSION 1.4.0+1;
 #X restore 10 10 pd META;

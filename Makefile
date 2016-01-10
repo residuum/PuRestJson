@@ -26,9 +26,9 @@ lib.setup.sources = src/purest_json
 
 # file for creating deken package
 ifeq ($(findstring $(machine), x86_64 ia64), $(machine))
-  bits = 64
+  deken.bits = 64
 else
-  bits = 32
+  deken.bits = 32
 endif
 ifeq ($(system), Windows)
   deken.ext = zip
@@ -37,7 +37,7 @@ else
   deken.ext = tar.gz
   deken.pack = tar -zcvf
 endif
-deken.file = $(lib.name)-v$(lib.version)-($(system)-$(machine)-$(bits))-externals
+deken.file = $(lib.name)-v$(lib.version)-($(system)-$(machine)-$(deken.bits))-externals
 deken.tmp = deken-tmp
 deken.folder = $(lib.name)
 

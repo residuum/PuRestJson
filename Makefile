@@ -12,7 +12,7 @@ examplefiles = $(addprefix examples/, $(EXAMPLES))
 class.sources = $(addprefix src/, $(OBJECTS))
 uthash = src/uthash/src
 
-cflags += -DPD -DVERSION='"$(lib.version)"' -I"$(uthash)" -std=c99 
+cflags += -DVERSION='"$(lib.version)"' -I"$(uthash)" -std=c99 
 ldflags = 
 ldlibs = -lcurl -ljson-c -loauth
 

@@ -1,6 +1,4 @@
-#N canvas 220 68 1137 558 10;
-#X msg 451 -18 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
-;
+#N canvas 220 73 1137 558 10;
 #X text 55 -59 - object for HTTP communication with REST webservices
 ;
 #X obj 450 422 print data;
@@ -8,12 +6,12 @@
 #X obj 450 -52 import purest_json;
 #X obj 19 -60 rest;
 #X obj 450 390 rest;
-#X text 481 38 By default \, requests do not timeout. To set a maximal
+#X text 466 27 By default \, requests do not timeout. To set a maximal
 time in milliseconds \, set a value with [timeout( message. To clear
 the value and return to the default \, use an empty [timeout( message.
 ;
-#X msg 484 92 timeout 2000;
-#X msg 573 91 timeout;
+#X msg 469 81 timeout 2000;
+#X msg 569 81 timeout;
 #X msg 600 332 sslcheck 0;
 #X msg 692 332 sslcheck 1;
 #X obj 19 -36 oauth;
@@ -297,7 +295,7 @@ four parameters for the [init( message to use basic cookie authentication
 #X text 594 289 By default correct SSL host is checked. Disable check
 by sending sslcheck with a value to 0 \, reenable checking by setting
 the value to 1;
-#X msg 647 171 cancel;
+#X msg 632 160 cancel;
 #X text 637 202 Use this request to test cancelling and timeout: it
 will wait for 10 seconds before returning data.;
 #X msg 641 232 GET http://ix.residuum.org/pd/sleep_example.php;
@@ -330,7 +328,7 @@ of 10ms is sufficient on my system (TM).;
 #X connect 8 0 7 0;
 #X connect 11 0 6 0;
 #X restore 710 162 pd cancel;
-#X text 643 93 You can cancel a currently executed request by issuing
+#X text 628 82 You can cancel a currently executed request by issuing
 [cancel(. If data has been returned already \, but is not output \,
 or output only partially \, outputting the data will still be completed.
 Note \, that cancelling the call may take some time \, so do not try
@@ -440,12 +438,13 @@ any parameter to the object.;
 #X connect 7 0 0 0;
 #X connect 13 0 0 0;
 #X restore 21 419 pd proxy;
-#X connect 0 0 6 0;
-#X connect 6 0 2 0;
-#X connect 6 1 3 0;
-#X connect 8 0 6 0;
-#X connect 9 0 6 0;
-#X connect 10 0 6 0;
-#X connect 11 0 6 0;
-#X connect 19 0 6 0;
-#X connect 21 0 6 0;
+#X msg 451 -18 GET http://jsonplaceholder.typicode.com/posts;
+#X connect 5 0 1 0;
+#X connect 5 1 2 0;
+#X connect 7 0 5 0;
+#X connect 8 0 5 0;
+#X connect 9 0 5 0;
+#X connect 10 0 5 0;
+#X connect 18 0 5 0;
+#X connect 20 0 5 0;
+#X connect 32 0 5 0;

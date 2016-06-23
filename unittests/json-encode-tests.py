@@ -62,5 +62,10 @@ class JsonEncodeTests(unittest.TestCase):
         self.assertEquals(out, '''list { "key": 1 };
 ''')
     
+    def test_read_large(self):
+        out = runPd(os.path.join(self.basePath, 'read-large.pd'))
+        self.assertEquals(out, '''list { "key": 1 };
+''')
+    
 if __name__ == '__main__': 
     unittest.main()

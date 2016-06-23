@@ -111,7 +111,6 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 				sprintf(value, "%s", json_object_get_string(val));
 				kvp_add_simple((struct _kvp_store *)jenc, key, kvp_val_create(value, 0));
 				string_free(value, &value_len);
-				json_object_put(val);
 				break;
 			case json_type_array:
 				array_len = json_object_array_length(val);
@@ -142,7 +141,6 @@ static void jenc_load_json_data(t_json_encode *const jenc, json_object *const jo
 	const enum json_type type = json_object_get_type(jobj);
 
 	kvp_store_free_memory((struct _kvp_store *)jenc);
-
 	switch (type) {
 		case json_type_object:
 			jenc_load_json_object(jenc, jobj);
@@ -182,7 +180,6 @@ static t_symbol *jenc_get_json_symbol(t_json_encode *const jenc) {
 	}
 
 	for (it = jenc->storage.data; it != NULL; it = it->hh.next) {
-		post("%s", it->key);
 		if (it->is_array == 1) {
 			value = jenc_get_array_value(it);
 		} else {

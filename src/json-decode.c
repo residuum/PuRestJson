@@ -73,7 +73,6 @@ static void jdec_output_object(json_object *const jobj, t_outlet *const data_out
 					break;
 				case json_type_object:
 					SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
-					json_object_put(val);
 					break;
 				case json_type_array:
 					SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
@@ -97,7 +96,6 @@ static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_
 		json_object *array_member = json_object_array_get_idx(jobj, i);
 		if (!is_error(array_member)) {
 			jdec_output(array_member, data_outlet, done_outlet);
-			/*json_object_put(array_member);*/
 		}
 	}
 }
@@ -151,8 +149,7 @@ static void jdec_output_string(const char *const json_string, t_json_decode *con
 
 	if (!is_error(jobj)) {
 		jdec_output(jobj, jdec->x_ob.ob_outlet, jdec->done_outlet);
-		/* TODO: This sometimes results in a segfault. Why? */
-		/*json_object_put(jobj);*/
+		json_object_put(jobj);
 	} else {
 		pd_error(jdec, "Not a JSON object.");
 	}

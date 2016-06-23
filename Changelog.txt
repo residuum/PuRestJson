@@ -1,5 +1,14 @@
 Changelog
 ---------
+1.4.1: Orpheus's Lyre
+- Bug fix:
+	-- [json-encode] and [json-decode]: Correctly freeing JSON object
+	   memory
+- Removed Google API calls from help
+- Switch Makefile to pd-lib-builder
+- Remove building of own Debian packages
+- [Mac] Add liboauth build as homebrew script
+
 1.4.0: My neighbor TOR
 - [rest] and [oauth]: proxy enabled
 - updated manual

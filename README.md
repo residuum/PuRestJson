@@ -43,9 +43,17 @@ Object for url encoding and contatenating url parameters.
 
 For the usage of the externals see the help patches for the objects.
 
+## Installation from package repositories
+
+Downloads are available via [deken](https://github.com/pure-data/deken)
+which is included in Pd since version 0.47. Packages for Debian and Ubuntu
+are available as `pd-purest-json`.
+
 ## Binary downloads
 
 Binary packages can be found at http://ix.residuum.org/pd/purest_json.html
+
+Currently only Windows and Linux packages are available.
 
 ## How to build PuREST JSON
 

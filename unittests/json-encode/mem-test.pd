@@ -1,0 +1,16 @@
+#N canvas 44 93 1002 589 10;
+#X obj 358 60 import purest_json;
+#X obj 513 144 t b b;
+#X obj 509 190 json-encode;
+#X obj 507 247 json-decode;
+#X obj 504 288 stdout;
+#X msg 580 165 read read-large.json;
+#X obj 516 102 until;
+#X msg 519 70 1000;
+#X connect 1 0 2 0;
+#X connect 1 1 5 0;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;
+#X connect 5 0 2 0;
+#X connect 6 0 1 0;
+#X connect 7 0 6 0;

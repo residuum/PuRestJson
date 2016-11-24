@@ -1,0 +1,6 @@
+language: c
+dist: trusty
+sudo: required
+compiler: gcc
+before_install: sudo apt-get -y install puredata-dev libjson-c-dev libcurl4-nss-dev liboauth-dev
+script: make

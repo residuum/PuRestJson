@@ -1,6 +1,18 @@
 language: c
-dist: trusty
-sudo: required
-compiler: gcc
-before_install: sudo apt-get -y install puredata-dev libjson-c-dev libcurl4-nss-dev liboauth-dev
-script: make
+
+matrix:
+    include:
+        - env: PLATFORM='linux64'
+          os: linux
+          dist: trusty
+          sudo: required
+          compiler: gcc
+
+        - env: PLATFORM='windows'
+          os: linux
+          dist: trusty
+          sudo: required
+          compiler: gcc
+
+before_install: bash ./travis-build/${PLATFORM}_before_install.sh
+script: bash ./travis-build/${PLATFORM}_script.sh

@@ -1,5 +1,9 @@
 language: c
 
+env:
+    global:
+        - PDVERSION='0.47-1'
+
 matrix:
     include:
         - env: PLATFORM='linux64'
@@ -13,6 +17,9 @@ matrix:
           dist: trusty
           sudo: required
           compiler: gcc
+
+        - env: PLATFORM='osx'
+          os: osx
 
         - env: PLATFORM='windows'
           os: linux

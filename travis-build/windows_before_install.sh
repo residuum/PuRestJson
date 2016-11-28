@@ -11,5 +11,5 @@ sudo apt-get update
 sudo apt-get -y install mxe-${MXE_TARGET}-curl mxe-${MXE_TARGET}-json-c \
 	mxe-${MXE_TARGET}-liboauth mxe-${MXE_TARGET}-pthreads
 
-wget -O /tmp/pd.zip http://msp.ucsd.edu/Software/pd-0.47-1.msw.zip
+wget -O /tmp/pd.zip http://msp.ucsd.edu/Software/pd-${PDVERSION}.msw.zip
 unzip -d /tmp /tmp/pd.zip

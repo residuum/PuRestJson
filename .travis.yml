@@ -8,6 +8,12 @@ matrix:
           sudo: required
           compiler: gcc
 
+        - env: PLATFORM='linux32'
+          os: linux
+          dist: trusty
+          sudo: required
+          compiler: gcc
+
         - env: PLATFORM='windows'
           os: linux
           dist: trusty

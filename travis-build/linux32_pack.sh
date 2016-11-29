@@ -1,5 +1,4 @@
 #!/bin/bash
 
-make \
-	machine=i386 \
-	deken
+sudo chroot ${CHROOTDIR} bash -c "cd PuRestJson && make deken"
+cp ${CHROOTDIR}/PuRestJson/*.tar.gz .

@@ -12,7 +12,7 @@ matrix:
           sudo: required
           compiler: gcc
 
-        - env: PLATFORM='linux32'
+        - env: PLATFORM='linux32' CHROOTDIR='/opt/crosscompilation'
           os: linux
           dist: trusty
           sudo: required

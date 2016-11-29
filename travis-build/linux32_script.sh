@@ -1,10 +1,6 @@
 #!/bin/bash
 
-ls /usr
+ls ${CHROOTDIR}
 
-ls /usr/bin/*gcc*
+sudo chroot ${CHROOTDIR} bash -c "cd PuRestJson && make"
 
-make \
-	CC='gcc -m32' \
-	arch.c.flags='-march=pentium4 -mfpmath=sse -msse -msse2' \
-	arch.ld.flags='-L "/usr/libx32" -L "/libx32"'

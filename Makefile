@@ -21,6 +21,11 @@ define forWindows
 		-liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto \
 		-lws2_32 -lgdi32 -lcrypt32 -lz  
     cflags += -mthreads -DCURL_STATICLIB
+    datafiles += cacert.pem
+endef
+
+define forDarwin
+    datafiles += cacert.pem
 endef
 
 lib.setup.sources = src/purest_json
@@ -55,4 +60,4 @@ deken:
 	cd "$(deken.tmp)"; \
 	  $(deken.pack) "$(deken.file).$(deken.ext)" "$(deken.folder)"; \
 	  rm -rf "$(deken.folder)"; \
-	  mv "$(deken.file).$(deken.ext)" ..
+	  mv "$(deken.file).$(deken.ext)" ..;

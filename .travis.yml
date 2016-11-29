@@ -29,3 +29,6 @@ matrix:
 
 before_install: bash ./travis-build/${PLATFORM}_before_install.sh
 script: bash ./travis-build/${PLATFORM}_script.sh
+after_success:
+    - bash ./travis-build/${PLATFORM}_pack.sh
+    - bash ./travis-build/upload.sh

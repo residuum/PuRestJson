@@ -1,8 +1,10 @@
 language: c
 
+
 env:
     global:
         - PDVERSION='0.47-1'
+        - secure: "DA85V8jBW8C6n6z9qiGufU1BK1atVUsvnceHIuf0pG64faZBNLg93J3SfyV2/NN0C4AVAaVHSM+F8XR8Ba8GdxHbW8OGJR+vcgr6ZFg5Qai/xmMJm5MfcR/oPFj8nuMnT61rb6Jm5QpuURRwAjio+x7wCHQJkkpH1TiQF9mV2Tk="
 
 matrix:
     include:
@@ -29,6 +31,10 @@ matrix:
 
 before_install: bash ./travis-build/${PLATFORM}_before_install.sh
 script: bash ./travis-build/${PLATFORM}_script.sh
-after_success:
-    - bash ./travis-build/${PLATFORM}_pack.sh
-    - bash ./travis-build/upload.sh
+after_success: bash ./travis-build/${PLATFORM}_pack.sh
+deploy:
+    skip_cleanup: true
+    provider: script
+    script: bash ./travis-build/upload.sh
+    on: 
+        all_branches: true

@@ -49,11 +49,15 @@ Downloads are available via [deken](https://github.com/pure-data/deken)
 which is included in Pd since version 0.47. Packages for Debian and Ubuntu
 are available as `pd-purest-json`.
 
-## Binary downloads
+## Downloads of development versions
 
-Binary packages can be found at http://ix.residuum.org/pd/purest_json.html
+For each commit, a build in [Travis](https://travis-ci.org/residuum/PuRestJson) 
+is triggered. These builds generate deken-like packages, that are available 
+from https://ssl-account.com/cloud.residuum.org/index.php/s/380C60JAabnO7jk
 
-Currently only Windows and Linux packages are available.
+The format for the files is `<Travis-build-number>_<Date-in-YYYY-MM-DD>_<dekenfilename>`.
+
+Those downloads may not work, but represent the current state of development.
 
 ## How to build PuREST JSON
 

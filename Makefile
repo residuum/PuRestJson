@@ -25,7 +25,7 @@ define forWindows
 endef
 
 define forDarwin
-    datafiles += cacert.pem
+    datafiles += cacert.pem *.dylib
 endef
 
 lib.setup.sources = src/purest_json

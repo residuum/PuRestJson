@@ -2,12 +2,12 @@ language: c
 
 
 env:
-    global:
+        global:
         - PDVERSION='0.47-1'
         - secure: "DA85V8jBW8C6n6z9qiGufU1BK1atVUsvnceHIuf0pG64faZBNLg93J3SfyV2/NN0C4AVAaVHSM+F8XR8Ba8GdxHbW8OGJR+vcgr6ZFg5Qai/xmMJm5MfcR/oPFj8nuMnT61rb6Jm5QpuURRwAjio+x7wCHQJkkpH1TiQF9mV2Tk="
 
 matrix:
-    include:
+        include:
         - env: PLATFORM='linux64'
           os: linux
           dist: trusty

@@ -22,7 +22,7 @@ def sed_inplace(filename, pattern, repl):
     # writing with updating). This is usually a good thing. In this case,
     # however, binary writing imposes non-trivial encoding constraints trivially
     # resolved by switching to text writing. Let's do that.
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
+    with tempfile.NamedTemporaryFile(mode = 'w', delete = False) as tmp_file:
         with open(filename) as src_file:
             for line in src_file:
                 tmp_file.write(pattern_compiled.sub(repl, line))
@@ -33,18 +33,25 @@ def sed_inplace(filename, pattern, repl):
     shutil.move(tmp_file.name, filename)
 
 
-wikiDir='/tmp/PuRestJson.wiki/'
-exportDir='manual/'
+wikiDir = '/tmp/PuRestJson.wiki/'
+exportDir = 'manual/'
+
+if len(sys.argv) > 1:
+    exportDir = sys.argv[1]
+
+if len(sys.argv) > 2:
+    wikiDir = sys.argv[2]
+
 print 'Preparing directory: ', wikiDir
 
 # convert md files one-by-one
 for f in os.listdir(wikiDir):
     if f.endswith('.md'):
         print 'Converting: ', f
-        baseFile=os.path.splitext(os.path.basename(f))[0];
-        htmlFile=baseFile + '.html'
+        baseFile = os.path.splitext(os.path.basename(f))[0];
+        htmlFile = baseFile + '.html'
         subprocess.call(['grip', wikiDir + f, '--export', '--no-inline', exportDir + htmlFile])
-        p=re.compile(exportDir)
+        p = re.compile(exportDir)
         sed_inplace(exportDir + htmlFile, p, '')
         # edit links to css, images and other pages
         htmlDoc = open(exportDir + htmlFile)

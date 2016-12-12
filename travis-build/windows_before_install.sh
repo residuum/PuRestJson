@@ -13,3 +13,5 @@ sudo apt-get -y install mxe-${MXE_TARGET}-curl mxe-${MXE_TARGET}-json-c \
 
 wget -O /tmp/pd.zip http://msp.ucsd.edu/Software/pd-${PDVERSION}.msw.zip
 unzip -d /tmp /tmp/pd.zip
+
+pip install grip beautifulsoup4 lxml

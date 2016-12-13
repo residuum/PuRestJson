@@ -10,8 +10,8 @@ for pd_darwin in *.pd_darwin; do
     LIBS=`otool -L $pd_darwin`
     if [ "x$LIBS" != "x" ]; then
         echo "$pd_darwin is using:"
-        for lib in $LIBS{@:2}; do
-            if echo $lib | grep --quiet dylib; then
+        for lib in $LIBS; do
+            if echo $lib | grep --quiet '^/usr/local/.*dylib$'; then
                 echo "    $lib"
                 install -vp $lib $PD_APP_LIB
                 new_lib=`echo $lib | sed 's|.*/\(.*\.dylib\)|\1|'`
@@ -29,8 +29,8 @@ while true; do
         LIBS=`otool -L $dylib`
         if [ "x$LIBS" != "x" ]; then
             echo "$dylib is using:"
-            for lib in $LIBS{@:2}; do
-                if echo $lib | grep --quiet 'dylib$'; then
+            for lib in $LIBS; do
+				if echo $lib | grep --quiet '^/usr/local/.*dylib$'; then
                     echo "    $lib"
                     new_lib=`echo $lib | sed 's|.*/\(.*\.dylib\)|\1|'`
                     if [ -e  $PD_APP_LIB/$new_lib ]; then

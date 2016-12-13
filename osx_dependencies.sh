@@ -30,7 +30,7 @@ while true; do
         if [ "x$LIBS" != "x" ]; then
             echo "$dylib is using:"
             for lib in $LIBS; do
-				if echo $lib | grep --quiet '^/usr/local/.*dylib$'; then
+                if echo $lib | grep --quiet '^/usr/local/.*dylib$'; then
                     echo "    $lib"
                     new_lib=`echo $lib | sed 's|.*/\(.*\.dylib\)|\1|'`
                     if [ -e  $PD_APP_LIB/$new_lib ]; then

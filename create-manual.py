@@ -16,7 +16,14 @@ if len(sys.argv) > 1:
 if len(sys.argv) > 2:
     wikiDir = sys.argv[2]
 
-print 'Preparing directory: ', wikiDir
+print 'Input directory: ', wikiDir
+print 'Output directory: ', exportDir
+
+# rename all files containing '[' and ']' in names because Windows does not like those
+for f in os.listdir(wikiDir):
+    cleaned = f.replace('[', '').replace(']', '')
+    if f != cleaned:
+        os.rename(wikiDir + f, wikiDir + cleaned)
 
 # convert md files one-by-one
 for f in os.listdir(wikiDir):
@@ -36,7 +43,9 @@ for f in os.listdir(wikiDir):
         soup.head.append(css)
         for a in soup.findAll('a'):
             if a['href'].startswith('https://github.com/residuum/PuRestJson/wiki/'):
-                a['href'] = a['href'].replace('https://github.com/residuum/PuRestJson/wiki/', '') + '.html'
+                a['href'] = a['href'].replace('https://github.com/residuum/PuRestJson/wiki/', '')\
+                        .replace('[', '')\
+                        .replace(']', '') + '.html'
         for img in soup.findAll('img'):
             if img['src'].startswith('https://camo.githubusercontent.com'):
                 img['src'] = img['data-canonical-src'].replace('https://raw.github.com/residuum/PuRestJson/master/','')

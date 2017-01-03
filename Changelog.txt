@@ -1,5 +1,9 @@
 Changelog
 ---------
+1.4.2: Argo in Shipyard
+- Update of build scripts and documentation
+- Usage of CI for build
+
 1.4.1: Orpheus's Lyre
 - Bug fix:
 	-- [json-encode] and [json-decode]: Correctly freeing JSON object

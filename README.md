@@ -5,14 +5,18 @@
      | |    | |_| | | \ \| |____ ____) |  | |    | |__| |____) | |__| | |\  |
      |_|     \__,_|_|  \_\______|_____/   |_|     \____/|_____/ \____/|_| \_|
 
+[![Build Status](https://travis-ci.org/residuum/PuRestJson.svg?branch=master)](https://travis-ci.org/residuum/PuRestJson)
+
+<a href="https://scan.coverity.com/projects/residuum-purestjson">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/4515/badge.svg"/>
+</a>
+
 PuREST JSON is a library for connecting Puredata (Pd) to HTTP services
 and encoding and decoding JSON data.
 
 The library can issue GET, POST, PUT and DELETE statements, so consumation
 of RESTful services is possible, e.g. CouchDB.
-
-The library used to be called CouchPdb, but handles all HTTP requests,
-so the name was not fitting any more.
 
 ## About Puredata (From the official website)
 
@@ -39,7 +43,7 @@ Object for encoding data to JSON.
 Object for decoding JSON data.
 
 ### `[urlparams]`
-Object for url encoding and contatenating url parameters.
+Object for url encoding and concatenating url parameters.
 
 For the usage of the externals see the help patches for the objects.
 

@@ -7,23 +7,29 @@ env:
         - secure: "DA85V8jBW8C6n6z9qiGufU1BK1atVUsvnceHIuf0pG64faZBNLg93J3SfyV2/NN0C4AVAaVHSM+F8XR8Ba8GdxHbW8OGJR+vcgr6ZFg5Qai/xmMJm5MfcR/oPFj8nuMnT61rb6Jm5QpuURRwAjio+x7wCHQJkkpH1TiQF9mV2Tk="
 
 matrix:
-        include:
-        - env: PLATFORM='linux64'
-          os: linux
-          dist: trusty
-          sudo: required
-          compiler: gcc
-
-        - env: PLATFORM='linux32' CHROOTDIR='/opt/crosscompilation'
-          os: linux
-          dist: trusty
-          sudo: required
-          compiler: gcc
-
-        - env: PLATFORM='osx'
-          os: osx
-
+    include:
+        #- env: PLATFORM='linux64'
+        #os: linux
+        #dist: trusty
+        #sudo: required
+        #compiler: gcc
+        #
+        #- env: PLATFORM='linux32' CHROOTDIR='/opt/crosscompilation'
+        #os: linux
+        #dist: trusty
+        #sudo: required
+        #compiler: gcc
+        #
+        #- env: PLATFORM='osx'
+        #os: osx
+        #
         - env: PLATFORM='windows'
+          os: linux
+          dist: trusty
+          sudo: required
+          compiler: gcc
+
+        - env: PLATFORM='windows64'
           os: linux
           dist: trusty
           sudo: required

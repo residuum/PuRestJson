@@ -17,9 +17,9 @@ ldflags =
 ldlibs = -lcurl -ljson-c -loauth
 
 define forWindows
-    ldlibs += -lpthread -lm -lidn -lintl -lwldap32 -lgnutls -lhogweed -lgmp -lssl \
-		-liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto \
-		-lws2_32 -lgdi32 -lcrypt32 -lz  
+    ldlibs += -lpthread -lm -lwldap32 -lgnutls -lhogweed -lgmp -lssl \
+		-lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto \
+		-lws2_32 -lgdi32 -lcrypt32 -lz -lunistring -lidn -lintl -liconv
     cflags += -mthreads -DCURL_STATICLIB
     datafiles += cacert.pem
 endef

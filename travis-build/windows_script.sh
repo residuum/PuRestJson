@@ -11,6 +11,6 @@ make \
   pdincludepath=${PD_DIR}/src \
   pdbinpath=${PD_DIR}/bin \
   CC=${MXE_GCC} \
-  arch.c.flags='-march=pentium4 -msse -msse2 -mfpmath=sse -I \
-    "/usr/lib/mxe/usr/i686-w64-mingw32.static/include"' \
+  arch.c.flags='-march=pentium4 -msse -msse2 -mfpmath=sse \
+    -I "/usr/lib/mxe/usr/i686-w64-mingw32.static/include"' \
   ldflags='-L "/usr/lib/mxe/usr/i686-w64-mingw32.static/lib"'

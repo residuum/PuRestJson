@@ -1,4 +1,4 @@
 #!/bin/bash
 
 make \
-	pdincludepath=/tmp/Pd-${PDVERSION}-64bit.app/Contents/Resources/src
+	pdincludepath=/tmp/Pd-${PDVERSION}.app/Contents/Resources/src

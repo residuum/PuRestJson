@@ -4,8 +4,6 @@ MXE_DIR=/usr/lib/mxe
 MXE_GCC=${MXE_DIR}/usr/bin/x86_64-w64-mingw32.static-gcc
 PD_DIR=/tmp/pd
 
-ls ${MXE_DIR}/usr/bin
-
 make \
   system=Windows \
   machine=x86_64 \

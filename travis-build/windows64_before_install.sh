@@ -16,4 +16,4 @@ wget -O /tmp/pd.zip http://msp.ucsd.edu/Software/${PD_PATH_STRING}.msw.zip
 unzip -d /tmp /tmp/pd.zip
 mv /tmp/${PD_PATH_STRING} /tmp/pd
 
-pip install grip beautifulsoup4 lxml
+pip install grip beautifulsoup4 lxml --user

@@ -47,7 +47,8 @@ deken.file = $(lib.name)-v$(lib.version)-($(system)-$(machine)-$(deken.bits))-ex
 deken.tmp = deken-tmp
 deken.folder = $(lib.name)
 
-include pd-lib-builder/Makefile.pdlibbuilder
+PDLIBBUILDER_DIR=pd-lib-builder
+include $(PDLIBBUILDER_DIR)/Makefile.pdlibbuilder
 
 deken:
 	mkdir -p "$(deken.tmp)"

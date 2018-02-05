@@ -82,7 +82,7 @@ static void oauth_set_init(t_oauth *const oauth, const int argc, t_atom *const a
 					&oauth->oauth.token_key_len, "Token key cannot be set.");
 			oauth->oauth.token_secret = ctw_set_param((struct _ctw *)oauth, argv + 4, 
 					&oauth->oauth.token_secret_len, "Token secret cannot be set.");
-			/* fall through deliberately */
+			/* FALLTHRU */
 		case 3:
 			oauth->common.base_url = ctw_set_param((struct _ctw *)oauth, argv, 
 					&oauth->common.base_url_len, "Base URL cannot be set.");

@@ -628,7 +628,7 @@ static void ctw_set_proxy(struct _ctw *const common, const int argc, t_atom *con
 			atom_string(argv + 2, tmp, MAXPDSTRING);
 			common->proxy_pass = string_create(&(common->proxy_pass_len), strlen(tmp));
 			strcpy(common->proxy_pass, tmp);
-			/* fall through deliberately */
+			/* FALLTHRU */
 		case 1:
 			atom_string(argv, tmp, MAXPDSTRING);
 			common->proxy = string_create(&(common->proxy_len), strlen(tmp));

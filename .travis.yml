@@ -19,6 +19,12 @@ matrix:
           sudo: required
           compiler: gcc
 
+        - env: PLATFORM='linux_arm' CHROOTDIR='/opt/crosscompilation'
+          os: linux
+          dist: trusty
+          sudo: required
+          compiler: gcc
+
         - env: PLATFORM='osx'
           os: osx
 

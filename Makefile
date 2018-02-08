@@ -1,6 +1,6 @@
 lib.name = purest_json
 
-OBJECTS = rest oauth json-decode json-encode urlparams 
+OBJECTS = rest.c oauth.c json-decode.c json-encode.c urlparams.c 
 PDOBJECTS = 
 EXAMPLES = purest-json-test.pd the-sound-of-money.pd statistics.pd twitter-client.pd binary-test.pd
 EXTRA_DIST = README.md LICENSE.txt Changelog.txt test.json
@@ -28,7 +28,7 @@ define forDarwin
     datafiles += cacert.pem *.dylib
 endef
 
-lib.setup.sources = src/purest_json
+lib.setup.sources = src/purest_json.c
 
 # file for creating deken package
 ifeq ($(findstring $(machine), x86_64 ia64), $(machine))

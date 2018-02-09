@@ -13,13 +13,23 @@ matrix:
           sudo: required
           compiler: gcc
 
-        - env: PLATFORM='linux32' CHROOTDIR='/opt/crosscompilation'
+        - env: 
+          - PLATFORM='linux32'
+          - DIST=stretch
+          - DEBIAN_ARCH=i386
+          - CHROOTDIR=/opt/crosscompilation
+
           os: linux
           dist: trusty
           sudo: required
           compiler: gcc
 
-        - env: PLATFORM='linux_arm' CHROOTDIR='/opt/crosscompilation'
+        - env: 
+          - PLATFORM='linux_arm'
+          - DIST=stretch
+          - DEBIAN_ARCH=armhf
+          - CHROOTDIR=/opt/crosscompilation
+
           os: linux
           dist: trusty
           sudo: required
@@ -28,13 +38,31 @@ matrix:
         - env: PLATFORM='osx'
           os: osx
 
-        - env: PLATFORM='windows'
+        - env: 
+          - PLATFORM='windows'
+          - MXE_TARGET=i686-w64-mingw32.static
+          - MXE_PATH_SLUG=i686-w64-mingw32.static
+          - PD_UNZIP_PATH=pd
+          - PD_DIR=/tmp/pd
+          - PD_URL=http://msp.ucsd.edu/Software/pd-${PDVERSION}.msw.zip
+          - MACHINE=i386
+          - CUSTOM_CFLAGS='-march=core2 -mfpmath=sse -msse -msse2 -msse3'
+
           os: linux
           dist: trusty
           sudo: required
           compiler: gcc
 
-        - env: PLATFORM='windows64'
+        - env: 
+          - PLATFORM='windows64'
+          - MXE_TARGET=x86-64-w64-mingw32.static
+          - MXE_PATH_SLUG=x86_64-w64-mingw32.static
+          - PD_UNZIP_PATH=pd-0.48-1test2-ia64
+          - PD_DIR=/tmp/pd
+          - PD_URL=http://msp.ucsd.edu/Software/${PD_UNZIP_PATH}.msw.zip
+          - MACHINE=x86_x64
+          - CUSTOM_CFLAGS='-march=core2 -mfpmath=sse -msse -msse2 -msse3'
+
           os: linux
           dist: trusty
           sudo: required

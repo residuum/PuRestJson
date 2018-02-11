@@ -6,4 +6,4 @@ python create-manual.py
 
 wget https://curl.haxx.se/ca/cacert.pem
 bash ./osx_dependencies.sh
-make deken
+make machine=x86_64 deken

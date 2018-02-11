@@ -60,7 +60,7 @@ matrix:
           - PD_UNZIP_PATH=pd-0.48-1test2-ia64
           - PD_DIR=/tmp/pd
           - PD_URL=http://msp.ucsd.edu/Software/${PD_UNZIP_PATH}.msw.zip
-          - MACHINE=x86_x64
+          - MACHINE=x86_64
           - CUSTOM_CFLAGS='-march=core2 -mfpmath=sse -msse -msse2 -msse3'
 
           os: linux

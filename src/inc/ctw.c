@@ -34,7 +34,8 @@ struct _memory_struct {
 
 struct _ctw {
 	t_object x_ob;
-	t_outlet *status_out;
+	t_outlet *data_out;
+	t_outlet *error_out;
 	t_atom *out;
 	t_canvas *x_canvas; /* needed for getting file path */
 	pthread_t thread;
@@ -430,7 +431,7 @@ static void ctw_output_curl_error(struct _ctw *const common, CURLMsg *const msg)
 	SETFLOAT(&status_data[0], msg->data.result);
 	SETSYMBOL(&status_data[1], gensym(curl_easy_strerror(msg->data.result)));
 	pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
-	outlet_list(common->status_out, &s_list, 2, &status_data[0]);
+	outlet_list(common->error_out, &s_list, 2, &status_data[0]);
 }
 
 static void ctw_output(struct _ctw *const common, struct _memory_struct *const out_memory, FILE *const fp) {
@@ -445,11 +446,11 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 			if (http_status >= 200 && http_status < 300) {
 				if (msg->data.result == CURLE_OK) {
 					if (fp == NULL) {
-						outlet_symbol(common->x_ob.ob_outlet, gensym((*out_memory).memory));
+						outlet_symbol(common->data_out, gensym((*out_memory).memory));
 					}
 					/* Free memory */
 					string_free((*out_memory).memory, &(*out_memory).size);
-					outlet_bang(common->status_out);
+					outlet_bang(common->x_ob.ob_outlet);
 				} else {
 					ctw_output_curl_error(common, msg);
 				}
@@ -458,7 +459,7 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 					t_atom http_status_data;
 					SETFLOAT(&http_status_data, (float)http_status);
 					pd_error(common, "HTTP error while performing request: %li.", http_status);
-					outlet_float(common->status_out, atom_getfloat(&http_status_data));
+					outlet_float(common->error_out, atom_getfloat(&http_status_data));
 				} else {
 					ctw_output_curl_error(common, msg);
 				}

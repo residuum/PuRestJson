@@ -104,7 +104,7 @@ static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *co
 			/* output status */
 			curl_easy_getinfo(rest->common.easy_handle, CURLINFO_RESPONSE_CODE, &http_status);
 			if (http_status >= 200 && http_status < 300) {
-				outlet_bang(rest->common.status_out);
+				outlet_bang(rest->common.x_ob.ob_outlet);
 				if (msg->data.result == CURLE_OK) {
 					rest_extract_token(rest, out_header);
 				} else {
@@ -114,7 +114,7 @@ static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *co
 							gensym(curl_easy_strerror(msg->data.result)));
 					pd_error(rest, "Error while performing request: %s.", 
 							curl_easy_strerror(msg->data.result));
-					outlet_list(rest->common.status_out, &s_list, 2, &http_status_data[0]);
+					outlet_list(rest->common.error_out, &s_list, 2, &http_status_data[0]);
 				}
 			}
 			curl_easy_cleanup(rest->common.easy_handle);
@@ -351,7 +351,8 @@ void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {
 	rest_set_init(rest, argc, argv); 
 
 	outlet_new(&rest->common.x_ob, NULL);
-	rest->common.status_out = outlet_new(&rest->common.x_ob, NULL);
+	rest->common.data_out = outlet_new(&rest->common.x_ob, NULL);
+	rest->common.error_out = outlet_new(&rest->common.x_ob, NULL);
 	rest->common.locked = 0;
 #ifdef NEEDS_CERT_PATH
 	ctw_set_cert_path((struct _ctw *)rest, rest_class->c_externdir->s_name);

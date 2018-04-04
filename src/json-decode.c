@@ -35,7 +35,7 @@ static t_class *json_decode_class;
 
 struct _json_decode {
 	t_object x_ob;
-	t_outlet *done_outlet;
+	t_outlet *data_outlet;
 };
 
 /* outputs json object at outlets */
@@ -148,7 +148,7 @@ static void jdec_output_string(const char *const json_string, t_json_decode *con
 	json_object *const jobj = json_tokener_parse(json_string);
 
 	if (!is_error(jobj)) {
-		jdec_output(jobj, jdec->x_ob.ob_outlet, jdec->done_outlet);
+		jdec_output(jobj, jdec->data_outlet, jdec->x_ob.ob_outlet);
 		json_object_put(jobj);
 	} else {
 		pd_error(jdec, "Not a JSON object.");
@@ -171,7 +171,7 @@ void *json_decode_new(const t_symbol *const sel, const int argc, const t_atom *c
 	(void) argv;
 
 	outlet_new(&jdec->x_ob, NULL);
-	jdec->done_outlet = outlet_new(&jdec->x_ob, &s_bang);
+	jdec->data_outlet = outlet_new(&jdec->x_ob, &s_bang);
 	purest_json_lib_info("json-decode");
 	return (void *)jdec;
 }

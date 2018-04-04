@@ -378,7 +378,8 @@ void *oauth_new(const t_symbol *const sel, const int argc, t_atom *const argv) {
 	oauth->oauth.rsa_key_len = 0;
 
 	outlet_new(&oauth->common.x_ob, NULL);
-	oauth->common.status_out = outlet_new(&oauth->common.x_ob, NULL);
+	oauth->common.data_out = outlet_new(&oauth->common.x_ob, NULL);
+	oauth->common.error_out = outlet_new(&oauth->common.x_ob, NULL);
 	oauth->common.locked = 0;
 #ifdef NEEDS_CERT_PATH
 	ctw_set_cert_path((struct _ctw *)oauth, oauth_class->c_externdir->s_name);

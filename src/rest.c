@@ -350,7 +350,7 @@ void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {
 	rest_set_init(rest, 0, argv); 
 	rest_set_init(rest, argc, argv); 
 
-	outlet_new(&rest->common.x_ob, NULL);
+	outlet_new(&rest->common.x_ob, &s_bang);
 	rest->common.data_out = outlet_new(&rest->common.x_ob, NULL);
 	rest->common.error_out = outlet_new(&rest->common.x_ob, NULL);
 	rest->common.locked = 0;

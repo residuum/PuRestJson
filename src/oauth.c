@@ -377,7 +377,7 @@ void *oauth_new(const t_symbol *const sel, const int argc, t_atom *const argv) {
 	oauth->oauth.method = OA_HMAC;
 	oauth->oauth.rsa_key_len = 0;
 
-	outlet_new(&oauth->common.x_ob, NULL);
+	outlet_new(&oauth->common.x_ob, &s_bang);
 	oauth->common.data_out = outlet_new(&oauth->common.x_ob, NULL);
 	oauth->common.error_out = outlet_new(&oauth->common.x_ob, NULL);
 	oauth->common.locked = 0;

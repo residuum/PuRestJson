@@ -36,14 +36,15 @@ static t_class *json_decode_class;
 struct _json_decode {
 	t_object x_ob;
 	t_outlet *data_outlet;
+	t_outlet *error_outlet;
 };
 
 /* outputs json object at outlets */
 static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 /* outputs json array at outlets */
-static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+static void jdec_output_array(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet, t_outlet *error_outlet);
 /* output json data */
-static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
+static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet, t_outlet *error_outlet);
 /* checks for valid json string and converts to json */
 static void jdec_output_string(const char *json_string, t_json_decode *jdec);
 
@@ -90,17 +91,19 @@ static void jdec_output_object(json_object *const jobj, t_outlet *const data_out
 	outlet_bang(done_outlet);
 }
 
-static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
+static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_outlet *const done_outlet, t_outlet *const error_outlet) {
 	const int array_len = json_object_array_length(jobj);
 	for (int i = 0; i < array_len; i++) {
 		json_object *array_member = json_object_array_get_idx(jobj, i);
-		if (!is_error(array_member)) {
-			jdec_output(array_member, data_outlet, done_outlet);
+		if (array_member != NULL) {
+			jdec_output(array_member, data_outlet, done_outlet, error_outlet);
+		} else {
+			outlet_bang(error_outlet);
 		}
 	}
 }
 
-static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
+static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet, t_outlet *const error_outlet) {
 	t_atom out_data[2];
 	t_float out_float;
 	const enum json_type outer_type = json_object_get_type(jobj);
@@ -136,7 +139,7 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
 			jdec_output_object(jobj, data_outlet, done_outlet);
 			break;
 		case json_type_array: 
-			jdec_output_array(jobj, data_outlet, done_outlet);
+			jdec_output_array(jobj, data_outlet, done_outlet, error_outlet);
 			break;
 		default:
 			MYERROR("What other JSON type?");
@@ -147,11 +150,12 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
 static void jdec_output_string(const char *const json_string, t_json_decode *const jdec) {
 	json_object *const jobj = json_tokener_parse(json_string);
 
-	if (!is_error(jobj)) {
-		jdec_output(jobj, jdec->data_outlet, jdec->x_ob.ob_outlet);
+	if (jobj != NULL) {
+		jdec_output(jobj, jdec->data_outlet, jdec->x_ob.ob_outlet, jdec->error_outlet);
 		json_object_put(jobj);
 	} else {
 		pd_error(jdec, "Not a JSON object.");
+		outlet_bang(jdec->error_outlet);
 	}
 }
 
@@ -170,8 +174,9 @@ void *json_decode_new(const t_symbol *const sel, const int argc, const t_atom *c
 	(void) argc;
 	(void) argv;
 
-	outlet_new(&jdec->x_ob, NULL);
-	jdec->data_outlet = outlet_new(&jdec->x_ob, &s_bang);
+	outlet_new(&jdec->x_ob, &s_bang);
+	jdec->data_outlet = outlet_new(&jdec->x_ob, NULL);
+	jdec->error_outlet = outlet_new(&jdec->x_ob, &s_bang);
 	purest_json_lib_info("json-decode");
 	return (void *)jdec;
 }

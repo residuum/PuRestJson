@@ -310,20 +310,20 @@ will wait for 10 seconds before returning data.;
 -1 -1;
 #X text 79 -311 This won't always work \, as another thread will have
 to be signalled and must clean up.;
+#X obj 277 -168 del 20;
 #X text 277 -277 By experimentation \, I have found out that a delay
-of 10ms is sufficient on my system (TM).;
-#X obj 277 -168 del 10;
+of 20ms is sufficient on my system (TM).;
 #X connect 2 0 0 0;
 #X connect 2 1 1 0;
 #X connect 3 0 2 0;
-#X connect 4 0 11 0;
+#X connect 4 0 10 0;
 #X connect 4 1 3 0;
 #X connect 5 0 4 0;
 #X connect 6 0 2 0;
 #X connect 7 0 6 0;
 #X connect 7 1 3 0;
 #X connect 8 0 7 0;
-#X connect 11 0 6 0;
+#X connect 10 0 6 0;
 #X restore 710 162 pd cancel;
 #X text 628 82 You can cancel a currently executed request by issuing
 [cancel(. If data has been returned already \, but is not output \,
@@ -333,14 +333,6 @@ to issue a new request immediately. See;
 #X text 19 27 [rest] is an object for communication with REST services.
 Request methods GET \, POST \, PUT \, DELETE \, HEAD \, OPTIONS \,
 PATCH and TRACE are available.;
-#X text 19 72 [oauth] is an object for communication with OAUTH enbabled
-webservices. Request methods GET \, POST \, PUT \, DELETE \, HEAD \,
-OPTIONS and TRACE are available.;
-#X text 19 116 All requests are issued with [REQUEST_METHOD URL DATA(
-where REQUEST_METHOD is the uppercase verb of the method \, URL is
-the request URL \, or the relative server path \, if [url( or initialization
-is used \, and DATA is the upload data for PUT or post data for POST.
-For creating url encoded slists of parameters see;
 #X text 19 223 HTTP requests are asynchronous. Do not expect a request
 to return data immediately. While one request is processed \, the object
 is blocked.;
@@ -435,18 +427,26 @@ any parameter to the object.;
 #X connect 7 0 0 0;
 #X connect 13 0 0 0;
 #X restore 21 419 pd proxy;
-#X msg 451 -18 GET http://jsonplaceholder.typicode.com/posts;
 #X obj 623 423 print error;
 #X obj 450 422 print done;
 #X obj 532 422 print data;
 #X msg 641 232 GET https://ix.residuum.org/pd/sleep_example.php;
-#X connect 3 0 31 0;
-#X connect 3 1 32 0;
-#X connect 3 2 30 0;
+#X msg 451 -18 GET https://jsonplaceholder.typicode.com/posts;
+#X text 19 117 All requests are issued with [REQUEST_METHOD URL DATA(
+where REQUEST_METHOD is the uppercase verb of the method \, URL is
+the request URL \, or the relative server path \, if [url( or initialization
+is used \, and DATA is the upload data for PUT or post data for POST.
+For creating url encoded lists of parameters see;
+#X text 19 70 [oauth] is an object for communication with OAUTH enabled
+webservices. Request methods GET \, POST \, PUT \, DELETE \, HEAD \,
+OPTIONS and TRACE are available.;
+#X connect 3 0 28 0;
+#X connect 3 1 29 0;
+#X connect 3 2 27 0;
 #X connect 5 0 3 0;
 #X connect 6 0 3 0;
 #X connect 7 0 3 0;
 #X connect 8 0 3 0;
 #X connect 16 0 3 0;
-#X connect 29 0 3 0;
-#X connect 33 0 3 0;
+#X connect 30 0 3 0;
+#X connect 31 0 3 0;

@@ -9,4 +9,5 @@ wget https://curl.haxx.se/ca/cacert.pem
 make \
 	machine=${MACHINE} \
 	system=Windows \
+	deken.bits=${BITS} \
 	deken

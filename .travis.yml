@@ -46,6 +46,7 @@ matrix:
           - PD_DIR=/tmp/pd
           - PD_URL=http://msp.ucsd.edu/Software/pd-${PDVERSION}.msw.zip
           - MACHINE=i386
+          - BITS=32
           - CUSTOM_CFLAGS='-march=core2 -mfpmath=sse -msse -msse2 -msse3'
 
           os: linux
@@ -60,7 +61,8 @@ matrix:
           - PD_UNZIP_PATH=pd-0.48-1test2-ia64
           - PD_DIR=/tmp/pd
           - PD_URL=http://msp.ucsd.edu/Software/${PD_UNZIP_PATH}.msw.zip
-          - MACHINE=x86_64
+          - MACHINE=amd64
+          - BITS=64
           - CUSTOM_CFLAGS='-march=core2 -mfpmath=sse -msse -msse2 -msse3'
 
           os: linux

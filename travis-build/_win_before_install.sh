@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "deb http://pkg.mxe.cc/repos/apt/debian wheezy main" \
+echo "deb http://pkg.mxe.cc/repos/apt bionic main" \
     | sudo tee /etc/apt/sources.list.d/mxeapt.list
-sudo apt-key adv --keyserver x-hkp://keys.gnupg.net \
-    --recv-keys D43A795B73B16ABE9643FE1AFD8FFF16DB45C6AB
+sudo apt-key adv --keyserver keyserver.ubuntu.com \
+	--recv-keys C6BF758A33A3A276
 sudo apt-get update
 sudo apt-get -y install mxe-${MXE_TARGET}-curl mxe-${MXE_TARGET}-json-c \
 	mxe-${MXE_TARGET}-liboauth mxe-${MXE_TARGET}-pthreads

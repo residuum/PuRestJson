@@ -1,5 +1,6 @@
 #!/bin/bash
 
+sudo apt-get update
 sudo apt-get -y install qemu-user-static debootstrap
 sudo mkdir -p ${CHROOTDIR}
 sudo qemu-debootstrap \

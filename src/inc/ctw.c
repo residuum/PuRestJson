@@ -177,7 +177,7 @@ static size_t ctw_write_stream(const void *const ptr, const size_t realsize, str
 	}
 	memcpy(stream_output, ptr, realsize);
 	stream_output[realsize] = '\0';
-	outlet_symbol(ctw->x_ob.ob_outlet, gensym(stream_output));
+	outlet_symbol(ctw->data_out, gensym(stream_output));
 	/* Free memory */
 	freebytes(stream_output, realsize + sizeof(char));
 	return realsize;

@@ -94,7 +94,7 @@ static void jdec_output_array(json_object *jobj, t_outlet *const data_outlet, t_
 	const int array_len = json_object_array_length(jobj);
 	for (int i = 0; i < array_len; i++) {
 		json_object *array_member = json_object_array_get_idx(jobj, i);
-		if (!is_error(array_member)) {
+		if (array_member != NULL) {
 			jdec_output(array_member, data_outlet, done_outlet);
 		}
 	}
@@ -147,7 +147,7 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
 static void jdec_output_string(const char *const json_string, t_json_decode *const jdec) {
 	json_object *const jobj = json_tokener_parse(json_string);
 
-	if (!is_error(jobj)) {
+	if (jobj != NULL) {
 		jdec_output(jobj, jdec->x_ob.ob_outlet, jdec->done_outlet);
 		json_object_put(jobj);
 	} else {

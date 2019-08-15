@@ -116,7 +116,7 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 				array_len = json_object_array_length(val);
 				for (int i = 0; i < array_len; i++) {
 					json_object *array_member = json_object_array_get_idx(val, i);
-					if (!is_error(array_member)) {
+					if (array_member != NULL) {
 						value = string_create(&value_len, 
 								snprintf(NULL, 0, "%s",
 									json_object_get_string(array_member)));
@@ -298,7 +298,7 @@ void json_encode_read(t_json_encode *const jenc, const t_symbol *const filename)
 	}
 	jobj = json_tokener_parse(json_string);
 	freebytes(json_string, (st.st_size + 1) * sizeof(char));
-	if (!is_error(jobj)) {
+	if (jobj == NULL) {
 		jenc_load_json_data(jenc, jobj);
 		json_object_put(jobj);
 	} else {

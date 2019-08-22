@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MXE_DIR=/usr/lib/mxe
+MXE_DIR=/tmp/mxe
 MXE_GCC=${MXE_DIR}/usr/bin/${MXE_PATH_SLUG}-gcc
 
 make \

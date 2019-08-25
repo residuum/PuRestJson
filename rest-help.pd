@@ -419,6 +419,7 @@ those delimited by spaces \, like;
 #X text 431 342 To clear proxy settings \, send a proxy message without
 any parameter to the object.;
 #X msg 460 78 GET https://ix.residuum.org/pd/proxy_example.php;
+#X msg 328 206 cancel;
 #X connect 0 1 1 0;
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;
@@ -426,6 +427,7 @@ any parameter to the object.;
 #X connect 6 0 0 0;
 #X connect 7 0 0 0;
 #X connect 13 0 0 0;
+#X connect 14 0 0 0;
 #X restore 21 419 pd proxy;
 #X obj 623 423 print error;
 #X obj 450 422 print done;

@@ -43,16 +43,9 @@ THE SOFTWARE.
 	#endif
 #endif
 
-#ifndef PUREST_JSON_LIB
-	static void purest_json_lib_info(char *name) {
-		post("[%s] part of PuREST JSON version %s", name, VERSION);
-		post("For more info see http://ix.residuum.org/pd/purest_json.html");
-	}
-#else 
-	static void purest_json_lib_info(char *name) {
-		(void) name;
-	}
-#endif
+static void purest_json_lib_info(char *name) {
+	(void) name;
+}
 
 #define MYASSERT(cond, ...) do { \
     if (!(cond)) {               \

@@ -387,7 +387,17 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 	if (code != CURLM_OK) {
 		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 	}
-	rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+	if (maxfd == -1) {
+#ifdef _WIN32
+		Sleep(100);
+		rc= 0;
+#else
+		rc = select(0, &fdread, &fdwrite, &fdexcep, &timeout);
+#endif
+	}
+	else {
+		rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+	}
 	switch(rc) {
 		case -1:
 			pd_error(common, "Unspecified error while performing request (network disconnect?).");

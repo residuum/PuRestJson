@@ -1,22 +1,22 @@
 #N canvas 79 63 1143 647 10;
-#X obj 665 397 json-encode;
-#X obj 665 466 json-decode;
-#X obj 51 -13 json-encode;
-#X obj 51 15 json-decode;
-#X text 131 -12 - encodes data into a JSON string.;
-#X text 131 14 - decodes a JSON string to lists.;
-#X msg 646 35 add id 1;
-#X text 643 2 Will add key id and value of 1 to object;
-#X msg 688 65 add name Residuum;
-#X text 714 91 This will add a string with the spaces intact to the
+#X obj 665 417 json-encode;
+#X obj 665 486 json-decode;
+#X obj 51 7 json-encode;
+#X obj 51 35 json-decode;
+#X text 131 8 - encodes data into a JSON string.;
+#X text 131 34 - decodes a JSON string to lists.;
+#X msg 646 55 add id 1;
+#X text 643 22 Will add key id and value of 1 to object;
+#X msg 688 85 add name Residuum;
+#X text 714 111 This will add a string with the spaces intact to the
 JSON object;
-#X msg 752 207 add id 2;
-#X text 749 180 adding a different value will overwrite the previously
+#X msg 752 227 add id 2;
+#X text 749 200 adding a different value will overwrite the previously
 stored one;
-#X msg 478 341 clear;
-#X text 437 310 This will clear the object;
-#X text 794 241 output the value;
-#X msg 795 260 bang;
+#X msg 478 361 clear;
+#X text 437 330 This will clear the object;
+#X text 794 261 output the value;
+#X msg 795 280 bang;
 #N canvas 85 61 536 476 nested-objects 0;
 #X obj -74 -56 json-encode;
 #X obj -74 2 json-decode;
@@ -46,8 +46,8 @@ stored one;
 #X connect 8 0 1 0;
 #X connect 8 1 9 0;
 #X connect 12 0 4 0;
-#X restore 49 424 pd nested-objects;
-#X obj 665 424 t a a;
+#X restore 49 444 pd nested-objects;
+#X obj 665 444 t a a;
 #N canvas 312 61 693 648 about-decoded-json-strings 0;
 #X obj 218 -185 json-encode;
 #X obj 94 -86 json-decode;
@@ -59,12 +59,12 @@ stored one;
 #X obj 218 -159 t a a a;
 #X obj 387 -57 json-decode;
 #X obj 418 87 line;
-#X floatatom 418 120 5 0 0 0 - - -, f 5;
+#X floatatom 418 120 5 0 0 0 - - -;
 #X msg 418 67 \$1 \, \$2 \$3;
 #X obj 418 2 route start end duration;
 #X text 399 -78 wrong;
 #X obj 157 72 line;
-#X floatatom 157 105 5 0 0 0 - - -, f 5;
+#X floatatom 157 105 5 0 0 0 - - -;
 #X obj 157 -29 route start end duration;
 #X obj 157 -58 list trim;
 #X obj 418 -27 list trim;
@@ -115,7 +115,7 @@ the store \, with the left outlet of [json-decode].;
 #X connect 21 0 22 0;
 #X connect 22 0 23 0;
 #X connect 23 0 13 0;
-#X restore 49 447 pd about-decoded-json-strings;
+#X restore 49 467 pd about-decoded-json-strings;
 #N canvas 44 61 450 465 json-arrays 0;
 #X obj 42 73 json-encode;
 #X msg 42 33 clear \, array storage textfile \, array storage couchdb
@@ -142,37 +142,37 @@ the store \, with the left outlet of [json-decode].;
 #X connect 7 1 11 0;
 #X connect 8 0 7 0;
 #X connect 8 1 10 0;
-#X restore 49 472 pd json-arrays;
-#X text 46 401 [json-decode] treats json arrays as a series of objects.
+#X restore 49 492 pd json-arrays;
+#X text 46 421 [json-decode] treats json arrays as a series of objects.
 ;
-#X obj 755 467 print JSON_string;
-#X msg 799 309 write /tmp/test.json;
-#X msg 797 371 read test.json;
-#X text 797 290 write the content as JSON to a file;
-#X text 794 352 read data from a JSON file;
-#X text 46 46 [json-encode] has six methods: add \, array \, clear
+#X obj 755 487 print JSON_string;
+#X msg 799 329 write /tmp/test.json;
+#X msg 797 391 read test.json;
+#X text 797 310 write the content as JSON to a file;
+#X text 794 372 read data from a JSON file;
+#X text 46 66 [json-encode] has six methods: add \, array \, clear
 \, bang \, write and read.;
-#X text 46 112 array adds a new value to an array.;
-#X text 46 130 clear clears the internally stored object.;
-#X text 46 147 bang outputs the stored object as a JSON string.;
-#X text 46 74 add adds a new key/value pair to the internally stored
+#X text 46 132 array adds a new value to an array.;
+#X text 46 150 clear clears the internally stored object.;
+#X text 46 167 bang outputs the stored object as a JSON string.;
+#X text 46 94 add adds a new key/value pair to the internally stored
 object. If you call add with a value that is already a JSON string
 \, then the object will be added as a nested object.;
-#X text 46 165 read reads JSON data from a file. This file must contain
+#X text 46 185 read reads JSON data from a file. This file must contain
 exactly one JSON object \, as [json-encode] only stores one object
 internally.;
-#X text 46 203 write writes the internally stored data as JSON to a
+#X text 46 223 write writes the internally stored data as JSON to a
 file.;
-#X obj 347 227 qlist;
-#X text 46 225 add \, read and write methods work analog to;
-#X obj 49 588 import purest_json;
-#X obj 458 564 print decoding_done;
-#X obj 617 565 print decoded_data;
-#X msg 714 118 add album dss;
-#X msg 734 150 add year 2018;
-#X obj 774 566 print not-a-json-object;
-#X msg 924 401 no json;
-#X text 44 254 [json-decode] will accept a JSON string at its input
+#X obj 347 247 qlist;
+#X text 46 245 add \, read and write methods work analog to;
+#X obj 49 608 import purest_json;
+#X obj 458 584 print decoding_done;
+#X obj 617 585 print decoded_data;
+#X msg 714 138 add album dss;
+#X msg 734 170 add year 2018;
+#X obj 774 586 print not-a-json-object;
+#X msg 924 421 no json;
+#X text 44 274 [json-decode] will accept a JSON string at its input
 and will output the decoded object as a series of lists of key/value
 pairs on the middle outlet. Boolean values of TRUE/FALSE will be translated
 to 1 or 0 \, float and integer values will be output as floats. Nested

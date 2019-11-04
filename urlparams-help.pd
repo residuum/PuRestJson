@@ -1,29 +1,28 @@
 #N canvas 44 51 687 503 10;
-#X declare -lib purest_json;
-#X msg 211 110 add id 1;
-#X text 208 77 Will add key id and value of 1 to object;
-#X msg 253 140 add name Residuum;
-#X msg 299 236 add year 2011;
-#X msg 317 282 add id 2;
-#X msg 23 330 clear;
-#X text 22 305 This will clear the object;
-#X text 359 316 output the value;
-#X msg 360 335 bang;
-#X obj 480 2 import purest_json;
-#X obj 47 -14 urlparams;
-#X obj 229 374 urlparams;
-#X text 43 14 [urlparams] has three methods: add \, clear and bang.
+#X msg 211 140 add id 1;
+#X text 208 107 Will add key id and value of 1 to object;
+#X msg 253 170 add name Residuum;
+#X msg 299 266 add year 2011;
+#X msg 317 312 add id 2;
+#X msg 23 360 clear;
+#X text 22 335 This will clear the object;
+#X text 359 346 output the value;
+#X msg 360 365 bang;
+#X obj 480 32 import purest_json;
+#X obj 47 16 urlparams;
+#X obj 229 404 urlparams;
+#X text 43 44 [urlparams] has three methods: add \, clear and bang.
 add adds a new key/value pair to the internally stored object. clear
 clears the internally stored object. bang outputs the stored object
 as urlencoded parameter string.;
-#X text 279 166 This will add a string with url encoded spaces and
+#X text 279 196 This will add a string with url encoded spaces and
 special characters;
-#X obj 229 409 print;
-#X msg 279 194 add anothername who will tweet to @residuummuc with
+#X obj 229 439 print;
+#X msg 279 224 add anothername who will tweet to @residuummuc with
 hashtag #Pd?;
-#X text 127 -13 - create a list of URL encoded parameters for request
+#X text 127 17 - create a list of URL encoded parameters for request
 parameters.;
-#X text 314 255 adding a different value will overwrite the previously
+#X text 314 285 adding a different value will overwrite the previously
 stored one;
 #X connect 0 0 11 0;
 #X connect 2 0 11 0;

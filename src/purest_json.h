@@ -34,7 +34,11 @@ THE SOFTWARE.
 	#define APICALL __cdecl
 	#define MYERROR(...) post(__VA_ARGS__)
 #else
-	#define APIEXPORT
+	#if defined(__GNUC__) && __GNUC__>=4
+		#define APIEXPORT extern __attribute__ ((visibility("default")))
+	#else
+		#define APIEXPORT
+	#endif
 	#define APICALL
 	#define MYERROR(...) error(__VA_ARGS__)
 	#ifdef __APPLE__

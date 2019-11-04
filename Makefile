@@ -2,7 +2,7 @@ lib.name = purest_json
 
 OBJECTS = rest.c oauth.c json-decode.c json-encode.c urlparams.c 
 PDOBJECTS = 
-EXAMPLES = purest-json-test.pd the-sound-of-money.pd statistics.pd twitter-client.pd binary-test.pd
+EXAMPLES = purest-json-test.pd the-sound-of-money.pd twitter-client.pd binary-test.pd
 EXTRA_DIST = README.md LICENSE.txt Changelog.txt test.json
 HELPPATCHES = json-help.pd urlparams-help.pd rest-help.pd
 UNITTESTS = 

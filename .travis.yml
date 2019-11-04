@@ -1,35 +1,79 @@
 language: c
 
-
 env:
-        global:
-        - PDVERSION='0.47-1'
+    global:
+        - PDVERSION='0.49-0'
         - secure: "DA85V8jBW8C6n6z9qiGufU1BK1atVUsvnceHIuf0pG64faZBNLg93J3SfyV2/NN0C4AVAaVHSM+F8XR8Ba8GdxHbW8OGJR+vcgr6ZFg5Qai/xmMJm5MfcR/oPFj8nuMnT61rb6Jm5QpuURRwAjio+x7wCHQJkkpH1TiQF9mV2Tk="
 
 matrix:
-        include:
+    include:
         - env: PLATFORM='linux64'
           os: linux
-          dist: trusty
+          dist: bionic
           sudo: required
           compiler: gcc
 
-        - env: PLATFORM='linux32' CHROOTDIR='/opt/crosscompilation'
+        - env: 
+          - PLATFORM='linux32'
+          - DIST=buster
+          - DEBIAN_ARCH=i386
+          - CHROOTDIR=/opt/crosscompilation
+
           os: linux
-          dist: trusty
+          dist: bionic
+          sudo: required
+          compiler: gcc
+
+        - env: 
+          - PLATFORM='linux_arm'
+          - DIST=buster
+          - DEBIAN_ARCH=armhf
+          - CHROOTDIR=/opt/crosscompilation
+
+          os: linux
+          dist: bionic
           sudo: required
           compiler: gcc
 
         - env: PLATFORM='osx'
           os: osx
 
-        - env: PLATFORM='windows'
+        - env: 
+          - PLATFORM='windows'
+          - MXE_TARGET=i686-w64-mingw32.static
+          - MXE_PATH_SLUG=i686-w64-mingw32.static
+          - PD_UNZIP_PATH=pd
+          - PD_DIR=/tmp/pd-${PDVERSION}-i386
+          - PD_URL=http://msp.ucsd.edu/Software/pd-${PDVERSION}-i386.msw.zip
+          - MACHINE=i386
+          - BITS=32
+          - CUSTOM_CFLAGS='-march=core2 -mfpmath=sse -msse -msse2 -msse3'
+
           os: linux
-          dist: trusty
+          dist: bionic
           sudo: required
           compiler: gcc
 
-before_install: bash ./travis-build/${PLATFORM}_before_install.sh
+        - env: 
+          - PLATFORM='windows64'
+          - MXE_TARGET=x86-64-w64-mingw32.static
+          - MXE_PATH_SLUG=x86_64-w64-mingw32.static
+          - PD_UNZIP_PATH=pd
+          - PD_DIR=/tmp/pd-${PDVERSION}
+          - PD_URL=http://msp.ucsd.edu/Software/pd-${PDVERSION}.msw.zip
+          - MACHINE=amd64
+          - BITS=64
+          - CUSTOM_CFLAGS='-march=core2 -mfpmath=sse -msse -msse2 -msse3'
+
+          os: linux
+          dist: bionic
+          sudo: required
+          compiler: gcc
+
+before_install: 
+    - export -f travis_wait
+    - export -f travis_jigger
+    - bash ./travis-build/${PLATFORM}_before_install.sh
 script: bash ./travis-build/${PLATFORM}_script.sh
 after_success: bash ./travis-build/${PLATFORM}_pack.sh
 deploy:

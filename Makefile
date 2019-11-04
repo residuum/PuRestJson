@@ -1,6 +1,6 @@
 lib.name = purest_json
 
-OBJECTS = rest oauth json-decode json-encode urlparams 
+OBJECTS = rest.c oauth.c json-decode.c json-encode.c urlparams.c 
 PDOBJECTS = 
 EXAMPLES = purest-json-test.pd the-sound-of-money.pd statistics.pd twitter-client.pd binary-test.pd
 EXTRA_DIST = README.md LICENSE.txt Changelog.txt test.json
@@ -17,37 +17,28 @@ ldflags =
 ldlibs = -lcurl -ljson-c -loauth
 
 define forWindows
-    ldlibs += -lpthread -lm -lidn -lintl -lwldap32 -lgnutls -lhogweed -lgmp -lssl \
-		-liconv -lnettle -lssh2 -lgcrypt -lgpg-error -lcrypto \
-		-lws2_32 -lgdi32 -lcrypt32 -lz  
+    ldlibs += -lpthread -lm -lwldap32 -lssl -lssh2 -lgcrypt -lgpg-error \
+			  -lcrypto -lws2_32 -lgdi32 -lcrypt32 -lz -lidn2 -lunistring \
+			  -latomic -lintl -liconv -lcharset
     cflags += -mthreads -DCURL_STATICLIB
-    datafiles += cacert.pem
 endef
 
 define forDarwin
     datafiles += cacert.pem *.dylib
 endef
 
-lib.setup.sources = src/purest_json
+lib.setup.sources = src/purest_json.c
 
-# file for creating deken package
-ifeq ($(findstring $(machine), x86_64 ia64), $(machine))
-  deken.bits = 64
-else
-  deken.bits = 32
-endif
-ifeq ($(system), Windows)
-  deken.ext = zip
-  deken.pack = zip -9 -r
-else
-  deken.ext = tar.gz
-  deken.pack = tar -zcvf
-endif
-deken.file = $(lib.name)-v$(lib.version)-($(system)-$(machine)-$(deken.bits))-externals
-deken.tmp = deken-tmp
-deken.folder = $(lib.name)
+# creating deken package
+deken.bits=32
+deken.ext=dek
+deken.pack=zip -9 -r
+deken.file= $(lib.name)[v$(lib.version)]($(system)-$(machine)-$(deken.bits))
+deken.tmp=deken-tmp
+deken.folder=$(lib.name)
 
-include pd-lib-builder/Makefile.pdlibbuilder
+PDLIBBUILDER_DIR=pd-lib-builder
+include $(PDLIBBUILDER_DIR)/Makefile.pdlibbuilder
 
 deken:
 	mkdir -p "$(deken.tmp)"
@@ -60,4 +51,4 @@ deken:
 	cd "$(deken.tmp)"; \
 	  $(deken.pack) "$(deken.file).$(deken.ext)" "$(deken.folder)"; \
 	  rm -rf "$(deken.folder)"; \
-	  mv "$(deken.file).$(deken.ext)" ..;
+	  mv "$(deken.file).$(deken.ext)" ..; \

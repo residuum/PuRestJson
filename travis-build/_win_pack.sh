@@ -4,6 +4,8 @@ git clone https://github.com/residuum/PuRestJson.wiki.git /tmp/PuRestJson.wiki/
 
 python create-manual.py
 
-wget https://curl.haxx.se/ca/cacert.pem
-bash ./osx_dependencies.sh
-make machine=amd64 deken.bits=32 deken
+make \
+	machine=${MACHINE} \
+	system=Windows \
+	deken.bits=${BITS} \
+	deken

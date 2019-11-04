@@ -49,6 +49,33 @@ struct _rest {
 
 static t_class *rest_class;
 
+/* constructor */
+static void *rest_new(t_symbol *sel, const int argc, t_atom *argv);
+/* destructor */
+static void rest_free(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
+
+/* HTTP request */
+static void rest_command(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* set or clear timeout */
+static void rest_timeout(t_rest *rest, const t_floatarg f);
+/* inits object and sets parameters */
+static void rest_init(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets or clears check of SSL certificate */
+static void rest_sslcheck(t_rest *rest, const t_floatarg f);
+/* cancel request */
+static void rest_cancel(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
+/* set header */
+static void rest_header(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* clear header */
+static void rest_clear_headers(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
+/* sets output file */
+static void rest_file(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets mode to HTTP streaming or blocking */
+static void rest_mode(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets proxy */
+static void rest_proxy(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+
+
 /* frees data */
 static void rest_free_inner(t_rest *rest);
 /* extracts cookie data */

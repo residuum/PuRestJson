@@ -32,12 +32,3 @@ THE SOFTWARE.
 /* [json-decode] */
 struct _json_decode;
 typedef struct _json_decode t_json_decode;
-
-/* constructor */
-APIEXPORT void APICALL *json_decode_new(const t_symbol *sel, const int argc, const t_atom *argv);
-
-/* string input */
-APIEXPORT void APICALL json_decode_string(t_json_decode *x, const t_symbol *data);
-
-/* list input */
-APIEXPORT void APICALL json_decode_list(t_json_decode *x, const t_symbol *sel, const int argc, t_atom *argv);

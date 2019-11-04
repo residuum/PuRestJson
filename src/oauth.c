@@ -54,6 +54,36 @@ struct _oauth {
 	} oauth;
 };
 
+
+/* constructor */
+static void *oauth_new(const t_symbol *sel, const int argc, t_atom *argv);
+/* destructor */
+static void oauth_free(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);
+
+/* HTTP request */
+static void oauth_command(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* set or clear timeout */
+static void oauth_timeout(t_oauth *oauth, const t_floatarg f);
+/* inits object and sets parameters */
+static void oauth_init(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* OAuth singature method */
+static void oauth_method(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets or clears check of SSL certificate */
+static void oauth_sslcheck(t_oauth *oauth, const t_floatarg f);
+/* cancel request */
+static void oauth_cancel(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);
+/* set header */
+static void oauth_header(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* clear header */
+static void oauth_clear_headers(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);
+/* sets output file */
+static void oauth_file(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets mode to HTTP streaming or blocking */
+static void oauth_mode(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets proxy */
+static void oauth_proxy(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+
+
 /* frees data */
 static void oauth_free_inner(t_oauth *oauth, const short free_rsa);
 /* initialises object */

@@ -35,15 +35,3 @@ THE SOFTWARE.
 /* [urlparams] */
 struct _urlparams;
 typedef struct _urlparams t_urlparams;
-
-/* constructor */
-APIEXPORT void APICALL *urlparams_new(const t_symbol *sel, const int argc, const t_atom *argv);
-/* destructor */
-APIEXPORT void APICALL urlparams_free(t_urlparams *x, const t_symbol *sel, const int argc, const t_atom *argv);
-
-/* bang and output */
-APIEXPORT void APICALL urlparams_bang(t_urlparams *x);
-/* add value */
-APIEXPORT void APICALL urlparams_add(t_urlparams *x, const t_symbol *sel, const int argc, t_atom *argv);
-/* clear stored values */
-APIEXPORT void APICALL urlparams_clear(t_urlparams *x, const t_symbol *sel, const int argc, const t_atom *argv);

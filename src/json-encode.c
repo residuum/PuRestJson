@@ -44,6 +44,25 @@ struct _json_encode {
 	t_canvas *x_canvas; /* needed for getting file names */
 };
 
+
+/* constructor */
+static void *json_encode_new(const t_symbol *sel, const int argc, const t_atom *argv);
+/* destructor */
+static void json_encode_free(t_json_encode *x, const t_symbol *sel, const int argc, const t_atom *argv);
+
+/* bang and output */
+static void json_encode_bang(t_json_encode *x);
+/* add value */
+static void json_encode_add(t_json_encode *x, const t_symbol *sel, const int argc, t_atom *argv);
+/* add value to array */
+static void json_encode_array(t_json_encode *x, const t_symbol *sel, const int argc, t_atom *argv);
+/* read json file */
+static void json_encode_read(t_json_encode *x, const t_symbol *filename);
+/* write json file */
+static void json_encode_write(t_json_encode *x, const t_symbol *filename);
+/* clear stored json data */
+static void json_encode_clear(t_json_encode *x, const t_symbol *sel, const int argc, const t_atom *argv);
+
 /* gets json object */
 static json_object *jenc_create_object(const struct _v *value);
 /* loads json object */

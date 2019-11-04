@@ -54,4 +54,5 @@ if [ "$PD_DIR" != "/tmp/$PD_UNZIP_PATH" ]; then
 	mv /tmp/${PD_UNZIP_PATH} ${PD_DIR}
 fi
 
+pip install --upgrade pip
 pip install grip beautifulsoup4 lxml --user

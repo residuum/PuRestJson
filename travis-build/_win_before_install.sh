@@ -45,7 +45,7 @@ sudo apt-get install \
 
 git clone https://github.com/mxe/mxe /tmp/mxe
 cd /tmp/mxe
-travis_wait 30 make MXE_TARGETS=${MXE_PATH_SLUG} curl liboauth pthreads json-c
+travis_wait 60 make MXE_TARGETS=${MXE_PATH_SLUG} curl liboauth pthreads json-c
 
 wget -O /tmp/pd.zip "${PD_URL}"
 unzip -d /tmp /tmp/pd.zip

@@ -33,7 +33,7 @@ THE SOFTWARE.
 	#define APIEXPORT __declspec(dllexport)
 	#define APICALL __cdecl
 	#define MYERROR(...) post(__VA_ARGS__)
-#else 
+#else
 	#define APIEXPORT
 	#define APICALL
 	#define MYERROR(...) error(__VA_ARGS__)
@@ -67,5 +67,5 @@ APIEXPORT void APICALL setup_json0x2ddecode(void);
 /* [urlparams] */
 APIEXPORT void APICALL urlparams_setup(void);
 
-/* general */ 
+/* general */
 APIEXPORT void APICALL purest_json_setup(void);

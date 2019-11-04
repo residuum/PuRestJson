@@ -37,4 +37,3 @@ THE SOFTWARE.
 /* [json-encode] */
 struct _json_encode;
 typedef struct _json_encode t_json_encode;
-

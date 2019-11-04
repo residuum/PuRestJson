@@ -79,7 +79,7 @@ static void jdec_output_object(json_object *const jobj, t_outlet *const data_out
 				case json_type_int:
 					SETFLOAT(&out_data[1], json_object_get_int(val));
 					break;
-				case json_type_string: 
+				case json_type_string:
 					SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
 					break;
 				case json_type_object:
@@ -148,7 +148,7 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
 		case json_type_object:
 			jdec_output_object(jobj, data_outlet, done_outlet);
 			break;
-		case json_type_array: 
+		case json_type_array:
 			jdec_output_array(jobj, data_outlet, done_outlet, error_outlet);
 			break;
 		default:

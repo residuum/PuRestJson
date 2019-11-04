@@ -190,7 +190,7 @@ void oauth_setup(void) {
 }
 
 void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *argv) {
-	char *req_type;
+	const char *req_type;
 	char path[MAXPDSTRING];
 	size_t req_path_len;
 	char *req_path;

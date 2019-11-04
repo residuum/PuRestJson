@@ -1,5 +1,9 @@
 Changelog
 ---------
+1.4.3: Y U no stable API
+- Bug fix: compilation works with json-c >= 0.13
+- Bug fix: remove builderplate display in Pd console
+
 1.4.2: Argo in Shipyard
 - Update of build scripts and documentation
 - Usage of CI for build

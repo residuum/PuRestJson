@@ -39,6 +39,16 @@ struct _json_decode {
 	t_outlet *error_outlet;
 };
 
+/* constructor */
+static void *json_decode_new(const t_symbol *sel, const int argc, const t_atom *argv);
+
+/* string input */
+static void json_decode_string(t_json_decode *x, const t_symbol *data);
+
+/* list input */
+static void json_decode_list(t_json_decode *x, const t_symbol *sel, const int argc, t_atom *argv);
+
+
 /* outputs json object at outlets */
 static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);
 /* outputs json array at outlets */
@@ -69,7 +79,7 @@ static void jdec_output_object(json_object *const jobj, t_outlet *const data_out
 				case json_type_int:
 					SETFLOAT(&out_data[1], json_object_get_int(val));
 					break;
-				case json_type_string: 
+				case json_type_string:
 					SETSYMBOL(&out_data[1], gensym(json_object_get_string(val)));
 					break;
 				case json_type_object:
@@ -138,7 +148,7 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
 		case json_type_object:
 			jdec_output_object(jobj, data_outlet, done_outlet);
 			break;
-		case json_type_array: 
+		case json_type_array:
 			jdec_output_array(jobj, data_outlet, done_outlet, error_outlet);
 			break;
 		default:
@@ -182,7 +192,7 @@ void *json_decode_new(const t_symbol *const sel, const int argc, const t_atom *c
 }
 
 void json_decode_string(t_json_decode *const jdec, const t_symbol *const data) {
-	char *const original_string = data->s_name;
+	const char *const original_string = data->s_name;
 
 	if (original_string && strlen(original_string)) {
 		size_t memsize = 0;

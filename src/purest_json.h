@@ -33,8 +33,12 @@ THE SOFTWARE.
 	#define APIEXPORT __declspec(dllexport)
 	#define APICALL __cdecl
 	#define MYERROR(...) post(__VA_ARGS__)
-#else 
-	#define APIEXPORT
+#else
+	#if defined(__GNUC__) && __GNUC__>=4
+		#define APIEXPORT extern __attribute__ ((visibility("default")))
+	#else
+		#define APIEXPORT
+	#endif
 	#define APICALL
 	#define MYERROR(...) error(__VA_ARGS__)
 	#ifdef __APPLE__
@@ -67,5 +71,5 @@ APIEXPORT void APICALL setup_json0x2ddecode(void);
 /* [urlparams] */
 APIEXPORT void APICALL urlparams_setup(void);
 
-/* general */ 
+/* general */
 APIEXPORT void APICALL purest_json_setup(void);

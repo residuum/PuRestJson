@@ -5,7 +5,7 @@ static void string_free(char *string, size_t *strl);
 /* suppresses warning, nothing special */
 #ifndef NO_BACKSLASHES
 /* removes pd added backslashes from string */
-static char *string_remove_backslashes(char *source_string, size_t *memsize);
+static char *string_remove_backslashes(const char *source_string, size_t *memsize);
 #endif
 
 /* begin implementations */
@@ -32,9 +32,13 @@ static void string_free(char *string, size_t *const strl) {
 
 /* suppresses warning, nothing special */
 #ifndef NO_BACKSLASHES
-static char *string_remove_backslashes(char *const source_string, size_t *const memsize) {
+static char *string_remove_backslashes(const char *const _source_string, size_t *const memsize) {
 	char *cleaned_string = NULL;
-	const size_t len_src = strlen(source_string);
+	char source_string_stack[MAXPDSTRING];
+	const size_t len_src = strlen(_source_string);
+	size_t sslen = 0;
+	char*source_string = (len_src<MAXPDSTRING)?source_string_stack:string_create(&sslen, len_src);
+	strcpy(source_string, _source_string);
 
 	cleaned_string = string_create(memsize, len_src);
 	if (cleaned_string == NULL) {
@@ -55,6 +59,8 @@ static char *string_remove_backslashes(char *const source_string, size_t *const 
 			segment = strtok(NULL, masking);
 		}
 	}
+	if(source_string != source_string_stack)
+		string_free(source_string, &sslen);
 	return (cleaned_string);
 }
 #endif

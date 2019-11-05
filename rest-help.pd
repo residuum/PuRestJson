@@ -1,19 +1,19 @@
-#N canvas 220 73 1137 558 10;
-#X text 55 -59 - object for HTTP communication with REST webservices
+#N canvas 209 73 1137 558 10;
+#X text 55 21 - object for HTTP communication with REST webservices
 ;
-#X obj 450 -52 import purest_json;
-#X obj 19 -60 rest;
-#X obj 450 390 rest;
-#X text 466 27 By default \, requests do not timeout. To set a maximal
+#X obj 450 28 import purest_json;
+#X obj 19 20 rest;
+#X obj 450 470 rest;
+#X text 466 107 By default \, requests do not timeout. To set a maximal
 time in milliseconds \, set a value with [timeout( message. To clear
 the value and return to the default \, use an empty [timeout( message.
 ;
-#X msg 469 81 timeout 2000;
-#X msg 569 81 timeout;
-#X msg 600 332 sslcheck 0;
-#X msg 692 332 sslcheck 1;
-#X obj 19 -36 oauth;
-#X text 57 -37 - object for HTTP communication with OAuth webservices
+#X msg 469 161 timeout 2000;
+#X msg 569 161 timeout;
+#X msg 600 412 sslcheck 0;
+#X msg 692 412 sslcheck 1;
+#X obj 19 44 oauth;
+#X text 57 43 - object for HTTP communication with OAuth webservices
 ;
 #N canvas 148 110 1044 412 oauth-specific 0;
 #X obj 29 53 oauth http://example.com/ CLIENTKEY CLIENTSECRET ACCESSTOKEN
@@ -72,10 +72,10 @@ or use [init( message.;
 #X connect 10 0 13 0;
 #X connect 10 1 14 0;
 #X connect 11 0 10 0;
-#X restore 196 266 pd oauth-specific;
-#X text 19 -2 Most methods work the same for [rest] and [oauth] \,
+#X restore 196 346 pd oauth-specific;
+#X text 19 78 Most methods work the same for [rest] and [oauth] \,
 only some methods differ. The differences are outlined below.;
-#X obj 22 197 urlparams;
+#X obj 22 277 urlparams;
 #N canvas 137 61 544 367 rest-specific 0;
 #N canvas 492 70 517 474 cookie-auth 0;
 #X text 34 91 This will try to log you in on creation. It will call
@@ -289,12 +289,12 @@ empty init message will clean a previous set base url. The number of
 possible parameters for [rest] and [oauth] differ. You can also use
 four parameters for the [init( message to use basic cookie authentication
 \, see below.;
-#X restore 21 266 pd rest-specific;
-#X text 594 289 By default correct SSL host is checked. Disable check
+#X restore 21 346 pd rest-specific;
+#X text 594 369 By default correct SSL host is checked. Disable check
 by sending sslcheck with a value to 0 \, reenable checking by setting
 the value to 1;
-#X msg 632 160 cancel;
-#X text 637 202 Use this request to test cancelling and timeout: it
+#X msg 632 240 cancel;
+#X text 637 282 Use this request to test cancelling and timeout: it
 will wait for 10 seconds before returning data.;
 #N canvas 385 252 807 334 cancel 0;
 #X obj 105 -51 print data;
@@ -324,16 +324,16 @@ of 20ms is sufficient on my system (TM).;
 #X connect 7 1 3 0;
 #X connect 8 0 7 0;
 #X connect 10 0 6 0;
-#X restore 710 162 pd cancel;
-#X text 628 82 You can cancel a currently executed request by issuing
+#X restore 710 242 pd cancel;
+#X text 628 162 You can cancel a currently executed request by issuing
 [cancel(. If data has been returned already \, but is not output \,
 or output only partially \, outputting the data will still be completed.
 Note \, that cancelling the call may take some time \, so do not try
 to issue a new request immediately. See;
-#X text 19 27 [rest] is an object for communication with REST services.
+#X text 19 107 [rest] is an object for communication with REST services.
 Request methods GET \, POST \, PUT \, DELETE \, HEAD \, OPTIONS \,
 PATCH and TRACE are available.;
-#X text 19 223 HTTP requests are asynchronous. Do not expect a request
+#X text 19 303 HTTP requests are asynchronous. Do not expect a request
 to return data immediately. While one request is processed \, the object
 is blocked.;
 #N canvas 358 174 631 378 download-to-file 0;
@@ -352,8 +352,8 @@ is blocked.;
 #X connect 1 0 0 0;
 #X connect 5 0 0 0;
 #X connect 6 0 0 0;
-#X restore 21 374 pd download-to-file;
-#X text 20 333 More functions:;
+#X restore 21 454 pd download-to-file;
+#X text 20 413 More functions:;
 #N canvas 170 140 678 510 streaming-and-blocking 0;
 #X obj 77 353 rest;
 #X msg 77 142 mode stream;
@@ -375,7 +375,7 @@ You can set the mode even during running requests.;
 #X connect 1 0 0 0;
 #X connect 2 0 0 0;
 #X connect 10 0 0 0;
-#X restore 21 396 pd streaming-and-blocking;
+#X restore 21 476 pd streaming-and-blocking;
 #N canvas 114 149 628 451 setting-headers 0;
 #X obj 76 327 rest;
 #X msg 191 226 GET https://api.github.com/repos/residuum/PuRestJson/contents/Makefile
@@ -397,8 +397,8 @@ values of Accept: headers;
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;
 #X connect 7 0 0 0;
-#X restore 21 351 pd setting-headers;
-#N canvas 313 165 899 593 proxy 0;
+#X restore 21 431 pd setting-headers;
+#N canvas 302 165 899 593 proxy 0;
 #X obj 291 442 rest;
 #X obj 301 479 print;
 #X msg 433 380 proxy;
@@ -428,18 +428,18 @@ any parameter to the object.;
 #X connect 7 0 0 0;
 #X connect 13 0 0 0;
 #X connect 14 0 0 0;
-#X restore 21 419 pd proxy;
-#X obj 623 423 print error;
-#X obj 450 422 print done;
-#X obj 532 422 print data;
-#X msg 641 232 GET https://ix.residuum.org/pd/sleep_example.php;
-#X msg 451 -18 GET https://jsonplaceholder.typicode.com/posts;
-#X text 19 117 All requests are issued with [REQUEST_METHOD URL DATA(
+#X restore 21 499 pd proxy;
+#X obj 623 503 print error;
+#X obj 450 502 print done;
+#X obj 532 502 print data;
+#X msg 641 312 GET https://ix.residuum.org/pd/sleep_example.php;
+#X msg 451 62 GET https://jsonplaceholder.typicode.com/posts;
+#X text 19 197 All requests are issued with [REQUEST_METHOD URL DATA(
 where REQUEST_METHOD is the uppercase verb of the method \, URL is
 the request URL \, or the relative server path \, if [url( or initialization
 is used \, and DATA is the upload data for PUT or post data for POST.
 For creating url encoded lists of parameters see;
-#X text 19 70 [oauth] is an object for communication with OAUTH enabled
+#X text 19 150 [oauth] is an object for communication with OAUTH enabled
 webservices. Request methods GET \, POST \, PUT \, DELETE \, HEAD \,
 OPTIONS and TRACE are available.;
 #X connect 3 0 28 0;

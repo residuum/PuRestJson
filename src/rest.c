@@ -49,6 +49,33 @@ struct _rest {
 
 static t_class *rest_class;
 
+/* constructor */
+static void *rest_new(t_symbol *sel, const int argc, t_atom *argv);
+/* destructor */
+static void rest_free(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
+
+/* HTTP request */
+static void rest_command(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* set or clear timeout */
+static void rest_timeout(t_rest *rest, const t_floatarg f);
+/* inits object and sets parameters */
+static void rest_init(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets or clears check of SSL certificate */
+static void rest_sslcheck(t_rest *rest, const t_floatarg f);
+/* cancel request */
+static void rest_cancel(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
+/* set header */
+static void rest_header(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* clear header */
+static void rest_clear_headers(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
+/* sets output file */
+static void rest_file(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets mode to HTTP streaming or blocking */
+static void rest_mode(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets proxy */
+static void rest_proxy(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
+
+
 /* frees data */
 static void rest_free_inner(t_rest *rest);
 /* extracts cookie data */
@@ -80,7 +107,7 @@ static void rest_extract_token(t_rest *const rest, struct _memory_struct *const 
 				while (cookie_params != NULL) {
 					if (strlen(cookie_params)) {
 						rest->common.auth_token = string_create(
-								&rest->common.auth_token_len, 
+								&rest->common.auth_token_len,
 								strlen(cookie_params));
 						strcpy(rest->common.auth_token, cookie_params);
 						break;
@@ -110,9 +137,9 @@ static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *co
 				} else {
 					t_atom http_status_data[2];
 					SETFLOAT(&http_status_data[0], (float)http_status);
-					SETSYMBOL(&http_status_data[1], 
+					SETSYMBOL(&http_status_data[1],
 							gensym(curl_easy_strerror(msg->data.result)));
-					pd_error(rest, "Error while performing request: %s.", 
+					pd_error(rest, "Error while performing request: %s.",
 							curl_easy_strerror(msg->data.result));
 					outlet_list(rest->common.error_out, &s_list, 2, &http_status_data[0]);
 				}
@@ -127,7 +154,7 @@ static void *rest_get_auth_token(void *const thread_args) {
 	t_rest *const rest = thread_args;
 
 	/* length + name=&password=*/
-	rest->common.parameters = string_create(&rest->common.parameters_len, 
+	rest->common.parameters = string_create(&rest->common.parameters_len,
 			rest->cookie.username_len + rest->cookie.password_len + 17);
 	if (rest->common.parameters != NULL) {
 		strcpy(rest->common.parameters, "name=");
@@ -135,7 +162,7 @@ static void *rest_get_auth_token(void *const thread_args) {
 		strcat(rest->common.parameters, "&password=");
 		strcat(rest->common.parameters, rest->cookie.password);
 	}
-	rest->common.complete_url = string_create(&rest->common.complete_url_len, 
+	rest->common.complete_url = string_create(&rest->common.complete_url_len,
 			rest->common.base_url_len + rest->cookie.login_path_len);
 	strcpy(rest->common.complete_url, rest->common.base_url);
 	strcat(rest->common.complete_url, rest->cookie.login_path);
@@ -177,18 +204,18 @@ static void rest_set_init(t_rest *const rest, const int argc, t_atom *const argv
 		case 0:
 			break;
 		case 1:
-			rest->common.base_url = ctw_set_param((struct _ctw *)rest, argv, &rest->common.base_url_len, 
+			rest->common.base_url = ctw_set_param((struct _ctw *)rest, argv, &rest->common.base_url_len,
 					"Base URL cannot be set.");
 			break;
 		case 4:
 			rest->common.locked = 1;
-			rest->common.base_url = ctw_set_param((struct _ctw *)rest, argv, &rest->common.base_url_len, 
+			rest->common.base_url = ctw_set_param((struct _ctw *)rest, argv, &rest->common.base_url_len,
 					"Base URL cannot be set.");
-			rest->cookie.login_path = ctw_set_param((struct _ctw *)rest, argv + 1, 
+			rest->cookie.login_path = ctw_set_param((struct _ctw *)rest, argv + 1,
 					&rest->cookie.login_path_len, "Cookie path cannot be set.");
 			rest->cookie.username = ctw_set_param((struct _ctw *)rest, argv + 2, &rest->cookie.username_len,
 					"Username cannot be set.");
-			rest->cookie.password = ctw_set_param((struct _ctw *)rest, argv + 3, &rest->cookie.password_len, 
+			rest->cookie.password = ctw_set_param((struct _ctw *)rest, argv + 3, &rest->cookie.password_len,
 					"Password cannot be set.");
 			string_free(rest->common.auth_token, &rest->common.auth_token_len);
 			ctw_thread_exec((void *)rest, rest_get_auth_token);
@@ -273,7 +300,7 @@ void rest_init(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 	if (rest->common.locked) {
 		post("rest object is performing request and locked.");
 	} else {
-		rest_set_init(rest, argc, argv); 
+		rest_set_init(rest, argc, argv);
 	}
 }
 
@@ -347,8 +374,8 @@ void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {
 	ctw_init((struct _ctw *)rest);
 	ctw_set_timeout((struct _ctw *)rest, 0);
 
-	rest_set_init(rest, 0, argv); 
-	rest_set_init(rest, argc, argv); 
+	rest_set_init(rest, 0, argv);
+	rest_set_init(rest, argc, argv);
 
 	outlet_new(&rest->common.x_ob, &s_bang);
 	rest->common.data_out = outlet_new(&rest->common.x_ob, NULL);

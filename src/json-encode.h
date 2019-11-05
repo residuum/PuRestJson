@@ -37,21 +37,3 @@ THE SOFTWARE.
 /* [json-encode] */
 struct _json_encode;
 typedef struct _json_encode t_json_encode;
-
-/* constructor */
-APIEXPORT void APICALL *json_encode_new(const t_symbol *sel, const int argc, const t_atom *argv);
-/* destructor */
-APIEXPORT void APICALL json_encode_free(t_json_encode *x, const t_symbol *sel, const int argc, const t_atom *argv);
-
-/* bang and output */
-APIEXPORT void APICALL json_encode_bang(t_json_encode *x);
-/* add value */
-APIEXPORT void APICALL json_encode_add(t_json_encode *x, const t_symbol *sel, const int argc, t_atom *argv);
-/* add value to array */
-APIEXPORT void APICALL json_encode_array(t_json_encode *x, const t_symbol *sel, const int argc, t_atom *argv);
-/* read json file */
-APIEXPORT void APICALL json_encode_read(t_json_encode *x, const t_symbol *filename);
-/* write json file */
-APIEXPORT void APICALL json_encode_write(t_json_encode *x, const t_symbol *filename);
-/* clear stored json data */
-APIEXPORT void APICALL json_encode_clear(t_json_encode *x, const t_symbol *sel, const int argc, const t_atom *argv);

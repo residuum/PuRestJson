@@ -41,6 +41,18 @@ struct _urlparams {
 	struct _kvp_store storage;
 };
 
+/* constructor */
+static void *urlparams_new(const t_symbol *sel, const int argc, const t_atom *argv);
+/* destructor */
+static void urlparams_free(t_urlparams *x, const t_symbol *sel, const int argc, const t_atom *argv);
+
+/* bang and output */
+static void urlparams_bang(t_urlparams *x);
+/* add value */
+static void urlparams_add(t_urlparams *x, const t_symbol *sel, const int argc, t_atom *argv);
+/* clear stored values */
+static void urlparams_clear(t_urlparams *x, const t_symbol *sel, const int argc, const t_atom *argv);
+
 /* converts char to hex represenstation for url encoding */
 static char urlp_tohex(const char code);
 /* url encodes a string */

@@ -19,4 +19,5 @@ sudo chroot ${CHROOTDIR} bash -c "apt-get update"
 sudo chroot ${CHROOTDIR} bash -c "apt-get install -qq -y build-essential \
 	puredata-dev libjson-c-dev libcurl4-openssl-dev liboauth-dev zip"
 
+pip install --upgrade pip
 pip install grip beautifulsoup4 lxml --user

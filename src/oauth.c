@@ -54,6 +54,36 @@ struct _oauth {
 	} oauth;
 };
 
+
+/* constructor */
+static void *oauth_new(const t_symbol *sel, const int argc, t_atom *argv);
+/* destructor */
+static void oauth_free(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);
+
+/* HTTP request */
+static void oauth_command(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* set or clear timeout */
+static void oauth_timeout(t_oauth *oauth, const t_floatarg f);
+/* inits object and sets parameters */
+static void oauth_init(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* OAuth singature method */
+static void oauth_method(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets or clears check of SSL certificate */
+static void oauth_sslcheck(t_oauth *oauth, const t_floatarg f);
+/* cancel request */
+static void oauth_cancel(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);
+/* set header */
+static void oauth_header(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* clear header */
+static void oauth_clear_headers(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);
+/* sets output file */
+static void oauth_file(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets mode to HTTP streaming or blocking */
+static void oauth_mode(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+/* sets proxy */
+static void oauth_proxy(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
+
+
 /* frees data */
 static void oauth_free_inner(t_oauth *oauth, const short free_rsa);
 /* initialises object */
@@ -78,17 +108,17 @@ static void oauth_set_init(t_oauth *const oauth, const int argc, t_atom *const a
 		case 0:
 			break;
 		case 5:
-			oauth->oauth.token_key = ctw_set_param((struct _ctw *)oauth, argv + 3, 
+			oauth->oauth.token_key = ctw_set_param((struct _ctw *)oauth, argv + 3,
 					&oauth->oauth.token_key_len, "Token key cannot be set.");
-			oauth->oauth.token_secret = ctw_set_param((struct _ctw *)oauth, argv + 4, 
+			oauth->oauth.token_secret = ctw_set_param((struct _ctw *)oauth, argv + 4,
 					&oauth->oauth.token_secret_len, "Token secret cannot be set.");
 			/* FALLTHRU */
 		case 3:
-			oauth->common.base_url = ctw_set_param((struct _ctw *)oauth, argv, 
+			oauth->common.base_url = ctw_set_param((struct _ctw *)oauth, argv,
 					&oauth->common.base_url_len, "Base URL cannot be set.");
-			oauth->oauth.client_key = ctw_set_param((struct _ctw *)oauth, argv + 1, 
+			oauth->oauth.client_key = ctw_set_param((struct _ctw *)oauth, argv + 1,
 					&oauth->oauth.client_key_len, "Client key cannot be set.");
-			oauth->oauth.client_secret = ctw_set_param((struct _ctw *)oauth, argv + 2, 
+			oauth->oauth.client_secret = ctw_set_param((struct _ctw *)oauth, argv + 2,
 					&oauth->oauth.client_secret_len, "Client secret cannot be set.");
 			break;
 		default:
@@ -160,7 +190,7 @@ void oauth_setup(void) {
 }
 
 void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *argv) {
-	char *req_type;
+	const char *req_type;
 	char path[MAXPDSTRING];
 	size_t req_path_len;
 	char *req_path;
@@ -203,7 +233,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 			cleaned_parameters = string_remove_backslashes(parameters, &memsize);
 		}
 	}
-	req_path = string_create(&req_path_len, 
+	req_path = string_create(&req_path_len,
 			oauth->common.base_url_len + strlen(path) + memsize + 1);
 	if (oauth->common.base_url != NULL) {
 		strcpy(req_path, oauth->common.base_url);
@@ -222,7 +252,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 		req_url= oauth_sign_url2(req_path, &postargs, oauth->oauth.method, oauth->common.req_type,
 				oauth->oauth.client_key,
 				oauth->oauth.method == OA_RSA ? oauth->oauth.rsa_key : oauth->oauth.client_secret,
-				oauth->oauth.token_key, 
+				oauth->oauth.token_key,
 				oauth->oauth.method == OA_RSA ? NULL : oauth->oauth.token_secret);
 		oauth->common.parameters = string_create(&oauth->common.parameters_len, strlen(postargs));
 		strcpy(oauth->common.parameters, postargs);
@@ -230,7 +260,7 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 		req_url= oauth_sign_url2(req_path, NULL, oauth->oauth.method, oauth->common.req_type,
 				oauth->oauth.client_key,
 				oauth->oauth.method == OA_RSA ? oauth->oauth.rsa_key : oauth->oauth.client_secret,
-				oauth->oauth.token_key, 
+				oauth->oauth.token_key,
 				oauth->oauth.method == OA_RSA ? NULL : oauth->oauth.token_secret);
 		oauth->common.parameters = string_create(&oauth->common.parameters_len, 0);
 	}
@@ -273,8 +303,8 @@ void oauth_method(t_oauth *const oauth, const t_symbol *const sel, const int arg
 		}
 	} else if (strcmp(method_name, "RSA") == 0) {
 		if (LIBOAUTH_VERSION_MAJOR < 1
-				|| (LIBOAUTH_VERSION_MAJOR == 1 
-					&& LIBOAUTH_VERSION_MINOR == 0 
+				|| (LIBOAUTH_VERSION_MAJOR == 1
+					&& LIBOAUTH_VERSION_MINOR == 0
 					&& LIBOAUTH_VERSION_MICRO == 0)) {
 			pd_error(oauth, "RSA-SHA1 is not supported by liboauth version < 1.0.1.");
 			return;
@@ -297,7 +327,7 @@ void oauth_init(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 	if (oauth->common.locked) {
 		post("oauth object is performing request and locked.");
 	} else {
-		oauth_set_init(oauth, argc, argv); 
+		oauth_set_init(oauth, argc, argv);
 	}
 }
 
@@ -333,7 +363,7 @@ void oauth_header(t_oauth *const oauth, const t_symbol *const sel, const int arg
 	ctw_add_header((struct _ctw *)oauth, argc, argv);
 }
 
-void oauth_clear_headers(t_oauth *const oauth, const t_symbol *const sel, const int argc, 
+void oauth_clear_headers(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 		const t_atom *const argv) {
 
 	(void) sel;
@@ -372,8 +402,8 @@ void *oauth_new(const t_symbol *const sel, const int argc, t_atom *const argv) {
 	ctw_init((struct _ctw *)oauth);
 	ctw_set_timeout((struct _ctw *)oauth, 0);
 
-	oauth_set_init(oauth, 0, argv); 
-	oauth_set_init(oauth, argc, argv); 
+	oauth_set_init(oauth, 0, argv);
+	oauth_set_init(oauth, argc, argv);
 	oauth->oauth.method = OA_HMAC;
 	oauth->oauth.rsa_key_len = 0;
 

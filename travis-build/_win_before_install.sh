@@ -43,9 +43,12 @@ sudo apt-get install \
     wget \
     xz-utils
 
-git clone https://github.com/mxe/mxe /tmp/mxe
-cd /tmp/mxe
-travis_wait 60 make MXE_TARGETS=${MXE_PATH_SLUG} curl liboauth pthreads json-c
+#git clone https://github.com/mxe/mxe /tmp/mxe
+#cd /tmp/mxe
+#travis_wait 60 make MXE_TARGETS=${MXE_PATH_SLUG} curl liboauth pthreads json-c
+
+wget -O /tmp/mxe.tar.bz2 https://ssl-account.com/cloud.residuum.org/index.php/s/smxgUxCZ7zXF4u2/download
+tar -xvf /tmp/mxe.tar.bz2 -C /tmp
 
 wget -O /tmp/pd.zip "${PD_URL}"
 unzip -d /tmp /tmp/pd.zip

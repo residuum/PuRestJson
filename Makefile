@@ -21,7 +21,6 @@ define forWindows
 			  -lcrypto -lws2_32 -lgdi32 -lcrypt32 -lz -lidn2 -lunistring \
 			  -latomic -lintl -liconv -lcharset
     cflags += -mthreads -DCURL_STATICLIB
-    datafiles += cacert.pem
 endef
 
 define forDarwin

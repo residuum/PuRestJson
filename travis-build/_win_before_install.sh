@@ -47,15 +47,19 @@ sudo apt-get install \
 #cd /tmp/mxe
 #travis_wait 60 make MXE_TARGETS=${MXE_PATH_SLUG} curl liboauth pthreads json-c
 
-wget -O /tmp/mxe.tar.bz2 https://ssl-account.com/cloud.residuum.org/index.php/s/smxgUxCZ7zXF4u2/download
-tar -xvf /tmp/mxe.tar.bz2 -C /tmp
+wget --no-verbose -O /tmp/mxe.tar.bz2 \
+	https://purest_json:${OC_PASSWORD}@ssl-account.com/cloud.residuum.org/remote.php/webdav/mxe.tar.bz2
+mkdir /tmp/mxe
+tar -xf /tmp/mxe.tar.bz2 -C /tmp/mxe
 
-wget -O /tmp/pd.zip "${PD_URL}"
-unzip -d /tmp /tmp/pd.zip
+wget --no-verbose -O /tmp/pd.zip "${PD_URL}"
+unzip -q -d /tmp /tmp/pd.zip
 if [ "$PD_DIR" != "/tmp/$PD_UNZIP_PATH" ]; then
 	echo "Move unzipped files"
 	mv /tmp/${PD_UNZIP_PATH} ${PD_DIR}
 fi
+
+PATH=$PATH:/tmp/usr/bin
 
 pip install --upgrade pip
 pip install grip beautifulsoup4 lxml --user

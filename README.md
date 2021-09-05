@@ -53,7 +53,7 @@ are available as `pd-purest-json`.
 
 For each commit, a build in [Travis](https://travis-ci.org/residuum/PuRestJson) 
 is triggered. These builds generate deken-like packages, that are available 
-from https://ssl-account.com/cloud.residuum.org/index.php/s/380C60JAabnO7jk
+from https://cloud.residuum.org/index.php/s/380C60JAabnO7jk
 
 The format for the files is `<Travis-build-number>_<Date-in-YYYY-MM-DD>_<dekenfilename>`.
 

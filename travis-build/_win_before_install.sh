@@ -54,6 +54,7 @@ tar -xf /tmp/mxe.tar.bz2 -C /tmp/mxe
 
 wget --no-verbose -O /tmp/pd.zip "${PD_URL}"
 unzip -q -d /tmp /tmp/pd.zip
+
 if [ "$PD_DIR" != "/tmp/$PD_UNZIP_PATH" ]; then
 	echo "Move unzipped files"
 	mv /tmp/${PD_UNZIP_PATH} ${PD_DIR}

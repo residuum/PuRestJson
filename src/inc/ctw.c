@@ -177,7 +177,9 @@ static size_t ctw_write_stream(const void *const ptr, const size_t realsize, str
 	}
 	memcpy(stream_output, ptr, realsize);
 	stream_output[realsize] = '\0';
+	sys_lock();
 	outlet_symbol(ctw->data_out, gensym(stream_output));
+	sys_unlock();
 	/* Free memory */
 	freebytes(stream_output, realsize + sizeof(char));
 	return realsize;
@@ -441,7 +443,9 @@ static void ctw_output_curl_error(struct _ctw *const common, CURLMsg *const msg)
 	SETFLOAT(&status_data[0], msg->data.result);
 	SETSYMBOL(&status_data[1], gensym(curl_easy_strerror(msg->data.result)));
 	pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
+	sys_lock();
 	outlet_list(common->error_out, &s_list, 2, &status_data[0]);
+	sys_unlock();
 }
 
 static void ctw_output(struct _ctw *const common, struct _memory_struct *const out_memory, FILE *const fp) {
@@ -455,12 +459,14 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 			curl_easy_getinfo(common->easy_handle, CURLINFO_RESPONSE_CODE, &http_status);
 			if (http_status >= 200 && http_status < 300) {
 				if (msg->data.result == CURLE_OK) {
+					sys_lock();
 					if (fp == NULL) {
 						outlet_symbol(common->data_out, gensym((*out_memory).memory));
 					}
 					/* Free memory */
 					string_free((*out_memory).memory, &(*out_memory).size);
 					outlet_bang(common->x_ob.ob_outlet);
+					sys_unlock();
 				} else {
 					ctw_output_curl_error(common, msg);
 				}
@@ -468,8 +474,10 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 				if (msg->data.result == CURLE_OK){
 					t_atom http_status_data;
 					SETFLOAT(&http_status_data, (float)http_status);
+					sys_lock();
 					pd_error(common, "HTTP error while performing request: %li.", http_status);
 					outlet_float(common->error_out, atom_getfloat(&http_status_data));
+					sys_unlock();
 				} else {
 					ctw_output_curl_error(common, msg);
 				}
@@ -592,7 +600,9 @@ static void ctw_set_file(struct _ctw *const common, const int argc, t_atom *cons
 	}
 	filename = atom_getsymbol(argv);
 	if (filename == 0) {
+		sys_lock();
 		pd_error(common, "not a filename.");
+		sys_unlock();
 		return;
 	}
 	canvas_makefilename(common->x_canvas, filename->s_name, buf, MAXPDSTRING);

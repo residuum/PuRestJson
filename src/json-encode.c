@@ -317,11 +317,12 @@ void json_encode_read(t_json_encode *const jenc, const t_symbol *const filename)
 	}
 	jobj = json_tokener_parse(json_string);
 	freebytes(json_string, (st.st_size + 1) * sizeof(char));
-	if (jobj == NULL) {
+	if (jobj != NULL) {
 		jenc_load_json_data(jenc, jobj);
 		json_object_put(jobj);
+		post("File json %s loaded.", filename->s_name);
 	} else {
-		post("File does not contain valid JSON.");
+		pd_error(jenc, "File %s does not contain valid JSON.", filename->s_name);
 	}
 }
 

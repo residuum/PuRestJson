@@ -4,4 +4,4 @@ DIST=stretch
 DEBIAN_ARCH=armhf
 CHROOTDIR=/opt/crosscompilation
 
-bash ./travis-build/_debootstrap_before_install.sh
+bash ./circleci-scripts/_debootstrap_setup_environment.sh

@@ -1,0 +1,96 @@
+version: 2.1
+
+jobs:
+  build-linux64:
+    machine:
+      image: ubuntu-2004:202010-01
+    environment:
+      PDVERSION: 0.52-2
+      SYSTEM: linux64
+    steps: 
+      - checkout
+      - run:
+          name: "Compiling"
+          command: bash ./circleci-scripts/build.sh
+  build-linux32:
+    machine:
+      image: ubuntu-2004:202010-01
+    environment:
+      PDVERSION: 0.52-2
+      SYSTEM: linux32
+      DIST: buster
+      DEBIAN_ARCH: i386
+      CHROOTDIR: /opt/crosscompilation
+    steps: 
+      - checkout
+      - run:
+          name: "Compiling"
+          command: bash ./circleci-scripts/build.sh
+  build-linuxarm:
+    machine:
+      image: ubuntu-2004:202010-01
+    environment:
+      PDVERSION: 0.52-2
+      SYSTEM: linuxarm
+      DIST: buster
+      DEBIAN_ARCH: armhf
+      CHROOTDIR: /opt/crosscompilation
+    steps: 
+      - checkout
+      - run:
+          name: "Compiling"
+          command: bash ./circleci-scripts/build.sh
+  build-osx:
+    macos:
+      xcode: 12.5.1
+    environment:
+      PDVERSION: 0.52-2
+      SYSTEM: osx
+    steps: 
+      - checkout
+      - run:
+          name: "Compiling"
+          command: bash ./circleci-scripts/build.sh
+  build-windows:
+    machine:
+      image: ubuntu-2004:202010-01
+    environment:
+      PDVERSION: 0.52-2
+      SYSTEM: windows
+      MXE_TARGET: i686-w64-mingw32.static
+      MXE_PATH_SLUG: i686-w64-mingw32.static
+      PD_UNZIP_PATH: pd
+      MACHINE: i386
+      BITS: 32
+      CUSTOM_CFLAGS: -march=core2 -mfpmath=sse -msse -msse2 -msse3
+    steps: 
+      - checkout
+      - run:
+          name: "Compiling"
+          command: bash ./circleci-scripts/build.sh
+  build-windows64:
+    machine:
+      image: ubuntu-2004:202010-01
+    environment:
+      PDVERSION: 0.52-2
+      SYSTEM: windows64
+      MXE_TARGET: x86-64-w64-mingw32.static
+      MXE_PATH_SLUG: x86_64-w64-mingw32.static
+      PD_UNZIP_PATH: pd
+      MACHINE: amd64
+      BITS: 64
+      CUSTOM_CFLAGS: '-march=core2 -mfpmath=sse -msse -msse2 -msse3'
+    steps: 
+      - checkout
+      - run:
+          name: "Compiling"
+          command: bash ./circleci-scripts/build.sh
+workflows:
+  tagged-build:
+    jobs:
+    - build-linux64
+    - build-linux32
+    - build-linuxarm
+    - build-osx
+    - build-windows
+    - build-windows64

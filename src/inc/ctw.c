@@ -159,11 +159,15 @@ static void ctw_set_cert_path(struct _ctw *common, const char *directory);
 static size_t ctw_write_mem(const void *const ptr, const size_t realsize, struct _memory_struct *const mem) {
 	mem->memory = resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
+	    sys_lock();
 		MYERROR("not enough memory.");
+		sys_unlock();
 	}
 	memcpy(&mem->memory[mem->size], ptr, realsize);
 	if (mem->size + realsize - mem->size != realsize) {
+	    sys_lock();
 		MYERROR("Integer overflow or similar. Bad Things can happen.");
+		sys_unlock();
 	}
 	mem->size += realsize;
 	mem->memory[mem->size] = '\0';
@@ -173,7 +177,9 @@ static size_t ctw_write_mem(const void *const ptr, const size_t realsize, struct
 static size_t ctw_write_stream(const void *const ptr, const size_t realsize, struct _ctw *const ctw) {
 	char *stream_output = getbytes(realsize + sizeof(char));
 	if (stream_output == NULL) {
+	    sys_lock();
 		MYERROR("not enough memory");
+		sys_unlock();
 	}
 	memcpy(stream_output, ptr, realsize);
 	stream_output[realsize] = '\0';
@@ -214,7 +220,9 @@ static char *ctw_set_param(struct _ctw *const common, t_atom *const arg, size_t 
 	char *string;
 
 	if (arg[0].a_type != A_SYMBOL) {
+	    sys_lock();
 		pd_error(common, "%s", error_msg);
+		sys_unlock();
 		return NULL;
 	} 
 	atom_string(arg, temp, MAXPDSTRING);
@@ -280,7 +288,9 @@ static void ctw_prepare_put(struct _ctw *const common, struct _memory_struct *co
 		(*in_memory).memory = getbytes(strlen(common->parameters) + 1);
 		(*in_memory).size = strlen(common->parameters);
 		if ((*in_memory).memory == NULL) {
+		    sys_lock();
 			MYERROR("not enough memory.");
+			sys_unlock();
 		}
 		memcpy((*in_memory).memory, common->parameters, strlen(common->parameters));
 	} else {
@@ -355,8 +365,10 @@ static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const sli
 		if ((fp = fopen(common->out_file, "wb"))) {
 			curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)fp);
 		} else {
+		    sys_lock();
 			pd_error(common, "%s: writing not possible. Will output on left outlet instead.", 
 					common->out_file);
+			sys_unlock();
 		}
 	}
 	if (fp == NULL) {
@@ -387,7 +399,9 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 
 	code = curl_multi_fdset(common->multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 	if (code != CURLM_OK) {
+	    sys_lock();
 		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
+		sys_unlock();
 	}
 	if (maxfd == -1) {
 #ifdef _WIN32
@@ -402,14 +416,18 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 	}
 	switch(rc) {
 		case -1:
+		    sys_lock();
 			pd_error(common, "Unspecified error while performing request (network disconnect?).");
+			sys_unlock();
 			running = 0;
 			break;
 		case 0: /* timeout */ 
 		default: /* action */ 
 			code = curl_multi_perform(common->multi_handle, &running);
 			if (code != CURLM_OK) {
+			    sys_lock();
 				pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
+				sys_unlock();
 			}
 			break;
 	}
@@ -421,7 +439,9 @@ static void ctw_perform(struct _ctw *const common) {
 	const CURLMcode code = curl_multi_perform(common->multi_handle, &running);
 
 	if (code != CURLM_OK) {
+	    sys_lock();
 		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
+		sys_unlock();
 	}
 	do {
 		running = ctw_libcurl_loop(common);
@@ -441,9 +461,9 @@ static void ctw_output_curl_error(struct _ctw *const common, CURLMsg *const msg)
 	t_atom status_data[2];
 
 	SETFLOAT(&status_data[0], msg->data.result);
+	sys_lock();
 	SETSYMBOL(&status_data[1], gensym(curl_easy_strerror(msg->data.result)));
 	pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
-	sys_lock();
 	outlet_list(common->error_out, &s_list, 2, &status_data[0]);
 	sys_unlock();
 }
@@ -463,10 +483,10 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 					if (fp == NULL) {
 						outlet_symbol(common->data_out, gensym((*out_memory).memory));
 					}
-					/* Free memory */
-					string_free((*out_memory).memory, &(*out_memory).size);
 					outlet_bang(common->x_ob.ob_outlet);
 					sys_unlock();
+					/* Free memory */
+					string_free((*out_memory).memory, &(*out_memory).size);
 				} else {
 					ctw_output_curl_error(common, msg);
 				}
@@ -507,7 +527,9 @@ static void *ctw_exec(void *const thread_args) {
 	common->easy_handle = curl_easy_init();
 	common->multi_handle = curl_multi_init();
 	if (common->easy_handle == NULL) {
+	    sys_lock();
 		MYERROR("Cannot init curl.");
+		sys_unlock();
 		ctw_cleanup_request(common, NULL, NULL);
 	} else {
 		struct curl_slist *slist = NULL;
@@ -600,9 +622,7 @@ static void ctw_set_file(struct _ctw *const common, const int argc, t_atom *cons
 	}
 	filename = atom_getsymbol(argv);
 	if (filename == 0) {
-		sys_lock();
 		pd_error(common, "not a filename.");
-		sys_unlock();
 		return;
 	}
 	canvas_makefilename(common->x_canvas, filename->s_name, buf, MAXPDSTRING);

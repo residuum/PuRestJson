@@ -40,7 +40,7 @@ THE SOFTWARE.
 		#define APIEXPORT
 	#endif
 	#define APICALL
-	#define MYERROR(...) error(__VA_ARGS__)
+	#define MYERROR(...) pd_error(0, __VA_ARGS__)
 	#ifdef __APPLE__
 		#define NEEDS_CERT_PATH 1
 	#endif

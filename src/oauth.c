@@ -278,6 +278,10 @@ void oauth_method(t_oauth *const oauth, const t_symbol *const sel, const int arg
 
 	(void) sel;
 
+    if (oauth->common.locked) {
+		post("oauth object is performing request and locked.");
+		return;
+	}
 	string_free(oauth->oauth.rsa_key, &oauth->oauth.rsa_key_len);
 
 	if (argc == 0) {
@@ -359,7 +363,10 @@ void oauth_cancel(t_oauth *const oauth, const t_symbol *const sel, const int arg
 void oauth_header(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-
+    if (oauth->common.locked) {
+		post("oauth object is performing request and locked.");
+		return;
+	}
 	ctw_add_header((struct _ctw *)oauth, argc, argv);
 }
 
@@ -369,14 +376,20 @@ void oauth_clear_headers(t_oauth *const oauth, const t_symbol *const sel, const 
 	(void) sel;
 	(void) argc;
 	(void) argv;
-
+    if (oauth->common.locked) {
+		post("oauth object is performing request and locked.");
+		return;
+	}
 	ctw_clear_headers((struct _ctw *)oauth);
 }
 
 void oauth_file(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-
+    if (oauth->common.locked) {
+		post("oauth object is performing request and locked.");
+		return;
+	}
 	ctw_set_file((struct _ctw *)oauth, argc, argv);
 }
 
@@ -390,7 +403,10 @@ void oauth_mode(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 void oauth_proxy(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-
+    if (oauth->common.locked) {
+		post("oauth object is performing request and locked.");
+		return;
+	}
 	ctw_set_proxy((struct _ctw *)oauth, argc, argv);
 }
 

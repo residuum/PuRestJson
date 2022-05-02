@@ -137,11 +137,13 @@ static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *co
 				} else {
 					t_atom http_status_data[2];
 					SETFLOAT(&http_status_data[0], (float)http_status);
+					sys_lock();
 					SETSYMBOL(&http_status_data[1],
 							gensym(curl_easy_strerror(msg->data.result)));
 					pd_error(rest, "Error while performing request: %s.",
 							curl_easy_strerror(msg->data.result));
 					outlet_list(rest->common.error_out, &s_list, 2, &http_status_data[0]);
+					sys_unlock();
 				}
 			}
 			curl_easy_cleanup(rest->common.easy_handle);
@@ -172,7 +174,9 @@ static void *rest_get_auth_token(void *const thread_args) {
 	rest->common.easy_handle = curl_easy_init();
 	rest->common.multi_handle = curl_multi_init();
 	if (rest->common.easy_handle == NULL) {
+	    sys_lock();
 		MYERROR("Cannot init curl.");
+		sys_unlock();
 		ctw_cleanup_request(&rest->common, NULL, NULL);
 	} else {
 		struct curl_slist *slist = NULL;
@@ -332,7 +336,10 @@ void rest_cancel(t_rest *const rest, const t_symbol *const sel, const int argc, 
 void rest_header(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-
+	if (rest->common.locked) {
+		post("rest object is performing request and locked.");
+		return;
+	}
 	ctw_add_header((struct _ctw *)rest, argc, argv);
 }
 
@@ -341,28 +348,36 @@ void rest_clear_headers(t_rest *const rest, const t_symbol *const sel, const int
 	(void) sel;
 	(void) argc;
 	(void) argv;
-
+    if (rest->common.locked) {
+		post("rest object is performing request and locked.");
+		return;
+	}
 	ctw_clear_headers((struct _ctw *)rest);
 }
 
 void rest_file(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-
+    if (rest->common.locked) {
+		post("rest object is performing request and locked.");
+		return;
+	}
 	ctw_set_file((struct _ctw *)rest, argc, argv);
 }
 
 void rest_mode(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-
 	ctw_set_mode((struct _ctw *)rest, argc, argv);
 }
 
 void rest_proxy(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-
+    if (rest->common.locked) {
+		post("rest object is performing request and locked.");
+		return;
+	}
 	ctw_set_proxy((struct _ctw *)rest, argc, argv);
 }
 
@@ -375,7 +390,6 @@ void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {
 	ctw_set_timeout((struct _ctw *)rest, 0);
 
 	rest_set_init(rest, 0, argv);
-	rest_set_init(rest, argc, argv);
 
 	outlet_new(&rest->common.x_ob, &s_bang);
 	rest->common.data_out = outlet_new(&rest->common.x_ob, NULL);
@@ -384,6 +398,7 @@ void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {
 #ifdef NEEDS_CERT_PATH
 	ctw_set_cert_path((struct _ctw *)rest, rest_class->c_externdir->s_name);
 #endif
+    rest_set_init(rest, argc, argv);
 	purest_json_lib_info("rest");
 	return (void *)rest;
 }

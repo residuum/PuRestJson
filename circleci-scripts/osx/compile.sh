@@ -1,4 +1,4 @@
 #!/bin/bash
 
 make \
-	pdincludepath=/tmp/Pd-${PDVERSION}.app/Contents/Resources/src
+	pdincludepath=/tmp/Pd-${PDVERSION}-macosx7.app/Contents/Resources/src

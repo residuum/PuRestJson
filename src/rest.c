@@ -136,8 +136,11 @@ static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *co
 					rest_extract_token(rest, out_header);
 				} else {
 					t_atom http_status_data[2];
-					SETFLOAT(&http_status_data[0], (float)http_status);
+#ifdef PDINSTANCE
+					pd_setinstance(rest->x_pd_this);
+#endif
 					sys_lock();
+					SETFLOAT(&http_status_data[0], (float)http_status);
 					SETSYMBOL(&http_status_data[1],
 							gensym(curl_easy_strerror(msg->data.result)));
 					pd_error(rest, "Error while performing request: %s.",

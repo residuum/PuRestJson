@@ -88,9 +88,9 @@ jobs:
 workflows:
   tagged-build:
     jobs:
-      #- build-linux64
-      #- build-linux32
-      #- build-linuxarm
-      #- build-windows
-      #- build-windows64
+    - build-linux64
+    - build-linux32
+    - build-linuxarm
+    - build-windows
+    - build-windows64
     - build-osx

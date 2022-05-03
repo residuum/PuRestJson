@@ -67,6 +67,9 @@ struct _ctw {
 	size_t cert_path_len;
 	char *cert_path;
 #endif
+#ifdef PDINSTANCE
+    t_pdinstance *x_pd_this;  /**< pointer to the owner pd instance */
+#endif
 };
 
 /* used for writing data on HTTP data received:
@@ -220,7 +223,10 @@ static char *ctw_set_param(struct _ctw *const common, t_atom *const arg, size_t 
 	char *string;
 
 	if (arg[0].a_type != A_SYMBOL) {
-	    sys_lock();
+#ifdef PDINSTANCE
+		pd_setinstance(common->x_pd_this);
+#endif
+		sys_lock();
 		pd_error(common, "%s", error_msg);
 		sys_unlock();
 		return NULL;
@@ -365,6 +371,9 @@ static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const sli
 		if ((fp = fopen(common->out_file, "wb"))) {
 			curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)fp);
 		} else {
+#ifdef PDINSTANCE
+			pd_setinstance(common->x_pd_this);
+#endif
 		    sys_lock();
 			pd_error(common, "%s: writing not possible. Will output on left outlet instead.", 
 					common->out_file);
@@ -399,6 +408,9 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 
 	code = curl_multi_fdset(common->multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 	if (code != CURLM_OK) {
+#ifdef PDINSTANCE
+		pd_setinstance(common->x_pd_this);
+#endif
 	    sys_lock();
 		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 		sys_unlock();
@@ -416,6 +428,9 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 	}
 	switch(rc) {
 		case -1:
+#ifdef PDINSTANCE
+			pd_setinstance(common->x_pd_this);
+#endif
 		    sys_lock();
 			pd_error(common, "Unspecified error while performing request (network disconnect?).");
 			sys_unlock();
@@ -425,6 +440,9 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 		default: /* action */ 
 			code = curl_multi_perform(common->multi_handle, &running);
 			if (code != CURLM_OK) {
+#ifdef PDINSTANCE
+				pd_setinstance(common->x_pd_this);
+#endif
 			    sys_lock();
 				pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 				sys_unlock();
@@ -439,6 +457,9 @@ static void ctw_perform(struct _ctw *const common) {
 	const CURLMcode code = curl_multi_perform(common->multi_handle, &running);
 
 	if (code != CURLM_OK) {
+#ifdef PDINSTANCE
+		pd_setinstance(common->x_pd_this);
+#endif
 	    sys_lock();
 		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 		sys_unlock();
@@ -460,8 +481,11 @@ static void ctw_thread_perform(struct _ctw *const common) {
 static void ctw_output_curl_error(struct _ctw *const common, CURLMsg *const msg) {
 	t_atom status_data[2];
 
-	SETFLOAT(&status_data[0], msg->data.result);
 	sys_lock();
+	SETFLOAT(&status_data[0], msg->data.result);
+#ifdef PDINSTANCE
+	pd_setinstance(common->x_pd_this);
+#endif
 	SETSYMBOL(&status_data[1], gensym(curl_easy_strerror(msg->data.result)));
 	pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
 	outlet_list(common->error_out, &s_list, 2, &status_data[0]);
@@ -479,6 +503,9 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 			curl_easy_getinfo(common->easy_handle, CURLINFO_RESPONSE_CODE, &http_status);
 			if (http_status >= 200 && http_status < 300) {
 				if (msg->data.result == CURLE_OK) {
+#ifdef PDINSTANCE
+					pd_setinstance(common->x_pd_this);
+#endif
 					sys_lock();
 					if (fp == NULL) {
 						outlet_symbol(common->data_out, gensym((*out_memory).memory));
@@ -493,8 +520,11 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 			} else {
 				if (msg->data.result == CURLE_OK){
 					t_atom http_status_data;
-					SETFLOAT(&http_status_data, (float)http_status);
+#ifdef PDINSTANCE
+					pd_setinstance(common->x_pd_this);
+#endif
 					sys_lock();
+					SETFLOAT(&http_status_data, (float)http_status);
 					pd_error(common, "HTTP error while performing request: %li.", http_status);
 					outlet_float(common->error_out, atom_getfloat(&http_status_data));
 					sys_unlock();
@@ -694,6 +724,9 @@ static void ctw_init(struct _ctw *const common) {
 	common->proxy_user_len = 0;
 	common->proxy_pass_len = 0;
 	common->x_canvas = canvas_getcurrent();
+#ifdef PDINSTANCE
+    common.x_pd_this = pd_this;
+#endif
 
 	ctw_set_timeout(common, 0);
 	ctw_set_mode_number(common, 0);

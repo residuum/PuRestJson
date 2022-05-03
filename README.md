@@ -5,13 +5,6 @@
      | |    | |_| | | \ \| |____ ____) |  | |    | |__| |____) | |__| | |\  |
      |_|     \__,_|_|  \_\______|_____/   |_|     \____/|_____/ \____/|_| \_|
 
-[![Build Status](https://travis-ci.org/residuum/PuRestJson.svg?branch=master)](https://travis-ci.org/residuum/PuRestJson)
-
-<a href="https://scan.coverity.com/projects/residuum-purestjson">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/4515/badge.svg"/>
-</a>
-
 PuREST JSON is a library for connecting Puredata (Pd) to HTTP services
 and encoding and decoding JSON data.
 
@@ -55,7 +48,7 @@ are available as `pd-purest-json`.
 
 ## Downloads of development versions
 
-For each commit, a build in [Travis](https://travis-ci.org/residuum/PuRestJson) 
+For each commit, a build in [Circle CI](https://app.circleci.com/pipelines/github/residuum/PuRestJson) 
 is triggered. These builds generate deken-like packages, that are available 
 from https://cloud.residuum.org/index.php/s/380C60JAabnO7jk
 

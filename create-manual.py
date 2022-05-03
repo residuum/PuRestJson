@@ -16,8 +16,8 @@ if len(sys.argv) > 1:
 if len(sys.argv) > 2:
     wikiDir = sys.argv[2]
 
-print 'Input directory: ', wikiDir
-print 'Output directory: ', exportDir
+print ('Input directory: ', wikiDir)
+print ('Output directory: ', exportDir)
 
 # rename all files containing '[' and ']' in names,
 # because Windows does not like those.
@@ -29,10 +29,10 @@ for f in os.listdir(wikiDir):
 # convert md files one-by-one.
 for f in os.listdir(wikiDir):
     if f.endswith('.md'):
-        print 'Converting: ', f
+        print ('Converting: ', f)
         baseFile = os.path.splitext(os.path.basename(f))[0];
         htmlFile = baseFile + '.html'
-        subprocess.call(['grip', wikiDir + f, '--export', '--no-inline', 
+        subprocess.run(['grip', wikiDir + f, '--export', '--no-inline', 
             exportDir + htmlFile])
         # edit links to css, images and other pages.
         htmlDoc = open(exportDir + htmlFile)

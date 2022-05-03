@@ -18,9 +18,9 @@ jobs:
     environment:
       PDVERSION: 0.52-2
       SYSTEM: linux32
-      DIST: buster
+      DIST: bullseye
       DEBIAN_ARCH: i386
-      CHROOTDIR: /opt/crosscompilation
+      CHROOTDIR: /tmp/crosscompilation
     steps: 
       - checkout
       - run:
@@ -32,9 +32,9 @@ jobs:
     environment:
       PDVERSION: 0.52-2
       SYSTEM: linuxarm
-      DIST: buster
+      DIST: bullseye
       DEBIAN_ARCH: armhf
-      CHROOTDIR: /opt/crosscompilation
+      CHROOTDIR: /tmp/crosscompilation
     steps: 
       - checkout
       - run:
@@ -91,6 +91,6 @@ workflows:
     - build-linux64
     - build-linux32
     - build-linuxarm
-    - build-osx
-    - build-windows
-    - build-windows64
+      #- build-osx
+      #- build-windows
+      #- build-windows64

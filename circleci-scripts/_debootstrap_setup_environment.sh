@@ -9,7 +9,7 @@ sudo qemu-debootstrap \
 	--arch=${DEBIAN_ARCH} \
 	${DIST} ${CHROOTDIR} http://deb.debian.org/debian
 	
-sudo rsync -a ${TRAVIS_BUILD_DIR} ${CHROOTDIR}/ 
+sudo rsync -a . ${CHROOTDIR}/PuRestJson 
 
 echo deb http://deb.debian.org/debian \
     $DIST main contrib non-free \

@@ -7,8 +7,8 @@ make \
   system=Windows \
   machine=${MACHINE} \
   uname=MINGW \
-  pdincludepath=${PD_DIR}/src \
-  pdbinpath=${PD_DIR}/bin \
+  pdincludepath=${PD_UNZIP_PATH}/src \
+  pdbinpath=${PD_UNZIP_PATH}/bin \
   CC=${MXE_GCC} \
   arch.c.flags='${CUSTOM_CFLAGS} \
     -I "${MXE_DIR}/usr/${MXE_PATH_SLUG}/include"' \

@@ -19,21 +19,13 @@ if len(sys.argv) > 2:
 print ('Input directory: ', wikiDir)
 print ('Output directory: ', exportDir)
 
-# rename all files containing '[' and ']' in names,
-# because Windows does not like those.
-for f in os.listdir(wikiDir):
-    cleaned = f.replace('[', '').replace(']', '').replace(':', '')
-    if f != cleaned:
-        os.rename(wikiDir + f, wikiDir + cleaned)
-
-# convert md files one-by-one.
 for f in os.listdir(wikiDir):
     if f.endswith('.md'):
         print ('Converting: ', f)
         baseFile = os.path.splitext(os.path.basename(f))[0];
         htmlFile = baseFile + '.html'
         subprocess.run(['grip', wikiDir + f, '--export', '--no-inline', 
-            exportDir + htmlFile])
+            exportDir + htmlFile, '--title=' + baseFile.replace('-', ' ')]);
         # edit links to css, images and other pages.
         htmlDoc = open(exportDir + htmlFile)
         soup = BeautifulSoup(htmlDoc, 'lxml')
@@ -62,7 +54,12 @@ for f in os.listdir(wikiDir):
         # write changes back to file
         htmlDoc.close()
         html = soup.prettify('utf-8')
-        with open(exportDir + htmlFile, 'w') as edited:
+        with open(exportDir + htmlFile, 'wb') as edited:
             edited.write(html)
+        # rename all files containing '[' and ']' in names,
+        # because Windows does not like those.
+        cleaned = htmlFile.replace('[', '').replace(']', '').replace(':', '')
+        if htmlFile != cleaned:
+            os.rename(exportDir + htmlFile, exportDir + cleaned)
 
 os.rename(exportDir + "Home.html", exportDir + "index.html")

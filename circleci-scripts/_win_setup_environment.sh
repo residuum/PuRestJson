@@ -47,4 +47,4 @@ unzip -q -d /tmp /tmp/pd.zip
 PATH=$PATH:/tmp/usr/bin
 
 pip3 install --upgrade pip
-pip3 install grip beautifulsoup4 lxml --user
+pip3 install beautifulsoup4 lxml --user

@@ -17,7 +17,7 @@ static struct _strlist *strlist_create(char *const val, const size_t val_len) {
 
 	created_data = getbytes(sizeof(struct _strlist));
 	if (created_data == NULL || val == NULL) {
-		MYERROR("Could not get data.");
+		pd_error(0, "Could not get data.");
 		return NULL;
 	}
 

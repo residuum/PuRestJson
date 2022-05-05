@@ -16,7 +16,7 @@ static char *string_create(size_t *const newl, const size_t strl) {
 	(*newl) = 1 + strl;
 	gen = getbytes((*newl) * sizeof(char));
 	if (gen == NULL) {
-		MYERROR("not enough memory.");
+		pd_error(0, "not enough memory.");
 		return gen;
 	}
 	return memset(gen, 0x00, (*newl));
@@ -42,7 +42,7 @@ static char *string_remove_backslashes(const char *const _source_string, size_t 
 
 	cleaned_string = string_create(memsize, len_src);
 	if (cleaned_string == NULL) {
-		MYERROR("Unable to allocate memory.\n");
+		pd_error(0, "Unable to allocate memory.\n");
 	} else if (len_src > 0) {
 		char *masking = "\\";
 		char *segment = strtok(source_string, masking);

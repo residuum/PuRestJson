@@ -134,7 +134,7 @@ static void oauth_set_rsa_key(t_oauth *const oauth, const int argc, t_atom *cons
 
 	for (int i = 1; i < argc; i++) {
 		atom_string(argv + i, temp, MAXPDSTRING);
-		rsa_key_len +=strlen(temp) + 1;
+		rsa_key_len += strlen(temp) + 1;
 	}
 	oauth->oauth.rsa_key = string_create(&oauth->oauth.rsa_key_len, rsa_key_len);
 	for (int i = 1; i < argc; i++) {
@@ -148,7 +148,7 @@ static void oauth_set_rsa_key(t_oauth *const oauth, const int argc, t_atom *cons
 			use_newline = 1;
 		}
 		strcat(oauth->oauth.rsa_key, temp);
-		if (i < argc -1) {
+		if (i < argc - 1) {
 			if (use_newline == 1)  {
 				strcat(oauth->oauth.rsa_key, "\n");
 			} else {
@@ -278,7 +278,7 @@ void oauth_method(t_oauth *const oauth, const t_symbol *const sel, const int arg
 
 	(void) sel;
 
-    if (oauth->common.locked) {
+	if (oauth->common.locked) {
 		post("oauth object is performing request and locked.");
 		return;
 	}
@@ -363,7 +363,7 @@ void oauth_cancel(t_oauth *const oauth, const t_symbol *const sel, const int arg
 void oauth_header(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-    if (oauth->common.locked) {
+	if (oauth->common.locked) {
 		post("oauth object is performing request and locked.");
 		return;
 	}
@@ -376,7 +376,7 @@ void oauth_clear_headers(t_oauth *const oauth, const t_symbol *const sel, const 
 	(void) sel;
 	(void) argc;
 	(void) argv;
-    if (oauth->common.locked) {
+	if (oauth->common.locked) {
 		post("oauth object is performing request and locked.");
 		return;
 	}
@@ -386,7 +386,7 @@ void oauth_clear_headers(t_oauth *const oauth, const t_symbol *const sel, const 
 void oauth_file(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-    if (oauth->common.locked) {
+	if (oauth->common.locked) {
 		post("oauth object is performing request and locked.");
 		return;
 	}
@@ -403,7 +403,7 @@ void oauth_mode(t_oauth *const oauth, const t_symbol *const sel, const int argc,
 void oauth_proxy(t_oauth *const oauth, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-    if (oauth->common.locked) {
+	if (oauth->common.locked) {
 		post("oauth object is performing request and locked.");
 		return;
 	}

@@ -2,7 +2,7 @@
 Author:
 Thomas Mayer <thomas@residuum.org>
 
-Copyright (c) 2011-2015 Thomas Mayer
+Copyright (c) 2011-2022 Thomas Mayer
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,7 @@ struct _ctw {
 	char *cert_path;
 #endif
 #ifdef PDINSTANCE
-    t_pdinstance *x_pd_this;  /**< pointer to the owner pd instance */
+	t_pdinstance *x_pd_this;  /**< pointer to the owner pd instance */
 #endif
 };
 
@@ -113,6 +113,8 @@ static void ctw_prepare_trace(struct _ctw *common, struct curl_slist *slist);
 /* prepares for HTTP request, setting in- and output */
 static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist,
 		struct _memory_struct *out_memory, struct _memory_struct *in_memory);
+/* checking curl status */
+static void ctw_libcurl_status_check(struct _ctw *common, CURLcode code);
 /* curl request loop */
 static int ctw_libcurl_loop(struct _ctw *common);
 /* performes the HTTP request */
@@ -162,14 +164,15 @@ static void ctw_set_cert_path(struct _ctw *common, const char *directory);
 static size_t ctw_write_mem(const void *const ptr, const size_t realsize, struct _memory_struct *const mem) {
 	mem->memory = resizebytes(mem->memory, mem->size, mem->size + realsize + sizeof(char));
 	if (mem->memory == NULL) {
-	    sys_lock();
-		MYERROR("not enough memory.");
+		sys_lock();
+		pd_error(0, "not enough memory.");
 		sys_unlock();
+		return 0;
 	}
 	memcpy(&mem->memory[mem->size], ptr, realsize);
 	if (mem->size + realsize - mem->size != realsize) {
-	    sys_lock();
-		MYERROR("Integer overflow or similar. Bad Things can happen.");
+		sys_lock();
+		pd_error(0, "Integer overflow or similar. Bad Things can happen.");
 		sys_unlock();
 	}
 	mem->size += realsize;
@@ -180,12 +183,19 @@ static size_t ctw_write_mem(const void *const ptr, const size_t realsize, struct
 static size_t ctw_write_stream(const void *const ptr, const size_t realsize, struct _ctw *const ctw) {
 	char *stream_output = getbytes(realsize + sizeof(char));
 	if (stream_output == NULL) {
-	    sys_lock();
-		MYERROR("not enough memory");
+#ifdef PDINSTANCE
+		pd_setinstance(ctw->x_pd_this);
+#endif
+		sys_lock();
+		pd_error(ctw, "not enough memory");
 		sys_unlock();
+		return 0;
 	}
 	memcpy(stream_output, ptr, realsize);
 	stream_output[realsize] = '\0';
+#ifdef PDINSTANCE
+	pd_setinstance(ctw->x_pd_this);
+#endif
 	sys_lock();
 	outlet_symbol(ctw->data_out, gensym(stream_output));
 	sys_unlock();
@@ -249,9 +259,9 @@ static void ctw_cancel_request(void *const args) {
 
 static void ctw_prepare_basic(struct _ctw *const common, struct curl_slist *slist) {
 	/* enable redirection */
-	curl_easy_setopt (common->easy_handle, CURLOPT_FOLLOWLOCATION, 1);
-	curl_easy_setopt (common->easy_handle, CURLOPT_AUTOREFERER, 1);
-	curl_easy_setopt (common->easy_handle, CURLOPT_MAXREDIRS, 30);
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_FOLLOWLOCATION, 1));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_AUTOREFERER, 1));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_MAXREDIRS, 30));
 
 	if (common->http_headers != NULL) {
 		struct _strlist *header = common->http_headers;
@@ -259,77 +269,81 @@ static void ctw_prepare_basic(struct _ctw *const common, struct curl_slist *slis
 			slist = curl_slist_append(slist, header->str);
 			header = header->next;
 		}
-		curl_easy_setopt(common->easy_handle, CURLOPT_HTTPHEADER, slist);
+		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_HTTPHEADER, slist));
 	}
 
-	curl_easy_setopt(common->easy_handle, CURLOPT_URL, common->complete_url);
-	curl_easy_setopt(common->easy_handle, CURLOPT_NOSIGNAL, 1);
-	curl_easy_setopt(common->easy_handle, CURLOPT_TIMEOUT_MS, common->timeout);
-	curl_easy_setopt(common->easy_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck);
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_URL, common->complete_url));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_NOSIGNAL, 1));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_TIMEOUT_MS, common->timeout));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck));
 	if (common->auth_token_len) {
-		curl_easy_setopt(common->easy_handle, CURLOPT_COOKIE, common->auth_token);
+		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_COOKIE, common->auth_token));
 	}
 	if(common->proxy_len) {
-		curl_easy_setopt(common->easy_handle, CURLOPT_PROXY, common->proxy);
+		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_PROXY, common->proxy));
 	}
 	if(common->proxy_user_len) {
-		curl_easy_setopt(common->easy_handle, CURLOPT_PROXYUSERNAME, common->proxy_user);
+		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_PROXYUSERNAME, common->proxy_user));
 	}
 	if(common->proxy_pass_len) {
-		curl_easy_setopt(common->easy_handle, CURLOPT_PROXYPASSWORD, common->proxy_pass);
+		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_PROXYPASSWORD, common->proxy_pass));
 	}
 #ifdef NEEDS_CERT_PATH
 	if (common->sslcheck){
-		curl_easy_setopt(common->easy_handle, CURLOPT_CAINFO, common->cert_path);
-		curl_easy_setopt(common->easy_handle, CURLOPT_CAPATH, common->cert_path);
+		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CAINFO, common->cert_path));
+		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CAPATH, common->cert_path));
 	}
 #endif
 }
 
 static void ctw_prepare_put(struct _ctw *const common, struct _memory_struct *const in_memory) {
-	curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1);
-	curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb);
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb));
 	/* Prepare data for reading */
 	if (common->parameters_len) {
 		(*in_memory).memory = getbytes(strlen(common->parameters) + 1);
 		(*in_memory).size = strlen(common->parameters);
 		if ((*in_memory).memory == NULL) {
-		    sys_lock();
-			MYERROR("not enough memory.");
+#ifdef PDINSTANCE
+			pd_setinstance(common->x_pd_this);
+#endif
+			sys_lock();
+			pd_error(common, "not enough memory.");
 			sys_unlock();
+			return;
 		}
 		memcpy((*in_memory).memory, common->parameters, strlen(common->parameters));
 	} else {
 		(*in_memory).memory = NULL;
 		(*in_memory).size = 0;
 	}
-	curl_easy_setopt(common->easy_handle, CURLOPT_READDATA, (void *)in_memory);
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_READDATA, (void *)in_memory));
 }
 
 static void ctw_prepare_post(struct _ctw *const common) {
-	curl_easy_setopt(common->easy_handle, CURLOPT_POST, 1);
-	curl_easy_setopt(common->easy_handle, CURLOPT_POSTFIELDS, common->parameters);
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_POST, 1));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_POSTFIELDS, common->parameters));
 }
 
 static void ctw_prepare_delete(struct _ctw *const common) {
-	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE"));
 }
 
 static void ctw_prepare_head(struct _ctw *const common) {
-	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "HEAD");
-	curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1);
-	curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1); 
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "HEAD"));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1));
 }
 
 static void ctw_prepare_patch(struct _ctw *const common, struct _memory_struct *const in_memory) {
 	ctw_prepare_put(common, in_memory);
-	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "PATCH");
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "PATCH"));
 }
 
 static void ctw_prepare_options(struct _ctw *const common) {
-	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "OPTIONS");
-	curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1);
-	curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1); 
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "OPTIONS"));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1));
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1));
 }
 
 static void ctw_prepare_connect(struct _ctw *const common) {
@@ -339,7 +353,7 @@ static void ctw_prepare_connect(struct _ctw *const common) {
 
 static void ctw_prepare_trace(struct _ctw *const common, struct curl_slist *slist) {
 	slist = curl_slist_append(slist, "Content-type: message/http");
-	curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "TRACE");
+	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "TRACE"));
 }
 
 static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const slist,
@@ -369,12 +383,12 @@ static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const sli
 	(*out_memory).size = 0;
 	if (common->out_file_len) {
 		if ((fp = fopen(common->out_file, "wb"))) {
-			curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)fp);
+			ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)fp));
 		} else {
 #ifdef PDINSTANCE
 			pd_setinstance(common->x_pd_this);
 #endif
-		    sys_lock();
+			sys_lock();
 			pd_error(common, "%s: writing not possible. Will output on left outlet instead.", 
 					common->out_file);
 			sys_unlock();
@@ -384,11 +398,17 @@ static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const sli
 		struct _cb_val *cb_val = getbytes(sizeof(struct _cb_val));
 		cb_val->mem = out_memory;
 		cb_val->ctw = common;
-		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb);
-		curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)cb_val);
+		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb));
+		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)cb_val));
 	}
 	curl_multi_add_handle(common->multi_handle, common->easy_handle);
 	return fp;
+}
+
+static void ctw_libcurl_status_check(struct _ctw *common, CURLcode code){
+	if (code != CURLE_OK){
+		pd_error(common, curl_easy_strerror(code));
+	}
 }
 
 static int ctw_libcurl_loop(struct _ctw *const common) {
@@ -411,7 +431,7 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 #ifdef PDINSTANCE
 		pd_setinstance(common->x_pd_this);
 #endif
-	    sys_lock();
+		sys_lock();
 		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 		sys_unlock();
 	}
@@ -431,7 +451,7 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 #ifdef PDINSTANCE
 			pd_setinstance(common->x_pd_this);
 #endif
-		    sys_lock();
+			sys_lock();
 			pd_error(common, "Unspecified error while performing request (network disconnect?).");
 			sys_unlock();
 			running = 0;
@@ -443,7 +463,7 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 #ifdef PDINSTANCE
 				pd_setinstance(common->x_pd_this);
 #endif
-			    sys_lock();
+				sys_lock();
 				pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 				sys_unlock();
 			}
@@ -460,7 +480,7 @@ static void ctw_perform(struct _ctw *const common) {
 #ifdef PDINSTANCE
 		pd_setinstance(common->x_pd_this);
 #endif
-	    sys_lock();
+		sys_lock();
 		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 		sys_unlock();
 	}
@@ -481,11 +501,11 @@ static void ctw_thread_perform(struct _ctw *const common) {
 static void ctw_output_curl_error(struct _ctw *const common, CURLMsg *const msg) {
 	t_atom status_data[2];
 
-	sys_lock();
-	SETFLOAT(&status_data[0], msg->data.result);
 #ifdef PDINSTANCE
 	pd_setinstance(common->x_pd_this);
 #endif
+	sys_lock();
+	SETFLOAT(&status_data[0], msg->data.result);
 	SETSYMBOL(&status_data[1], gensym(curl_easy_strerror(msg->data.result)));
 	pd_error(common, "Error while performing request: %s", curl_easy_strerror(msg->data.result));
 	outlet_list(common->error_out, &s_list, 2, &status_data[0]);
@@ -534,6 +554,7 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 			}
 			curl_easy_cleanup(common->easy_handle);
 			curl_multi_cleanup(common->multi_handle);
+			break;
 		}
 	}
 }
@@ -557,8 +578,11 @@ static void *ctw_exec(void *const thread_args) {
 	common->easy_handle = curl_easy_init();
 	common->multi_handle = curl_multi_init();
 	if (common->easy_handle == NULL) {
-	    sys_lock();
-		MYERROR("Cannot init curl.");
+#ifdef PDINSTANCE
+		pd_setinstance(common->x_pd_this);
+#endif
+		sys_lock();
+		pd_error(common, "Cannot init curl.");
 		sys_unlock();
 		ctw_cleanup_request(common, NULL, NULL);
 	} else {
@@ -582,7 +606,7 @@ static void ctw_thread_exec(struct _ctw *const common, void *(*func) (void *)) {
 	rc = pthread_create(&(common->thread), &thread_attributes, func, (void *)common);
 	pthread_attr_destroy(&thread_attributes);
 	if (rc) {
-		MYERROR("Could not create thread with code %d.", rc);
+		pd_error(common, "Could not create thread with code %d.", rc);
 		string_free(common->complete_url, &common->complete_url_len);
 		string_free(common->parameters, &common->parameters_len);
 		common->locked = 0;
@@ -725,7 +749,7 @@ static void ctw_init(struct _ctw *const common) {
 	common->proxy_pass_len = 0;
 	common->x_canvas = canvas_getcurrent();
 #ifdef PDINSTANCE
-    common.x_pd_this = pd_this;
+	common.x_pd_this = pd_this;
 #endif
 
 	ctw_set_timeout(common, 0);

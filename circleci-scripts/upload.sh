@@ -1,4 +1,5 @@
 #! /bin/bash
+set -e
 
 OWNCLOUD_URL=https://purest_json:${OC_PASSWORD}@cloud.residuum.org/remote.php/dav/files/purest_json/travis
 

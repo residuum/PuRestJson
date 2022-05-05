@@ -151,6 +151,7 @@ static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *co
 			}
 			curl_easy_cleanup(rest->common.easy_handle);
 			curl_multi_cleanup(rest->common.multi_handle);
+			break;
 		}
 	}
 }
@@ -178,7 +179,7 @@ static void *rest_get_auth_token(void *const thread_args) {
 	rest->common.multi_handle = curl_multi_init();
 	if (rest->common.easy_handle == NULL) {
 	    sys_lock();
-		MYERROR("Cannot init curl.");
+		pd_error(rest, "Cannot init curl.");
 		sys_unlock();
 		ctw_cleanup_request(&rest->common, NULL, NULL);
 	} else {
@@ -193,8 +194,8 @@ static void *rest_get_auth_token(void *const thread_args) {
 		struct _cb_val *cb_val = getbytes(sizeof(struct _cb_val));
 		cb_val->mem = &out_header;
 		cb_val->ctw = (struct _ctw *)rest;
-		curl_easy_setopt(rest->common.easy_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb);
-		curl_easy_setopt(rest->common.easy_handle, CURLOPT_WRITEHEADER, (void *)cb_val);
+		ctw_libcurl_status_check(&rest->common, curl_easy_setopt(rest->common.easy_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb));
+		ctw_libcurl_status_check(&rest->common, curl_easy_setopt(rest->common.easy_handle, CURLOPT_WRITEHEADER, (void *)cb_val));
 		ctw_thread_perform(&rest->common);
 		rest_process_auth_data(rest, &out_header);
 		string_free(out_header.memory, &out_header.size);

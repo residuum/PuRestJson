@@ -32,7 +32,6 @@ THE SOFTWARE.
 #ifdef _WIN32
 	#define APIEXPORT __declspec(dllexport)
 	#define APICALL __cdecl
-	#define MYERROR(...) post(__VA_ARGS__)
 #else
 	#if defined(__GNUC__) && __GNUC__>=4
 		#define APIEXPORT extern __attribute__ ((visibility("default")))
@@ -40,7 +39,6 @@ THE SOFTWARE.
 		#define APIEXPORT
 	#endif
 	#define APICALL
-	#define MYERROR(...) pd_error(0, __VA_ARGS__)
 	#ifdef __APPLE__
 		#define NEEDS_CERT_PATH 1
 	#endif
@@ -52,7 +50,7 @@ static void purest_json_lib_info(char *name) {
 
 #define MYASSERT(cond, ...) do { \
     if (!(cond)) {               \
-        MYERROR(__VA_ARGS__);    \
+        pd_error(0, __VA_ARGS__);    \
     }                            \
 } while(0);
 

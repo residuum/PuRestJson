@@ -122,7 +122,7 @@ static struct _kvp *kvp_create(const char *const key, struct _v *const value, co
 
 	created_data = getbytes(sizeof(struct _kvp));
 	if (created_data == NULL || key == NULL || value == NULL) {
-		MYERROR("Could not get data.");
+		pd_error(0, "Could not get data.");
 		return NULL;
 	}
 

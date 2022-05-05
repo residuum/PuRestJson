@@ -92,7 +92,7 @@ static void jdec_output_object(json_object *const jobj, t_outlet *const data_out
 					SETSYMBOL(&out_data[1], gensym(""));
 					break;
 				default:
-					MYERROR("What other JSON type?");
+					pd_error(0, "What other JSON type?");
 					break;
 			}
 		}
@@ -152,7 +152,7 @@ static void jdec_output(json_object *const jobj, t_outlet *const data_outlet, t_
 			jdec_output_array(jobj, data_outlet, done_outlet, error_outlet);
 			break;
 		default:
-			MYERROR("What other JSON type?");
+			pd_error(0, "What other JSON type?");
 			break;
 	}
 }

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 export PD_UNZIP_PATH=/tmp/pd-${PDVERSION}-i386
 export PD_URL=http://msp.ucsd.edu/Software/pd-${PDVERSION}-i386.msw.zip

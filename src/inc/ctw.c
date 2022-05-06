@@ -407,7 +407,7 @@ static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const sli
 
 static void ctw_libcurl_status_check(struct _ctw *common, CURLcode code){
 	if (code != CURLE_OK){
-		pd_error(common, curl_easy_strerror(code));
+		pd_error(common, "%s", curl_easy_strerror(code));
 	}
 }
 

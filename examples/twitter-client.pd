@@ -1,4 +1,5 @@
 #N canvas 508 175 974 536 10;
+#X declare -path purest_json -stdlib zexy -stdpath cyclone;
 #N canvas 975 249 726 490 authorize 0;
 #X msg 24 36 POST /oauth/request_token;
 #X obj 24 255 print data1;
@@ -41,21 +42,21 @@ YOUR_TEMP_TOKEN YOUR_TEMP_SECRET;
 #X obj 29 28 inlet;
 #X text 118 66 Search;
 #X obj 72 226 fifop;
-#X obj 42 191 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
+#X obj 42 191 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
 #X obj 103 569 *~ 0;
 #X obj 103 511 osc~;
 #X obj 103 481 mtof;
 #X obj 103 642 dac~;
 #X obj 104 605 *~ 0;
-#X obj 862 332 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+#X obj 862 332 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #fcfcfc
+#000000 #000000 0 1;
 #X msg 153 466 0;
-#X symbolatom 259 326 38 0 0 0 - - -;
-#X symbolatom 259 340 80 0 0 0 - - -;
+#X symbolatom 259 326 38 0 0 0 - - - 0;
+#X symbolatom 259 340 80 0 0 0 - - - 0;
 #X obj 209 464 f;
 #X obj 72 262 unpack f s s s;
-#X symbolatom 539 326 40 0 0 0 - - -;
+#X symbolatom 539 326 40 0 0 0 - - - 0;
 #X obj 104 539 *~;
 #X obj 365 433 osc~;
 #N canvas 1432 61 437 398 tweet-text-analysis 0;
@@ -186,8 +187,9 @@ YOUR_TEMP_TOKEN YOUR_TEMP_SECRET;
 #X connect 22 0 18 0;
 #X connect 23 0 0 0;
 #X restore 375 261 pd sonify-it;
-#X obj 712 22 import purest_json zexy cyclone;
 #X msg 228 56 init https://api.twitter.com SEJpJksCRpcgyoP4nk73Ng FEHGi9k8jF3zTPrBLbnBonF94gbUGZLrGKMgl4Td5bc
 YOUR_AUTH_TOKEN YOUR_AUTH_SECRET;
-#X connect 4 0 1 0;
-#X connect 4 0 2 0;
+#X obj 618 479 declare -path purest_json -stdlib zexy -stdpath cyclone
+;
+#X connect 3 0 1 0;
+#X connect 3 0 2 0;

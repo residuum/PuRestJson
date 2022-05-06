@@ -1,4 +1,5 @@
 #N canvas 79 63 1143 647 10;
+#X declare -path purest_json;
 #X obj 665 417 json-encode;
 #X obj 665 486 json-decode;
 #X obj 51 7 json-encode;
@@ -25,7 +26,7 @@ stored one;
 #X obj -8 -147 json-encode;
 #X msg -8 -101 add newest \$1;
 #X obj -74 -274 bng 15 250 50 0 empty empty Click_to_create_a_nested_object
-17 7 0 10 -262144 -1 -1;
+17 7 0 10 #fcfcfc #000000 #000000;
 #X obj -74 -244 t b b b;
 #X obj -74 -30 t a a;
 #X obj 11 2 print JSON_string;
@@ -53,18 +54,18 @@ stored one;
 #X obj 94 -86 json-decode;
 #X msg 218 -232 bang;
 #X obj 218 -382 bng 15 250 50 0 empty empty Click_to_create_an_object
-17 7 0 10 -262144 -1 -1;
+17 7 0 10 #fcfcfc #000000 #000000;
 #X obj 218 -352 t b b b b;
 #X msg 269 -316 add duration 3000;
 #X obj 218 -159 t a a a;
 #X obj 387 -57 json-decode;
 #X obj 418 87 line;
-#X floatatom 418 120 5 0 0 0 - - -;
+#X floatatom 418 120 5 0 0 0 - - - 0;
 #X msg 418 67 \$1 \, \$2 \$3;
 #X obj 418 2 route start end duration;
 #X text 399 -78 wrong;
 #X obj 157 72 line;
-#X floatatom 157 105 5 0 0 0 - - -;
+#X floatatom 157 105 5 0 0 0 - - - 0;
 #X obj 157 -29 route start end duration;
 #X obj 157 -58 list trim;
 #X obj 418 -27 list trim;
@@ -165,7 +166,6 @@ internally.;
 file.;
 #X obj 347 247 qlist;
 #X text 46 245 add \, read and write methods work analog to;
-#X obj 49 608 import purest_json;
 #X obj 458 584 print decoding_done;
 #X obj 617 585 print decoded_data;
 #X msg 714 138 add album dss;
@@ -181,10 +181,11 @@ the object is fully parsed \, the left outlet will issue a bang \,
 so that you can differenciate between subsequent objects. The messages
 will come as list key value. If the string cannot be decoded as JSON
 \, then the right outlet will output a bang.;
+#X obj 49 608 declare -path purest_json;
 #X connect 0 0 17 0;
-#X connect 1 0 36 0;
-#X connect 1 1 37 0;
-#X connect 1 2 40 0;
+#X connect 1 0 35 0;
+#X connect 1 1 36 0;
+#X connect 1 2 39 0;
 #X connect 6 0 0 0;
 #X connect 8 0 0 0;
 #X connect 10 0 0 0;
@@ -194,6 +195,6 @@ will come as list key value. If the string cannot be decoded as JSON
 #X connect 17 1 21 0;
 #X connect 22 0 0 0;
 #X connect 23 0 0 0;
+#X connect 37 0 0 0;
 #X connect 38 0 0 0;
-#X connect 39 0 0 0;
-#X connect 41 0 1 0;
+#X connect 40 0 1 0;

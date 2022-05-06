@@ -1,4 +1,5 @@
 #N canvas 44 51 687 503 10;
+#X declare -path purest_json;
 #X msg 211 140 add id 1;
 #X text 208 107 Will add key id and value of 1 to object;
 #X msg 253 170 add name Residuum;
@@ -8,7 +9,6 @@
 #X text 22 335 This will clear the object;
 #X text 359 346 output the value;
 #X msg 360 365 bang;
-#X obj 480 32 import purest_json;
 #X obj 47 16 urlparams;
 #X obj 229 404 urlparams;
 #X text 43 44 [urlparams] has three methods: add \, clear and bang.
@@ -24,11 +24,12 @@ hashtag #Pd?;
 parameters.;
 #X text 314 285 adding a different value will overwrite the previously
 stored one;
-#X connect 0 0 11 0;
-#X connect 2 0 11 0;
-#X connect 3 0 11 0;
-#X connect 4 0 11 0;
-#X connect 5 0 11 0;
-#X connect 8 0 11 0;
-#X connect 11 0 14 0;
-#X connect 15 0 11 0;
+#X obj 480 32 declare -path purest_json;
+#X connect 0 0 10 0;
+#X connect 2 0 10 0;
+#X connect 3 0 10 0;
+#X connect 4 0 10 0;
+#X connect 5 0 10 0;
+#X connect 8 0 10 0;
+#X connect 10 0 13 0;
+#X connect 14 0 10 0;

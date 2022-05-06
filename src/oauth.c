@@ -2,7 +2,7 @@
 Author:
 Thomas Mayer <thomas@residuum.org>
 
-Copyright (c) 2011-2015 Thomas Mayer
+Copyright (c) 2011-2022 Thomas Mayer
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -83,7 +83,6 @@ static void oauth_mode(t_oauth *oauth, const t_symbol *sel, const int argc, t_at
 /* sets proxy */
 static void oauth_proxy(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
 
-
 /* frees data */
 static void oauth_free_inner(t_oauth *oauth, const short free_rsa);
 /* initialises object */
@@ -129,22 +128,25 @@ static void oauth_set_init(t_oauth *const oauth, const int argc, t_atom *const a
 
 static void oauth_set_rsa_key(t_oauth *const oauth, const int argc, t_atom *const argv) {
 	char temp[MAXPDSTRING];
-	size_t rsa_key_len = 1;
+	size_t rsa_part_len[argc];  /* 0 is not used, but this is easier to read */
+	size_t rsa_key_len = 1; /* Accomodate NULL terminator */
 	short use_newline = 0;
 
 	for (int i = 1; i < argc; i++) {
 		atom_string(argv + i, temp, MAXPDSTRING);
-		rsa_key_len += strlen(temp) + 1;
+		rsa_part_len[i] = strlen(temp);
+		rsa_key_len += rsa_part_len[i] + 1; /* Each section + 1 for space or newline */
 	}
 	oauth->oauth.rsa_key = string_create(&oauth->oauth.rsa_key_len, rsa_key_len);
 	for (int i = 1; i < argc; i++) {
 		atom_string(argv + i, temp, MAXPDSTRING);
-		if (strncmp(temp, "-----", 5) == 0 && strlen(oauth->oauth.rsa_key) > 1)  {
-			memset(oauth->oauth.rsa_key + strlen(oauth->oauth.rsa_key) - 1, 0x00, 1);
+		if (rsa_part_len[i] >= 5 && strncmp(temp, "-----", 5) == 0 && strlen(oauth->oauth.rsa_key) > 1)  {
+			/* Cutoff trailing space and add newline */
+			oauth->oauth.rsa_key[strlen(oauth->oauth.rsa_key) - 1] = '\0';
 			strcat(oauth->oauth.rsa_key, "\n");
 			use_newline = 0;
 		}
-		if (strlen(temp) >= 5 && strncmp(temp + strlen(temp) - 5, "-----", 5) == 0) {
+		if (rsa_part_len[i] >= 5 && strncmp(temp + rsa_part_len[i] - 5, "-----", 5) == 0) {
 			use_newline = 1;
 		}
 		strcat(oauth->oauth.rsa_key, temp);

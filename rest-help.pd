@@ -1,7 +1,7 @@
 #N canvas 209 73 1137 558 10;
+#X declare -path purest_json;
 #X text 55 21 - object for HTTP communication with REST webservices
 ;
-#X obj 450 28 import purest_json;
 #X obj 19 20 rest;
 #X obj 450 470 rest;
 #X text 466 107 By default \, requests do not timeout. To set a maximal
@@ -34,7 +34,7 @@ zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn qkMsDmzt0EfNaAO
 WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
 3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8 AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A== -----END PRIVATE KEY-----;
-#X msg -142 -95 init http://term.ie/oauth/example key this_is_ignored
+#X msg -142 -95 init http://www.lamusica.com/oauth/example key this_is_ignored
 accesskey this_is_ignored;
 #X text 261 -97 You need to set client secret and access secret with
 the [init( message or as arguments for [oauth] \, but these will be
@@ -57,8 +57,8 @@ of the request.;
 #X msg 555 95 GET /echo_api.php?method=foo&bar=baz;
 #X msg 573 140 POST /echo_api.php?method=foo&bar=baz;
 #X obj 529 182 oauth;
-#X msg 521 49 init http://term.ie/oauth/example key secret accesskey
-accesssecret;
+#X msg 521 49 init http://www.lamusica.com/oauth/example key secret
+accesskey accesssecret;
 #X text 27 7 Set the base url \, consumer key and secret (client credentials)
 \, and optionally access token and secret (token credentials) at creation
 or use [init( message.;
@@ -221,8 +221,8 @@ to be used by a simple sequencer.;
 #X msg 46 112 0;
 #X obj 226 463 spigot 1;
 #X obj 295 107 spigot;
-#X obj 328 73 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
+#X obj 328 73 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
 #X obj 603 102 print Put command;
 #X obj 149 332 t b a b;
 #X text 275 57 toggle only when using sequencer;
@@ -302,12 +302,12 @@ will wait for 10 seconds before returning data.;
 #X obj 105 -83 rest;
 #X msg 159 -165 cancel;
 #X obj 303 -213 t b b;
-#X obj 303 -242 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
+#X obj 303 -242 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#000000 #000000;
 #X msg 105 -130 GET http://ix.residuum.org/pd/sleep_example.php;
 #X obj 105 -220 t b b;
-#X obj 105 -249 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
+#X obj 105 -249 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#000000 #000000;
 #X text 79 -311 This won't always work \, as another thread will have
 to be signalled and must clean up.;
 #X obj 277 -168 del 20;
@@ -338,8 +338,6 @@ to return data immediately. While one request is processed \, the object
 is blocked.;
 #N canvas 358 174 631 378 download-to-file 0;
 #X obj 77 247 rest;
-#X msg 119 106 GET https://ajax.googleapis.com/ajax/services/search/web?v=2.0&q=puredata
-;
 #X text 74 20 Set the location \, where the file should be saved;
 #X text 117 86 Downloaded data will write it to the file;
 #X text 170 172 Clear the location;
@@ -347,11 +345,12 @@ is blocked.;
 #X msg 172 192 file;
 #X obj 48 297 print done;
 #X obj 133 297 print data;
-#X connect 0 0 7 0;
-#X connect 0 1 8 0;
-#X connect 1 0 0 0;
+#X msg 119 106 GET https://jsonplaceholder.typicode.com/posts;
+#X connect 0 0 6 0;
+#X connect 0 1 7 0;
+#X connect 4 0 0 0;
 #X connect 5 0 0 0;
-#X connect 6 0 0 0;
+#X connect 8 0 0 0;
 #X restore 21 454 pd download-to-file;
 #X text 20 413 More functions:;
 #N canvas 170 140 678 510 streaming-and-blocking 0;
@@ -442,13 +441,14 @@ For creating url encoded lists of parameters see;
 #X text 19 150 [oauth] is an object for communication with OAUTH enabled
 webservices. Request methods GET \, POST \, PUT \, DELETE \, HEAD \,
 OPTIONS and TRACE are available.;
-#X connect 3 0 28 0;
-#X connect 3 1 29 0;
-#X connect 3 2 27 0;
-#X connect 5 0 3 0;
-#X connect 6 0 3 0;
-#X connect 7 0 3 0;
-#X connect 8 0 3 0;
-#X connect 16 0 3 0;
-#X connect 30 0 3 0;
-#X connect 31 0 3 0;
+#X obj 451 14 declare -path purest_json;
+#X connect 2 0 27 0;
+#X connect 2 1 28 0;
+#X connect 2 2 26 0;
+#X connect 4 0 2 0;
+#X connect 5 0 2 0;
+#X connect 6 0 2 0;
+#X connect 7 0 2 0;
+#X connect 15 0 2 0;
+#X connect 29 0 2 0;
+#X connect 30 0 2 0;

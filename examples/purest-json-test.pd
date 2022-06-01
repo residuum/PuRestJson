@@ -72,6 +72,26 @@
 #X obj 714 483 print array-done;
 #X obj 860 483 print array-decode;
 #X obj 888 549 declare -path purest_json -stdlib zexy;
+#N canvas 1060 277 778 533 github 0;
+#X obj 116 137 rest;
+#X obj 203 204 print data;
+#X msg 116 108 GET https://api.github.com/repos/residuum/PuRestJson/commits
+;
+#X obj 126 172 t a a;
+#X obj 126 218 json-decode;
+#X obj 157 243 list trim;
+#X msg 95 67 header User-Agent: My User Agent;
+#X obj 49 275 print array-done;
+#X obj 157 275 print array-decoded;
+#X connect 0 1 3 0;
+#X connect 2 0 0 0;
+#X connect 3 0 4 0;
+#X connect 3 1 1 0;
+#X connect 4 0 7 0;
+#X connect 4 1 5 0;
+#X connect 5 0 8 0;
+#X connect 6 0 0 0;
+#X restore 8 506 pd github;
 #X connect 0 0 37 0;
 #X connect 1 0 0 0;
 #X connect 2 0 0 0;

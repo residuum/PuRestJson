@@ -63,6 +63,7 @@ struct _ctw {
 	unsigned char locked; /* is object locked? */
 	unsigned char sslcheck; /* check SSL certificate with CA list? */
 	unsigned char mode; /* output when done or stream? */
+	unsigned char clear_cb; /* clear callback. Used, when streaming output and thread is running */
 #ifdef NEEDS_CERT_PATH
 	size_t cert_path_len;
 	char *cert_path;
@@ -208,6 +209,9 @@ static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const s
 	const size_t realsize = size * nmemb;
 	struct _cb_val *const cb_val = data;
 	struct _ctw *const ctw = cb_val->ctw;
+	if (ctw->clear_cb == 1) {
+		return -1;
+	}
 
 	if (ctw->mode == 0) {
 		return ctw_write_mem(ptr, realsize, cb_val->mem);
@@ -748,6 +752,7 @@ static void ctw_init(struct _ctw *const common) {
 	common->proxy_user_len = 0;
 	common->proxy_pass_len = 0;
 	common->x_canvas = canvas_getcurrent();
+	common->clear_cb = 0;
 #ifdef PDINSTANCE
 	common.x_pd_this = pd_this;
 #endif
@@ -767,6 +772,7 @@ static void ctw_free(struct _ctw *const common) {
 	string_free(common->proxy, &common->proxy_len);
 	string_free(common->proxy_user, &common->proxy_user_len);
 	string_free(common->proxy_pass, &common->proxy_pass_len);
+	common->clear_cb = 1;
 	ctw_clear_headers(common);
 	curl_global_cleanup();
 #ifdef NEEDS_CERT_PATH

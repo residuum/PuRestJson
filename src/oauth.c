@@ -102,6 +102,7 @@ static void oauth_free_inner(t_oauth *const oauth, const short free_rsa) {
 
 static void oauth_set_init(t_oauth *const oauth, const int argc, t_atom *const argv) {
 	oauth_free_inner(oauth, 0);
+	oauth->common.clear_cb = 0;
 
 	switch (argc) {
 		case 0:

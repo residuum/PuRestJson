@@ -207,6 +207,7 @@ static void *rest_get_auth_token(void *const thread_args) {
 
 static void rest_set_init(t_rest *const rest, const int argc, t_atom *const argv) {
 	rest_free_inner(rest);
+	rest->common.clear_cb = 0;
 
 	switch (argc) {
 		case 0:

@@ -72,7 +72,7 @@
 #X obj 714 483 print array-done;
 #X obj 860 483 print array-decode;
 #X obj 888 549 declare -path purest_json -stdlib zexy;
-#N canvas 1060 277 778 533 github 0;
+#N canvas 198 282 778 533 github 0;
 #X obj 116 137 rest;
 #X obj 203 204 print data;
 #X msg 116 108 GET https://api.github.com/repos/residuum/PuRestJson/commits

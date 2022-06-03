@@ -37,7 +37,7 @@ YOUR_TEMP_TOKEN YOUR_TEMP_SECRET;
 #X connect 6 0 3 0;
 #X connect 10 0 4 0;
 #X restore 159 257 pd simple-operations;
-#N canvas 855 130 931 760 sonify-it 1;
+#N canvas 855 130 931 760 sonify-it 0;
 #X obj 29 129 oauth;
 #X obj 29 28 inlet;
 #X text 118 66 Search;

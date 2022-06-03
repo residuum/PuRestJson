@@ -137,7 +137,7 @@ static void rest_process_auth_data(t_rest *const rest, struct _memory_struct *co
 				} else {
 					t_atom http_status_data[2];
 #ifdef PDINSTANCE
-					pd_setinstance(rest->x_pd_this);
+					pd_setinstance(rest->common.x_pd_this);
 #endif
 					sys_lock();
 					SETFLOAT(&http_status_data[0], (float)http_status);

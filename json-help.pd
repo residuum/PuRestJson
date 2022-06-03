@@ -19,20 +19,20 @@ stored one;
 #X text 794 261 output the value;
 #X msg 795 280 bang;
 #N canvas 85 61 536 476 nested-objects 0;
-#X obj -74 -56 json-encode;
-#X obj -74 2 json-decode;
-#X msg 104 -101 add name Residuum;
-#X msg -74 -103 bang;
-#X obj -8 -147 json-encode;
-#X msg -8 -101 add newest \$1;
-#X obj -74 -274 bng 15 250 50 0 empty empty Click_to_create_a_nested_object
+#X obj 76 244 json-encode;
+#X obj 76 302 json-decode;
+#X msg 254 199 add name Residuum;
+#X msg 76 197 bang;
+#X obj 142 153 json-encode;
+#X msg 142 199 add newest \$1;
+#X obj 76 26 bng 15 250 50 0 empty empty Click_to_create_a_nested_object
 17 7 0 10 #fcfcfc #000000 #000000;
-#X obj -74 -244 t b b b;
-#X obj -74 -30 t a a;
-#X obj 11 2 print JSON_string;
-#X obj -74 42 print decoding_done;
-#X obj 57 41 print decoded_pair;
-#X msg -8 -181 add album dss \, add year 2018 \, bang \,;
+#X obj 76 56 t b b b;
+#X obj 76 270 t a a;
+#X obj 161 302 print JSON_string;
+#X obj 76 342 print decoding_done;
+#X obj 207 341 print decoded_pair;
+#X msg 142 119 add album dss \, add year 2018 \, bang \,;
 #X connect 0 0 8 0;
 #X connect 1 0 10 0;
 #X connect 1 1 11 0;
@@ -49,42 +49,42 @@ stored one;
 #X connect 12 0 4 0;
 #X restore 49 444 pd nested-objects;
 #X obj 665 444 t a a;
-#N canvas 312 61 693 648 about-decoded-json-strings 0;
-#X obj 218 -185 json-encode;
-#X obj 94 -86 json-decode;
-#X msg 218 -232 bang;
-#X obj 218 -382 bng 15 250 50 0 empty empty Click_to_create_an_object
+#N canvas 312 61 801 648 about-decoded-json-strings 0;
+#X obj 388 205 json-encode;
+#X obj 264 304 json-decode;
+#X msg 388 158 bang;
+#X obj 388 8 bng 15 250 50 0 empty empty Click_to_create_an_object
 17 7 0 10 #fcfcfc #000000 #000000;
-#X obj 218 -352 t b b b b;
-#X msg 269 -316 add duration 3000;
-#X obj 218 -159 t a a a;
-#X obj 387 -57 json-decode;
-#X obj 418 87 line;
-#X floatatom 418 120 5 0 0 0 - - - 0;
-#X msg 418 67 \$1 \, \$2 \$3;
-#X obj 418 2 route start end duration;
-#X text 399 -78 wrong;
-#X obj 157 72 line;
-#X floatatom 157 105 5 0 0 0 - - - 0;
-#X obj 157 -29 route start end duration;
-#X obj 157 -58 list trim;
-#X obj 418 -27 list trim;
-#X obj 418 45 pack 0 0 0;
-#X msg 252 -286 add start 100;
-#X msg 235 -255 add end 500;
-#X obj 142 1 f;
-#X obj 157 30 pack 0 0 0;
-#X msg 157 52 \$1 \, \$2 \$3;
-#X text -157 -209 This will give you a chance to wait for other data
-from the JSON object.;
-#X obj 303 -127 print JSON_string;
-#X text 105 -121 correct;
-#X text -159 -337 You should not assume too much about the order of
-keys and values in a JSON object. In this example \, a JSON string
-is decoded to drive a [line] object from start to stop using [route]
-and [pack]. When using [pack] you should not feed the left-most inlet
-with data immediately \, but store a value \, e.g. in a [f] and bang
-the store \, with the left outlet of [json-decode].;
+#X obj 388 38 t b b b b;
+#X msg 439 74 add duration 3000;
+#X obj 388 231 t a a a;
+#X obj 557 333 json-decode;
+#X obj 588 477 line;
+#X floatatom 588 510 5 0 0 0 - - - 0;
+#X msg 588 457 \$1 \, \$2 \$3;
+#X obj 588 392 route start end duration;
+#X text 569 312 wrong;
+#X obj 327 462 line;
+#X floatatom 327 495 5 0 0 0 - - - 0;
+#X obj 327 361 route start end duration;
+#X obj 327 332 list trim;
+#X obj 588 363 list trim;
+#X obj 588 435 pack 0 0 0;
+#X msg 422 104 add start 100;
+#X msg 405 135 add end 500;
+#X obj 312 391 f;
+#X obj 327 420 pack 0 0 0;
+#X msg 327 442 \$1 \, \$2 \$3;
+#X text 13 181 This will give you a chance to wait for other data from
+the JSON object.;
+#X obj 473 263 print JSON_string;
+#X text 275 269 correct;
+#X text 11 53 You should not assume too much about the order of keys
+and values in a JSON object. In this example \, a JSON string is decoded
+to drive a [line] object from start to stop using [route] and [pack].
+When using [pack] you should not feed the left-most inlet with data
+immediately \, but store a value \, e.g. in a [f] and bang the store
+\, with the left outlet of [json-decode].;
 #X connect 0 0 6 0;
 #X connect 1 0 21 0;
 #X connect 1 1 16 0;

@@ -754,7 +754,7 @@ static void ctw_init(struct _ctw *const common) {
 	common->x_canvas = canvas_getcurrent();
 	common->clear_cb = 0;
 #ifdef PDINSTANCE
-	common.x_pd_this = pd_this;
+	common->x_pd_this = pd_this;
 #endif
 
 	ctw_set_timeout(common, 0);

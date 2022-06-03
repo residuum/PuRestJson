@@ -15,7 +15,7 @@ the value and return to the default \, use an empty [timeout( message.
 #X obj 19 44 oauth;
 #X text 57 43 - object for HTTP communication with OAuth webservices
 ;
-#N canvas 148 110 1044 412 oauth-specific 0;
+#N canvas 148 110 1044 412 oauth-specific 1;
 #X obj 29 53 oauth http://example.com/ CLIENTKEY CLIENTSECRET ACCESSTOKEN
 ACCESSSECRET;
 #X msg 31 205 method PLAINTEXT;
@@ -23,10 +23,10 @@ ACCESSSECRET;
 #X msg 82 234 method HMAC;
 #X msg 91 262 method RSA privatekey;
 #N canvas 551 129 913 619 RSA 0;
-#X msg -89 318 GET /echo_api.php?method=foo&bar=baz;
-#X msg -92 361 POST /echo_api.php?method=foo&bar=baz;
-#X obj -128 409 oauth;
-#X msg -106 -47 method RSA -----BEGIN PRIVATE KEY----- MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
+#X msg 131 448 GET /echo_api.php?method=foo&bar=baz;
+#X msg 128 491 POST /echo_api.php?method=foo&bar=baz;
+#X obj 92 539 oauth;
+#X msg 114 83 method RSA -----BEGIN PRIVATE KEY----- MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
 A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d 7rjVJ0BLB+ubPK8iA/Tw3hLQgXMRRGRXXCn8ikfuQfjUS1uZSatdLB81mydBETlJ
 hI6GH4twrbDJCR2Bwy/XWXgqgGRzAgMBAAECgYBYWVtleUzavkbrPjy0T5FMou8H X9u2AC2ry8vD/l7cqedtwMPp9k7TubgNFo+NGvKsl2ynyprOZR1xjQ7WgrgVB+mm
 uScOM/5HVceFuGRDhYTCObE+y1kxRloNYXnx3ei1zbeYLPCHdhxRYW7T0qcynNmw rn05/KO2RLjgQNalsQJBANeA3Q4Nugqy4QBUCEC09SqylT2K9FrrItqL2QKc9v0Z
@@ -34,13 +34,13 @@ zO2uwllCbg0dwpVuYPYXYvikNHHg+aCWF+VXsb9rpPsCQQDWR9TT4ORdzoj+Nccn qkMsDmzt0EfNaAO
 WPTpAkBI+gFhjfJvRw38n3g/+UeAkwMI2TJQS4n8+hid0uus3/zOjDySH3XHCUno cn1xOJAyZODBo47E+67R4jV1/gzbAkEAklJaspRPXP877NssM5nAZMU0/O/NGCZ+
 3jPgDUno6WbJn5cqm8MqWhW1xGkImgRk+fkDBquiq4gPiT898jusgQJAd5Zrr6Q8 AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A== -----END PRIVATE KEY-----;
-#X msg -142 -95 init http://www.lamusica.com/oauth/example key this_is_ignored
+#X msg 78 35 init http://www.lamusica.com/oauth/example key this_is_ignored
 accesskey this_is_ignored;
-#X text 261 -97 You need to set client secret and access secret with
+#X text 481 33 You need to set client secret and access secret with
 the [init( message or as arguments for [oauth] \, but these will be
 ignored with the RSA key;
-#X obj -166 448 print status-rsa;
-#X obj -46 445 print data-rsa;
+#X obj 54 578 print status-rsa;
+#X obj 174 575 print data-rsa;
 #X connect 0 0 2 0;
 #X connect 1 0 2 0;
 #X connect 2 0 6 0;
@@ -297,21 +297,21 @@ the value to 1;
 #X text 637 282 Use this request to test cancelling and timeout: it
 will wait for 10 seconds before returning data.;
 #N canvas 385 252 807 334 cancel 0;
-#X obj 105 -51 print data;
-#X obj 187 -51 print status;
-#X obj 105 -83 rest;
-#X msg 159 -165 cancel;
-#X obj 303 -213 t b b;
-#X obj 303 -242 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
-#000000 #000000;
-#X msg 105 -130 GET http://ix.residuum.org/pd/sleep_example.php;
-#X obj 105 -220 t b b;
-#X obj 105 -249 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
-#000000 #000000;
-#X text 79 -311 This won't always work \, as another thread will have
+#X obj 105 279 print data;
+#X obj 187 279 print status;
+#X obj 105 247 rest;
+#X msg 159 165 cancel;
+#X obj 303 117 t b b;
+#X obj 303 88 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
+#X msg 105 200 GET http://ix.residuum.org/pd/sleep_example.php;
+#X obj 105 110 t b b;
+#X obj 105 81 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
+#X text 79 19 This won't always work \, as another thread will have
 to be signalled and must clean up.;
-#X obj 277 -168 del 20;
-#X text 277 -277 By experimentation \, I have found out that a delay
+#X obj 277 162 del 20;
+#X text 277 53 By experimentation \, I have found out that a delay
 of 20ms is sufficient on my system (TM).;
 #X connect 2 0 0 0;
 #X connect 2 1 1 0;
@@ -388,10 +388,12 @@ You can set the mode even during running requests.;
 #X msg 182 172 header_clear;
 #X text 71 22 Some webservices return different data types for different
 values of Accept: headers;
-#X obj 76 359 print status;
 #X obj 158 359 print data;
-#X connect 0 0 9 0;
-#X connect 0 1 10 0;
+#X obj 76 359 print done;
+#X obj 238 359 print error;
+#X connect 0 0 10 0;
+#X connect 0 1 9 0;
+#X connect 0 2 11 0;
 #X connect 1 0 0 0;
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;

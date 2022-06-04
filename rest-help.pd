@@ -15,7 +15,7 @@ the value and return to the default \, use an empty [timeout( message.
 #X obj 19 44 oauth;
 #X text 57 43 - object for HTTP communication with OAuth webservices
 ;
-#N canvas 148 110 1044 412 oauth-specific 1;
+#N canvas 148 110 1044 412 oauth-specific 0;
 #X obj 29 53 oauth http://example.com/ CLIENTKEY CLIENTSECRET ACCESSTOKEN
 ACCESSSECRET;
 #X msg 31 205 method PLAINTEXT;

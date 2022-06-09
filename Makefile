@@ -35,22 +35,26 @@ endef
 lib.setup.sources = src/purest_json.c
 
 # creating deken package
-deken.bits=32
-deken.ext=dek
-deken.pack=zip -9 -r
-deken.file= $(lib.name)[v$(lib.version)]($(system)-$(machine)-$(deken.bits))
-deken.tmp=deken-tmp
-deken.folder=$(lib.name)
+deken.bits = 32
+deken.ext = dek
+deken.pack = zip -9 -r
+deken.tmp = deken-tmp
+deken.folder = $(lib.name)
 
 PDLIBBUILDER_DIR=pd-lib-builder
 include $(PDLIBBUILDER_DIR)/Makefile.pdlibbuilder
 
+space := $(subst ,, )
+deken.systems := $(foreach m,$(machine),($(system)-$(m)-$(deken.bits)))
+deken.systemscleaned := $(subst $(space),,$(deken.systems))
+deken.file :=  $(lib.name)[v$(lib.version)]$(deken.systemscleaned)
+
 deken:
 	mkdir -p "$(deken.tmp)"
-	mkdir "$(deken.tmp)/$(deken.folder)"
+	mkdir -p "$(deken.tmp)/$(deken.folder)"
 	cp $(executables) "$(deken.tmp)/$(deken.folder)/"
 	cp $(datafiles) "$(deken.tmp)/$(deken.folder)/"
-	mkdir "$(deken.tmp)/$(deken.folder)/examples"
+	mkdir -p "$(deken.tmp)/$(deken.folder)/examples"
 	cp -r manual "$(deken.tmp)/$(deken.folder)/"
 	cp $(examplefiles) "$(deken.tmp)/$(deken.folder)/examples"
 	cd "$(deken.tmp)"; \

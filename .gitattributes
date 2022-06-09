@@ -1,4 +1,4 @@
 # exclude files that only make sense in the upstream repository
 .git*      	export-ignore
-.travis.yml	export-ignore
-travis-build/*	export-ignore
+.circleci	export-ignore
+circleci-scripts/*	export-ignore

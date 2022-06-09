@@ -4,7 +4,7 @@ set -e
 brew update
 brew install json-c curl liboauth
 
-curl -o /tmp/pd.tar.gz http://msp.ucsd.edu/Software/pd-${PDVERSION}-macosx7.mac.tar.gz
-tar -xf /tmp/pd.tar.gz -C /tmp
+curl -o /tmp/pd.zip https://msp.puredata.info/Software/pd-${PDVERSION}.macos.zip
+unzip -q -d /tmp /tmp/pd.zip
 
 pip3 install grip beautifulsoup4 lxml --user

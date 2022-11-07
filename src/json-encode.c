@@ -119,15 +119,15 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 				break;
 			case json_type_string:
 				value = string_create(&value_len, snprintf(NULL, 0, "%s",
-							json_object_get_string(val)));
-				sprintf(value, "%s", json_object_get_string(val));
+							json_object_to_json_string_ext(val, JSON_C_TO_STRING_PLAIN)));
+				sprintf(value, "%s", json_object_to_json_string_ext(val, JSON_C_TO_STRING_PLAIN));
 				kvp_add_simple((struct _kvp_store *)jenc, key, kvp_val_create(value, 0));
 				string_free(value, &value_len);
 				break;
 			case json_type_object:
 				value = string_create(&value_len, snprintf(NULL, 0, "%s",
-							json_object_get_string(val)));
-				sprintf(value, "%s", json_object_get_string(val));
+							json_object_to_json_string_ext(val, JSON_C_TO_STRING_PLAIN)));
+				sprintf(value, "%s", json_object_to_json_string_ext(val, JSON_C_TO_STRING_PLAIN));
 				kvp_add_simple((struct _kvp_store *)jenc, key, kvp_val_create(value, 0));
 				string_free(value, &value_len);
 				break;
@@ -138,8 +138,8 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 					if (array_member != NULL) {
 						value = string_create(&value_len,
 								snprintf(NULL, 0, "%s",
-									json_object_get_string(array_member)));
-						sprintf(value, "%s", json_object_get_string(array_member));
+									json_object_to_json_string_ext(array_member, JSON_C_TO_STRING_PLAIN)));
+						sprintf(value, "%s", json_object_to_json_string_ext(array_member, JSON_C_TO_STRING_PLAIN));
 						kvp_add_array((struct _kvp_store *)jenc, key,
 								kvp_val_create(value, 0));
 						string_free(value, &value_len);
@@ -206,7 +206,7 @@ static t_symbol *jenc_get_json_symbol(t_json_encode *const jenc) {
 		}
 		json_object_object_add(jobj, it->key, value);
 	}
-	json_symbol = gensym(json_object_to_json_string(jobj));
+	json_symbol = gensym(json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_PLAIN));
 	json_object_put(jobj);
 	return json_symbol;
 }

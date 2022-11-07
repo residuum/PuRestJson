@@ -2,7 +2,7 @@
 set -e
 
 sudo apt-get update
-sudo apt-get -y install qemu-user-static debootstrap grip
+sudo apt-get -y install qemu-user-static debootstrap
 sudo mkdir -p ${CHROOTDIR}
 sudo qemu-debootstrap \
 	--variant=buildd \
@@ -21,4 +21,4 @@ sudo chroot ${CHROOTDIR} bash -c "apt-get install -qq -y build-essential \
 	puredata-dev libjson-c-dev libcurl4-openssl-dev liboauth-dev zip"
 
 pip3 install --upgrade pip
-pip3 install beautifulsoup4 lxml --user
+pip3 install beautifulsoup4 lxml grip --user

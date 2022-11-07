@@ -34,8 +34,7 @@ sudo apt-get install \
     sed \
     unzip \
     wget \
-    xz-utils \
-	grip
+    xz-utils
 
 wget --no-verbose -O /tmp/mxe.tar.bz2 \
 	https://purest_json:${OC_PASSWORD}@cloud.residuum.org/remote.php/webdav/mxe.tar.bz2
@@ -48,4 +47,4 @@ unzip -q -d /tmp /tmp/pd.zip
 PATH=$PATH:/tmp/usr/bin
 
 pip3 install --upgrade pip
-pip3 install beautifulsoup4 lxml --user
+pip3 install beautifulsoup4 lxml grip --user

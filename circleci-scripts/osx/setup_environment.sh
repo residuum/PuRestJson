@@ -9,3 +9,4 @@ unzip -q -d /tmp /tmp/pd.zip
 sudo hdiutil attach /tmp/Pd-${PDVERSION}.dmg
 
 pip3 install grip beautifulsoup4 lxml --user
+export PATH=$PATH:~/Library/Python/3.8/bin

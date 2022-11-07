@@ -3,9 +3,9 @@ version: 2.1
 jobs:
   build-linux64:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:current
     environment:
-      PDVERSION: 0.52-2
+      PDVERSION: 0.53-0
       SYSTEM: linux64
     steps: 
       - checkout
@@ -14,9 +14,9 @@ jobs:
           command: bash ./circleci-scripts/build.sh
   build-linux32:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:current
     environment:
-      PDVERSION: 0.52-2
+      PDVERSION: 0.53-0
       SYSTEM: linux32
       DIST: bullseye
       DEBIAN_ARCH: i386
@@ -28,9 +28,9 @@ jobs:
           command: bash ./circleci-scripts/build.sh
   build-linuxarm:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:current
     environment:
-      PDVERSION: 0.52-2
+      PDVERSION: 0.53-0
       SYSTEM: linuxarm
       DIST: bullseye
       DEBIAN_ARCH: armhf
@@ -42,9 +42,9 @@ jobs:
           command: bash ./circleci-scripts/build.sh
   build-osx:
     macos:
-      xcode: 12.5.1
+      xcode: 14.1.0
     environment:
-      PDVERSION: 0.52-2
+      PDVERSION: 0.53-0
       SYSTEM: osx
     steps: 
       - checkout
@@ -53,9 +53,9 @@ jobs:
           command: bash ./circleci-scripts/build.sh
   build-windows:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:current
     environment:
-      PDVERSION: 0.52-2
+      PDVERSION: 0.53-0
       SYSTEM: windows
       MXE_TARGET: i686-w64-mingw32.static
       MXE_PATH_SLUG: i686-w64-mingw32.static
@@ -70,9 +70,9 @@ jobs:
           command: bash ./circleci-scripts/build.sh
   build-windows64:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:current
     environment:
-      PDVERSION: 0.52-2
+      PDVERSION: 0.53-0
       SYSTEM: windows64
       MXE_TARGET: x86-64-w64-mingw32.static
       MXE_PATH_SLUG: x86_64-w64-mingw32.static

@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 from bs4 import BeautifulSoup
+from grip import export
 
 wikiDir = '/tmp/PuRestJson.wiki/'
 exportDir = 'manual/'
@@ -22,10 +23,11 @@ print ('Output directory: ', exportDir)
 for f in os.listdir(wikiDir):
     if f.endswith('.md'):
         print ('Converting: ', f)
-        baseFile = os.path.splitext(os.path.basename(f))[0];
+        baseFile = os.path.splitext(os.path.basename(f))[0]
         htmlFile = baseFile + '.html'
-        subprocess.run(['grip', wikiDir + f, '--export', '--no-inline', 
-            exportDir + htmlFile, '--title=' + baseFile.replace('-', ' ')]);
+        export(wikiDir + f, render_inline=False,
+               out_filename=exportDir + htmlFile, 
+               title=baseFile.replace('-', ' '))
         # edit links to css, images and other pages.
         htmlDoc = open(exportDir + htmlFile)
         soup = BeautifulSoup(htmlDoc, 'lxml')

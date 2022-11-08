@@ -39,9 +39,6 @@ THE SOFTWARE.
 		#define APIEXPORT
 	#endif
 	#define APICALL
-	#ifdef __APPLE__
-		#define NEEDS_CERT_PATH 1
-	#endif
 #endif
 
 static void purest_json_lib_info(char *name) {

@@ -24,9 +24,6 @@ THE SOFTWARE.
 
 */
 
-#ifdef NEEDS_CERT_PATH
-#include "m_imp.h"
-#endif
 struct _memory_struct {
 	char *memory;
 	size_t size;
@@ -64,10 +61,6 @@ struct _ctw {
 	unsigned char sslcheck; /* check SSL certificate with CA list? */
 	unsigned char mode; /* output when done or stream? */
 	unsigned char clear_cb; /* clear callback. Used, when streaming output and thread is running */
-#ifdef NEEDS_CERT_PATH
-	size_t cert_path_len;
-	char *cert_path;
-#endif
 #ifdef PDINSTANCE
 	t_pdinstance *x_pd_this;  /**< pointer to the owner pd instance */
 #endif
@@ -156,10 +149,6 @@ static void ctw_set_proxy(struct _ctw *common, int argc, t_atom *argv);
 static void ctw_init(struct _ctw *common);
 /* frees data */
 static void ctw_free(struct _ctw *common);
-#ifdef NEEDS_CERT_PATH
-/* sets path to certificate file */
-static void ctw_set_cert_path(struct _ctw *common, const char *directory);
-#endif
 
 /* begin implementations */
 static size_t ctw_write_mem(const void *const ptr, const size_t realsize, struct _memory_struct *const mem) {
@@ -295,12 +284,6 @@ static void ctw_prepare_basic(struct _ctw *const common, struct curl_slist *slis
 	if(common->proxy_pass_len) {
 		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_PROXYPASSWORD, common->proxy_pass));
 	}
-#ifdef NEEDS_CERT_PATH
-	if (common->sslcheck){
-		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CAINFO, common->cert_path));
-		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CAPATH, common->cert_path));
-	}
-#endif
 }
 
 static void ctw_prepare_put(struct _ctw *const common, struct _memory_struct *const in_memory) {
@@ -782,15 +765,4 @@ static void ctw_free(struct _ctw *const common) {
 	common->clear_cb = 1;
 	ctw_clear_headers(common);
 	curl_global_cleanup();
-#ifdef NEEDS_CERT_PATH
-	string_free(common->cert_path, &common->cert_path_len);
-#endif 
 }
-
-#ifdef NEEDS_CERT_PATH
-static void ctw_set_cert_path(struct _ctw *const common, const char *const directory) {
-	common->cert_path = string_create(&common->cert_path_len, strlen(directory) + 11);
-	strcpy(common->cert_path, directory);
-	strcat(common->cert_path, "/cacert.pem");
-}
-#endif 

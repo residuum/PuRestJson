@@ -492,6 +492,7 @@ static void ctw_perform(struct _ctw *const common) {
 		sys_unlock();
 	}
 	do {
+		pthread_testcancel();
 		running = ctw_libcurl_loop(common);
 	} while (running);
 }

@@ -47,7 +47,7 @@ include $(PDLIBBUILDER_DIR)/Makefile.pdlibbuilder
 space := $(subst ,, )
 deken.systems := $(foreach m,$(machine),($(system)-$(m)-$(deken.bits)))
 deken.systemscleaned := $(subst $(space),,$(deken.systems))
-deken.file :=  $(lib.name)[v$(lib.version)]$(deken.systemscleaned)
+deken.file := $(lib.name)[v$(lib.version)]$(deken.systemscleaned)
 
 deken:
 	mkdir -p "$(deken.tmp)"

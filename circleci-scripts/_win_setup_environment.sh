@@ -29,7 +29,7 @@ sudo apt-get install \
     patch \
     perl \
     pkg-config \
-    python \
+    python-is-python3 \
     ruby \
     sed \
     unzip \

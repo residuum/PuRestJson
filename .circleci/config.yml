@@ -53,7 +53,7 @@ jobs:
           command: bash ./circleci-scripts/build.sh
   build-windows:
     machine:
-      image: ubuntu-2004:current
+      image: ubuntu-2204:current
     environment:
       PDVERSION: 0.53-0
       SYSTEM: windows
@@ -70,7 +70,7 @@ jobs:
           command: bash ./circleci-scripts/build.sh
   build-windows64:
     machine:
-      image: ubuntu-2004:current
+      image: ubuntu-2204:current
     environment:
       PDVERSION: 0.53-0
       SYSTEM: windows64

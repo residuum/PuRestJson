@@ -255,7 +255,10 @@ static char *ctw_set_param(struct _ctw *const common, t_atom *const arg, size_t 
 }
 
 static void ctw_cancel_request(void *const args) {
-	struct _ctw *const common = args; 
+	struct _ctw *const common = args;
+	if (common->locked == 0) {
+		return;
+	}
 	curl_multi_remove_handle(common->multi_handle, common->easy_handle);
 	common->locked = 0;
 	post("request cancelled.");
@@ -638,6 +641,9 @@ static void ctw_set_sslcheck(struct _ctw *const common, const int val) {
 }
 
 static void ctw_cancel(struct _ctw *const common) {
+	if (common->locked == 0) {
+		return;
+	}
 	pthread_cancel(common->thread);
 }
 

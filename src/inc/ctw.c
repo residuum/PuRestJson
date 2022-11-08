@@ -753,6 +753,10 @@ static void ctw_init(struct _ctw *const common) {
 }
 
 static void ctw_free(struct _ctw *const common) {
+	common->clear_cb = 1;
+	if (common->locked == 1) {
+		pthread_cancel(common->thread);
+	}
 	curl_multi_remove_handle(common->multi_handle, common->easy_handle);
 	string_free(common->base_url, &common->base_url_len);
 	string_free(common->parameters, &common->parameters_len);
@@ -762,7 +766,6 @@ static void ctw_free(struct _ctw *const common) {
 	string_free(common->proxy, &common->proxy_len);
 	string_free(common->proxy_user, &common->proxy_user_len);
 	string_free(common->proxy_pass, &common->proxy_pass_len);
-	common->clear_cb = 1;
 	ctw_clear_headers(common);
 	curl_global_cleanup();
 }

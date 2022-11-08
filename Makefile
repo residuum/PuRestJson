@@ -22,7 +22,7 @@ ldflags =
 ldlibs = -lcurl -ljson-c -loauth
 
 define forWindows
-    ldlibs += -lpthread -lm -lwldap32 -lssl -lssh2 -lgcrypt -lgpg-error \
+    ldlibs += -lpthread -lm -lwldap32 -lssl -lssh2 -lbcrypt -lgcrypt -lgpg-error \
 			  -lcrypto -lws2_32 -lgdi32 -lcrypt32 -lz -lidn2 -lunistring \
 			  -latomic -lintl -liconv -lcharset
     cflags += -mthreads -DCURL_STATICLIB

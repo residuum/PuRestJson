@@ -1,0 +1,17 @@
+#N canvas 209 73 1137 558 10;
+#X obj 104 223 rest;
+#X msg 131 172 mode stream;
+#X obj 75 273 print done;
+#X obj 160 273 print data;
+#X msg 104 125 GET https://ix.residuum.org/pd/stream_example.php;
+#X obj 104 68 loadbang;
+#X obj 104 91 t b b;
+#X msg 275 187 cancel;
+#X connect 0 0 2 0;
+#X connect 0 1 3 0;
+#X connect 1 0 0 0;
+#X connect 4 0 0 0;
+#X connect 5 0 6 0;
+#X connect 6 0 4 0;
+#X connect 6 1 1 0;
+#X connect 7 0 0 0;

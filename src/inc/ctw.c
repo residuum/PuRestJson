@@ -428,7 +428,7 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 	if (maxfd == -1) {
 #ifdef _WIN32
 		Sleep(100);
-		rc= 0;
+		rc = 0;
 #else
 		rc = select(0, &fdread, &fdwrite, &fdexcep, &timeout);
 #endif
@@ -757,7 +757,6 @@ static void ctw_free(struct _ctw *const common) {
 	if (common->locked == 1) {
 		pthread_cancel(common->thread);
 	}
-	curl_multi_remove_handle(common->multi_handle, common->easy_handle);
 	string_free(common->base_url, &common->base_url_len);
 	string_free(common->parameters, &common->parameters_len);
 	string_free(common->complete_url, &common->complete_url_len);

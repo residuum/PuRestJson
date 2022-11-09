@@ -403,20 +403,10 @@ static void ctw_libcurl_status_check(struct _ctw *common, CURLcode code){
 
 static int ctw_libcurl_loop(struct _ctw *const common) {
 	CURLMcode code;
-	struct timeval timeout;
-	int rc;
-	fd_set fdread;
-	fd_set fdwrite;
-	fd_set fdexcep;
-	int maxfd = -1;
-	FD_ZERO(&fdread);
-	FD_ZERO(&fdwrite);
-	FD_ZERO(&fdexcep);
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 300;
+	int numfds;
 	int running = 1;
 
-	code = curl_multi_fdset(common->multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+	code = curl_multi_perform(common->multi_handle, &running);
 	if (code != CURLM_OK) {
 #ifdef PDINSTANCE
 		pd_setinstance(common->x_pd_this);
@@ -424,56 +414,23 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 		sys_lock();
 		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 		sys_unlock();
-	}
-	if (maxfd == -1) {
-#ifdef _WIN32
-		Sleep(100);
-		rc = 0;
-#else
-		rc = select(0, &fdread, &fdwrite, &fdexcep, &timeout);
-#endif
-	}
-	else {
-		rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
-	}
-	switch(rc) {
-		case -1:
+	} else {
+		/* wait for activity or timeout */
+		code = curl_multi_poll(common->multi_handle, NULL, 0, 1000, &numfds);
+		if (code != CURLM_OK) {
 #ifdef PDINSTANCE
 			pd_setinstance(common->x_pd_this);
 #endif
 			sys_lock();
-			pd_error(common, "Unspecified error while performing request (network disconnect?).");
+			pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
 			sys_unlock();
-			running = 0;
-			break;
-		case 0: /* timeout */ 
-		default: /* action */ 
-			code = curl_multi_perform(common->multi_handle, &running);
-			if (code != CURLM_OK) {
-#ifdef PDINSTANCE
-				pd_setinstance(common->x_pd_this);
-#endif
-				sys_lock();
-				pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
-				sys_unlock();
-			}
-			break;
+		}
 	}
 	return running;
 }
 
 static void ctw_perform(struct _ctw *const common) {
 	int running;
-	const CURLMcode code = curl_multi_perform(common->multi_handle, &running);
-
-	if (code != CURLM_OK) {
-#ifdef PDINSTANCE
-		pd_setinstance(common->x_pd_this);
-#endif
-		sys_lock();
-		pd_error(common, "Error while performing request: %s", curl_multi_strerror(code));
-		sys_unlock();
-	}
 	do {
 		pthread_testcancel();
 		running = ctw_libcurl_loop(common);

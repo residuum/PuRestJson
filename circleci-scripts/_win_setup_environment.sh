@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-sudo apt-get update
-sudo apt-get install \
+sudo apt -y update
+sudo apt -y install \
     autoconf \
     automake \
     autopoint \

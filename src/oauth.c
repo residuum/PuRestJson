@@ -102,7 +102,7 @@ static void oauth_free_inner(t_oauth *const oauth, const short free_rsa) {
 
 static void oauth_set_init(t_oauth *const oauth, const int argc, t_atom *const argv) {
 	oauth_free_inner(oauth, 0);
-	oauth->common.clear_cb = 0;
+	oauth->common.clear_cb = OFF;
 
 	switch (argc) {
 		case 0:
@@ -215,16 +215,16 @@ void oauth_command(t_oauth *const oauth, const t_symbol *const sel, const int ar
 	/* check for initialisation */
 	if (oauth->common.base_url == NULL) {
 		pd_error(oauth, "oauth object is not initialised.");
-		oauth->common.locked = 0;
+		oauth->common.locked = OFF;
 		return;
 	}
 
-	oauth->common.locked = 1;
+	oauth->common.locked = ON;
 	req_type = sel->s_name;
 	strncpy(oauth->common.req_type, req_type, REQUEST_TYPE_LEN - 1);
 	if (ctw_check_request_type(oauth->common.req_type) != 0){
 		pd_error(oauth, "Request method %s not supported.", oauth->common.req_type);
-		oauth->common.locked = 0;
+		oauth->common.locked = OFF;
 		return;
 	}
 

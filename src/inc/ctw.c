@@ -23,6 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
+#define OFF 0
+#define ON 1
+#define MODE_BLOCKING 0
+#define MODE_STREAMING 1
 
 struct _memory_struct {
 	char *memory;
@@ -198,13 +202,13 @@ static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const s
 	const size_t realsize = size * nmemb;
 	struct _cb_val *const cb_val = data;
 	struct _ctw *const ctw = cb_val->ctw;
-	if (ctw->clear_cb == 1) {
+	if (ctw->clear_cb == ON) {
 		return -1;
 	}
 
-	if (ctw->mode == 0) {
+	if (ctw->mode == MODE_BLOCKING) {
 		return ctw_write_mem(ptr, realsize, cb_val->mem);
-	} else if (ctw->mode == 1) {
+	} else if (ctw->mode == MODE_STREAMING) {
 		return ctw_write_stream(ptr, realsize, ctw);
 	}
 	return 0;
@@ -245,11 +249,11 @@ static char *ctw_set_param(struct _ctw *const common, t_atom *const arg, size_t 
 
 static void ctw_cancel_request(void *const args) {
 	struct _ctw *const common = args;
-	if (common->locked == 0) {
+	if (common->locked == OFF) {
 		return;
 	}
 	curl_multi_remove_handle(common->multi_handle, common->easy_handle);
-	common->locked = 0;
+	common->locked = OFF;
 	post("request cancelled.");
 }
 
@@ -516,7 +520,7 @@ static void ctw_cleanup_request(struct _ctw *const common, FILE *const fp, struc
 	if (fp) {
 		fclose(fp);
 	}
-	common->locked = 0;
+	common->locked = OFF;
 }
 
 static void *ctw_exec(void *const thread_args) {
@@ -557,7 +561,7 @@ static void ctw_thread_exec(struct _ctw *const common, void *(*func) (void *)) {
 		pd_error(common, "Could not create thread with code %d.", rc);
 		string_free(common->complete_url, &common->complete_url_len);
 		string_free(common->parameters, &common->parameters_len);
-		common->locked = 0;
+		common->locked = OFF;
 	}
 }
 
@@ -574,15 +578,15 @@ static int ctw_check_request_type(const char *const req_type) {
 }
 
 static void ctw_set_sslcheck(struct _ctw *const common, const int val) {
-	if (val != 0) {
-		common->sslcheck = 1;
+	if (val != OFF) {
+		common->sslcheck = ON;
 	} else {
-		common->sslcheck = 0;
+		common->sslcheck = OFF;
 	}
 }
 
 static void ctw_cancel(struct _ctw *const common) {
-	if (common->locked == 0) {
+	if (common->locked == OFF) {
 		return;
 	}
 	pthread_cancel(common->thread);
@@ -652,9 +656,9 @@ static void ctw_set_mode(struct _ctw *common, int argc, t_atom *argv) {
 	}
 	mode = atom_getsymbol(argv);
 	if (strcmp(mode->s_name, "block") == 0) {
-		ctw_set_mode_number(common, 0);
+		ctw_set_mode_number(common, OFF);
 	} else if (strcmp(mode->s_name, "stream") == 0) {
-		ctw_set_mode_number(common, 1);
+		ctw_set_mode_number(common, ON);
 	} else {
 		pd_error(common, "not a valid mode");
 	}
@@ -699,19 +703,19 @@ static void ctw_init(struct _ctw *const common) {
 	common->proxy_user_len = 0;
 	common->proxy_pass_len = 0;
 	common->x_canvas = canvas_getcurrent();
-	common->clear_cb = 0;
+	common->clear_cb = OFF;
 #ifdef PDINSTANCE
 	common->x_pd_this = pd_this;
 #endif
 
 	ctw_set_timeout(common, 0);
-	ctw_set_mode_number(common, 0);
-	ctw_set_sslcheck(common, 1);
+	ctw_set_mode_number(common, MODE_BLOCKING);
+	ctw_set_sslcheck(common, ON);
 }
 
 static void ctw_free(struct _ctw *const common) {
-	common->clear_cb = 1;
-	if (common->locked == 1) {
+	common->clear_cb = ON;
+	if (common->locked == ON) {
 		pthread_cancel(common->thread);
 	}
 	string_free(common->base_url, &common->base_url_len);

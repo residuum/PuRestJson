@@ -207,7 +207,7 @@ static void *rest_get_auth_token(void *const thread_args) {
 
 static void rest_set_init(t_rest *const rest, const int argc, t_atom *const argv) {
 	rest_free_inner(rest);
-	rest->common.clear_cb = 0;
+	rest->common.clear_cb = OFF;
 
 	switch (argc) {
 		case 0:
@@ -217,7 +217,7 @@ static void rest_set_init(t_rest *const rest, const int argc, t_atom *const argv
 					"Base URL cannot be set.");
 			break;
 		case 4:
-			rest->common.locked = 1;
+			rest->common.locked = ON;
 			rest->common.base_url = ctw_set_param((struct _ctw *)rest, argv, &rest->common.base_url_len,
 					"Base URL cannot be set.");
 			rest->cookie.login_path = ctw_set_param((struct _ctw *)rest, argv + 1,
@@ -272,7 +272,7 @@ void rest_command(t_rest *const rest, const t_symbol *const sel, const int argc,
 		return;
 	}
 
-	rest->common.locked = 1;
+	rest->common.locked = ON;
 	strncpy(rest->common.req_type, req_type, REQUEST_TYPE_LEN - 1);
 	if (ctw_check_request_type(rest->common.req_type) != 0){
 		pd_error(rest, "Request method %s not supported.", rest->common.req_type);

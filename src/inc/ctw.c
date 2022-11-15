@@ -65,6 +65,14 @@ struct _ctw {
 	unsigned char sslcheck; /* check SSL certificate with CA list? */
 	unsigned char mode; /* output when done or stream? */
 	unsigned char clear_cb; /* clear callback. Used, when streaming output and thread is running */
+#ifdef _WIN32
+	/* pthread_cancel will not exit the thread on Windows.
+	 * Therefore a different approach is needed: 
+	 * Set a variable to the object that is read in the POSIX thread.
+	 * After reading the variable, the thread itself will call pthread_exit().
+	 * This is considerably slower, sorry about that. */
+	unsigned char exit_thread; /* signal exiting the thread on Windows */
+#endif
 #ifdef PDINSTANCE
 	t_pdinstance *x_pd_this;  /**< pointer to the owner pd instance */
 #endif
@@ -254,6 +262,9 @@ static void ctw_cancel_request(void *const args) {
 	}
 	curl_multi_remove_handle(common->multi_handle, common->easy_handle);
 	common->locked = OFF;
+#ifdef _WIN32
+	common->exit_thread = OFF;
+#endif
 	post("request cancelled.");
 }
 
@@ -411,6 +422,12 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 	int running = 1;
 
 	code = curl_multi_perform(common->multi_handle, &running);
+#ifdef _WIN32
+	if (common->exit_thread == ON){
+		ctw_cancel_request(common); 
+		pthread_exit(NULL);
+	}
+#endif
 	if (code != CURLM_OK) {
 #ifdef PDINSTANCE
 		pd_setinstance(common->x_pd_this);
@@ -436,9 +453,11 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 static void ctw_perform(struct _ctw *const common) {
 	int running;
 	do {
-		pthread_testcancel();
 		running = ctw_libcurl_loop(common);
 	} while (running);
+#ifdef _WIN32
+	common->exit_thread = OFF;
+#endif
 }
 
 static void ctw_thread_perform(struct _ctw *const common) {
@@ -586,10 +605,21 @@ static void ctw_set_sslcheck(struct _ctw *const common, const int val) {
 }
 
 static void ctw_cancel(struct _ctw *const common) {
+#ifndef _WIN32
+	int cancel_error;
+#endif
 	if (common->locked == OFF) {
 		return;
 	}
-	pthread_cancel(common->thread);
+#ifdef _WIN32
+	common->exit_thread = ON;
+#else
+	cancel_error = pthread_cancel(common->thread);
+
+	if (cancel_error) {
+		pd_error(common, "Error cancelling: %s", strerror(cancel_error));
+	}
+#endif
 }
 
 static void ctw_add_header(struct _ctw *const common, const int argc, t_atom *const argv) {
@@ -704,6 +734,9 @@ static void ctw_init(struct _ctw *const common) {
 	common->proxy_pass_len = 0;
 	common->x_canvas = canvas_getcurrent();
 	common->clear_cb = OFF;
+#ifdef _WIN32
+	common->exit_thread = OFF;
+#endif
 #ifdef PDINSTANCE
 	common->x_pd_this = pd_this;
 #endif

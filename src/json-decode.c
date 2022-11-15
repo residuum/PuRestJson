@@ -58,6 +58,27 @@ static void jdec_output(json_object *jobj, t_outlet *data_outlet, t_outlet *done
 /* checks for valid json string and converts to json */
 static void jdec_output_string(const char *json_string, t_json_decode *jdec);
 
+
+char *strdelch(char *str, char ch)
+{
+    char *current = str;
+    char *tail = str;
+
+    while(*tail)
+    {
+        if(*tail == ch)
+        {
+            tail++;
+        }
+        else
+        {
+            *current++ = *tail++;
+        }
+    }
+    *current = 0;
+    return str;
+}
+
 /* begin implementations */
 static void jdec_output_object(json_object *const jobj, t_outlet *const data_outlet, t_outlet *const done_outlet) {
 	json_object_object_foreach(jobj, key, val) { /* Passing through every json object */
@@ -80,7 +101,7 @@ static void jdec_output_object(json_object *const jobj, t_outlet *const data_out
 					SETFLOAT(&out_data[1], json_object_get_int(val));
 					break;
 				case json_type_string:
-					SETSYMBOL(&out_data[1], gensym(json_object_to_json_string_ext(val, JSON_C_TO_STRING_PLAIN)));
+					SETSYMBOL(&out_data[1], gensym(strdelch(json_object_to_json_string_ext(val, JSON_C_TO_STRING_PLAIN),'"')));
 					break;
 				case json_type_object:
 					SETSYMBOL(&out_data[1], gensym(json_object_to_json_string_ext(val, JSON_C_TO_STRING_PLAIN)));

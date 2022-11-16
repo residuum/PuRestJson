@@ -17,7 +17,7 @@ include_paths="/*"
 # additional exclude paths 
 # found by comparing the results of the default script
 # to the list of additional packages in fresh qemu install
-exclude_paths="$exclude_paths:*/libcom_err.so.*:*/libcrypto.so.*:*/libffi.so.*:*/libgmp.so*:*/libgnutls.so.*:*/libhogweed.so.*:*/libidn2.so.*:*/libk5crypto.so.*:*/libkeyutils.so.*:*/libkrb5.so.*:*/libkrb5support.so.*:*/libnettle.so.*:*/libp11-kit.so.*:*/libresolv.so.*:*/librtmp.so.*:*/libssl.so.*:*/libtasn1.so.*:*/libunistring.so.*:*/libzstd.so.*"
+exclude_paths="$exclude_paths:*/libcom_err.so.*:*/libcrypto.so.*:*/libffi.so.*:*/libgmp.so*:*/libgnutls.so.*:*/libhogweed.so.*:*/libidn2.so.*:*/libkeyutils.so.*:*/libp11-kit.so.*:*/libresolv.so.*:*/librtmp.so.*:*/libssl.so.*:*/libtasn1.so.*:*/libunistring.so.*:*/libzstd.so.*"
 
 # UTILITIES
 verbose=${verbose:-0}

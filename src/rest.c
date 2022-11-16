@@ -54,6 +54,7 @@ static void *rest_new(t_symbol *sel, const int argc, t_atom *argv);
 /* destructor */
 static void rest_free(t_rest *rest, const t_symbol *sel, const int argc, const t_atom *argv);
 
+/** Functions called via Pd messages **/
 /* HTTP request */
 static void rest_command(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
 /* set or clear timeout */
@@ -74,7 +75,6 @@ static void rest_file(t_rest *rest, const t_symbol *sel, const int argc, t_atom 
 static void rest_mode(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
 /* sets proxy */
 static void rest_proxy(t_rest *rest, const t_symbol *sel, const int argc, t_atom *argv);
-
 
 /* frees data */
 static void rest_free_inner(t_rest *rest);
@@ -194,8 +194,8 @@ static void *rest_get_auth_token(void *const thread_args) {
 		struct _cb_val *cb_val = getbytes(sizeof(struct _cb_val));
 		cb_val->mem = &out_header;
 		cb_val->ctw = (struct _ctw *)rest;
-		ctw_libcurl_status_check(&rest->common, curl_easy_setopt(rest->common.easy_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb));
-		ctw_libcurl_status_check(&rest->common, curl_easy_setopt(rest->common.easy_handle, CURLOPT_WRITEHEADER, (void *)cb_val));
+		ctw_libcurl_option_status_check(&rest->common, curl_easy_setopt(rest->common.easy_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb));
+		ctw_libcurl_option_status_check(&rest->common, curl_easy_setopt(rest->common.easy_handle, CURLOPT_WRITEHEADER, (void *)cb_val));
 		ctw_thread_perform(&rest->common);
 		rest_process_auth_data(rest, &out_header);
 		string_free(out_header.memory, &out_header.size);

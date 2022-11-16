@@ -96,8 +96,8 @@ static size_t ctw_write_mem_cb(const void *ptr, size_t size, size_t nmemb, void 
 static size_t ctw_read_mem_cb(void *ptr, size_t size, size_t nmemb, void *data);
 /* helper for setting string data */
 static char *ctw_set_param(struct _ctw *common, t_atom *arg, size_t *string_len, char *error_msg);
-/* cancels request in thread */
-static void ctw_cancel_request(void *args);
+/* aborts request thread */
+static void ctw_abort_request_thread(void *args);
 /* prepares for HTTP request, all verbs */
 static void ctw_prepare_basic(struct _ctw *common, struct curl_slist *slist);
 /* prepares for PUT request */
@@ -119,8 +119,8 @@ static void ctw_prepare_trace(struct _ctw *common, struct curl_slist *slist);
 /* prepares for HTTP request, setting in- and output */
 static FILE *ctw_prepare(struct _ctw *common, struct curl_slist *slist,
 		struct _memory_struct *out_memory, struct _memory_struct *in_memory);
-/* checking curl status */
-static void ctw_libcurl_status_check(struct _ctw *common, CURLcode code);
+/* checking curl status when setting options */
+static void ctw_libcurl_option_status_check(struct _ctw *common, CURLcode code);
 /* curl request loop */
 static int ctw_libcurl_loop(struct _ctw *common);
 /* performes the HTTP request */
@@ -255,7 +255,7 @@ static char *ctw_set_param(struct _ctw *const common, t_atom *const arg, size_t 
 	return string;
 }
 
-static void ctw_cancel_request(void *const args) {
+static void ctw_abort_request_thread(void *const args) {
 	struct _ctw *const common = args;
 	if (common->locked == OFF) {
 		return;
@@ -270,9 +270,9 @@ static void ctw_cancel_request(void *const args) {
 
 static void ctw_prepare_basic(struct _ctw *const common, struct curl_slist *slist) {
 	/* enable redirection */
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_FOLLOWLOCATION, 1));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_AUTOREFERER, 1));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_MAXREDIRS, 30));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_FOLLOWLOCATION, 1));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_AUTOREFERER, 1));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_MAXREDIRS, 30));
 
 	if (common->http_headers != NULL) {
 		struct _strlist *header = common->http_headers;
@@ -280,30 +280,30 @@ static void ctw_prepare_basic(struct _ctw *const common, struct curl_slist *slis
 			slist = curl_slist_append(slist, header->str);
 			header = header->next;
 		}
-		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_HTTPHEADER, slist));
+		ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_HTTPHEADER, slist));
 	}
 
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_URL, common->complete_url));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_NOSIGNAL, 1));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_TIMEOUT_MS, common->timeout));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_URL, common->complete_url));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_NOSIGNAL, 1));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_TIMEOUT_MS, common->timeout));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_SSL_VERIFYPEER, common->sslcheck));
 	if (common->auth_token_len) {
-		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_COOKIE, common->auth_token));
+		ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_COOKIE, common->auth_token));
 	}
 	if(common->proxy_len) {
-		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_PROXY, common->proxy));
+		ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_PROXY, common->proxy));
 	}
 	if(common->proxy_user_len) {
-		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_PROXYUSERNAME, common->proxy_user));
+		ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_PROXYUSERNAME, common->proxy_user));
 	}
 	if(common->proxy_pass_len) {
-		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_PROXYPASSWORD, common->proxy_pass));
+		ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_PROXYPASSWORD, common->proxy_pass));
 	}
 }
 
 static void ctw_prepare_put(struct _ctw *const common, struct _memory_struct *const in_memory) {
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_UPLOAD, 1));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_READFUNCTION, ctw_read_mem_cb));
 	/* Prepare data for reading */
 	if (common->parameters_len) {
 		(*in_memory).memory = getbytes(strlen(common->parameters) + 1);
@@ -322,33 +322,33 @@ static void ctw_prepare_put(struct _ctw *const common, struct _memory_struct *co
 		(*in_memory).memory = NULL;
 		(*in_memory).size = 0;
 	}
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_READDATA, (void *)in_memory));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_READDATA, (void *)in_memory));
 }
 
 static void ctw_prepare_post(struct _ctw *const common) {
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_POST, 1));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_POSTFIELDS, common->parameters));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_POST, 1));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_POSTFIELDS, common->parameters));
 }
 
 static void ctw_prepare_delete(struct _ctw *const common) {
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE"));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "DELETE"));
 }
 
 static void ctw_prepare_head(struct _ctw *const common) {
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "HEAD"));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "HEAD"));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1));
 }
 
 static void ctw_prepare_patch(struct _ctw *const common, struct _memory_struct *const in_memory) {
 	ctw_prepare_put(common, in_memory);
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "PATCH"));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "PATCH"));
 }
 
 static void ctw_prepare_options(struct _ctw *const common) {
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "OPTIONS"));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1));
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "OPTIONS"));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_HEADER, 1));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_NOBODY, 1));
 }
 
 static void ctw_prepare_connect(struct _ctw *const common) {
@@ -358,7 +358,7 @@ static void ctw_prepare_connect(struct _ctw *const common) {
 
 static void ctw_prepare_trace(struct _ctw *const common, struct curl_slist *slist) {
 	slist = curl_slist_append(slist, "Content-type: message/http");
-	ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "TRACE"));
+	ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_CUSTOMREQUEST, "TRACE"));
 }
 
 static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const slist,
@@ -388,7 +388,7 @@ static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const sli
 	(*out_memory).size = 0;
 	if (common->out_file_len) {
 		if ((fp = fopen(common->out_file, "wb"))) {
-			ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)fp));
+			ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)fp));
 		} else {
 #ifdef PDINSTANCE
 			pd_setinstance(common->x_pd_this);
@@ -403,14 +403,14 @@ static FILE *ctw_prepare(struct _ctw *const common, struct curl_slist *const sli
 		struct _cb_val *cb_val = getbytes(sizeof(struct _cb_val));
 		cb_val->mem = out_memory;
 		cb_val->ctw = common;
-		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb));
-		ctw_libcurl_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)cb_val));
+		ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_WRITEFUNCTION, ctw_write_mem_cb));
+		ctw_libcurl_option_status_check(common, curl_easy_setopt(common->easy_handle, CURLOPT_WRITEDATA, (void *)cb_val));
 	}
 	curl_multi_add_handle(common->multi_handle, common->easy_handle);
 	return fp;
 }
 
-static void ctw_libcurl_status_check(struct _ctw *common, CURLcode code){
+static void ctw_libcurl_option_status_check(struct _ctw *common, CURLcode code){
 	if (code != CURLE_OK){
 		pd_error(common, "%s", curl_easy_strerror(code));
 	}
@@ -424,7 +424,7 @@ static int ctw_libcurl_loop(struct _ctw *const common) {
 	code = curl_multi_perform(common->multi_handle, &running);
 #ifdef _WIN32
 	if (common->exit_thread == ON){
-		ctw_cancel_request(common); 
+		ctw_abort_request_thread(common); 
 		pthread_exit(NULL);
 	}
 #endif
@@ -461,7 +461,7 @@ static void ctw_perform(struct _ctw *const common) {
 }
 
 static void ctw_thread_perform(struct _ctw *const common) {
-	pthread_cleanup_push(ctw_cancel_request, (void *)common);
+	pthread_cleanup_push(ctw_abort_request_thread, (void *)common);
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 	ctw_perform(common);

@@ -46,6 +46,7 @@ static void *urlparams_new(const t_symbol *sel, const int argc, const t_atom *ar
 /* destructor */
 static void urlparams_free(t_urlparams *x, const t_symbol *sel, const int argc, const t_atom *argv);
 
+/** Functions called via Pd messages **/
 /* bang and output */
 static void urlparams_bang(t_urlparams *x);
 /* add value */

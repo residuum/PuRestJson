@@ -60,6 +60,7 @@ static void *oauth_new(const t_symbol *sel, const int argc, t_atom *argv);
 /* destructor */
 static void oauth_free(t_oauth *oauth, const t_symbol *sel, const int argc, const t_atom *argv);
 
+/** Functions called via Pd messages **/
 /* HTTP request */
 static void oauth_command(t_oauth *oauth, const t_symbol *sel, const int argc, t_atom *argv);
 /* set or clear timeout */

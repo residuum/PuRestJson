@@ -42,12 +42,11 @@ struct _json_decode {
 /* constructor */
 static void *json_decode_new(const t_symbol *sel, const int argc, const t_atom *argv);
 
+/** Functions called via Pd messages **/
 /* string input */
 static void json_decode_string(t_json_decode *x, const t_symbol *data);
-
 /* list input */
 static void json_decode_list(t_json_decode *x, const t_symbol *sel, const int argc, t_atom *argv);
-
 
 /* outputs json object at outlets */
 static void jdec_output_object(json_object *jobj, t_outlet *data_outlet, t_outlet *done_outlet);

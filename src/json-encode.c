@@ -50,6 +50,7 @@ static void *json_encode_new(const t_symbol *sel, const int argc, const t_atom *
 /* destructor */
 static void json_encode_free(t_json_encode *x, const t_symbol *sel, const int argc, const t_atom *argv);
 
+/** Functions called via Pd messages **/
 /* bang and output */
 static void json_encode_bang(t_json_encode *x);
 /* add value */

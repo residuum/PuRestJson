@@ -57,9 +57,8 @@ deken.file := $(lib.name)[v$(lib.version)]$(deken.systemscleaned)
 deken:
 	mkdir -p "$(deken.tmp)"
 	mkdir -p "$(deken.tmp)/$(deken.folder)"
-	cp $(executables) "$(deken.tmp)/$(deken.folder)/"
+	cp $(executables) $(deken.dependencies) "$(deken.tmp)/$(deken.folder)/"
 	cp $(datafiles) "$(deken.tmp)/$(deken.folder)/"
-	cp $(deken.dependencies) "$(deken.tmp)/$(deken.folder)/"
 	mkdir -p "$(deken.tmp)/$(deken.folder)/examples"
 	cp -r manual "$(deken.tmp)/$(deken.folder)/"
 	cp $(examplefiles) "$(deken.tmp)/$(deken.folder)/examples"

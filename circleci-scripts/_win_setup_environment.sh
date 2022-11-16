@@ -36,7 +36,7 @@ sudo apt -y install \
     wget \
     xz-utils
 
-wget --no-verbose -O /tmp/mxe.tar.bz2 \
+curl -o /tmp/mxe.tar.bz2 \
 	https://purest_json:${OC_PASSWORD}@cloud.residuum.org/remote.php/webdav/mxe.tar.bz2
 mkdir /tmp/mxe
 tar -xf /tmp/mxe.tar.bz2 -C /tmp/mxe

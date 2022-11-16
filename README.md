@@ -52,7 +52,7 @@ For each commit, a build in [Circle CI](https://app.circleci.com/pipelines/githu
 is triggered. These builds generate deken-like packages, that are available 
 from https://cloud.residuum.org/index.php/s/380C60JAabnO7jk
 
-The format for the files is `<Travis-build-number>_<Date-in-YYYY-MM-DD>_<dekenfilename>`.
+The format for the files is `<Circle-CI-job-number>_<Date-in-YYYY-MM-DD>_<dekenfilename>`.
 
 Those downloads may not work, but represent the current state of development.
 

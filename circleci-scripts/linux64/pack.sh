@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+bash ./linux_dependencies.sh *.pd_linux
 
 git clone https://github.com/residuum/PuRestJson.wiki.git /tmp/PuRestJson.wiki/
 

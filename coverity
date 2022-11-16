@@ -1,7 +1,7 @@
 #!/bin/bash
 
 rm -f purest-json.tar.gz
-export PATH=$PATH:~/bin/cov-analysis-linux64-2021.12.1/bin
+export PATH=$PATH:~/bin/cov-analysis-linux64-2022.6.0/bin
 make clean
 cov-build --dir cov-int make
 tar czvf purest-json.tar.gz cov-int/

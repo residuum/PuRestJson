@@ -8,5 +8,5 @@ python3 create-manual.py
 make \
 	machine=${MACHINE} \
 	system=Windows \
-	deken.bits=${BITS} \
+	deken.bits=32 \
 	deken

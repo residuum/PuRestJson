@@ -18,7 +18,7 @@ echo deb http://deb.debian.org/debian \
 
 sudo chroot ${CHROOTDIR} bash -c "apt -y update"
 sudo chroot ${CHROOTDIR} bash -c "apt install -qq -y build-essential \
-	puredata-dev libjson-c-dev libcurl4-openssl-dev liboauth-dev zip"
+	puredata-dev libjson-c-dev libcurl4-openssl-dev liboauth-dev zip patchelf"
 
 pip3 install --upgrade pip
 pip3 install beautifulsoup4 lxml grip --user

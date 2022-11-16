@@ -12,6 +12,14 @@ examplefiles = $(addprefix examples/, $(EXAMPLES))
 class.sources = $(addprefix src/, $(OBJECTS))
 uthash = src/uthash/src
 
+# creating deken package
+deken.bits = 32
+deken.ext = dek
+deken.pack = zip -9 -r
+deken.tmp = deken-tmp
+deken.folder = $(lib.name)
+deken.dependencies =
+
 multi_cflags =
 ifeq ($(multi), true)
     multi_cflags = -DPDINSTANCE
@@ -29,17 +37,14 @@ define forWindows
 endef
 
 define forDarwin
-    datafiles += *.dylib
+    deken.dependencies = *.dylib
+endef
+
+define forLinux
+    deken.dependencies = *.so*
 endef
 
 lib.setup.sources = src/purest_json.c
-
-# creating deken package
-deken.bits = 32
-deken.ext = dek
-deken.pack = zip -9 -r
-deken.tmp = deken-tmp
-deken.folder = $(lib.name)
 
 PDLIBBUILDER_DIR=pd-lib-builder
 include $(PDLIBBUILDER_DIR)/Makefile.pdlibbuilder
@@ -54,6 +59,7 @@ deken:
 	mkdir -p "$(deken.tmp)/$(deken.folder)"
 	cp $(executables) "$(deken.tmp)/$(deken.folder)/"
 	cp $(datafiles) "$(deken.tmp)/$(deken.folder)/"
+	cp $(deken.dependencies) "$(deken.tmp)/$(deken.folder)/"
 	mkdir -p "$(deken.tmp)/$(deken.folder)/examples"
 	cp -r manual "$(deken.tmp)/$(deken.folder)/"
 	cp $(examplefiles) "$(deken.tmp)/$(deken.folder)/examples"
@@ -61,3 +67,6 @@ deken:
 	  $(deken.pack) "$(deken.file).$(deken.ext)" "$(deken.folder)"; \
 	  rm -rf "$(deken.folder)"; \
 	  mv "$(deken.file).$(deken.ext)" ..; \
+
+clobber: clean
+	rm -f $(deken.dependencies)

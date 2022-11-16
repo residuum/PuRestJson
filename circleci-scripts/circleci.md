@@ -20,6 +20,8 @@ Gets dependencies, source code, and binaries for the machine. This includes Pyth
 As it says: compiles the externals.
 
 ### Packaging (pack.sh)
+Moves dependencies that are not installed on a default system into the current folder, changes binaries to point to the correct folder, and include the dependencies in the .dek.
+
 Gets a clone of the Github wiki and uses [grip](https://github.com/joeyespo/grip) to compile markdown into HTML.
 
 Creates a .zip of the result, renames it to .dek for later upload to [deken](https://deken.puredata.info/), the Puredata package repository.
@@ -37,7 +39,7 @@ This uses `_debootstrap_setup_environment.sh` in the setup stage.
 ## Windows (windows and windows64)
 Downloads pre-compiled [MXE](https://mxe.cc/) cross compiling environment on Linux and uses that.
 
-The resulting dll are quite large, because dependencies are statically linked, and therefore included.
+The resulting dll are quite large, because dependencies are statically linked, and therefore included, but copying of dependencies is not necessary.
 
 This uses `_win_setup_environment.sh` in the setup stage, `_win_compile.sh` in the compilation stage, and `_win_pack.sh` in the packaging stage.
 
@@ -51,4 +53,4 @@ Gets dependencies from [homebrew](https://brew.sh/), and uses hdiutil to attach 
 
 Compilation is then straightforward.
 
-Packaging includes moving all dependencies downloaded from homebrew into the current folder, changes binaries to point to the correct folder, and include that in the .dek. This is done recursively.
+Included packages are the ones downloaded from homebrew.

@@ -1,23 +1,23 @@
 version: 2.1
 
 jobs:
-  build-linux64:
+  build-linux-amd64:
     machine:
       image: ubuntu-2004:current
     environment:
       PDVERSION: 0.53-0
-      SYSTEM: linux64
+      SYSTEM: linux-amd64
     steps: 
       - checkout
       - run:
           name: "Compiling"
           command: bash ./circleci-scripts/build.sh
-  build-linux32:
+  build-linux-i386:
     machine:
       image: ubuntu-2004:current
     environment:
       PDVERSION: 0.53-0
-      SYSTEM: linux32
+      SYSTEM: linux-i386
       DIST: bullseye
       DEBIAN_ARCH: i386
       CHROOTDIR: /tmp/crosscompilation
@@ -26,14 +26,28 @@ jobs:
       - run:
           name: "Compiling"
           command: bash ./circleci-scripts/build.sh
-  build-linuxarm:
+  build-linux-armhf:
     machine:
       image: ubuntu-2004:current
     environment:
       PDVERSION: 0.53-0
-      SYSTEM: linuxarm
+      SYSTEM: linux-armhf
       DIST: bullseye
       DEBIAN_ARCH: armhf
+      CHROOTDIR: /tmp/crosscompilation
+    steps: 
+      - checkout
+      - run:
+          name: "Compiling"
+          command: bash ./circleci-scripts/build.sh
+  build-linux-arm64:
+    machine:
+      image: ubuntu-2004:current
+    environment:
+      PDVERSION: 0.53-0
+      SYSTEM: linux-arm64
+      DIST: bullseye
+      DEBIAN_ARCH: arm64
       CHROOTDIR: /tmp/crosscompilation
     steps: 
       - checkout
@@ -51,12 +65,12 @@ jobs:
       - run:
           name: "Compiling"
           command: bash ./circleci-scripts/build.sh
-  build-windows:
+  build-windows32:
     machine:
       image: ubuntu-2204:current
     environment:
       PDVERSION: 0.53-0
-      SYSTEM: windows
+      SYSTEM: windows32
       MXE_TARGET: i686-w64-mingw32.static
       MXE_PATH_SLUG: i686-w64-mingw32.static
       PD_UNZIP_PATH: pd
@@ -88,9 +102,10 @@ jobs:
 workflows:
   tagged-build:
     jobs:
-      - build-linux64
-      - build-linux32
-      - build-linuxarm
-      - build-windows
+      - build-linux-amd64
+      - build-linux-i386
+      - build-linux-armhf
+      - build-linux-arm64
+      - build-windows32
       - build-windows64
       - build-osx

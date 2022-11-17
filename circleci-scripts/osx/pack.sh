@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-bash ./osx_dependencies.sh
+bash ./dependencies/osx.sh
 
 git clone https://github.com/residuum/PuRestJson.wiki.git /tmp/PuRestJson.wiki/
 python3 create-manual.py

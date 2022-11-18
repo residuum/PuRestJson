@@ -562,8 +562,8 @@ static void *ctw_exec(void *const thread_args) {
 		struct _memory_struct in_memory;
 		FILE *fp = ctw_prepare(common, slist, &out_memory, &in_memory);
 		ctw_thread_perform(common);
-		ctw_output(common, &out_memory, fp);
 		ctw_cleanup_request(common, fp, slist);
+		ctw_output(common, &out_memory, fp);
 	}
 	return NULL;
 }

@@ -178,7 +178,7 @@ static void *rest_get_auth_token(void *const thread_args) {
 	rest->common.easy_handle = curl_easy_init();
 	rest->common.multi_handle = curl_multi_init();
 	if (rest->common.easy_handle == NULL) {
-	    sys_lock();
+		sys_lock();
 		pd_error(rest, "Cannot init curl.");
 		sys_unlock();
 		ctw_cleanup_request(&rest->common, NULL, NULL);
@@ -197,10 +197,10 @@ static void *rest_get_auth_token(void *const thread_args) {
 		ctw_libcurl_option_status_check(&rest->common, curl_easy_setopt(rest->common.easy_handle, CURLOPT_HEADERFUNCTION, ctw_write_mem_cb));
 		ctw_libcurl_option_status_check(&rest->common, curl_easy_setopt(rest->common.easy_handle, CURLOPT_WRITEHEADER, (void *)cb_val));
 		ctw_thread_perform(&rest->common);
+		ctw_cleanup_request(&rest->common, fp, slist);
 		rest_process_auth_data(rest, &out_header);
 		string_free(out_header.memory, &out_header.size);
 		string_free(out_content.memory, &out_content.size);
-		ctw_cleanup_request(&rest->common, fp, slist);
 	}
 	return NULL;
 }
@@ -353,7 +353,7 @@ void rest_clear_headers(t_rest *const rest, const t_symbol *const sel, const int
 	(void) sel;
 	(void) argc;
 	(void) argv;
-    if (rest->common.locked) {
+	if (rest->common.locked) {
 		post("rest object is performing request and locked.");
 		return;
 	}
@@ -363,7 +363,7 @@ void rest_clear_headers(t_rest *const rest, const t_symbol *const sel, const int
 void rest_file(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-    if (rest->common.locked) {
+	if (rest->common.locked) {
 		post("rest object is performing request and locked.");
 		return;
 	}
@@ -379,7 +379,7 @@ void rest_mode(t_rest *const rest, const t_symbol *const sel, const int argc, t_
 void rest_proxy(t_rest *const rest, const t_symbol *const sel, const int argc, t_atom *const argv) {
 
 	(void) sel;
-    if (rest->common.locked) {
+	if (rest->common.locked) {
 		post("rest object is performing request and locked.");
 		return;
 	}
@@ -403,7 +403,7 @@ void *rest_new(t_symbol *const sel, const int argc, t_atom *const argv) {
 #ifdef NEEDS_CERT_PATH
 	ctw_set_cert_path((struct _ctw *)rest, rest_class->c_externdir->s_name);
 #endif
-    rest_set_init(rest, argc, argv);
+	rest_set_init(rest, argc, argv);
 	purest_json_lib_info("rest");
 	return (void *)rest;
 }

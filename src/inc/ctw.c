@@ -23,10 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
-#define OFF 0
-#define ON 1
-#define MODE_BLOCKING 0
-#define MODE_STREAMING 1
+
+typedef enum {OFF, ON} on_off;
+typedef enum {blocking, streaming} output_mode;
 
 struct _memory_struct {
 	char *memory;
@@ -63,7 +62,7 @@ struct _ctw {
 	CURL *easy_handle;
 	unsigned char locked; /* is object locked? */
 	unsigned char sslcheck; /* check SSL certificate with CA list? */
-	unsigned char mode; /* output when done or stream? */
+	output_mode mode; /* output when done or stream? */
 	unsigned char clear_cb; /* clear callback. Used, when streaming output and thread is running */
 #ifdef _WIN32
 	/* pthread_cancel will not exit the thread on Windows.
@@ -130,7 +129,7 @@ static void ctw_thread_perform(struct _ctw *common);
 /* outputs curl error */
 static void ctw_output_curl_error(struct _ctw *common, CURLMsg *msg);
 /* outputs collected data and bang */
-static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, FILE *fp);
+static void ctw_output(struct _ctw *common, struct _memory_struct *out_memory, bool use_outlet);
 /* cleans up after HTTP request */
 static void ctw_cleanup_request(struct _ctw *common, FILE *fp, struct curl_slist *slist);
 /* executes HTTP request */
@@ -154,7 +153,7 @@ static void ctw_set_timeout(struct _ctw *common, int val);
 /* sets mode to blocking or streaming */
 static void ctw_set_mode(struct _ctw *common, int argc, t_atom *argv);
 /* sets mode to blocking or streaming as numerical value */
-static void ctw_set_mode_number(struct _ctw *common, int val);
+static void ctw_set_mode_number(struct _ctw *common, output_mode val);
 /* sets proxy */
 static void ctw_set_proxy(struct _ctw *common, int argc, t_atom *argv);
 /* inits object */
@@ -214,9 +213,9 @@ static size_t ctw_write_mem_cb(const void *const ptr, const size_t size, const s
 		return -1;
 	}
 
-	if (ctw->mode == MODE_BLOCKING) {
+	if (ctw->mode == blocking) {
 		return ctw_write_mem(ptr, realsize, cb_val->mem);
-	} else if (ctw->mode == MODE_STREAMING) {
+	} else if (ctw->mode == streaming) {
 		return ctw_write_stream(ptr, realsize, ctw);
 	}
 	return 0;
@@ -483,7 +482,7 @@ static void ctw_output_curl_error(struct _ctw *const common, CURLMsg *const msg)
 	sys_unlock();
 }
 
-static void ctw_output(struct _ctw *const common, struct _memory_struct *const out_memory, FILE *const fp) {
+static void ctw_output(struct _ctw *const common, struct _memory_struct *const out_memory, bool use_outlet) {
 	CURLMsg *msg;
 	int msgs_left;
 
@@ -498,7 +497,7 @@ static void ctw_output(struct _ctw *const common, struct _memory_struct *const o
 					pd_setinstance(common->x_pd_this);
 #endif
 					sys_lock();
-					if (fp == NULL) {
+					if (use_outlet) {
 						outlet_symbol(common->data_out, gensym((*out_memory).memory));
 					}
 					outlet_bang(common->x_ob.ob_outlet);
@@ -562,8 +561,9 @@ static void *ctw_exec(void *const thread_args) {
 		struct _memory_struct in_memory;
 		FILE *fp = ctw_prepare(common, slist, &out_memory, &in_memory);
 		ctw_thread_perform(common);
+		bool use_outlet = fp == NULL;		
 		ctw_cleanup_request(common, fp, slist);
-		ctw_output(common, &out_memory, fp);
+		ctw_output(common, &out_memory, use_outlet);
 	}
 	return NULL;
 }
@@ -673,7 +673,7 @@ static void ctw_set_timeout(struct _ctw *const common, const int val) {
 	common->timeout = (long) val;
 }
 
-static void ctw_set_mode_number(struct _ctw *common, int val) {
+static void ctw_set_mode_number(struct _ctw *common, output_mode val) {
 	common->mode = val;
 }
 
@@ -686,9 +686,9 @@ static void ctw_set_mode(struct _ctw *common, int argc, t_atom *argv) {
 	}
 	mode = atom_getsymbol(argv);
 	if (strcmp(mode->s_name, "block") == 0) {
-		ctw_set_mode_number(common, OFF);
+		ctw_set_mode_number(common, blocking);
 	} else if (strcmp(mode->s_name, "stream") == 0) {
-		ctw_set_mode_number(common, ON);
+		ctw_set_mode_number(common, streaming);
 	} else {
 		pd_error(common, "not a valid mode");
 	}
@@ -742,7 +742,7 @@ static void ctw_init(struct _ctw *const common) {
 #endif
 
 	ctw_set_timeout(common, 0);
-	ctw_set_mode_number(common, MODE_BLOCKING);
+	ctw_set_mode_number(common, blocking);
 	ctw_set_sslcheck(common, ON);
 }
 

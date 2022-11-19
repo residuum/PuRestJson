@@ -120,8 +120,8 @@ static void jenc_load_json_object(const t_json_encode *const jenc, json_object *
 				break;
 			case json_type_string:
 				value = string_create(&value_len, snprintf(NULL, 0, "%s",
-							json_object_to_json_string_ext(val, JSON_C_TO_STRING_PLAIN)));
-				sprintf(value, "%s", json_object_to_json_string_ext(val, JSON_C_TO_STRING_PLAIN));
+							json_object_get_string(val)));
+				sprintf(value, "%s", json_object_get_string(val));
 				kvp_add_simple((struct _kvp_store *)jenc, key, kvp_val_create(value, 0));
 				string_free(value, &value_len);
 				break;

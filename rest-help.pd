@@ -352,7 +352,11 @@
 #X msg 125 142 proxy https://135.181.103.249:8888;
 #X text 34 49 WARNING: all those proxies are from some dubious lists on the internet \, use at your own risk. These may not be up during the test.;
 #X msg 62 114 proxy http://47.89.185.178:8888;
+#X obj 455 486 print error;
+#X text 34 356 Running TOR locally in standard configuration, f 23;
+#X msg 35 388 proxy socks5://127.0.0.1:9050;
 #X connect 0 1 9 0;
+#X connect 0 2 17 0;
 #X connect 1 0 0 0;
 #X connect 7 0 0 0;
 #X connect 8 0 0 0;
@@ -362,6 +366,7 @@
 #X connect 13 0 0 0;
 #X connect 14 0 0 0;
 #X connect 16 0 0 0;
+#X connect 19 0 0 0;
 #X restore 21 622 pd proxy;
 #X obj 623 576 print error;
 #X obj 450 576 print done;
@@ -376,8 +381,11 @@
 #X obj 562 531 tgl 18 0 empty empty empty 0 -9 0 10 #fcfcfc #000000 #000000 0 1;
 #X text 18 132 Another strategy can be to use [text] for storing data for inspection.;
 #X text 18 9 WARNING: [print]ing downloaded data to console may lead to undesired behaviour \, because it usually contains special characters such as curly braces \, backslashes \, or quotation marks that may be interpreted as tcl commands and therefore break the console or even crash Pd. Data from arbitrary URLs can also contain malicious data.;
+#X obj 409 671 text define \$0-example;
+#X obj 519 619 text insert \$0-example;
 #X connect 2 0 27 0;
 #X connect 2 1 35 0;
+#X connect 2 1 40 0;
 #X connect 2 2 26 0;
 #X connect 4 0 2 0;
 #X connect 5 0 2 0;

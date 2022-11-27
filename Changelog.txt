@@ -1,8 +1,26 @@
 Changelog
 ---------
+2.0.0: Medea 
+- BREAKING; [oauth], [rest], [json-decode]: Change outlet order to Pd standard order
+	-- right outlet outputs on error
+	-- middle outlet outputs data
+	-- left outlet outputs bang on done
+- deken packages include dependencies for all systems, including Linux
+- Updated help files and examples
+- [Mac]; [rest], [oauth]: OS X now uses system certificate authority information
+- [Mac] Support for newer OS X versions
+- [Linux] arm64 packages
+- Support for multiinstance Pd on compile time added
+- Bug fixes: 
+	-- [json-encode]: Can read files again
+	-- [rest], [oauth]: Fixed crash on closing patch while waiting for data
+	-- [Windows]; [rest], [oauth]: Cancelling requests on Windows working,
+	although not as fast as on true POSIX compliant systems
+- Internal: Switch to Circle CI for compilation
+
 1.4.3: Y U no stable API
 - Bug fix: compilation works with json-c >= 0.13
-- Bug fix: remove builderplate display in Pd console
+- Bug fix: remove boilerplate display in Pd console
 
 1.4.2: Argo in Shipyard
 - Update of build scripts and documentation

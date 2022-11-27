@@ -37,6 +37,7 @@ define forWindows
 endef
 
 define forDarwin
+    ldflags = $(patsubst %,-L%,$(wildcard /opt/homebrew/lib))
     deken.dependencies = *.dylib
 endef
 

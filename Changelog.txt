@@ -1,5 +1,9 @@
 Changelog
 ---------
+2.0.1: Medea's ruse
+- Bug fix:
+	-- [Mac]; [rest], [oauth]: Loading libcurl dependencies from correct
+	locations on build.
 2.0.0: Medea 
 - BREAKING; [oauth], [rest], [json-decode]: Change outlet order to Pd standard order
 	-- right outlet outputs on error

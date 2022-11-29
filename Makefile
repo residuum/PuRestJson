@@ -38,6 +38,8 @@ endef
 
 define forDarwin
     ldflags = $(patsubst %,-L%,$(wildcard /opt/homebrew/lib))
+	ldflags += "-L/usr/local/opt/curl/lib"
+	cflags += "-I/usr/local/opt/curl/include"
     deken.dependencies = *.dylib
 endef
 

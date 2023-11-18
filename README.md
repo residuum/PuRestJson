@@ -1,3 +1,5 @@
+**Due to Github's determination to be the "world’s leading AI-powered developer platform" I will move my projects to [Codeberg](https://codeberg.org/Residuum)**
+      
       _____        _____  ______  _____ _______        _  _____  ____  _   _
      |  __ \      |  __ \|  ____|/ ____|__   __|      | |/ ____|/ __ \| \ | |
      | |__) |_   _| |__) | |__  | (___    | |         | | (___ | |  | |  \| |
